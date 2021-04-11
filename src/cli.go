@@ -69,13 +69,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	doc := strings.Builder{}
+	files := ""
 
-	historyStyle := lipgloss.NewStyle().
-		Align(lipgloss.Left).
+	style := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#FAFAFA")).
 		Width(50)
-
-	files := ""
 
 	for i, file := range m.Files {
 		files += fmt.Sprintf("%s\n", checkbox(file.Name(), m.Cursor == i))
@@ -83,8 +81,8 @@ func (m model) View() string {
 
 	doc.WriteString(lipgloss.JoinHorizontal(
 		lipgloss.Top,
-		historyStyle.Copy().Align(lipgloss.Left).Render(files),
-		historyStyle.Copy().Align(lipgloss.Center).Render(m.FileContent),
+		style.Copy().Align(lipgloss.Left).Render(files),
+		style.Copy().Align(lipgloss.Left).Render(m.FileContent),
 	))
 
 	return doc.String()
