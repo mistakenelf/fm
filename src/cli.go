@@ -11,6 +11,8 @@ import (
 )
 
 func (m model) Init() tea.Cmd {
+	fmt.Print("\033[H\033[2J")
+
 	return m.getInitialDirectoryListing
 }
 
@@ -44,9 +46,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Cursor++
 			}
 
-		case "enter":
+		case "enter", " ":
 			if m.Files[m.Cursor].IsDir() {
 				m.Files = getUpdatedDirectoryListing(m.Files[m.Cursor].Name())
+				m.Cursor = 0
 			} else {
 				dat, err := ioutil.ReadFile(m.Files[m.Cursor].Name())
 
@@ -56,8 +59,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				m.FileContent = string(dat)
 			}
+			m.Selected[m.Cursor] = struct{}{}
+
+		case "h", "backspace":
 			m.Cursor = 0
 			m.Selected[m.Cursor] = struct{}{}
+			m.Files = getUpdatedDirectoryListing("..")
 		}
 
 	default:
