@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/fs"
 	"io/ioutil"
 	"log"
@@ -26,8 +25,6 @@ func (m model) getInitialDirectoryListing() tea.Msg {
 }
 
 func getUpdatedDirectoryListing(dir string) []fs.FileInfo {
-	fmt.Print("\033[H\033[2J")
-
 	files, err := ioutil.ReadDir(dir)
 	curFiles := make([]fs.FileInfo, 0)
 	os.Chdir(dir)

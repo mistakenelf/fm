@@ -4,19 +4,30 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"path/filepath"
 	"strings"
 
+	"github.com/knipferrc/fm/src/components"
+
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
-func (m model) Init() tea.Cmd {
-	fmt.Print("\033[H\033[2J")
+const (
+	useHighPerformanceRenderer = false
+)
 
+func (m model) Init() tea.Cmd {
 	return m.getInitialDirectoryListing
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
+
 	if msg, ok := msg.(tea.KeyMsg); ok {
 		k := msg.String()
 
@@ -66,15 +77,39 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Selected[m.Cursor] = struct{}{}
 			m.Files = getUpdatedDirectoryListing("..")
 		}
+	case tea.WindowSizeMsg:
+		if !m.ViewportReady {
+			m.Viewport = viewport.Model{Width: msg.Width, Height: msg.Height}
+			m.Viewport.YPosition = 0
+			m.Viewport.HighPerformanceRendering = false
+			m.ViewportReady = true
+		} else {
+			m.Viewport.Width = msg.Width
+			m.Viewport.Height = msg.Height
+		}
+
+		if useHighPerformanceRenderer {
+			cmds = append(cmds, viewport.Sync(m.Viewport))
+		}
 
 	default:
 		return m, nil
 	}
 
-	return m, nil
+	m.Viewport, cmd = m.Viewport.Update(msg)
+
+	if useHighPerformanceRenderer {
+		cmds = append(cmds, cmd)
+	}
+
+	return m, tea.Batch(cmds...)
 }
 
 func (m model) View() string {
+	if !m.ViewportReady {
+		return "Loading..."
+	}
+
 	doc := strings.Builder{}
 	files := ""
 
@@ -83,7 +118,7 @@ func (m model) View() string {
 		Width(50)
 
 	for i, file := range m.Files {
-		files += fmt.Sprintf("%s\n", checkbox(file.Name(), m.Cursor == i))
+		files += fmt.Sprintf("%s\n", components.FileListing(file.Name(), m.Cursor == i, file.IsDir(), filepath.Ext(file.Name())))
 	}
 
 	doc.WriteString(lipgloss.JoinHorizontal(
@@ -92,5 +127,7 @@ func (m model) View() string {
 		style.Copy().Align(lipgloss.Left).Render(m.FileContent),
 	))
 
-	return doc.String()
+	m.Viewport.SetContent(doc.String())
+
+	return m.Viewport.View()
 }

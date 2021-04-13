@@ -1,17 +1,23 @@
 package main
 
 import (
-	"io/fs"
 	"log"
+	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {
-	initialModel := model{make([]fs.FileInfo, 0), make(map[int]struct{}), 0, false, ""}
-	p := tea.NewProgram(initialModel)
+	p := tea.NewProgram(createInitialModel())
+
+	p.EnterAltScreen()
+	defer p.ExitAltScreen()
+
+	p.EnableMouseCellMotion()
+	defer p.DisableMouseCellMotion()
 
 	if err := p.Start(); err != nil {
 		log.Fatal(err)
+		os.Exit(1)
 	}
 }
