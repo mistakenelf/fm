@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/knipferrc/fm/src/config"
 	"github.com/knipferrc/fm/src/directory"
 
@@ -10,14 +12,15 @@ import (
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
-		cmd  tea.Cmd
-		cmds []tea.Cmd
+		viewportCmd  tea.Cmd
+		textInputCmd tea.Cmd
+		cmds         []tea.Cmd
 	)
 
 	if msg, ok := msg.(tea.KeyMsg); ok {
 		k := msg.String()
 
-		if k == "q" || k == "esc" || k == "ctrl+c" {
+		if k == "q" || k == "ctrl+c" {
 			return m, tea.Quit
 		}
 	}
@@ -25,7 +28,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case fileStatus:
 		m.Files = msg
-		m.CurrentlyHighlighted = m.Files[m.Cursor].Name()
 
 		return m, nil
 
@@ -35,29 +37,46 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "up", "k":
-			if m.Cursor > 0 {
+			if m.Cursor > 0 && !m.TextInput.Focused() {
 				m.Cursor--
-				m.CurrentlyHighlighted = m.Files[m.Cursor].Name()
 			}
 
 		case "down", "j":
-			if m.Cursor < len(m.Files)-1 {
+			if m.Cursor < len(m.Files)-1 && !m.TextInput.Focused() {
 				m.Cursor++
-				m.CurrentlyHighlighted = m.Files[m.Cursor].Name()
 			}
 
 		case "enter", " ":
-			if m.Files[m.Cursor].IsDir() {
+			if m.Files[m.Cursor].IsDir() && !m.TextInput.Focused() {
 				m.Files = directory.GetDirectoryListing(m.Files[m.Cursor].Name())
 				m.Cursor = 0
+			} else {
+				os.Rename(m.Files[m.Cursor].Name(), m.TextInput.Value())
+				m.Files = directory.GetDirectoryListing("./")
+				m.TextInput.Blur()
+				m.Rename = false
 			}
 
 		case "h", "backspace":
-			m.Cursor = 0
-			m.Files = directory.GetDirectoryListing("..")
+			if !m.TextInput.Focused() {
+				m.Cursor = 0
+				m.Files = directory.GetDirectoryListing("..")
+			}
 
 		case "m":
 			m.Move = true
+			m.TextInput.Placeholder = "/usr/share/"
+			m.TextInput.Focus()
+
+		case "r":
+			m.Rename = true
+			m.TextInput.Placeholder = "newfilename.ex"
+			m.TextInput.Focus()
+
+		case "esc":
+			m.Move = false
+			m.TextInput.Blur()
+			m.Rename = false
 		}
 
 	case tea.WindowSizeMsg:
@@ -80,11 +99,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	m.Viewport, cmd = m.Viewport.Update(msg)
+	m.Viewport, viewportCmd = m.Viewport.Update(msg)
+	m.TextInput, textInputCmd = m.TextInput.Update(msg)
 
 	if config.UseHighPerformanceRenderer {
-		cmds = append(cmds, cmd)
+		cmds = append(cmds, viewportCmd)
 	}
+
+	cmds = append(cmds, textInputCmd)
 
 	return m, tea.Batch(cmds...)
 }

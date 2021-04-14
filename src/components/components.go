@@ -2,10 +2,12 @@ package components
 
 import (
 	"fmt"
+	"io/fs"
 	"strings"
 
 	"github.com/knipferrc/fm/src/icons"
 
+	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -27,9 +29,11 @@ func FileListing(label string, selected bool, isDir bool, ext string) string {
 	}
 }
 
-func StatusBar(screenWidth int, currentFile string) string {
+func StatusBar(screenWidth int, currentFile fs.FileInfo, isMoving bool, isRenaming bool, textInput *textinput.Model) string {
 	doc := strings.Builder{}
 	w := lipgloss.Width
+
+	statusKey := ""
 
 	statusNugget := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#FFFDF5")).
@@ -54,12 +58,30 @@ func StatusBar(screenWidth int, currentFile string) string {
 
 	fmStyle := statusNugget.Copy().Background(lipgloss.Color("#6124DF"))
 
-	statusKey := statusStyle.Render(currentFile)
+	if currentFile != nil {
+		statusKey = statusStyle.Render(currentFile.Name())
+	}
+
 	encoding := encodingStyle.Render("UTF-8")
 	fm := fmStyle.Render(fmt.Sprintf("%s %s", icons.Icon_Def["dir"].GetGlyph(), "FM"))
+
 	statusVal := statusText.Copy().
 		Width(screenWidth - w(statusKey) - w(encoding) - w(fm)).
 		Render("M - Move, D - Delete, R - Rename")
+
+	if isMoving {
+		movePrompt := fmt.Sprintf("%s %s", "Where would you like to move this to?", textInput.View())
+		statusVal = statusText.Copy().
+			Width(screenWidth - w(statusKey) - w(encoding) - w(fm)).
+			Render(movePrompt)
+	}
+
+	if isRenaming {
+		movePrompt := fmt.Sprintf("%s %s", "What would you like to name this file?", textInput.View())
+		statusVal = statusText.Copy().
+			Width(screenWidth - w(statusKey) - w(encoding) - w(fm)).
+			Render(movePrompt)
+	}
 
 	bar := lipgloss.JoinHorizontal(lipgloss.Top,
 		statusKey,

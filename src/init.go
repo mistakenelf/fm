@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -25,5 +26,5 @@ func (m model) getDirectoryListing() tea.Msg {
 }
 
 func (m model) Init() tea.Cmd {
-	return m.getDirectoryListing
+	return tea.Batch(m.getDirectoryListing, textinput.Blink)
 }
