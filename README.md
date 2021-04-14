@@ -6,6 +6,10 @@
   </p>
 </p>
 
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+  <img src="./assets/screenshot.png" width="450" title="hover text">
+</p>
+
 ## About The Project
 
 A terminal based file manager
