@@ -11,7 +11,7 @@ import (
 
 type fileStatus []fs.FileInfo
 
-func (m model) getInitialDirectoryListing() tea.Msg {
+func (m model) getDirectoryListing() tea.Msg {
 	files, err := ioutil.ReadDir("./")
 	os.Chdir("./")
 
@@ -24,16 +24,6 @@ func (m model) getInitialDirectoryListing() tea.Msg {
 	return fileStatus(m.Files)
 }
 
-func getUpdatedDirectoryListing(dir string) []fs.FileInfo {
-	files, err := ioutil.ReadDir(dir)
-	curFiles := make([]fs.FileInfo, 0)
-	os.Chdir(dir)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	curFiles = append(curFiles, files...)
-
-	return curFiles
+func (m model) Init() tea.Cmd {
+	return m.getDirectoryListing
 }

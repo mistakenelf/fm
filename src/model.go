@@ -7,23 +7,23 @@ import (
 )
 
 type model struct {
-	Files         []fs.FileInfo
-	Selected      map[int]struct{}
-	Cursor        int
-	Quitting      bool
-	FileContent   string
-	Viewport      viewport.Model
-	ViewportReady bool
+	Files                []fs.FileInfo
+	Cursor               int
+	Viewport             viewport.Model
+	ViewportReady        bool
+	CurrentlyHighlighted string
+	ScreenWidth          int
+	Move                 bool
 }
 
 func createInitialModel() model {
 	return model{
 		make([]fs.FileInfo, 0),
-		make(map[int]struct{}),
 		0,
+		viewport.Model{},
 		false,
 		"",
-		viewport.Model{},
+		0,
 		false,
 	}
 }
