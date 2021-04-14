@@ -29,7 +29,7 @@ func FileListing(label string, selected bool, isDir bool, ext string) string {
 	}
 }
 
-func StatusBar(screenWidth int, currentFile fs.FileInfo, isMoving bool, isRenaming bool, textInput *textinput.Model) string {
+func StatusBar(screenWidth int, currentFile fs.FileInfo, isMoving, isRenaming, isDeleting bool, textInput *textinput.Model) string {
 	doc := strings.Builder{}
 	w := lipgloss.Width
 
@@ -78,6 +78,13 @@ func StatusBar(screenWidth int, currentFile fs.FileInfo, isMoving bool, isRenami
 
 	if isRenaming {
 		movePrompt := fmt.Sprintf("%s %s", "What would you like to name this file?", textInput.View())
+		statusVal = statusText.Copy().
+			Width(screenWidth - w(statusKey) - w(encoding) - w(fm)).
+			Render(movePrompt)
+	}
+
+	if isDeleting {
+		movePrompt := fmt.Sprintf("%s %s %s", "Are you sure you want to delete this? [y/n]", currentFile.Name(), textInput.View())
 		statusVal = statusText.Copy().
 			Width(screenWidth - w(statusKey) - w(encoding) - w(fm)).
 			Render(movePrompt)

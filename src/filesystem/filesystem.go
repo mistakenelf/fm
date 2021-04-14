@@ -176,3 +176,19 @@ func MoveDir(src string, dst string) (err error) {
 
 	return
 }
+
+func DeleteDirectory(dirname string) {
+	removeError := os.RemoveAll(dirname)
+
+	if removeError != nil {
+		log.Fatal("Error deleting directory", removeError)
+	}
+}
+
+func DeleteFile(filename string) {
+	removeError := os.Remove(filename)
+
+	if removeError != nil {
+		log.Fatal("Error deleting file", removeError)
+	}
+}

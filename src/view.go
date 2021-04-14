@@ -36,7 +36,7 @@ func (m model) View() string {
 		file = m.Files[m.Cursor]
 	}
 
-	view := fmt.Sprintf("%s%s", m.Viewport.View(), components.StatusBar(m.ScreenWidth, file, m.Move, m.Rename, &m.TextInput))
+	view := fmt.Sprintf("%s%s", m.Viewport.View(), components.StatusBar(m.ScreenWidth, file, m.Move, m.Rename, m.Delete, &m.TextInput))
 
 	return view
 }

@@ -65,6 +65,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.TextInput.Blur()
 					m.Move = false
 				}
+			} else if m.Delete {
+				if m.Files[m.Cursor].IsDir() {
+					if m.TextInput.Value() == "y" {
+						filesystem.DeleteDirectory(m.Files[m.Cursor].Name())
+						m.Files = filesystem.GetDirectoryListing("./")
+						m.TextInput.Blur()
+						m.Delete = false
+					}
+				} else {
+					if m.TextInput.Value() == "y" {
+						filesystem.DeleteFile(m.Files[m.Cursor].Name())
+						m.Files = filesystem.GetDirectoryListing("./")
+						m.TextInput.Blur()
+						m.Delete = false
+					}
+				}
 			}
 
 		case "h", "backspace":
@@ -87,10 +103,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.TextInput.Focus()
 			}
 
+		case "d":
+			if !m.TextInput.Focused() {
+				m.Delete = true
+				m.TextInput.Placeholder = "[y/n]"
+				m.TextInput.Focus()
+			}
+
 		case "esc":
 			m.Move = false
-			m.TextInput.Blur()
 			m.Rename = false
+			m.Delete = false
+			m.TextInput.Blur()
 		}
 
 	case tea.WindowSizeMsg:

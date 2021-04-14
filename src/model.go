@@ -16,6 +16,7 @@ type model struct {
 	ScreenWidth   int
 	Move          bool
 	Rename        bool
+	Delete        bool
 }
 
 func createInitialModel() model {
@@ -31,6 +32,7 @@ func createInitialModel() model {
 		input,
 		false,
 		0,
+		false,
 		false,
 		false,
 	}
