@@ -53,6 +53,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Files = filesystem.GetDirectoryListing("./")
 				m.TextInput.Blur()
 				m.Rename = false
+			} else if m.Move {
+				if m.Files[m.Cursor].IsDir() {
+					filesystem.MoveDir(m.Files[m.Cursor].Name(), m.TextInput.Value())
+					m.Files = filesystem.GetDirectoryListing("./")
+					m.TextInput.Blur()
+					m.Move = false
+				} else {
+					filesystem.MoveFile(m.Files[m.Cursor].Name(), m.TextInput.Value())
+					m.Files = filesystem.GetDirectoryListing("./")
+					m.TextInput.Blur()
+					m.Move = false
+				}
 			}
 
 		case "h", "backspace":
@@ -62,14 +74,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "m":
-			m.Move = true
-			m.TextInput.Placeholder = "/usr/share/"
-			m.TextInput.Focus()
+			if !m.TextInput.Focused() {
+				m.Move = true
+				m.TextInput.Placeholder = "/usr/share/"
+				m.TextInput.Focus()
+			}
 
 		case "r":
-			m.Rename = true
-			m.TextInput.Placeholder = "newfilename.ex"
-			m.TextInput.Focus()
+			if !m.TextInput.Focused() {
+				m.Rename = true
+				m.TextInput.Placeholder = "newfilename.ex"
+				m.TextInput.Focus()
+			}
 
 		case "esc":
 			m.Move = false
