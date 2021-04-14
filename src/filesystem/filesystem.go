@@ -1,4 +1,4 @@
-package directory
+package filesystem
 
 import (
 	"io/fs"
@@ -19,4 +19,8 @@ func GetDirectoryListing(dir string) []fs.FileInfo {
 	curFiles = append(curFiles, files...)
 
 	return curFiles
+}
+
+func RenameDirOrFile(currentName string, newName string) {
+	os.Rename(currentName, newName)
 }

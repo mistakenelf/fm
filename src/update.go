@@ -1,10 +1,8 @@
 package main
 
 import (
-	"os"
-
 	"github.com/knipferrc/fm/src/config"
-	"github.com/knipferrc/fm/src/directory"
+	"github.com/knipferrc/fm/src/filesystem"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -48,11 +46,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "enter", " ":
 			if m.Files[m.Cursor].IsDir() && !m.TextInput.Focused() {
-				m.Files = directory.GetDirectoryListing(m.Files[m.Cursor].Name())
+				m.Files = filesystem.GetDirectoryListing(m.Files[m.Cursor].Name())
 				m.Cursor = 0
-			} else {
-				os.Rename(m.Files[m.Cursor].Name(), m.TextInput.Value())
-				m.Files = directory.GetDirectoryListing("./")
+			} else if m.Rename {
+				filesystem.RenameDirOrFile(m.Files[m.Cursor].Name(), m.TextInput.Value())
+				m.Files = filesystem.GetDirectoryListing("./")
 				m.TextInput.Blur()
 				m.Rename = false
 			}
@@ -60,7 +58,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "h", "backspace":
 			if !m.TextInput.Focused() {
 				m.Cursor = 0
-				m.Files = directory.GetDirectoryListing("..")
+				m.Files = filesystem.GetDirectoryListing("..")
 			}
 
 		case "m":
