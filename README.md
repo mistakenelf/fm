@@ -17,7 +17,7 @@ A terminal based file manager
 
 ## Getting Started
 
-Follow the instructures below to get setup for local development
+Follow the instructions below to get setup for local development
 
 1. Clone the repo
 
