@@ -14,6 +14,7 @@ type model struct {
 	TextInput     textinput.Model
 	ViewportReady bool
 	ScreenWidth   int
+	ScreenHeight  int
 	Move          bool
 	Rename        bool
 	Delete        bool
@@ -31,6 +32,7 @@ func createInitialModel() model {
 		viewport.Model{},
 		input,
 		false,
+		0,
 		0,
 		false,
 		false,

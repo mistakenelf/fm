@@ -10,7 +10,7 @@ import (
 	"github.com/knipferrc/fm/src/components"
 )
 
-func fileManager(files []fs.FileInfo, cursor int) string {
+func fileManager(files []fs.FileInfo, cursor int, width int) string {
 	doc := strings.Builder{}
 	curFiles := ""
 
@@ -22,21 +22,23 @@ func fileManager(files []fs.FileInfo, cursor int) string {
 		lipgloss.Top,
 		lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#FAFAFA")).
-			Width(50).Align(lipgloss.Left).Render(curFiles),
+			Width(width).
+			Align(lipgloss.Left).
+			Render(curFiles),
 	))
 
 	return doc.String()
 }
 
 func (m model) View() string {
-	m.Viewport.SetContent(fileManager(m.Files, m.Cursor))
+	m.Viewport.SetContent(fileManager(m.Files, m.Cursor, m.ScreenWidth))
 	var file fs.FileInfo = nil
 
 	if len(m.Files) > 0 {
 		file = m.Files[m.Cursor]
 	}
 
-	view := fmt.Sprintf("%s%s", m.Viewport.View(), components.StatusBar(m.ScreenWidth, file, m.Move, m.Rename, m.Delete, &m.TextInput))
+	view := lipgloss.JoinVertical(lipgloss.Top, m.Viewport.View(), components.StatusBar(m.ScreenWidth, file, m.Move, m.Rename, m.Delete, &m.TextInput))
 
 	return view
 }
