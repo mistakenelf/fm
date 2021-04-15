@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/knipferrc/fm/src/components"
-	"github.com/knipferrc/fm/src/config"
 	"github.com/knipferrc/fm/src/filesystem"
 
 	"github.com/charmbracelet/bubbles/viewport"
@@ -39,7 +38,6 @@ func (m *model) fixCursor() {
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
-		viewportCmd  tea.Cmd
 		textInputCmd tea.Cmd
 		cmds         []tea.Cmd
 	)
@@ -56,6 +54,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case fileStatus:
 		m.Files = msg
 		return m, nil
+	case tea.WindowSizeMsg:
+		m.ScreenWidth = msg.Width
+		m.ScreenHeight = msg.Height
+		m.Viewport = viewport.Model{
+			Width:  msg.Width,
+			Height: msg.Height - 1,
+		}
+		m.Viewport.YPosition = 0
 
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -154,36 +160,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.ShowHelp = false
 			m.TextInput.Blur()
 		}
-	case tea.WindowSizeMsg:
-		m.ScreenWidth = msg.Width
-		m.ScreenHeight = msg.Height
-
-		if !m.ViewportReady {
-			m.Viewport = viewport.Model{
-				Width:  msg.Width,
-				Height: msg.Height - 1,
-			}
-			m.Viewport.YPosition = 0
-			m.Viewport.HighPerformanceRendering = config.UseHighPerformanceRenderer
-			m.ViewportReady = true
-		} else {
-			m.Viewport.Width = msg.Width
-			m.Viewport.Height = msg.Height - 1
-			m.fixViewport(true)
-		}
-
-		if config.UseHighPerformanceRenderer {
-			cmds = append(cmds, viewport.Sync(m.Viewport))
-		}
 	}
 
-	m.Viewport, viewportCmd = m.Viewport.Update(msg)
 	m.TextInput, textInputCmd = m.TextInput.Update(msg)
-
-	if config.UseHighPerformanceRenderer {
-		cmds = append(cmds, viewportCmd)
-	}
-
 	cmds = append(cmds, textInputCmd)
 
 	return m, tea.Batch(cmds...)
