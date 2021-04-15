@@ -9,15 +9,16 @@ import (
 
 type model struct {
 	Files         []fs.FileInfo
-	Cursor        int
 	Viewport      viewport.Model
 	TextInput     textinput.Model
-	ViewportReady bool
+	Cursor        int
 	ScreenWidth   int
 	ScreenHeight  int
+	ViewportReady bool
 	Move          bool
 	Rename        bool
 	Delete        bool
+	ShowHelp      bool
 }
 
 func createInitialModel() model {
@@ -27,15 +28,16 @@ func createInitialModel() model {
 	input.Width = 50
 
 	return model{
-		make([]fs.FileInfo, 0),
-		0,
-		viewport.Model{},
-		input,
-		false,
-		0,
-		0,
-		false,
-		false,
-		false,
+		Files:         make([]fs.FileInfo, 0),
+		Viewport:      viewport.Model{},
+		TextInput:     input,
+		Cursor:        0,
+		ScreenWidth:   0,
+		ScreenHeight:  0,
+		ViewportReady: false,
+		Move:          false,
+		Rename:        false,
+		Delete:        false,
+		ShowHelp:      false,
 	}
 }

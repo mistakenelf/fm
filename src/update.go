@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/knipferrc/fm/src/components"
 	"github.com/knipferrc/fm/src/config"
 	"github.com/knipferrc/fm/src/filesystem"
 
@@ -54,28 +55,24 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case fileStatus:
 		m.Files = msg
-
 		return m, nil
 
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
-
 		case "up", "k":
 			if !m.TextInput.Focused() {
 				m.Cursor--
 				m.fixCursor()
 				m.fixViewport(false)
 			}
-
 		case "down", "j":
 			if !m.TextInput.Focused() {
 				m.Cursor++
 				m.fixCursor()
 				m.fixViewport(false)
 			}
-
 		case "enter", " ":
 			if m.Files[m.Cursor].IsDir() && !m.TextInput.Focused() {
 				m.Files = filesystem.GetDirectoryListing(m.Files[m.Cursor].Name())
@@ -92,7 +89,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.TextInput.Blur()
 					m.Move = false
 				} else {
-					filesystem.MoveFile(m.Files[m.Cursor].Name(), m.TextInput.Value())
+					filesystem.CopyFile(m.Files[m.Cursor].Name(), m.TextInput.Value(), true)
 					m.Files = filesystem.GetDirectoryListing("./")
 					m.TextInput.Blur()
 					m.Move = false
@@ -104,6 +101,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.Files = filesystem.GetDirectoryListing("./")
 						m.TextInput.Blur()
 						m.Delete = false
+					} else {
+						m.Files = filesystem.GetDirectoryListing("./")
+						m.TextInput.Blur()
+						m.Delete = false
 					}
 				} else {
 					if m.TextInput.Value() == "y" {
@@ -111,58 +112,57 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.Files = filesystem.GetDirectoryListing("./")
 						m.TextInput.Blur()
 						m.Delete = false
+					} else {
+						m.Files = filesystem.GetDirectoryListing("./")
+						m.TextInput.Blur()
+						m.Delete = false
 					}
 				}
+			} else {
+				return m, nil
 			}
-
 		case "h", "backspace":
 			if !m.TextInput.Focused() {
 				m.Cursor = 0
 				m.Files = filesystem.GetDirectoryListing("..")
 			}
-
 		case "m":
 			if !m.TextInput.Focused() {
 				m.Move = true
 				m.TextInput.Placeholder = "/usr/share/"
 				m.TextInput.Focus()
 			}
-
 		case "r":
 			if !m.TextInput.Focused() {
 				m.Rename = true
 				m.TextInput.Placeholder = "newfilename.ex"
 				m.TextInput.Focus()
 			}
-
 		case "d":
 			if !m.TextInput.Focused() {
 				m.Delete = true
 				m.TextInput.Placeholder = "[y/n]"
 				m.TextInput.Focus()
 			}
-		case "pgup", "u":
-
-			m.Viewport.LineUp(1)
-			m.fixViewport(true)
-
-		case "pgdown":
-			m.Viewport.ViewDown()
-			m.fixViewport(true)
-
+		case "i":
+			m.Viewport.SetContent(components.Help())
+			m.ShowHelp = true
 		case "esc":
 			m.Move = false
 			m.Rename = false
 			m.Delete = false
+			m.ShowHelp = false
 			m.TextInput.Blur()
 		}
-
 	case tea.WindowSizeMsg:
 		m.ScreenWidth = msg.Width
 		m.ScreenHeight = msg.Height
 
 		if !m.ViewportReady {
-			m.Viewport = viewport.Model{Width: msg.Width, Height: msg.Height - 1}
+			m.Viewport = viewport.Model{
+				Width:  msg.Width,
+				Height: msg.Height - 1,
+			}
 			m.Viewport.YPosition = 0
 			m.Viewport.HighPerformanceRendering = config.UseHighPerformanceRenderer
 			m.ViewportReady = true
