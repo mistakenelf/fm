@@ -36,7 +36,7 @@ func (m *model) fixCursor() {
 }
 
 func (m model) handleKeyUp() (tea.Model, tea.Cmd) {
-	if !m.textinput.Focused() {
+	if !m.textinput.Focused() && !m.showhelp {
 		m.cursor--
 		m.fixCursor()
 		m.fixViewport(false)
@@ -46,7 +46,7 @@ func (m model) handleKeyUp() (tea.Model, tea.Cmd) {
 }
 
 func (m model) handleKeyDown() (tea.Model, tea.Cmd) {
-	if !m.textinput.Focused() {
+	if !m.textinput.Focused() && !m.showhelp {
 		m.cursor++
 		m.fixCursor()
 		m.fixViewport(false)
@@ -56,6 +56,10 @@ func (m model) handleKeyDown() (tea.Model, tea.Cmd) {
 }
 
 func (m model) handleEnterKey() (tea.Model, tea.Cmd) {
+	if m.showhelp {
+		return m, nil
+	}
+
 	if m.files[m.cursor].IsDir() && !m.textinput.Focused() {
 		m.files = filesystem.GetDirectoryListing(m.files[m.cursor].Name())
 		m.cursor = 0
@@ -108,7 +112,7 @@ func (m model) handleEnterKey() (tea.Model, tea.Cmd) {
 }
 
 func (m model) handleBackKey() (tea.Model, tea.Cmd) {
-	if !m.textinput.Focused() {
+	if !m.textinput.Focused() && !m.showhelp {
 		m.cursor = 0
 		m.files = filesystem.GetDirectoryListing("..")
 	}
@@ -117,7 +121,7 @@ func (m model) handleBackKey() (tea.Model, tea.Cmd) {
 }
 
 func (m model) handleMoveKey() (tea.Model, tea.Cmd) {
-	if !m.textinput.Focused() {
+	if !m.textinput.Focused() && !m.showhelp {
 		m.move = true
 		m.textinput.Placeholder = "/usr/share/"
 		m.textinput.Focus()
@@ -127,7 +131,7 @@ func (m model) handleMoveKey() (tea.Model, tea.Cmd) {
 }
 
 func (m model) handleRenameKey() (tea.Model, tea.Cmd) {
-	if !m.textinput.Focused() {
+	if !m.textinput.Focused() && !m.showhelp {
 		m.rename = true
 		m.textinput.Placeholder = "newfilename.ex"
 		m.textinput.Focus()
@@ -137,7 +141,7 @@ func (m model) handleRenameKey() (tea.Model, tea.Cmd) {
 }
 
 func (m model) handleDeleteKey() (tea.Model, tea.Cmd) {
-	if !m.textinput.Focused() {
+	if !m.textinput.Focused() && !m.showhelp {
 		m.delete = true
 		m.textinput.Placeholder = "[y/n]"
 		m.textinput.Focus()
