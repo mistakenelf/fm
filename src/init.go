@@ -12,7 +12,7 @@ import (
 
 type fileStatus []fs.FileInfo
 
-func (m model) getDirectoryListing() tea.Msg {
+func getDirectoryListing() tea.Msg {
 	files, err := ioutil.ReadDir("./")
 	os.Chdir("./")
 
@@ -20,11 +20,9 @@ func (m model) getDirectoryListing() tea.Msg {
 		log.Fatal(err)
 	}
 
-	m.Files = append(m.Files, files...)
-
-	return fileStatus(m.Files)
+	return fileStatus(files)
 }
 
 func (m model) Init() tea.Cmd {
-	return tea.Batch(m.getDirectoryListing, textinput.Blink)
+	return tea.Batch(getDirectoryListing, textinput.Blink)
 }
