@@ -75,7 +75,7 @@ func StatusBar(screenWidth int, currentFile fs.FileInfo, isMoving, isRenaming, i
 
 	status := statusText.Copy().
 		Width(screenWidth - width(selectedFileName) - width(fileEncoding) - width(logo)).
-		Render("M - Move, D - Delete, R - Rename")
+		Render("m - move, d - delete, r - rename, i - help")
 
 	if isMoving {
 		status = getMovingPrompt(textInput, width, screenWidth, selectedFileName, fileEncoding, logo)

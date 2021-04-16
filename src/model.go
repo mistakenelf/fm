@@ -8,16 +8,17 @@ import (
 )
 
 type model struct {
-	Files        []fs.FileInfo
-	Viewport     viewport.Model
-	TextInput    textinput.Model
-	Cursor       int
-	ScreenWidth  int
-	ScreenHeight int
-	Move         bool
-	Rename       bool
-	Delete       bool
-	ShowHelp     bool
+	files        []fs.FileInfo
+	viewport     viewport.Model
+	textinput    textinput.Model
+	cursor       int
+	screenwidth  int
+	screenheight int
+	move         bool
+	rename       bool
+	delete       bool
+	showhelp     bool
+	ready        bool
 }
 
 func createInitialModel() model {
@@ -27,15 +28,16 @@ func createInitialModel() model {
 	input.Width = 50
 
 	return model{
-		Files:        make([]fs.FileInfo, 0),
-		Viewport:     viewport.Model{},
-		TextInput:    input,
-		Cursor:       0,
-		ScreenWidth:  0,
-		ScreenHeight: 0,
-		Move:         false,
-		Rename:       false,
-		Delete:       false,
-		ShowHelp:     false,
+		files:        make([]fs.FileInfo, 0),
+		viewport:     viewport.Model{},
+		textinput:    input,
+		cursor:       0,
+		screenwidth:  0,
+		screenheight: 0,
+		move:         false,
+		rename:       false,
+		delete:       false,
+		showhelp:     false,
+		ready:        false,
 	}
 }

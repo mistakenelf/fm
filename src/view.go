@@ -10,20 +10,21 @@ import (
 
 func (m model) View() string {
 	var file fs.FileInfo = nil
+	view := ""
 
-	if len(m.Files) > 0 {
-		file = m.Files[m.Cursor]
+	if len(m.files) > 0 {
+		file = m.files[m.cursor]
 	}
 
-	if m.ShowHelp {
-		view := lipgloss.JoinVertical(lipgloss.Top, m.Viewport.View(), components.StatusBar(m.ScreenWidth, file, m.Move, m.Rename, m.Delete, &m.TextInput))
+	if m.showhelp {
+		m.viewport.SetContent(components.Help())
 
-		return view
+		view = lipgloss.JoinVertical(lipgloss.Top, m.viewport.View(), components.StatusBar(m.screenwidth, file, m.move, m.rename, m.delete, &m.textinput))
 	} else {
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 
-		view := lipgloss.JoinVertical(lipgloss.Top, m.Viewport.View(), components.StatusBar(m.ScreenWidth, file, m.Move, m.Rename, m.Delete, &m.TextInput))
-
-		return view
+		view = lipgloss.JoinVertical(lipgloss.Top, m.viewport.View(), components.StatusBar(m.screenwidth, file, m.move, m.rename, m.delete, &m.textinput))
 	}
+
+	return view
 }

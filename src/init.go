@@ -10,19 +10,23 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type fileStatus []fs.FileInfo
+type fileStatus struct {
+	files []fs.FileInfo
+}
 
-func getDirectoryListing() tea.Msg {
-	files, err := ioutil.ReadDir("./")
-	os.Chdir("./")
+func getDirectoryListing() tea.Cmd {
+	return func() tea.Msg {
+		files, err := ioutil.ReadDir("./")
+		os.Chdir("./")
 
-	if err != nil {
-		log.Fatal(err)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		return fileStatus{files}
 	}
-
-	return fileStatus(files)
 }
 
 func (m model) Init() tea.Cmd {
-	return tea.Batch(getDirectoryListing, textinput.Blink)
+	return tea.Batch(getDirectoryListing(), textinput.Blink)
 }
