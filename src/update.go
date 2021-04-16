@@ -36,6 +36,134 @@ func (m *model) fixCursor() {
 	}
 }
 
+func (m model) handleKeyUp() (tea.Model, tea.Cmd) {
+	if !m.TextInput.Focused() {
+		m.Cursor--
+		m.fixCursor()
+		m.fixViewport(false)
+	}
+
+	return m, nil
+}
+
+func (m model) handleKeyDown() (tea.Model, tea.Cmd) {
+	if !m.TextInput.Focused() {
+		m.Cursor++
+		m.fixCursor()
+		m.fixViewport(false)
+	}
+
+	return m, nil
+}
+
+func (m model) handleEnterKey() (tea.Model, tea.Cmd) {
+	if m.Files[m.Cursor].IsDir() && !m.TextInput.Focused() {
+		m.Files = filesystem.GetDirectoryListing(m.Files[m.Cursor].Name())
+		m.Cursor = 0
+	} else if m.Rename {
+		filesystem.RenameDirOrFile(m.Files[m.Cursor].Name(), m.TextInput.Value())
+		m.Files = filesystem.GetDirectoryListing("./")
+		m.TextInput.Blur()
+		m.Rename = false
+	} else if m.Move {
+		if m.Files[m.Cursor].IsDir() {
+			filesystem.MoveDir(m.Files[m.Cursor].Name(), m.TextInput.Value())
+			m.Files = filesystem.GetDirectoryListing("./")
+			m.TextInput.Blur()
+			m.Move = false
+		} else {
+			filesystem.CopyFile(m.Files[m.Cursor].Name(), m.TextInput.Value(), true)
+			m.Files = filesystem.GetDirectoryListing("./")
+			m.TextInput.Blur()
+			m.Move = false
+		}
+	} else if m.Delete {
+		if m.Files[m.Cursor].IsDir() {
+			if m.TextInput.Value() == "y" {
+				filesystem.DeleteDirectory(m.Files[m.Cursor].Name())
+				m.Files = filesystem.GetDirectoryListing("./")
+				m.TextInput.Blur()
+				m.Delete = false
+			} else {
+				m.Files = filesystem.GetDirectoryListing("./")
+				m.TextInput.Blur()
+				m.Delete = false
+			}
+		} else {
+			if m.TextInput.Value() == "y" {
+				filesystem.DeleteFile(m.Files[m.Cursor].Name())
+				m.Files = filesystem.GetDirectoryListing("./")
+				m.TextInput.Blur()
+				m.Delete = false
+			} else {
+				m.Files = filesystem.GetDirectoryListing("./")
+				m.TextInput.Blur()
+				m.Delete = false
+			}
+		}
+	} else {
+		return m, nil
+	}
+
+	return m, nil
+}
+
+func (m model) handleBackKey() (tea.Model, tea.Cmd) {
+	if !m.TextInput.Focused() {
+		m.Cursor = 0
+		m.Files = filesystem.GetDirectoryListing("..")
+	}
+
+	return m, nil
+}
+
+func (m model) handleMoveKey() (tea.Model, tea.Cmd) {
+	if !m.TextInput.Focused() {
+		m.Move = true
+		m.TextInput.Placeholder = "/usr/share/"
+		m.TextInput.Focus()
+	}
+
+	return m, nil
+}
+
+func (m model) handleRenameKey() (tea.Model, tea.Cmd) {
+	if !m.TextInput.Focused() {
+		m.Rename = true
+		m.TextInput.Placeholder = "newfilename.ex"
+		m.TextInput.Focus()
+	}
+
+	return m, nil
+}
+
+func (m model) handleDeleteKey() (tea.Model, tea.Cmd) {
+	if !m.TextInput.Focused() {
+		m.Delete = true
+		m.TextInput.Placeholder = "[y/n]"
+		m.TextInput.Focus()
+	}
+
+	return m, nil
+}
+
+func (m model) handleHelpKey() (tea.Model, tea.Cmd) {
+	m.Viewport.SetContent(components.Help())
+	m.ShowHelp = true
+
+	return m, nil
+}
+
+func (m model) handleEscKey() (tea.Model, tea.Cmd) {
+	m.Move = false
+	m.Rename = false
+	m.Delete = false
+	m.ShowHelp = false
+	m.TextInput.Blur()
+
+	return m, nil
+}
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
 		textInputCmd tea.Cmd
@@ -62,103 +190,28 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			Height: msg.Height - 1,
 		}
 		m.Viewport.YPosition = 0
-
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
 		case "up", "k":
-			if !m.TextInput.Focused() {
-				m.Cursor--
-				m.fixCursor()
-				m.fixViewport(false)
-			}
+			return m.handleKeyUp()
 		case "down", "j":
-			if !m.TextInput.Focused() {
-				m.Cursor++
-				m.fixCursor()
-				m.fixViewport(false)
-			}
+			return m.handleKeyDown()
 		case "enter", " ":
-			if m.Files[m.Cursor].IsDir() && !m.TextInput.Focused() {
-				m.Files = filesystem.GetDirectoryListing(m.Files[m.Cursor].Name())
-				m.Cursor = 0
-			} else if m.Rename {
-				filesystem.RenameDirOrFile(m.Files[m.Cursor].Name(), m.TextInput.Value())
-				m.Files = filesystem.GetDirectoryListing("./")
-				m.TextInput.Blur()
-				m.Rename = false
-			} else if m.Move {
-				if m.Files[m.Cursor].IsDir() {
-					filesystem.MoveDir(m.Files[m.Cursor].Name(), m.TextInput.Value())
-					m.Files = filesystem.GetDirectoryListing("./")
-					m.TextInput.Blur()
-					m.Move = false
-				} else {
-					filesystem.CopyFile(m.Files[m.Cursor].Name(), m.TextInput.Value(), true)
-					m.Files = filesystem.GetDirectoryListing("./")
-					m.TextInput.Blur()
-					m.Move = false
-				}
-			} else if m.Delete {
-				if m.Files[m.Cursor].IsDir() {
-					if m.TextInput.Value() == "y" {
-						filesystem.DeleteDirectory(m.Files[m.Cursor].Name())
-						m.Files = filesystem.GetDirectoryListing("./")
-						m.TextInput.Blur()
-						m.Delete = false
-					} else {
-						m.Files = filesystem.GetDirectoryListing("./")
-						m.TextInput.Blur()
-						m.Delete = false
-					}
-				} else {
-					if m.TextInput.Value() == "y" {
-						filesystem.DeleteFile(m.Files[m.Cursor].Name())
-						m.Files = filesystem.GetDirectoryListing("./")
-						m.TextInput.Blur()
-						m.Delete = false
-					} else {
-						m.Files = filesystem.GetDirectoryListing("./")
-						m.TextInput.Blur()
-						m.Delete = false
-					}
-				}
-			} else {
-				return m, nil
-			}
+			return m.handleEnterKey()
 		case "h", "backspace":
-			if !m.TextInput.Focused() {
-				m.Cursor = 0
-				m.Files = filesystem.GetDirectoryListing("..")
-			}
+			return m.handleBackKey()
 		case "m":
-			if !m.TextInput.Focused() {
-				m.Move = true
-				m.TextInput.Placeholder = "/usr/share/"
-				m.TextInput.Focus()
-			}
+			return m.handleMoveKey()
 		case "r":
-			if !m.TextInput.Focused() {
-				m.Rename = true
-				m.TextInput.Placeholder = "newfilename.ex"
-				m.TextInput.Focus()
-			}
+			return m.handleRenameKey()
 		case "d":
-			if !m.TextInput.Focused() {
-				m.Delete = true
-				m.TextInput.Placeholder = "[y/n]"
-				m.TextInput.Focus()
-			}
+			return m.handleDeleteKey()
 		case "i":
-			m.Viewport.SetContent(components.Help())
-			m.ShowHelp = true
+			return m.handleHelpKey()
 		case "esc":
-			m.Move = false
-			m.Rename = false
-			m.Delete = false
-			m.ShowHelp = false
-			m.TextInput.Blur()
+			return m.handleEscKey()
 		}
 	}
 
