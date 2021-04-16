@@ -1,9 +1,26 @@
 package components
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"fmt"
+
+	"github.com/charmbracelet/lipgloss"
+)
 
 func Help() string {
-	header := lipgloss.NewStyle().Bold(true).Render("Welcome to FM!")
+	header := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("#FFFDF5")).
+		MarginBottom(1).
+		Render("Welcome to FM!")
 
-	return header
+	helpText := fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n",
+		"j - move cursor down",
+		"k - move cursor up",
+		"h - go back a directory",
+		"m - move file or folder to another directory",
+		"d - delete a file or directory",
+		"r - rename a file or directory",
+	)
+
+	return lipgloss.JoinVertical(lipgloss.Top, header, helpText)
 }
