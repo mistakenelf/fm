@@ -16,7 +16,9 @@ func (m model) View() string {
 		file = m.files[m.cursor]
 	}
 
-	if m.showhelp {
+	if !m.ready {
+		return "Loading..."
+	} else if m.showhelp {
 		m.viewport.SetContent(components.Help())
 
 		view = lipgloss.JoinVertical(lipgloss.Top, m.viewport.View(), components.StatusBar(m.screenwidth, file, m.move, m.rename, m.delete, &m.textinput))
