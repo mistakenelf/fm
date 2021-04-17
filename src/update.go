@@ -41,9 +41,8 @@ func (m model) handleKeyUp() (tea.Model, tea.Cmd) {
 		m.cursor--
 		m.fixCursor()
 		m.fixViewport(false)
+		m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 	}
-
-	m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 
 	return m, nil
 }
@@ -53,9 +52,8 @@ func (m model) handleKeyDown() (tea.Model, tea.Cmd) {
 		m.cursor++
 		m.fixCursor()
 		m.fixViewport(false)
+		m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 	}
-
-	m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 
 	return m, nil
 }
@@ -124,9 +122,8 @@ func (m model) handleBackKey() (tea.Model, tea.Cmd) {
 	if !m.textinput.Focused() && !m.showhelp {
 		m.cursor = 0
 		m.files = filesystem.GetDirectoryListing("..")
+		m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 	}
-
-	m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 
 	return m, nil
 }
