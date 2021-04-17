@@ -8,39 +8,29 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m *model) fixViewport(moveCursor bool) {
+func (m *model) scrollViewport() {
 	top := m.viewport.YOffset
 	bottom := m.viewport.Height + m.viewport.YOffset - 1
-
-	if moveCursor {
-		if m.cursor < top {
-			m.cursor = top
-		} else if m.cursor > bottom {
-			m.cursor = bottom
-		}
-		return
-	}
 
 	if m.cursor < top {
 		m.viewport.LineUp(1)
 	} else if m.cursor > bottom {
 		m.viewport.LineDown(1)
 	}
-}
 
-func (m *model) fixCursor() {
 	if m.cursor > len(m.files)-1 {
 		m.cursor = 0
+		m.viewport.GotoTop()
 	} else if m.cursor < 0 {
 		m.cursor = len(m.files) - 1
+		m.viewport.GotoBottom()
 	}
 }
 
 func (m model) handleKeyUp() (tea.Model, tea.Cmd) {
 	if !m.textinput.Focused() && !m.showhelp {
 		m.cursor--
-		m.fixCursor()
-		m.fixViewport(false)
+		m.scrollViewport()
 		m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 	}
 
@@ -50,8 +40,7 @@ func (m model) handleKeyUp() (tea.Model, tea.Cmd) {
 func (m model) handleKeyDown() (tea.Model, tea.Cmd) {
 	if !m.textinput.Focused() && !m.showhelp {
 		m.cursor++
-		m.fixCursor()
-		m.fixViewport(false)
+		m.scrollViewport()
 		m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 	}
 
