@@ -36,61 +36,35 @@ var (
 	logoStyle = statusItemStyle.Copy().Background(lipgloss.Color("#6124DF"))
 )
 
-func getMovingPrompt(textInput *textinput.Model, width func(string) int, screenWidth int, selectedFileName string, fileEncoding string, logo string) string {
-	prompt := fmt.Sprintf("%s %s", "Where would you like to move this to?", textInput.View())
-
-	return statusText.Copy().
-		Width(screenWidth - width(selectedFileName) - width(fileEncoding) - width(logo)).
-		Render(prompt)
-}
-
-func getRenamingPrompt(textInput *textinput.Model, width func(string) int, screenWidth int, selectedFileName string, fileEncoding string, logo string) string {
-	prompt := fmt.Sprintf("%s %s", "What would you like to name this file?", textInput.View())
-
-	return statusText.Copy().
-		Width(screenWidth - width(selectedFileName) - width(fileEncoding) - width(logo)).
-		Render(prompt)
-}
-
-func getDeletingPrompt(textInput *textinput.Model, width func(string) int, screenWidth int, currentFile, selectedFileName string, fileEncoding string, logo string) string {
-	prompt := fmt.Sprintf("%s %s? [y/n] %s", "Are you sure you want to delete", currentFile, textInput.View())
-
-	return statusText.Copy().
-		Width(screenWidth - width(selectedFileName) - width(fileEncoding) - width(logo)).
-		Render(prompt)
-}
-
-func StatusBar(screenWidth int, currentFile fs.FileInfo, isMoving, isRenaming, isDeleting bool, textInput *textinput.Model) string {
+func StatusBar(screenWidth int, currentFile fs.FileInfo, isMoving, isRenaming, isDeleting bool, textInput textinput.Model) string {
 	doc := strings.Builder{}
 	width := lipgloss.Width
-	selectedFileName := ""
-
-	if currentFile != nil {
-		selectedFileName = selectedFileStyle.Render(currentFile.Name())
-	}
-
 	fileEncoding := fileEncodingStyle.Render("UTF-8")
 
 	logo := logoStyle.Render(fmt.Sprintf("%s %s", icons.Icon_Def["dir"].GetGlyph(), "FM"))
 
 	status := statusText.Copy().
-		Width(screenWidth - width(selectedFileName) - width(fileEncoding) - width(logo)).
+		Width(screenWidth - width(selectedFileStyle.Render(currentFile.Name())) - width(fileEncoding) - width(logo)).
 		Render("m - move, d - delete, r - rename, i - help")
 
 	if isMoving {
-		status = getMovingPrompt(textInput, width, screenWidth, selectedFileName, fileEncoding, logo)
+		status = fmt.Sprintf("%s %s", "Where would you like to move this to?", textInput.View())
 	}
 
 	if isRenaming {
-		status = getRenamingPrompt(textInput, width, screenWidth, selectedFileName, fileEncoding, logo)
+		status = fmt.Sprintf("%s %s", "What would you like to name this file?", textInput.View())
 	}
 
 	if isDeleting {
-		status = getDeletingPrompt(textInput, width, screenWidth, currentFile.Name(), selectedFileName, fileEncoding, logo)
+		status = fmt.Sprintf("%s %s? [y/n] %s", "Are you sure you want to delete", currentFile, textInput.View())
 	}
 
+	status = statusText.Copy().
+		Width(screenWidth - width(currentFile.Name()) - width(fileEncoding) - width(logo)).
+		Render(status)
+
 	bar := lipgloss.JoinHorizontal(lipgloss.Top,
-		selectedFileName,
+		selectedFileStyle.Render(currentFile.Name()),
 		status,
 		fileEncoding,
 		logo,

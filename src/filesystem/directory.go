@@ -15,16 +15,14 @@ func RenameDirOrFile(currentName string, newName string) {
 
 func GetDirectoryListing(dir string) []fs.FileInfo {
 	files, err := ioutil.ReadDir(dir)
-	curFiles := make([]fs.FileInfo, 0)
-	os.Chdir(dir)
+	os.Chdir("./")
 
 	if err != nil {
 		log.Fatal(err)
+		os.Exit(1)
 	}
 
-	curFiles = append(curFiles, files...)
-
-	return curFiles
+	return files
 }
 
 func DeleteDirectory(dirname string) {
@@ -35,7 +33,7 @@ func DeleteDirectory(dirname string) {
 	}
 }
 
-func MoveDir(src string, dst string) (err error) {
+func CopyDir(src string, dst string, shouldRemove bool) (err error) {
 	src = filepath.Clean(src)
 	dst = filepath.Clean(dst)
 
@@ -71,7 +69,7 @@ func MoveDir(src string, dst string) (err error) {
 		dstPath := filepath.Join(dst, entry.Name())
 
 		if entry.IsDir() {
-			err = MoveDir(srcPath, dstPath)
+			err = CopyDir(srcPath, dstPath, true)
 			if err != nil {
 				return
 			}
@@ -87,10 +85,12 @@ func MoveDir(src string, dst string) (err error) {
 		}
 	}
 
-	removeError := os.RemoveAll(src)
+	if shouldRemove {
+		removeError := os.RemoveAll(src)
 
-	if removeError != nil {
-		log.Fatal("error removing directory", removeError)
+		if removeError != nil {
+			log.Fatal("error removing directory", removeError)
+		}
 	}
 
 	return
