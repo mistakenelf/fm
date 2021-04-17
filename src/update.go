@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/knipferrc/fm/src/components"
 	"github.com/knipferrc/fm/src/filesystem"
 
 	"github.com/charmbracelet/bubbles/viewport"
@@ -40,6 +41,7 @@ func (m model) handleKeyUp() (tea.Model, tea.Cmd) {
 		m.cursor--
 		m.fixCursor()
 		m.fixViewport(false)
+		m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 	}
 
 	return m, nil
@@ -50,6 +52,7 @@ func (m model) handleKeyDown() (tea.Model, tea.Cmd) {
 		m.cursor++
 		m.fixCursor()
 		m.fixViewport(false)
+		m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 	}
 
 	return m, nil
@@ -70,7 +73,7 @@ func (m model) handleEnterKey() (tea.Model, tea.Cmd) {
 		m.rename = false
 	} else if m.move {
 		if m.files[m.cursor].IsDir() {
-			filesystem.MoveDir(m.files[m.cursor].Name(), m.textinput.Value())
+			filesystem.CopyDir(m.files[m.cursor].Name(), m.textinput.Value(), true)
 			m.files = filesystem.GetDirectoryListing("./")
 			m.textinput.Blur()
 			m.move = false
@@ -105,8 +108,12 @@ func (m model) handleEnterKey() (tea.Model, tea.Cmd) {
 			}
 		}
 	} else {
+		m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
+
 		return m, nil
 	}
+
+	m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 
 	return m, nil
 }
@@ -115,6 +122,7 @@ func (m model) handleBackKey() (tea.Model, tea.Cmd) {
 	if !m.textinput.Focused() && !m.showhelp {
 		m.cursor = 0
 		m.files = filesystem.GetDirectoryListing("..")
+		m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 	}
 
 	return m, nil
@@ -127,6 +135,8 @@ func (m model) handleMoveKey() (tea.Model, tea.Cmd) {
 		m.textinput.Focus()
 	}
 
+	m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
+
 	return m, nil
 }
 
@@ -136,6 +146,8 @@ func (m model) handleRenameKey() (tea.Model, tea.Cmd) {
 		m.textinput.Placeholder = "newfilename.ex"
 		m.textinput.Focus()
 	}
+
+	m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 
 	return m, nil
 }
@@ -147,11 +159,14 @@ func (m model) handleDeleteKey() (tea.Model, tea.Cmd) {
 		m.textinput.Focus()
 	}
 
+	m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
+
 	return m, nil
 }
 
 func (m model) handleHelpKey() (tea.Model, tea.Cmd) {
 	m.showhelp = true
+	m.viewport.SetContent(components.Help())
 
 	return m, nil
 }
@@ -162,6 +177,8 @@ func (m model) handleEscKey() (tea.Model, tea.Cmd) {
 	m.delete = false
 	m.showhelp = false
 	m.textinput.Blur()
+
+	m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 
 	return m, nil
 }
@@ -181,9 +198,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	switch msg := msg.(type) {
-	case fileStatus:
-		m.files = msg.files
-		cmds = append(cmds, getDirectoryListing())
 	case tea.WindowSizeMsg:
 		if !m.ready {
 			m.screenwidth = msg.Width
@@ -193,6 +207,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				Height: msg.Height - 1,
 			}
 			m.viewport.YPosition = 0
+			m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 			m.ready = true
 		} else {
 			m.screenwidth = msg.Width

@@ -21,7 +21,7 @@ type model struct {
 	ready        bool
 }
 
-func createInitialModel() model {
+func createModel() model {
 	input := textinput.NewModel()
 	input.Prompt = "❯ "
 	input.CharLimit = 250
