@@ -236,5 +236,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.textinput, cmd = m.textinput.Update(msg)
 	cmds = append(cmds, cmd)
 
+	m.spinner, cmd = m.spinner.Update(msg)
+	cmds = append(cmds, cmd)
+
 	return m, tea.Batch(cmds...)
 }

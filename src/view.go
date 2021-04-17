@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/knipferrc/fm/src/components"
 
 	"github.com/charmbracelet/lipgloss"
@@ -8,7 +10,7 @@ import (
 
 func (m model) View() string {
 	if !m.ready || len(m.files) <= 0 {
-		return "Loading..."
+		return fmt.Sprintf("%s%s", m.spinner.View(), "loading...")
 	}
 
 	return lipgloss.JoinVertical(
