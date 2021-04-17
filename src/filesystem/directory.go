@@ -15,7 +15,7 @@ func RenameDirOrFile(currentName string, newName string) {
 
 func GetDirectoryListing(dir string) []fs.FileInfo {
 	files, err := ioutil.ReadDir(dir)
-	os.Chdir("./")
+	os.Chdir(dir)
 
 	if err != nil {
 		log.Fatal(err)
