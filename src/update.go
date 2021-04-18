@@ -27,10 +27,10 @@ func (m *model) scrollViewport() {
 	}
 }
 
-func (m model) handleKeyUp() (tea.Model, tea.Cmd) {
+func (m model) handleBackKey() (tea.Model, tea.Cmd) {
 	if !m.textinput.Focused() && !m.showhelp {
-		m.cursor--
-		m.scrollViewport()
+		m.cursor = 0
+		m.files = filesystem.GetDirectoryListing("..")
 		m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 	}
 
@@ -47,14 +47,29 @@ func (m model) handleKeyDown() (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) handleEnterKey() (tea.Model, tea.Cmd) {
-	if m.showhelp {
-		return m, nil
+func (m model) handleKeyUp() (tea.Model, tea.Cmd) {
+	if !m.textinput.Focused() && !m.showhelp {
+		m.cursor--
+		m.scrollViewport()
+		m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 	}
 
+	return m, nil
+}
+
+func (m model) handleRightKey() (tea.Model, tea.Cmd) {
 	if m.files[m.cursor].IsDir() && !m.textinput.Focused() {
 		m.files = filesystem.GetDirectoryListing(m.files[m.cursor].Name())
 		m.cursor = 0
+		m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
+	}
+
+	return m, nil
+}
+
+func (m model) handleEnterKey() (tea.Model, tea.Cmd) {
+	if m.showhelp {
+		return m, nil
 	} else if m.rename {
 		filesystem.RenameDirOrFile(m.files[m.cursor].Name(), m.textinput.Value())
 		m.files = filesystem.GetDirectoryListing("./")
@@ -110,16 +125,6 @@ func (m model) handleEnterKey() (tea.Model, tea.Cmd) {
 	}
 
 	m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
-
-	return m, nil
-}
-
-func (m model) handleBackKey() (tea.Model, tea.Cmd) {
-	if !m.textinput.Focused() && !m.showhelp {
-		m.cursor = 0
-		m.files = filesystem.GetDirectoryListing("..")
-		m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
-	}
 
 	return m, nil
 }
@@ -211,20 +216,24 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.rename && !m.delete && !m.move {
 				return m, tea.Quit
 			}
-		case "up", "k":
+		case "h":
 			if !m.rename && !m.delete && !m.move {
-				return m.handleKeyUp()
+				return m.handleBackKey()
 			}
 		case "down", "j":
 			if !m.rename && !m.delete && !m.move {
 				return m.handleKeyDown()
 			}
+		case "up", "k":
+			if !m.rename && !m.delete && !m.move {
+				return m.handleKeyUp()
+			}
+		case "l":
+			if !m.rename && !m.delete && !m.move {
+				return m.handleRightKey()
+			}
 		case "enter", " ":
 			return m.handleEnterKey()
-		case "h":
-			if !m.rename && !m.delete && !m.move {
-				return m.handleBackKey()
-			}
 		case "m":
 			if !m.rename && !m.delete && !m.move {
 				return m.handleMoveKey()
