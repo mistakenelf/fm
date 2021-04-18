@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/knipferrc/fm/src/config"
 	"github.com/knipferrc/fm/src/filesystem"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -11,8 +12,20 @@ import (
 )
 
 func main() {
+	config.SetDefaults()
+	config := config.LoadConfig()
 	m := createModel()
-	m.files = filesystem.GetDirectoryListing("./")
+
+	if config.StartDir == "~" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		m.files = filesystem.GetDirectoryListing(home)
+	} else {
+		m.files = filesystem.GetDirectoryListing(config.StartDir)
+	}
 	m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 
 	p := tea.NewProgram(m)
