@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-func RenameDirOrFile(currentName string, newName string) {
+func RenameDirOrFile(currentName, newName string) {
 	os.Rename(currentName, newName)
 }
 
@@ -33,7 +33,7 @@ func DeleteDirectory(dirname string) {
 	}
 }
 
-func CopyDir(src string, dst string, shouldRemove bool) (err error) {
+func CopyDir(src, dst string, shouldRemove bool) (err error) {
 	src = filepath.Clean(src)
 	dst = filepath.Clean(dst)
 

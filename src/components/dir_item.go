@@ -8,7 +8,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func DirItem(label string, selected bool, isDir bool, ext string) string {
+func DirItem(label string, selected, isDir bool, ext string) string {
 	if selected && isDir {
 		listing := fmt.Sprintf("%s %s", icons.Icon_Def["dir"].GetGlyph(), label)
 

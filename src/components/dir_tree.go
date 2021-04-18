@@ -9,7 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func DirTree(files []fs.FileInfo, cursor int, width int) string {
+func DirTree(files []fs.FileInfo, cursor, width int) string {
 	doc := strings.Builder{}
 	curFiles := ""
 
