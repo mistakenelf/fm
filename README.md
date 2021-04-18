@@ -31,11 +31,13 @@ A terminal based file manager
 
   #### <i>Note: The currently selected file or folder will be highlighted in pink</i>
 
+  - <kbd>h</kbd> Go back to the previous directory
+
   - <kbd>j</kbd> Move down in the file tree
 
   - <kbd>k</kbd> Move up in the file tree
 
-  - <kbd>h</kbd> Go back to the previous directory
+  - <kbd>l</kbd> Opens the currently selected directory
 
   - <kbd>m</kbd> Move a file or folder. Once pressed you will be prompted in the status bar to type the destination for the currently highlighted file or folder. For example, `test.txt` is currently highlighted, press <kbd>m</kbd>, type `/some/new/destination` and press <kbd>enter</kbd>
 
