@@ -59,17 +59,20 @@ func (m model) handleEnterKey() (tea.Model, tea.Cmd) {
 		filesystem.RenameDirOrFile(m.files[m.cursor].Name(), m.textinput.Value())
 		m.files = filesystem.GetDirectoryListing("./")
 		m.textinput.Blur()
+		m.textinput.Reset()
 		m.rename = false
 	} else if m.move {
 		if m.files[m.cursor].IsDir() {
 			filesystem.CopyDir(m.files[m.cursor].Name(), m.textinput.Value(), true)
 			m.files = filesystem.GetDirectoryListing("./")
 			m.textinput.Blur()
+			m.textinput.Reset()
 			m.move = false
 		} else {
 			filesystem.CopyFile(m.files[m.cursor].Name(), m.textinput.Value(), true)
 			m.files = filesystem.GetDirectoryListing("./")
 			m.textinput.Blur()
+			m.textinput.Reset()
 			m.move = false
 		}
 	} else if m.delete {
@@ -78,10 +81,12 @@ func (m model) handleEnterKey() (tea.Model, tea.Cmd) {
 				filesystem.DeleteDirectory(m.files[m.cursor].Name())
 				m.files = filesystem.GetDirectoryListing("./")
 				m.textinput.Blur()
+				m.textinput.Reset()
 				m.delete = false
 			} else {
 				m.files = filesystem.GetDirectoryListing("./")
 				m.textinput.Blur()
+				m.textinput.Reset()
 				m.delete = false
 			}
 		} else {
@@ -89,10 +94,12 @@ func (m model) handleEnterKey() (tea.Model, tea.Cmd) {
 				filesystem.DeleteFile(m.files[m.cursor].Name())
 				m.files = filesystem.GetDirectoryListing("./")
 				m.textinput.Blur()
+				m.textinput.Reset()
 				m.delete = false
 			} else {
 				m.files = filesystem.GetDirectoryListing("./")
 				m.textinput.Blur()
+				m.textinput.Reset()
 				m.delete = false
 			}
 		}
@@ -166,6 +173,7 @@ func (m model) handleEscKey() (tea.Model, tea.Cmd) {
 	m.delete = false
 	m.showhelp = false
 	m.textinput.Blur()
+	m.textinput.Reset()
 
 	m.viewport.SetContent(components.DirTree(m.files, m.cursor, m.screenwidth))
 
@@ -177,14 +185,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmd  tea.Cmd
 		cmds []tea.Cmd
 	)
-
-	if msg, ok := msg.(tea.KeyMsg); ok {
-		k := msg.String()
-
-		if k == "q" || k == "ctrl+c" {
-			return m, tea.Quit
-		}
-	}
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -208,23 +208,39 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
-			return m, tea.Quit
+			if !m.rename && !m.delete && !m.move {
+				return m, tea.Quit
+			}
 		case "up", "k":
-			return m.handleKeyUp()
+			if !m.rename && !m.delete && !m.move {
+				return m.handleKeyUp()
+			}
 		case "down", "j":
-			return m.handleKeyDown()
+			if !m.rename && !m.delete && !m.move {
+				return m.handleKeyDown()
+			}
 		case "enter", " ":
 			return m.handleEnterKey()
 		case "h":
-			return m.handleBackKey()
+			if !m.rename && !m.delete && !m.move {
+				return m.handleBackKey()
+			}
 		case "m":
-			return m.handleMoveKey()
+			if !m.rename && !m.delete && !m.move {
+				return m.handleMoveKey()
+			}
 		case "r":
-			return m.handleRenameKey()
+			if !m.rename && !m.delete && !m.move {
+				return m.handleRenameKey()
+			}
 		case "d":
-			return m.handleDeleteKey()
+			if !m.rename && !m.delete && !m.move {
+				return m.handleDeleteKey()
+			}
 		case "i":
-			return m.handleHelpKey()
+			if !m.rename && !m.delete && !m.move {
+				return m.handleHelpKey()
+			}
 		case "esc":
 			return m.handleEscKey()
 		}
