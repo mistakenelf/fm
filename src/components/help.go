@@ -13,10 +13,11 @@ func Help() string {
 		MarginBottom(1).
 		Render("Welcome to FM!")
 
-	helpText := fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n",
+	helpText := fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+		"h - go back a directory",
 		"j - move cursor down",
 		"k - move cursor up",
-		"h - go back a directory",
+		"l - open selected folder",
 		"m - move file or folder to another directory",
 		"d - delete a file or directory",
 		"r - rename a file or directory",
