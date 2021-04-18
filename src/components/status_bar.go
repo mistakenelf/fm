@@ -56,7 +56,7 @@ func StatusBar(screenWidth int, currentFile fs.FileInfo, isMoving, isRenaming, i
 	}
 
 	if isDeleting {
-		status = fmt.Sprintf("%s %s? [y/n] %s", "Are you sure you want to delete", currentFile, textInput.View())
+		status = fmt.Sprintf("%s %s? [y/n] %s", "Are you sure you want to delete", currentFile.Name(), textInput.View())
 	}
 
 	status = statusText.Copy().
