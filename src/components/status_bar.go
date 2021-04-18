@@ -59,9 +59,7 @@ func StatusBar(screenWidth int, currentFile fs.FileInfo, isMoving, isRenaming, i
 		status = fmt.Sprintf("%s %s? [y/n] %s", "Are you sure you want to delete", currentFile.Name(), textInput.View())
 	}
 
-	status = statusText.Copy().
-		Width(screenWidth - width(currentFile.Name()) - width(fileEncoding) - width(logo)).
-		Render(status)
+	status = statusText.Copy().Render(status)
 
 	bar := lipgloss.JoinHorizontal(lipgloss.Top,
 		selectedFileStyle.Render(currentFile.Name()),
