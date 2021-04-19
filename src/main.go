@@ -13,7 +13,9 @@ import (
 
 func main() {
 	config.SetDefaults()
-	config := config.LoadConfig()
+	config.LoadConfig()
+
+	config := config.GetConfig()
 	m := createModel()
 
 	if config.StartDir == "~" {
