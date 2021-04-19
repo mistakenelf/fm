@@ -232,7 +232,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.rename && !m.delete && !m.move {
 				return m.handleRightKey()
 			}
-		case "enter", " ":
+		case "enter":
 			return m.handleEnterKey()
 		case "m":
 			if !m.rename && !m.delete && !m.move {
