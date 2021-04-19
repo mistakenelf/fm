@@ -7,10 +7,12 @@ import (
 )
 
 type Config struct {
-	StartDir string `mapstructure:"start_dir"`
+	StartDir          string `mapstructure:"start_dir"`
+	ShowIcons         bool   `mapstructure:"show_icons"`
+	SelectedItemColor string `mapstructure:"selected_item_color"`
 }
 
-func LoadConfig() (config Config) {
+func LoadConfig() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yml")
 	viper.AddConfigPath("$HOME/.config/fm")
@@ -20,7 +22,9 @@ func LoadConfig() (config Config) {
 			fmt.Println("Error loading config:", err)
 		}
 	}
+}
 
+func GetConfig() (config Config) {
 	err := viper.Unmarshal(&config)
 
 	if err != nil {
@@ -32,4 +36,6 @@ func LoadConfig() (config Config) {
 
 func SetDefaults() {
 	viper.SetDefault("start_dir", ".")
+	viper.SetDefault("show_icons", true)
+	viper.SetDefault("selected_item_color", "#F25D94")
 }
