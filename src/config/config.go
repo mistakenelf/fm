@@ -2,6 +2,9 @@ package config
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/spf13/viper"
 )
@@ -13,9 +16,22 @@ type Config struct {
 }
 
 func LoadConfig() {
+	home, _ := os.UserHomeDir()
+	configPath := filepath.Join(home, ".config", "fm")
+	configFile := filepath.Join(home, ".config", "fm", "config.yml")
+
 	viper.SetConfigName("config")
 	viper.SetConfigType("yml")
-	viper.AddConfigPath("$HOME/.config/fm")
+	viper.AddConfigPath(configPath)
+
+	if _, err := os.Stat(configFile); os.IsNotExist(err) {
+		if err := os.MkdirAll(filepath.Dir(configFile), 0770); err != nil {
+			log.Fatal("Error creating config file")
+		}
+
+		os.Create(configFile)
+		viper.WriteConfig()
+	}
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
