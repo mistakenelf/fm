@@ -71,3 +71,9 @@ make run
 ```sh
 make build
 ```
+
+<br />
+
+### Credit
+
+- Thank you to this repo https://github.com/Yash-Handa/logo-ls for the icons
