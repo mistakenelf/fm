@@ -23,6 +23,12 @@ A terminal based file manager
 
 <br />
 
+## Installation
+
+```
+go get github.com/knipferrc/fm@latest
+```
+
 ## Usage
 
 - Start `fm` by running `fm` from your terminal
