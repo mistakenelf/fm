@@ -26,7 +26,7 @@ A terminal based file manager
 ## Installation
 
 ```
-go get github.com/knipferrc/fm@latest
+go install github.com/knipferrc/fm@latest
 ```
 
 ## Usage
