@@ -28,20 +28,20 @@ var (
 				Padding(0, 1).
 				MarginRight(1)
 
-	fileEncodingStyle = statusItemStyle.Copy().
-				Background(lipgloss.Color("#A550DF")).
-				Align(lipgloss.Right)
+	totalFilesStyle = statusItemStyle.Copy().
+			Background(lipgloss.Color("#A550DF")).
+			Align(lipgloss.Right)
 
 	statusText = lipgloss.NewStyle().Inherit(statusBarStyle)
 
 	logoStyle = statusItemStyle.Copy().Background(lipgloss.Color("#6124DF"))
 )
 
-func StatusBar(screenWidth int, currentFile fs.FileInfo, isMoving, isRenaming, isDeleting bool, textInput textinput.Model) string {
+func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo, isMoving, isRenaming, isDeleting bool, textInput textinput.Model) string {
 	doc := strings.Builder{}
 	width := lipgloss.Width
 	cfg := config.GetConfig()
-	fileEncoding := fileEncodingStyle.Render("UTF-8")
+	fileTotals := totalFilesStyle.Render(fmt.Sprintf("%d/%d", cursor+1, totalFiles))
 	status := ""
 	logo := ""
 
@@ -62,13 +62,13 @@ func StatusBar(screenWidth int, currentFile fs.FileInfo, isMoving, isRenaming, i
 	}
 
 	status = statusText.Copy().
-		Width(screenWidth - width(selectedFileStyle.Render(currentFile.Name())) - width(fileEncoding) - width(logo)).
+		Width(screenWidth - width(selectedFileStyle.Render(currentFile.Name())) - width(fileTotals) - width(logo)).
 		Render(status)
 
 	bar := lipgloss.JoinHorizontal(lipgloss.Top,
 		selectedFileStyle.Render(currentFile.Name()),
 		status,
-		fileEncoding,
+		fileTotals,
 		logo,
 	)
 
