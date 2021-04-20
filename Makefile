@@ -1,5 +1,5 @@
 build:
-	go build -o fm ./src
+	go build -o fm main.go
 
 run:
-	go run ./src
+	go run main.go

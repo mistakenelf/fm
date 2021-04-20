@@ -1,0 +1,268 @@
+package app
+
+import (
+	"github.com/knipferrc/fm/components"
+	"github.com/knipferrc/fm/filesystem"
+
+	"github.com/charmbracelet/bubbles/viewport"
+	tea "github.com/charmbracelet/bubbletea"
+)
+
+func (m *Model) scrollViewport() {
+	top := m.Viewport.YOffset
+	bottom := m.Viewport.Height + m.Viewport.YOffset - 1
+
+	if m.Cursor < top {
+		m.Viewport.LineUp(1)
+	} else if m.Cursor > bottom {
+		m.Viewport.LineDown(1)
+	}
+
+	if m.Cursor > len(m.Files)-1 {
+		m.Cursor = 0
+		m.Viewport.GotoTop()
+	} else if m.Cursor < 0 {
+		m.Cursor = len(m.Files) - 1
+		m.Viewport.GotoBottom()
+	}
+}
+
+func (m Model) handleBackKey() (tea.Model, tea.Cmd) {
+	if !m.Textinput.Focused() && !m.ShowHelp {
+		m.Cursor = 0
+		m.Files = filesystem.GetDirectoryListing("..")
+		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+	}
+
+	return m, nil
+}
+
+func (m Model) handleKeyDown() (tea.Model, tea.Cmd) {
+	if !m.Textinput.Focused() && !m.ShowHelp {
+		m.Cursor++
+		m.scrollViewport()
+		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+	}
+
+	return m, nil
+}
+
+func (m Model) handleKeyUp() (tea.Model, tea.Cmd) {
+	if !m.Textinput.Focused() && !m.ShowHelp {
+		m.Cursor--
+		m.scrollViewport()
+		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+	}
+
+	return m, nil
+}
+
+func (m Model) handleRightKey() (tea.Model, tea.Cmd) {
+	if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
+		m.Files = filesystem.GetDirectoryListing(m.Files[m.Cursor].Name())
+		m.Cursor = 0
+		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+	}
+
+	return m, nil
+}
+
+func (m Model) handleEnterKey() (tea.Model, tea.Cmd) {
+	if m.ShowHelp {
+		return m, nil
+	} else if m.Rename {
+		filesystem.RenameDirOrFile(m.Files[m.Cursor].Name(), m.Textinput.Value())
+		m.Files = filesystem.GetDirectoryListing("./")
+		m.Textinput.Blur()
+		m.Textinput.Reset()
+		m.Rename = false
+	} else if m.Move {
+		if m.Files[m.Cursor].IsDir() {
+			filesystem.CopyDir(m.Files[m.Cursor].Name(), m.Textinput.Value(), true)
+			m.Files = filesystem.GetDirectoryListing("./")
+			m.Textinput.Blur()
+			m.Textinput.Reset()
+			m.Move = false
+		} else {
+			filesystem.CopyFile(m.Files[m.Cursor].Name(), m.Textinput.Value(), true)
+			m.Files = filesystem.GetDirectoryListing("./")
+			m.Textinput.Blur()
+			m.Textinput.Reset()
+			m.Move = false
+		}
+	} else if m.Delete {
+		if m.Files[m.Cursor].IsDir() {
+			if m.Textinput.Value() == "y" {
+				filesystem.DeleteDirectory(m.Files[m.Cursor].Name())
+				m.Files = filesystem.GetDirectoryListing("./")
+				m.Textinput.Blur()
+				m.Textinput.Reset()
+				m.Delete = false
+			} else {
+				m.Files = filesystem.GetDirectoryListing("./")
+				m.Textinput.Blur()
+				m.Textinput.Reset()
+				m.Delete = false
+			}
+		} else {
+			if m.Textinput.Value() == "y" {
+				filesystem.DeleteFile(m.Files[m.Cursor].Name())
+				m.Files = filesystem.GetDirectoryListing("./")
+				m.Textinput.Blur()
+				m.Textinput.Reset()
+				m.Delete = false
+			} else {
+				m.Files = filesystem.GetDirectoryListing("./")
+				m.Textinput.Blur()
+				m.Textinput.Reset()
+				m.Delete = false
+			}
+		}
+	} else {
+		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+
+		return m, nil
+	}
+
+	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+
+	return m, nil
+}
+
+func (m Model) handleMoveKey() (tea.Model, tea.Cmd) {
+	if !m.Textinput.Focused() && !m.ShowHelp {
+		m.Move = true
+		m.Textinput.Placeholder = "/usr/share/"
+		m.Textinput.Focus()
+	}
+
+	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+
+	return m, nil
+}
+
+func (m Model) handleRenameKey() (tea.Model, tea.Cmd) {
+	if !m.Textinput.Focused() && !m.ShowHelp {
+		m.Rename = true
+		m.Textinput.Placeholder = "newfilename.ex"
+		m.Textinput.Focus()
+	}
+
+	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+
+	return m, nil
+}
+
+func (m Model) handleDeleteKey() (tea.Model, tea.Cmd) {
+	if !m.Textinput.Focused() && !m.ShowHelp {
+		m.Delete = true
+		m.Textinput.Placeholder = "[y/n]"
+		m.Textinput.Focus()
+	}
+
+	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+
+	return m, nil
+}
+
+func (m Model) handleHelpKey() (tea.Model, tea.Cmd) {
+	m.ShowHelp = true
+	m.Viewport.SetContent(components.Help())
+
+	return m, nil
+}
+
+func (m Model) handleEscKey() (tea.Model, tea.Cmd) {
+	m.Move = false
+	m.Rename = false
+	m.Delete = false
+	m.ShowHelp = false
+	m.Textinput.Blur()
+	m.Textinput.Reset()
+
+	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+
+	return m, nil
+}
+
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
+
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		if !m.Ready {
+			m.ScreenWidth = msg.Width
+			m.ScreenHeight = msg.Height
+			m.Viewport = viewport.Model{
+				Width:  msg.Width,
+				Height: msg.Height - 1,
+			}
+			m.Viewport.YPosition = 0
+			m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+			m.Ready = true
+		} else {
+			m.ScreenWidth = msg.Width
+			m.ScreenHeight = msg.Height
+			m.Viewport.Width = msg.Width
+			m.Viewport.Height = msg.Height - 1
+		}
+
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c", "q":
+			if !m.Rename && !m.Delete && !m.Move {
+				return m, tea.Quit
+			}
+		case "h":
+			if !m.Rename && !m.Delete && !m.Move {
+				return m.handleBackKey()
+			}
+		case "down", "j":
+			if !m.Rename && !m.Delete && !m.Move {
+				return m.handleKeyDown()
+			}
+		case "up", "k":
+			if !m.Rename && !m.Delete && !m.Move {
+				return m.handleKeyUp()
+			}
+		case "l":
+			if !m.Rename && !m.Delete && !m.Move {
+				return m.handleRightKey()
+			}
+		case "enter":
+			return m.handleEnterKey()
+		case "m":
+			if !m.Rename && !m.Delete && !m.Move {
+				return m.handleMoveKey()
+			}
+		case "r":
+			if !m.Rename && !m.Delete && !m.Move {
+				return m.handleRenameKey()
+			}
+		case "d":
+			if !m.Rename && !m.Delete && !m.Move {
+				return m.handleDeleteKey()
+			}
+		case "i":
+			if !m.Rename && !m.Delete && !m.Move {
+				return m.handleHelpKey()
+			}
+		case "esc":
+			return m.handleEscKey()
+		}
+	}
+
+	m.Viewport, cmd = m.Viewport.Update(msg)
+	cmds = append(cmds, cmd)
+
+	m.Textinput, cmd = m.Textinput.Update(msg)
+	cmds = append(cmds, cmd)
+
+	m.Spinner, cmd = m.Spinner.Update(msg)
+	cmds = append(cmds, cmd)
+
+	return m, tea.Batch(cmds...)
+}

@@ -7,24 +7,20 @@ jobs:
   build:
     name: GoReleaser build
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-
       - name: Set up Go 1.16
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
         id: go
-
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
           args: release --rm-dist
-          workdir: ./src
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"github.com/charmbracelet/bubbles/spinner"
@@ -6,6 +6,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m model) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	return tea.Batch(textinput.Blink, spinner.Tick)
 }

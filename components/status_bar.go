@@ -5,8 +5,8 @@ import (
 	"io/fs"
 	"strings"
 
-	"github.com/knipferrc/fm/src/config"
-	"github.com/knipferrc/fm/src/icons"
+	"github.com/knipferrc/fm/config"
+	"github.com/knipferrc/fm/icons"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
