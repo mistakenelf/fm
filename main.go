@@ -29,12 +29,9 @@ func main() {
 	} else {
 		m.Files = filesystem.GetDirectoryListing(cfg.StartDir)
 	}
+
 	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-
 	p := tea.NewProgram(m)
-
-	p.EnterAltScreen()
-	defer p.ExitAltScreen()
 
 	p.EnableMouseCellMotion()
 	defer p.DisableMouseCellMotion()
