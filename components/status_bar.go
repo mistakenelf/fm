@@ -40,12 +40,12 @@ var (
 func StatusBar(screenWidth int, currentFile fs.FileInfo, isMoving, isRenaming, isDeleting bool, textInput textinput.Model) string {
 	doc := strings.Builder{}
 	width := lipgloss.Width
-	config := config.GetConfig()
+	cfg := config.GetConfig()
 	fileEncoding := fileEncodingStyle.Render("UTF-8")
 	status := ""
 	logo := ""
 
-	if config.ShowIcons {
+	if cfg.ShowIcons {
 		logo = logoStyle.Render(fmt.Sprintf("%s %s", icons.Icon_Def["dir"].GetGlyph(), "FM"))
 	} else {
 		logo = logoStyle.Render("FM")
