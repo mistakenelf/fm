@@ -1,6 +1,5 @@
 <p align="center">
-  <h1 align="center">fm</h3>
-
+  <img src="./assets/logo.svg" height="180" width="180" />
   <p align="center">
     Keep those files organized
   </p>
