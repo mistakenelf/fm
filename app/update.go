@@ -2,7 +2,6 @@ package app
 
 import (
 	"github.com/knipferrc/fm/components"
-	"github.com/knipferrc/fm/filesystem"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -27,16 +26,6 @@ func (m *Model) scrollViewport() {
 	}
 }
 
-func (m Model) handleBackKey() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() && !m.ShowHelp {
-		m.Cursor = 0
-		m.Files = filesystem.GetDirectoryListing("..")
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-	}
-
-	return m, nil
-}
-
 func (m Model) handleKeyDown() (tea.Model, tea.Cmd) {
 	if !m.Textinput.Focused() && !m.ShowHelp {
 		m.Cursor++
@@ -57,62 +46,30 @@ func (m Model) handleKeyUp() (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) handleRightKey() (tea.Model, tea.Cmd) {
-	if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
-		m.Files = filesystem.GetDirectoryListing(m.Files[m.Cursor].Name())
-		m.Cursor = 0
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-	}
-
-	return m, nil
-}
-
 func (m Model) handleEnterKey() (tea.Model, tea.Cmd) {
 	if m.ShowHelp {
 		return m, nil
 	} else if m.Rename {
-		filesystem.RenameDirOrFile(m.Files[m.Cursor].Name(), m.Textinput.Value())
-		m.Files = filesystem.GetDirectoryListing("./")
-		m.Textinput.Blur()
-		m.Textinput.Reset()
-		m.Rename = false
+		return m, renameFileOrDir(m.Files[m.Cursor].Name(), m.Textinput.Value())
 	} else if m.Move {
 		if m.Files[m.Cursor].IsDir() {
-			filesystem.CopyDir(m.Files[m.Cursor].Name(), m.Textinput.Value(), true)
-			m.Files = filesystem.GetDirectoryListing("./")
-			m.Textinput.Blur()
-			m.Textinput.Reset()
-			m.Move = false
+			return m, moveDir(m.Files[m.Cursor].Name(), m.Textinput.Value())
 		} else {
-			filesystem.CopyFile(m.Files[m.Cursor].Name(), m.Textinput.Value(), true)
-			m.Files = filesystem.GetDirectoryListing("./")
-			m.Textinput.Blur()
-			m.Textinput.Reset()
-			m.Move = false
+			return m, moveFile(m.Files[m.Cursor].Name(), m.Textinput.Value())
 		}
 	} else if m.Delete {
 		if m.Files[m.Cursor].IsDir() {
 			if m.Textinput.Value() == "y" {
-				filesystem.DeleteDirectory(m.Files[m.Cursor].Name())
-				m.Files = filesystem.GetDirectoryListing("./")
-				m.Textinput.Blur()
-				m.Textinput.Reset()
-				m.Delete = false
+				return m, deleteDir(m.Files[m.Cursor].Name())
 			} else {
-				m.Files = filesystem.GetDirectoryListing("./")
 				m.Textinput.Blur()
 				m.Textinput.Reset()
 				m.Delete = false
 			}
 		} else {
 			if m.Textinput.Value() == "y" {
-				filesystem.DeleteFile(m.Files[m.Cursor].Name())
-				m.Files = filesystem.GetDirectoryListing("./")
-				m.Textinput.Blur()
-				m.Textinput.Reset()
-				m.Delete = false
+				return m, deleteFile(m.Files[m.Cursor].Name())
 			} else {
-				m.Files = filesystem.GetDirectoryListing("./")
 				m.Textinput.Blur()
 				m.Textinput.Reset()
 				m.Delete = false
@@ -192,6 +149,29 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	)
 
 	switch msg := msg.(type) {
+	case updateDirMsg:
+		m.Files = msg
+		m.Cursor = 0
+		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+	case renameMsg:
+		m.Files = msg
+		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.Textinput.Blur()
+		m.Textinput.Reset()
+		m.Rename = false
+	case moveMsg:
+		m.Files = msg
+		m.Cursor = 0
+		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.Textinput.Blur()
+		m.Textinput.Reset()
+		m.Move = false
+	case deleteMsg:
+		m.Files = msg
+		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.Textinput.Blur()
+		m.Textinput.Reset()
+		m.Delete = false
 	case tea.WindowSizeMsg:
 		if !m.Ready {
 			m.ScreenWidth = msg.Width
@@ -218,7 +198,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "h":
 			if !m.Rename && !m.Delete && !m.Move {
-				return m.handleBackKey()
+				return m, updateDirectoryListing("..")
 			}
 		case "down", "j":
 			if !m.Rename && !m.Delete && !m.Move {
@@ -230,7 +210,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "l":
 			if !m.Rename && !m.Delete && !m.Move {
-				return m.handleRightKey()
+				if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
+					return m, updateDirectoryListing(m.Files[m.Cursor].Name())
+				}
 			}
 		case "enter":
 			return m.handleEnterKey()
