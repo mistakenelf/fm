@@ -6,7 +6,6 @@ import (
 	"github.com/knipferrc/fm/components"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/reflow/wrap"
 )
 
 func (m Model) View() string {
@@ -21,9 +20,9 @@ func (m Model) View() string {
 
 	rightPane := lipgloss.NewStyle().
 		Border(lipgloss.NormalBorder()).Width((m.ScreenWidth / 2) - 4).
-		Render(wrap.String(m.SecondaryViewport.View(), m.ScreenWidth/2))
+		Render(m.SecondaryViewport.View())
 
-	panes := lipgloss.JoinHorizontal(lipgloss.Top, leftPane, rightPane)
+	panes := lipgloss.JoinHorizontal(0, leftPane, rightPane)
 
 	return lipgloss.JoinVertical(
 		lipgloss.Top,

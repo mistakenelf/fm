@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/knipferrc/fm/components"
+	"github.com/muesli/reflow/wrap"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -163,18 +164,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Textinput.Reset()
 		m.Delete = false
 	case fileContentMsg:
-		m.SecondaryViewport.SetContent(string(msg))
+		m.SecondaryViewport.SetContent(wrap.String(string(msg), m.ScreenWidth/2))
 	case tea.WindowSizeMsg:
 		if !m.Ready {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
 
 			m.Viewport = viewport.Model{
-				Width:  msg.Width / 2,
+				Width:  msg.Width,
 				Height: msg.Height - 3,
 			}
 			m.SecondaryViewport = viewport.Model{
-				Width:  (msg.Width / 2) - 3,
+				Width:  msg.Width,
 				Height: msg.Height - 3,
 			}
 
@@ -185,9 +186,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
-			m.Viewport.Width = msg.Width / 2
+			m.Viewport.Width = msg.Width
 			m.Viewport.Height = msg.Height - 3
-			m.SecondaryViewport.Width = (msg.Width / 2) - 3
+			m.SecondaryViewport.Width = msg.Width
 			m.SecondaryViewport.Height = msg.Height - 3
 		}
 
