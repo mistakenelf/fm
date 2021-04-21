@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 func (m *Model) scrollPrimaryViewport() {
@@ -75,12 +76,8 @@ func (m Model) handleEnterKey() (tea.Model, tea.Cmd) {
 			}
 		}
 	} else {
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-
 		return m, nil
 	}
-
-	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 
 	return m, nil
 }
@@ -92,19 +89,15 @@ func (m Model) handleMoveKey() (tea.Model, tea.Cmd) {
 		m.Textinput.Focus()
 	}
 
-	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-
 	return m, nil
 }
 
 func (m Model) handleRenameKey() (tea.Model, tea.Cmd) {
 	if !m.Textinput.Focused() {
 		m.Rename = true
-		m.Textinput.Placeholder = "newfilename.ex"
+		m.Textinput.Placeholder = "new_name"
 		m.Textinput.Focus()
 	}
-
-	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 
 	return m, nil
 }
@@ -115,8 +108,6 @@ func (m Model) handleDeleteKey() (tea.Model, tea.Cmd) {
 		m.Textinput.Placeholder = "[y/n]"
 		m.Textinput.Focus()
 	}
-
-	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 
 	return m, nil
 }
@@ -129,6 +120,7 @@ func (m Model) handleEscKey() (tea.Model, tea.Cmd) {
 	m.Textinput.Reset()
 
 	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+	m.SecondaryViewport.SetContent(components.Instructions())
 
 	return m, nil
 }
@@ -144,12 +136,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Files = msg
 		m.Cursor = 0
 		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+
 	case renameMsg:
 		m.Files = msg
 		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 		m.Textinput.Blur()
 		m.Textinput.Reset()
 		m.Rename = false
+
 	case moveMsg:
 		m.Files = msg
 		m.Cursor = 0
@@ -157,39 +151,49 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Textinput.Blur()
 		m.Textinput.Reset()
 		m.Move = false
+
 	case deleteMsg:
 		m.Files = msg
 		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 		m.Textinput.Blur()
 		m.Textinput.Reset()
 		m.Delete = false
+
 	case fileContentMsg:
-		m.SecondaryViewport.SetContent(wrap.String(string(msg), m.ScreenWidth/2))
+		border := lipgloss.NormalBorder()
+		halfScreenWidth := m.ScreenWidth / 2
+		borderWidth := lipgloss.Width(border.Left + border.Right + border.Top + border.Bottom)
+		m.SecondaryViewport.SetContent(wrap.String(string(msg), halfScreenWidth-borderWidth))
+
 	case tea.WindowSizeMsg:
+		borderWidth := lipgloss.Width(lipgloss.NormalBorder().Top)
+		statusBarHeight := 2
+		verticalMargin := borderWidth + statusBarHeight
+
 		if !m.Ready {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
 
 			m.Viewport = viewport.Model{
 				Width:  msg.Width,
-				Height: msg.Height - 3,
+				Height: msg.Height - verticalMargin,
 			}
 			m.SecondaryViewport = viewport.Model{
 				Width:  msg.Width,
-				Height: msg.Height - 3,
+				Height: msg.Height - verticalMargin,
 			}
 
 			m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-			m.SecondaryViewport.SetContent(components.Help())
+			m.SecondaryViewport.SetContent(components.Instructions())
 
 			m.Ready = true
 		} else {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
 			m.Viewport.Width = msg.Width
-			m.Viewport.Height = msg.Height - 3
+			m.Viewport.Height = msg.Height - verticalMargin
 			m.SecondaryViewport.Width = msg.Width
-			m.SecondaryViewport.Height = msg.Height - 3
+			m.SecondaryViewport.Height = msg.Height - verticalMargin
 		}
 
 	case tea.KeyMsg:
