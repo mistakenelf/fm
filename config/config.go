@@ -17,6 +17,7 @@ type SettingsConfig struct {
 type ColorsConfig struct {
 	SelectedItem string `mapstructure:"selected_item"`
 }
+
 type Config struct {
 	Settings SettingsConfig `mapstructure:"settings"`
 	Colors   ColorsConfig   `mapstructure:"colors"`
