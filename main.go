@@ -19,7 +19,7 @@ func main() {
 	cfg := config.GetConfig()
 	m := app.CreateModel()
 
-	if cfg.StartDir == "~" {
+	if cfg.Settings.StartDir == "~" {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			log.Fatal(err)
@@ -27,7 +27,7 @@ func main() {
 
 		m.Files = filesystem.GetDirectoryListing(home)
 	} else {
-		m.Files = filesystem.GetDirectoryListing(cfg.StartDir)
+		m.Files = filesystem.GetDirectoryListing(cfg.Settings.StartDir)
 	}
 
 	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))

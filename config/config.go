@@ -9,10 +9,17 @@ import (
 	"github.com/spf13/viper"
 )
 
+type SettingsConfig struct {
+	StartDir  string `mapstructure:"start_dir"`
+	ShowIcons bool   `mapstructure:"show_icons"`
+}
+
+type ColorsConfig struct {
+	SelectedItem string `mapstructure:"selected_item"`
+}
 type Config struct {
-	StartDir          string `mapstructure:"start_dir"`
-	ShowIcons         bool   `mapstructure:"show_icons"`
-	SelectedItemColor string `mapstructure:"selected_item_color"`
+	Settings SettingsConfig `mapstructure:"settings"`
+	Colors   ColorsConfig   `mapstructure:"colors"`
 }
 
 func LoadConfig() {
@@ -51,7 +58,7 @@ func GetConfig() (config Config) {
 }
 
 func SetDefaults() {
-	viper.SetDefault("start_dir", ".")
-	viper.SetDefault("show_icons", true)
-	viper.SetDefault("selected_item_color", "#F25D94")
+	viper.SetDefault("settings.start_dir", ".")
+	viper.SetDefault("settings.show_icons", true)
+	viper.SetDefault("colors.selected_item", "#F25D94")
 }

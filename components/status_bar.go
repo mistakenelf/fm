@@ -45,7 +45,7 @@ func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo, isM
 	status := ""
 	logo := ""
 
-	if cfg.ShowIcons {
+	if cfg.Settings.ShowIcons {
 		logo = logoStyle.Render(fmt.Sprintf("%s %s", icons.Icon_Def["dir"].GetGlyph(), "FM"))
 	} else {
 		logo = logoStyle.Render("FM")
