@@ -14,8 +14,15 @@ func (m Model) View() string {
 		return fmt.Sprintf("%s%s", m.Spinner.View(), "loading...")
 	}
 
-	leftPane := lipgloss.NewStyle().Border(lipgloss.NormalBorder()).Width(m.ScreenWidth / 2).Render(m.Viewport.View())
-	rightPane := lipgloss.NewStyle().Border(lipgloss.NormalBorder()).Width((m.ScreenWidth / 2) - 4).Render(wrap.String(m.SecondaryViewport.View(), (m.ScreenWidth/2)-4))
+	leftPane := lipgloss.NewStyle().
+		Border(lipgloss.NormalBorder()).
+		Width(m.ScreenWidth / 2).
+		Render(m.Viewport.View())
+
+	rightPane := lipgloss.NewStyle().
+		Border(lipgloss.NormalBorder()).Width((m.ScreenWidth / 2) - 4).
+		Render(wrap.String(m.SecondaryViewport.View(), m.ScreenWidth/2))
+
 	panes := lipgloss.JoinHorizontal(lipgloss.Top, leftPane, rightPane)
 
 	return lipgloss.JoinVertical(

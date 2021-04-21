@@ -164,23 +164,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Delete = false
 	case fileContentMsg:
 		m.SecondaryViewport.SetContent(string(msg))
-		m.SecondaryViewport.GotoTop()
 	case tea.WindowSizeMsg:
 		if !m.Ready {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
 
 			m.Viewport = viewport.Model{
-				Width:  msg.Width,
+				Width:  msg.Width / 2,
 				Height: msg.Height - 3,
 			}
 			m.SecondaryViewport = viewport.Model{
-				Width:  msg.Width,
+				Width:  (msg.Width / 2) - 3,
 				Height: msg.Height - 3,
 			}
 
-			m.Viewport.YPosition = 3
-			m.SecondaryViewport.YPosition = 3
 			m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 			m.SecondaryViewport.SetContent(components.Help())
 
@@ -188,10 +185,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
-			m.Viewport.Width = msg.Width
-			m.Viewport.Height = msg.Height - 1
-			m.SecondaryViewport.Width = msg.Width
-			m.SecondaryViewport.Height = msg.Height - 1
+			m.Viewport.Width = msg.Width / 2
+			m.Viewport.Height = msg.Height - 3
+			m.SecondaryViewport.Width = (msg.Width / 2) - 3
+			m.SecondaryViewport.Height = msg.Height - 3
 		}
 
 	case tea.KeyMsg:
