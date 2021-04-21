@@ -31,6 +31,7 @@ func main() {
 	}
 
 	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+	m.SecondaryViewport.SetContent(components.Help())
 	p := tea.NewProgram(m)
 
 	p.EnableMouseCellMotion()

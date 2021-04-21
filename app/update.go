@@ -7,7 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m *Model) scrollViewport() {
+func (m *Model) scrollPrimaryViewport() {
 	top := m.Viewport.YOffset
 	bottom := m.Viewport.Height + m.Viewport.YOffset - 1
 
@@ -27,9 +27,9 @@ func (m *Model) scrollViewport() {
 }
 
 func (m Model) handleKeyDown() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() && !m.ShowHelp {
+	if !m.Textinput.Focused() {
 		m.Cursor++
-		m.scrollViewport()
+		m.scrollPrimaryViewport()
 		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 	}
 
@@ -37,9 +37,9 @@ func (m Model) handleKeyDown() (tea.Model, tea.Cmd) {
 }
 
 func (m Model) handleKeyUp() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() && !m.ShowHelp {
+	if !m.Textinput.Focused() {
 		m.Cursor--
-		m.scrollViewport()
+		m.scrollPrimaryViewport()
 		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 	}
 
@@ -47,9 +47,7 @@ func (m Model) handleKeyUp() (tea.Model, tea.Cmd) {
 }
 
 func (m Model) handleEnterKey() (tea.Model, tea.Cmd) {
-	if m.ShowHelp {
-		return m, nil
-	} else if m.Rename {
+	if m.Rename {
 		return m, renameFileOrDir(m.Files[m.Cursor].Name(), m.Textinput.Value())
 	} else if m.Move {
 		if m.Files[m.Cursor].IsDir() {
@@ -87,7 +85,7 @@ func (m Model) handleEnterKey() (tea.Model, tea.Cmd) {
 }
 
 func (m Model) handleMoveKey() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() && !m.ShowHelp {
+	if !m.Textinput.Focused() {
 		m.Move = true
 		m.Textinput.Placeholder = "/usr/share/"
 		m.Textinput.Focus()
@@ -99,7 +97,7 @@ func (m Model) handleMoveKey() (tea.Model, tea.Cmd) {
 }
 
 func (m Model) handleRenameKey() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() && !m.ShowHelp {
+	if !m.Textinput.Focused() {
 		m.Rename = true
 		m.Textinput.Placeholder = "newfilename.ex"
 		m.Textinput.Focus()
@@ -111,7 +109,7 @@ func (m Model) handleRenameKey() (tea.Model, tea.Cmd) {
 }
 
 func (m Model) handleDeleteKey() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() && !m.ShowHelp {
+	if !m.Textinput.Focused() {
 		m.Delete = true
 		m.Textinput.Placeholder = "[y/n]"
 		m.Textinput.Focus()
@@ -122,18 +120,10 @@ func (m Model) handleDeleteKey() (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) handleHelpKey() (tea.Model, tea.Cmd) {
-	m.ShowHelp = true
-	m.Viewport.SetContent(components.Help())
-
-	return m, nil
-}
-
 func (m Model) handleEscKey() (tea.Model, tea.Cmd) {
 	m.Move = false
 	m.Rename = false
 	m.Delete = false
-	m.ShowHelp = false
 	m.Textinput.Blur()
 	m.Textinput.Reset()
 
@@ -172,22 +162,36 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Textinput.Blur()
 		m.Textinput.Reset()
 		m.Delete = false
+	case fileContentMsg:
+		m.SecondaryViewport.SetContent(string(msg))
+		m.SecondaryViewport.GotoTop()
 	case tea.WindowSizeMsg:
 		if !m.Ready {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
+
 			m.Viewport = viewport.Model{
 				Width:  msg.Width,
-				Height: msg.Height - 1,
+				Height: msg.Height - 3,
 			}
-			m.Viewport.YPosition = 0
+			m.SecondaryViewport = viewport.Model{
+				Width:  msg.Width,
+				Height: msg.Height - 3,
+			}
+
+			m.Viewport.YPosition = 3
+			m.SecondaryViewport.YPosition = 3
 			m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+			m.SecondaryViewport.SetContent(components.Help())
+
 			m.Ready = true
 		} else {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
 			m.Viewport.Width = msg.Width
 			m.Viewport.Height = msg.Height - 1
+			m.SecondaryViewport.Width = msg.Width
+			m.SecondaryViewport.Height = msg.Height - 1
 		}
 
 	case tea.KeyMsg:
@@ -212,6 +216,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.Rename && !m.Delete && !m.Move {
 				if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
 					return m, updateDirectoryListing(m.Files[m.Cursor].Name())
+				} else {
+					return m, readFileContent(m.Files[m.Cursor].Name())
 				}
 			}
 		case "enter":
@@ -227,10 +233,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "d":
 			if !m.Rename && !m.Delete && !m.Move {
 				return m.handleDeleteKey()
-			}
-		case "i":
-			if !m.Rename && !m.Delete && !m.Move {
-				return m.handleHelpKey()
 			}
 		case "esc":
 			return m.handleEscKey()

@@ -2,6 +2,7 @@ package filesystem
 
 import (
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 )
@@ -61,4 +62,14 @@ func CopyFile(src, dst string, shouldRemove bool) (err error) {
 	}
 
 	return
+}
+
+func ReadFileContent(name string) string {
+	dat, err := ioutil.ReadFile(name)
+
+	if err != nil {
+		log.Fatal("Error occured reading file")
+	}
+
+	return string(dat)
 }

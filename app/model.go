@@ -10,18 +10,18 @@ import (
 )
 
 type Model struct {
-	Files        []fs.FileInfo
-	Viewport     viewport.Model
-	Textinput    textinput.Model
-	Spinner      spinner.Model
-	Cursor       int
-	ScreenWidth  int
-	ScreenHeight int
-	Move         bool
-	Rename       bool
-	Delete       bool
-	ShowHelp     bool
-	Ready        bool
+	Files             []fs.FileInfo
+	Viewport          viewport.Model
+	SecondaryViewport viewport.Model
+	Textinput         textinput.Model
+	Spinner           spinner.Model
+	Cursor            int
+	ScreenWidth       int
+	ScreenHeight      int
+	Move              bool
+	Rename            bool
+	Delete            bool
+	Ready             bool
 }
 
 func CreateModel() Model {
@@ -35,17 +35,17 @@ func CreateModel() Model {
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 
 	return Model{
-		Files:        make([]fs.FileInfo, 0),
-		Viewport:     viewport.Model{},
-		Textinput:    input,
-		Spinner:      s,
-		Cursor:       0,
-		ScreenWidth:  0,
-		ScreenHeight: 0,
-		Move:         false,
-		Rename:       false,
-		Delete:       false,
-		ShowHelp:     false,
-		Ready:        false,
+		Files:             make([]fs.FileInfo, 0),
+		Viewport:          viewport.Model{},
+		SecondaryViewport: viewport.Model{},
+		Textinput:         input,
+		Spinner:           s,
+		Cursor:            0,
+		ScreenWidth:       0,
+		ScreenHeight:      0,
+		Move:              false,
+		Rename:            false,
+		Delete:            false,
+		Ready:             false,
 	}
 }
