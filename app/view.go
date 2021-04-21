@@ -10,22 +10,16 @@ import (
 
 func (m Model) View() string {
 	border := lipgloss.NormalBorder()
+	borderRightWidth := lipgloss.Width(border.Right + border.Top)
+	borderLeftWidth := lipgloss.Width(border.Left + border.Top)
 	halfScreenWidth := m.ScreenWidth / 2
 
 	if !m.Ready || len(m.Files) <= 0 {
 		return fmt.Sprintf("%s%s", m.Spinner.View(), "loading...")
 	}
 
-	leftPane := lipgloss.NewStyle().
-		Border(lipgloss.NormalBorder()).
-		Width(halfScreenWidth).
-		Render(m.Viewport.View())
-
-	rightPane := lipgloss.NewStyle().
-		Border(lipgloss.NormalBorder()).
-		Width(halfScreenWidth - lipgloss.Width(border.Left+border.Right+border.Top+border.Bottom)).
-		Render(m.SecondaryViewport.View())
-
+	leftPane := components.Pane(halfScreenWidth-borderLeftWidth, m.Viewport.View())
+	rightPane := components.Pane(halfScreenWidth-borderRightWidth, m.SecondaryViewport.View())
 	panes := lipgloss.JoinHorizontal(0, leftPane, rightPane)
 
 	return lipgloss.JoinVertical(
