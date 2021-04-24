@@ -3,6 +3,9 @@ package app
 import (
 	"io/fs"
 
+	"github.com/knipferrc/fm/config"
+	"github.com/knipferrc/fm/constants"
+
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -26,14 +29,16 @@ type Model struct {
 }
 
 func CreateModel() Model {
+	cfg := config.GetConfig()
+
 	input := textinput.NewModel()
-	input.Prompt = "❯ "
+	input.Prompt = cfg.Settings.TextFieldPrompt
 	input.CharLimit = 250
 	input.Width = 50
 
 	s := spinner.NewModel()
 	s.Spinner = spinner.Dot
-	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.Spinner))
 
 	return Model{
 		Files:             make([]fs.FileInfo, 0),
@@ -48,6 +53,6 @@ func CreateModel() Model {
 		Rename:            false,
 		Delete:            false,
 		Ready:             false,
-		ActivePane:        "primary",
+		ActivePane:        constants.PrimaryPane,
 	}
 }

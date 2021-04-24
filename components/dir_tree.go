@@ -22,7 +22,6 @@ func DirTree(files []fs.FileInfo, cursor, width int) string {
 	doc.WriteString(lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FAFAFA")).
 			Width(width).
 			Align(lipgloss.Left).
 			Render(curFiles),

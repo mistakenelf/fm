@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/knipferrc/fm/components"
+	"github.com/knipferrc/fm/constants"
 	"github.com/muesli/reflow/wrap"
 
 	"github.com/charmbracelet/bubbles/viewport"
@@ -29,7 +30,7 @@ func (m *Model) scrollPrimaryViewport() {
 }
 
 func (m Model) handleKeyDown() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() && m.ActivePane == "primary" {
+	if !m.Textinput.Focused() && m.ActivePane == constants.PrimaryPane {
 		m.Cursor++
 		m.scrollPrimaryViewport()
 		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
@@ -41,7 +42,7 @@ func (m Model) handleKeyDown() (tea.Model, tea.Cmd) {
 }
 
 func (m Model) handleKeyUp() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() && m.ActivePane == "primary" {
+	if !m.Textinput.Focused() && m.ActivePane == constants.PrimaryPane {
 		m.Cursor--
 		m.scrollPrimaryViewport()
 		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
@@ -207,7 +208,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 		case "h":
-			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == "primary" {
+			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == constants.PrimaryPane {
 				return m, updateDirectoryListing("..")
 			}
 		case "down", "j":
@@ -219,7 +220,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m.handleKeyUp()
 			}
 		case "l":
-			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == "primary" {
+			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == constants.PrimaryPane {
 				if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
 					return m, updateDirectoryListing(m.Files[m.Cursor].Name())
 				} else {
@@ -227,29 +228,29 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		case "enter":
-			if m.ActivePane == "primary" {
+			if m.ActivePane == constants.PrimaryPane {
 				return m.handleEnterKey()
 			}
 		case "m":
-			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == "primary" {
+			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == constants.PrimaryPane {
 				return m.handleMoveKey()
 			}
 		case "r":
-			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == "primary" {
+			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == constants.PrimaryPane {
 				return m.handleRenameKey()
 			}
 		case "d":
-			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == "primary" {
+			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == constants.PrimaryPane {
 				return m.handleDeleteKey()
 			}
 		case "tab":
-			if m.ActivePane == "primary" {
-				m.ActivePane = "secondary"
+			if m.ActivePane == constants.PrimaryPane {
+				m.ActivePane = constants.SecondaryPane
 			} else {
-				m.ActivePane = "primary"
+				m.ActivePane = constants.PrimaryPane
 			}
 		case "esc":
-			if m.ActivePane == "primary" {
+			if m.ActivePane == constants.PrimaryPane {
 				return m.handleEscKey()
 			}
 		}

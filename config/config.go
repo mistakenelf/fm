@@ -10,14 +10,16 @@ import (
 )
 
 type SettingsConfig struct {
-	StartDir  string `mapstructure:"start_dir"`
-	ShowIcons bool   `mapstructure:"show_icons"`
+	StartDir        string `mapstructure:"start_dir"`
+	ShowIcons       bool   `mapstructure:"show_icons"`
+	TextFieldPrompt string `mapstructure:"textfield_prompt"`
 }
 
 type ColorsConfig struct {
 	SelectedItem string `mapstructure:"selected_item"`
 	ActivePane   string `mapstructure:"active_pane"`
 	InactivePane string `mapstructure:"inactive_pane"`
+	Spinner      string `mapstructure:"spinner"`
 }
 
 type Config struct {
@@ -63,7 +65,9 @@ func GetConfig() (config Config) {
 func SetDefaults() {
 	viper.SetDefault("settings.start_dir", ".")
 	viper.SetDefault("settings.show_icons", true)
+	viper.SetDefault("settings.textfield_prompt", "❯ ")
 	viper.SetDefault("colors.selected_item", "#F25D94")
 	viper.SetDefault("colors.active_pane", "#F25D94")
 	viper.SetDefault("colors.inactive_pane", "#FFFFFF")
+	viper.SetDefault("colors.spinner", "#F25D94")
 }

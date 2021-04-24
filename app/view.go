@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/knipferrc/fm/components"
+	"github.com/knipferrc/fm/constants"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -16,7 +17,7 @@ func (m Model) View() string {
 	leftPaneActive := false
 	rightPaneActive := false
 
-	if m.ActivePane == "primary" {
+	if m.ActivePane == constants.PrimaryPane {
 		leftPaneActive = true
 	} else {
 		rightPaneActive = true
