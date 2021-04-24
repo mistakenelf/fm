@@ -30,7 +30,9 @@ func main() {
 		m.Files = filesystem.GetDirectoryListing(cfg.Settings.StartDir)
 	}
 
-	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+	m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+	m.SecondaryViewport.SetContent(components.Instructions())
+
 	p := tea.NewProgram(m)
 
 	p.EnableMouseCellMotion()

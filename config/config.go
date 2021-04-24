@@ -16,7 +16,10 @@ type SettingsConfig struct {
 
 type ColorsConfig struct {
 	SelectedItem string `mapstructure:"selected_item"`
+	ActivePane   string `mapstructure:"active_pane"`
+	InactivePane string `mapstructure:"inactive_pane"`
 }
+
 type Config struct {
 	Settings SettingsConfig `mapstructure:"settings"`
 	Colors   ColorsConfig   `mapstructure:"colors"`
@@ -61,4 +64,6 @@ func SetDefaults() {
 	viper.SetDefault("settings.start_dir", ".")
 	viper.SetDefault("settings.show_icons", true)
 	viper.SetDefault("colors.selected_item", "#F25D94")
+	viper.SetDefault("colors.active_pane", "#F25D94")
+	viper.SetDefault("colors.inactive_pane", "#FFFFFF")
 }

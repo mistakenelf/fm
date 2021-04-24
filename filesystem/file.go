@@ -62,3 +62,13 @@ func CopyFile(src, dst string, shouldRemove bool) (err error) {
 
 	return
 }
+
+func ReadFileContent(name string) string {
+	dat, err := os.ReadFile(name)
+
+	if err != nil {
+		log.Fatal("Error occured reading file")
+	}
+
+	return string(dat)
+}

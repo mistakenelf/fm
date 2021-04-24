@@ -11,6 +11,7 @@ type updateDirMsg []fs.FileInfo
 type renameMsg []fs.FileInfo
 type moveMsg []fs.FileInfo
 type deleteMsg []fs.FileInfo
+type fileContentMsg string
 
 func updateDirectoryListing(dir string) tea.Cmd {
 	return func() tea.Msg {
@@ -62,5 +63,13 @@ func deleteFile(file string) tea.Cmd {
 		files := filesystem.GetDirectoryListing("./")
 
 		return deleteMsg(files)
+	}
+}
+
+func readFileContent(file string) tea.Cmd {
+	return func() tea.Msg {
+		content := filesystem.ReadFileContent(file)
+
+		return fileContentMsg(content)
 	}
 }

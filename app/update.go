@@ -2,54 +2,58 @@ package app
 
 import (
 	"github.com/knipferrc/fm/components"
+	"github.com/muesli/reflow/wrap"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
-func (m *Model) scrollViewport() {
-	top := m.Viewport.YOffset
-	bottom := m.Viewport.Height + m.Viewport.YOffset - 1
+func (m *Model) scrollPrimaryViewport() {
+	top := m.PrimaryViewport.YOffset
+	bottom := m.PrimaryViewport.Height + m.PrimaryViewport.YOffset - 1
 
 	if m.Cursor < top {
-		m.Viewport.LineUp(1)
+		m.PrimaryViewport.LineUp(1)
 	} else if m.Cursor > bottom {
-		m.Viewport.LineDown(1)
+		m.PrimaryViewport.LineDown(1)
 	}
 
 	if m.Cursor > len(m.Files)-1 {
 		m.Cursor = 0
-		m.Viewport.GotoTop()
+		m.PrimaryViewport.GotoTop()
 	} else if m.Cursor < 0 {
 		m.Cursor = len(m.Files) - 1
-		m.Viewport.GotoBottom()
+		m.PrimaryViewport.GotoBottom()
 	}
 }
 
 func (m Model) handleKeyDown() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() && !m.ShowHelp {
+	if !m.Textinput.Focused() && m.ActivePane == "primary" {
 		m.Cursor++
-		m.scrollViewport()
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.scrollPrimaryViewport()
+		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+	} else {
+		m.SecondaryViewport.LineDown(1)
 	}
 
 	return m, nil
 }
 
 func (m Model) handleKeyUp() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() && !m.ShowHelp {
+	if !m.Textinput.Focused() && m.ActivePane == "primary" {
 		m.Cursor--
-		m.scrollViewport()
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.scrollPrimaryViewport()
+		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+	} else {
+		m.SecondaryViewport.LineUp(1)
 	}
 
 	return m, nil
 }
 
 func (m Model) handleEnterKey() (tea.Model, tea.Cmd) {
-	if m.ShowHelp {
-		return m, nil
-	} else if m.Rename {
+	if m.Rename {
 		return m, renameFileOrDir(m.Files[m.Cursor].Name(), m.Textinput.Value())
 	} else if m.Move {
 		if m.Files[m.Cursor].IsDir() {
@@ -76,55 +80,38 @@ func (m Model) handleEnterKey() (tea.Model, tea.Cmd) {
 			}
 		}
 	} else {
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-
 		return m, nil
 	}
-
-	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 
 	return m, nil
 }
 
 func (m Model) handleMoveKey() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() && !m.ShowHelp {
+	if !m.Textinput.Focused() {
 		m.Move = true
 		m.Textinput.Placeholder = "/usr/share/"
 		m.Textinput.Focus()
 	}
 
-	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-
 	return m, nil
 }
 
 func (m Model) handleRenameKey() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() && !m.ShowHelp {
+	if !m.Textinput.Focused() {
 		m.Rename = true
-		m.Textinput.Placeholder = "newfilename.ex"
+		m.Textinput.Placeholder = "new_name"
 		m.Textinput.Focus()
 	}
-
-	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 
 	return m, nil
 }
 
 func (m Model) handleDeleteKey() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() && !m.ShowHelp {
+	if !m.Textinput.Focused() {
 		m.Delete = true
 		m.Textinput.Placeholder = "[y/n]"
 		m.Textinput.Focus()
 	}
-
-	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-
-	return m, nil
-}
-
-func (m Model) handleHelpKey() (tea.Model, tea.Cmd) {
-	m.ShowHelp = true
-	m.Viewport.SetContent(components.Help())
 
 	return m, nil
 }
@@ -133,11 +120,11 @@ func (m Model) handleEscKey() (tea.Model, tea.Cmd) {
 	m.Move = false
 	m.Rename = false
 	m.Delete = false
-	m.ShowHelp = false
 	m.Textinput.Blur()
 	m.Textinput.Reset()
 
-	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+	m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+	m.SecondaryViewport.SetContent(components.Instructions())
 
 	return m, nil
 }
@@ -152,42 +139,65 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case updateDirMsg:
 		m.Files = msg
 		m.Cursor = 0
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+
 	case renameMsg:
 		m.Files = msg
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 		m.Textinput.Blur()
 		m.Textinput.Reset()
 		m.Rename = false
+
 	case moveMsg:
 		m.Files = msg
 		m.Cursor = 0
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 		m.Textinput.Blur()
 		m.Textinput.Reset()
 		m.Move = false
+
 	case deleteMsg:
 		m.Files = msg
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 		m.Textinput.Blur()
 		m.Textinput.Reset()
 		m.Delete = false
+
+	case fileContentMsg:
+		border := lipgloss.NormalBorder()
+		halfScreenWidth := m.ScreenWidth / 2
+		borderWidth := lipgloss.Width(border.Left + border.Right + border.Top + border.Bottom)
+		m.SecondaryViewport.SetContent(wrap.String(string(msg), halfScreenWidth-borderWidth))
+
 	case tea.WindowSizeMsg:
+		borderWidth := lipgloss.Width(lipgloss.NormalBorder().Top)
+		statusBarHeight := 2
+		verticalMargin := borderWidth + statusBarHeight
+
 		if !m.Ready {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
-			m.Viewport = viewport.Model{
+
+			m.PrimaryViewport = viewport.Model{
 				Width:  msg.Width,
-				Height: msg.Height - 1,
+				Height: msg.Height - verticalMargin,
 			}
-			m.Viewport.YPosition = 0
-			m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+			m.SecondaryViewport = viewport.Model{
+				Width:  msg.Width,
+				Height: msg.Height - verticalMargin,
+			}
+
+			m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+			m.SecondaryViewport.SetContent(components.Instructions())
+
 			m.Ready = true
 		} else {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
-			m.Viewport.Width = msg.Width
-			m.Viewport.Height = msg.Height - 1
+			m.PrimaryViewport.Width = msg.Width
+			m.PrimaryViewport.Height = msg.Height - verticalMargin
+			m.SecondaryViewport.Width = msg.Width
+			m.SecondaryViewport.Height = msg.Height - verticalMargin
 		}
 
 	case tea.KeyMsg:
@@ -197,7 +207,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 		case "h":
-			if !m.Rename && !m.Delete && !m.Move {
+			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == "primary" {
 				return m, updateDirectoryListing("..")
 			}
 		case "down", "j":
@@ -209,35 +219,46 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m.handleKeyUp()
 			}
 		case "l":
-			if !m.Rename && !m.Delete && !m.Move {
+			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == "primary" {
 				if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
 					return m, updateDirectoryListing(m.Files[m.Cursor].Name())
+				} else {
+					return m, readFileContent(m.Files[m.Cursor].Name())
 				}
 			}
 		case "enter":
-			return m.handleEnterKey()
+			if m.ActivePane == "primary" {
+				return m.handleEnterKey()
+			}
 		case "m":
-			if !m.Rename && !m.Delete && !m.Move {
+			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == "primary" {
 				return m.handleMoveKey()
 			}
 		case "r":
-			if !m.Rename && !m.Delete && !m.Move {
+			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == "primary" {
 				return m.handleRenameKey()
 			}
 		case "d":
-			if !m.Rename && !m.Delete && !m.Move {
+			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == "primary" {
 				return m.handleDeleteKey()
 			}
-		case "i":
-			if !m.Rename && !m.Delete && !m.Move {
-				return m.handleHelpKey()
+		case "tab":
+			if m.ActivePane == "primary" {
+				m.ActivePane = "secondary"
+			} else {
+				m.ActivePane = "primary"
 			}
 		case "esc":
-			return m.handleEscKey()
+			if m.ActivePane == "primary" {
+				return m.handleEscKey()
+			}
 		}
 	}
 
-	m.Viewport, cmd = m.Viewport.Update(msg)
+	m.PrimaryViewport, cmd = m.PrimaryViewport.Update(msg)
+	cmds = append(cmds, cmd)
+
+	m.SecondaryViewport, cmd = m.SecondaryViewport.Update(msg)
 	cmds = append(cmds, cmd)
 
 	m.Textinput, cmd = m.Textinput.Update(msg)
