@@ -13,7 +13,7 @@ func Instructions() string {
 		MarginBottom(1).
 		Render("Welcome to FM!")
 
-	instructionText := fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+	instructionText := fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
 		"h - go back a directory",
 		"j - move cursor down",
 		"k - move cursor up",
@@ -21,6 +21,7 @@ func Instructions() string {
 		"m - move file or folder to another directory",
 		"d - delete a file or directory",
 		"r - rename a file or directory",
+		"tab - toggle between panes",
 	)
 
 	return lipgloss.JoinVertical(lipgloss.Top, header, instructionText)

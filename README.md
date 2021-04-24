@@ -50,6 +50,8 @@ go install github.com/knipferrc/fm@latest
 
   - <kbd>r</kbd> Rename a file or folder. Once you have the file or folder highlighted that you wish to rename, press <kbd>r</kbd>, a prompt will show in the status bar, type the new name of the file or folder and then press <kbd>enter</kbd> to confirm those changes
 
+  - <kbd>tab</kbd> Toggle between panes
+
   - <kbd>esc</kbd> Cancel any current action. Pressing <kbd>esc</kbd> during any action (rename, move, or delete) will cancel that action and return you to file navigation
 
 <br />
