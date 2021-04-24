@@ -10,21 +10,21 @@ import (
 )
 
 func (m *Model) scrollPrimaryViewport() {
-	top := m.Viewport.YOffset
-	bottom := m.Viewport.Height + m.Viewport.YOffset - 1
+	top := m.PrimaryViewport.YOffset
+	bottom := m.PrimaryViewport.Height + m.PrimaryViewport.YOffset - 1
 
 	if m.Cursor < top {
-		m.Viewport.LineUp(1)
+		m.PrimaryViewport.LineUp(1)
 	} else if m.Cursor > bottom {
-		m.Viewport.LineDown(1)
+		m.PrimaryViewport.LineDown(1)
 	}
 
 	if m.Cursor > len(m.Files)-1 {
 		m.Cursor = 0
-		m.Viewport.GotoTop()
+		m.PrimaryViewport.GotoTop()
 	} else if m.Cursor < 0 {
 		m.Cursor = len(m.Files) - 1
-		m.Viewport.GotoBottom()
+		m.PrimaryViewport.GotoBottom()
 	}
 }
 
@@ -32,7 +32,7 @@ func (m Model) handleKeyDown() (tea.Model, tea.Cmd) {
 	if !m.Textinput.Focused() {
 		m.Cursor++
 		m.scrollPrimaryViewport()
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 	}
 
 	return m, nil
@@ -42,7 +42,7 @@ func (m Model) handleKeyUp() (tea.Model, tea.Cmd) {
 	if !m.Textinput.Focused() {
 		m.Cursor--
 		m.scrollPrimaryViewport()
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 	}
 
 	return m, nil
@@ -119,7 +119,7 @@ func (m Model) handleEscKey() (tea.Model, tea.Cmd) {
 	m.Textinput.Blur()
 	m.Textinput.Reset()
 
-	m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+	m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 	m.SecondaryViewport.SetContent(components.Instructions())
 
 	return m, nil
@@ -135,11 +135,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case updateDirMsg:
 		m.Files = msg
 		m.Cursor = 0
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 
 	case renameMsg:
 		m.Files = msg
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 		m.Textinput.Blur()
 		m.Textinput.Reset()
 		m.Rename = false
@@ -147,14 +147,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case moveMsg:
 		m.Files = msg
 		m.Cursor = 0
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 		m.Textinput.Blur()
 		m.Textinput.Reset()
 		m.Move = false
 
 	case deleteMsg:
 		m.Files = msg
-		m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 		m.Textinput.Blur()
 		m.Textinput.Reset()
 		m.Delete = false
@@ -174,7 +174,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
 
-			m.Viewport = viewport.Model{
+			m.PrimaryViewport = viewport.Model{
 				Width:  msg.Width,
 				Height: msg.Height - verticalMargin,
 			}
@@ -183,15 +183,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				Height: msg.Height - verticalMargin,
 			}
 
-			m.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+			m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 			m.SecondaryViewport.SetContent(components.Instructions())
 
 			m.Ready = true
 		} else {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
-			m.Viewport.Width = msg.Width
-			m.Viewport.Height = msg.Height - verticalMargin
+			m.PrimaryViewport.Width = msg.Width
+			m.PrimaryViewport.Height = msg.Height - verticalMargin
 			m.SecondaryViewport.Width = msg.Width
 			m.SecondaryViewport.Height = msg.Height - verticalMargin
 		}
@@ -236,12 +236,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.Rename && !m.Delete && !m.Move {
 				return m.handleDeleteKey()
 			}
+		case "tab":
+			if m.ActivePane == "primary" {
+				m.ActivePane = "secondary"
+			} else {
+				m.ActivePane = "primary"
+			}
 		case "esc":
 			return m.handleEscKey()
 		}
 	}
 
-	m.Viewport, cmd = m.Viewport.Update(msg)
+	m.PrimaryViewport, cmd = m.PrimaryViewport.Update(msg)
+	cmds = append(cmds, cmd)
+
+	m.SecondaryViewport, cmd = m.SecondaryViewport.Update(msg)
 	cmds = append(cmds, cmd)
 
 	m.Textinput, cmd = m.Textinput.Update(msg)

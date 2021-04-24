@@ -11,7 +11,7 @@ import (
 
 type Model struct {
 	Files             []fs.FileInfo
-	Viewport          viewport.Model
+	PrimaryViewport   viewport.Model
 	SecondaryViewport viewport.Model
 	Textinput         textinput.Model
 	Spinner           spinner.Model
@@ -22,6 +22,7 @@ type Model struct {
 	Rename            bool
 	Delete            bool
 	Ready             bool
+	ActivePane        string
 }
 
 func CreateModel() Model {
@@ -36,7 +37,7 @@ func CreateModel() Model {
 
 	return Model{
 		Files:             make([]fs.FileInfo, 0),
-		Viewport:          viewport.Model{},
+		PrimaryViewport:   viewport.Model{},
 		SecondaryViewport: viewport.Model{},
 		Textinput:         input,
 		Spinner:           s,
@@ -47,5 +48,6 @@ func CreateModel() Model {
 		Rename:            false,
 		Delete:            false,
 		Ready:             false,
+		ActivePane:        "primary",
 	}
 }

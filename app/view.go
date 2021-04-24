@@ -13,13 +13,21 @@ func (m Model) View() string {
 	borderRightWidth := lipgloss.Width(border.Right + border.Top)
 	borderLeftWidth := lipgloss.Width(border.Left + border.Top)
 	halfScreenWidth := m.ScreenWidth / 2
+	leftPaneActive := false
+	rightPaneActive := false
+
+	if m.ActivePane == "primary" {
+		leftPaneActive = true
+	} else {
+		rightPaneActive = true
+	}
 
 	if !m.Ready || len(m.Files) <= 0 {
 		return fmt.Sprintf("%s%s", m.Spinner.View(), "loading...")
 	}
 
-	leftPane := components.Pane(halfScreenWidth-borderLeftWidth, m.Viewport.View())
-	rightPane := components.Pane(halfScreenWidth-borderRightWidth, m.SecondaryViewport.View())
+	leftPane := components.Pane(halfScreenWidth-borderLeftWidth, leftPaneActive, m.PrimaryViewport.View())
+	rightPane := components.Pane(halfScreenWidth-borderRightWidth, rightPaneActive, m.SecondaryViewport.View())
 	panes := lipgloss.JoinHorizontal(0, leftPane, rightPane)
 
 	return lipgloss.JoinVertical(
