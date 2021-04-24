@@ -29,20 +29,24 @@ func (m *Model) scrollPrimaryViewport() {
 }
 
 func (m Model) handleKeyDown() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() {
+	if !m.Textinput.Focused() && m.ActivePane == "primary" {
 		m.Cursor++
 		m.scrollPrimaryViewport()
 		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+	} else {
+		m.SecondaryViewport.LineDown(1)
 	}
 
 	return m, nil
 }
 
 func (m Model) handleKeyUp() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() {
+	if !m.Textinput.Focused() && m.ActivePane == "primary" {
 		m.Cursor--
 		m.scrollPrimaryViewport()
 		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+	} else {
+		m.SecondaryViewport.LineUp(1)
 	}
 
 	return m, nil
@@ -203,7 +207,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 		case "h":
-			if !m.Rename && !m.Delete && !m.Move {
+			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == "primary" {
 				return m, updateDirectoryListing("..")
 			}
 		case "down", "j":
@@ -215,7 +219,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m.handleKeyUp()
 			}
 		case "l":
-			if !m.Rename && !m.Delete && !m.Move {
+			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == "primary" {
 				if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
 					return m, updateDirectoryListing(m.Files[m.Cursor].Name())
 				} else {
@@ -223,17 +227,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		case "enter":
-			return m.handleEnterKey()
+			if m.ActivePane == "primary" {
+				return m.handleEnterKey()
+			}
 		case "m":
-			if !m.Rename && !m.Delete && !m.Move {
+			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == "primary" {
 				return m.handleMoveKey()
 			}
 		case "r":
-			if !m.Rename && !m.Delete && !m.Move {
+			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == "primary" {
 				return m.handleRenameKey()
 			}
 		case "d":
-			if !m.Rename && !m.Delete && !m.Move {
+			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == "primary" {
 				return m.handleDeleteKey()
 			}
 		case "tab":
@@ -243,7 +249,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.ActivePane = "primary"
 			}
 		case "esc":
-			return m.handleEscKey()
+			if m.ActivePane == "primary" {
+				return m.handleEscKey()
+			}
 		}
 	}
 
