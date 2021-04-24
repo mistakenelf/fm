@@ -5,11 +5,11 @@ import (
 	"os"
 
 	"github.com/knipferrc/fm/app"
+	"github.com/knipferrc/fm/components"
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/filesystem"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/knipferrc/fm/components"
 )
 
 func main() {

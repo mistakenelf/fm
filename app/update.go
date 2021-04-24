@@ -3,11 +3,11 @@ package app
 import (
 	"github.com/knipferrc/fm/components"
 	"github.com/knipferrc/fm/constants"
-	"github.com/muesli/reflow/wrap"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/reflow/wrap"
 )
 
 func (m *Model) scrollPrimaryViewport() {

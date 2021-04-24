@@ -1,8 +1,9 @@
 package components
 
 import (
-	"github.com/charmbracelet/lipgloss"
 	"github.com/knipferrc/fm/config"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 func Pane(width int, isActive bool, content string) string {
