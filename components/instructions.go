@@ -11,7 +11,7 @@ func Instructions() string {
 		Bold(true).
 		Foreground(lipgloss.Color("#FFFDF5")).
 		MarginBottom(1).
-		Render("Welcome to FM!")
+		Render("FM (File Manager)")
 
 	instructionText := fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
 		"h - go back a directory",
