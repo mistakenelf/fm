@@ -91,6 +91,7 @@ func (m Model) handleEscKey() (tea.Model, tea.Cmd) {
 	m.ShowMovePrompt = false
 	m.ShowRenamePrompt = false
 	m.ShowDeletePrompt = false
+	m.ActivePane = constants.PrimaryPane
 	m.Textinput.Blur()
 	m.Textinput.Reset()
 
