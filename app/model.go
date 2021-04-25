@@ -32,7 +32,7 @@ func CreateModel() Model {
 	cfg := config.GetConfig()
 
 	input := textinput.NewModel()
-	input.Prompt = cfg.Settings.TextFieldPrompt
+	input.Prompt = "❯ "
 	input.CharLimit = 250
 	input.Width = 50
 
