@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/knipferrc/fm/config"
+	"github.com/knipferrc/fm/helpers"
 	"github.com/knipferrc/fm/icons"
 
 	"github.com/charmbracelet/lipgloss"
@@ -51,7 +52,7 @@ func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo) str
 
 	status := statusText.Copy().
 		Width(screenWidth - width(selectedFileStyle.Render(currentFile.Name())) - width(fileTotals) - width(logo)).
-		Render(fmt.Sprintf("%d bytes, %s", currentFile.Size(), currentFile.Mode().String()))
+		Render(fmt.Sprintf("%s %s", helpers.ConvertBytes(currentFile.Size()), currentFile.Mode().String()))
 
 	bar := lipgloss.JoinHorizontal(lipgloss.Top,
 		selectedFileStyle.Render(currentFile.Name()),
