@@ -8,7 +8,6 @@ import (
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/icons"
 
-	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -37,12 +36,11 @@ var (
 	logoStyle = statusItemStyle.Copy().Background(lipgloss.Color("#6124DF"))
 )
 
-func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo, isMoving, isRenaming, isDeleting bool, textInput textinput.Model) string {
+func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo) string {
 	doc := strings.Builder{}
 	width := lipgloss.Width
 	cfg := config.GetConfig()
 	fileTotals := totalFilesStyle.Render(fmt.Sprintf("%d/%d", cursor+1, totalFiles))
-	status := ""
 	logo := ""
 
 	if cfg.Settings.ShowIcons {
@@ -51,19 +49,9 @@ func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo, isM
 		logo = logoStyle.Render("FM")
 	}
 
-	if isMoving {
-		status = fmt.Sprintf("%s %s", "Where would you like to move this to?", textInput.View())
-	} else if isRenaming {
-		status = fmt.Sprintf("%s %s", "What would you like to name this file?", textInput.View())
-	} else if isDeleting {
-		status = fmt.Sprintf("%s %s? [y/n] %s", "Are you sure you want to delete", currentFile.Name(), textInput.View())
-	} else {
-		status = "m - move, d - delete, r - rename"
-	}
-
-	status = statusText.Copy().
+	status := statusText.Copy().
 		Width(screenWidth - width(selectedFileStyle.Render(currentFile.Name())) - width(fileTotals) - width(logo)).
-		Render(status)
+		Render(fmt.Sprintf("%d bytes, %s", currentFile.Size(), currentFile.Mode().String()))
 
 	bar := lipgloss.JoinHorizontal(lipgloss.Top,
 		selectedFileStyle.Render(currentFile.Name()),

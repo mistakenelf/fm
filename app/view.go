@@ -34,6 +34,6 @@ func (m Model) View() string {
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
 		panes,
-		components.StatusBar(m.ScreenWidth, m.Cursor, len(m.Files), m.Files[m.Cursor], m.Move, m.Rename, m.Delete, m.Textinput),
+		components.StatusBar(m.ScreenWidth, m.Cursor, len(m.Files), m.Files[m.Cursor]),
 	)
 }

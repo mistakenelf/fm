@@ -30,7 +30,7 @@ func (m *Model) scrollPrimaryViewport() {
 }
 
 func (m Model) handleKeyDown() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() && m.ActivePane == constants.PrimaryPane {
+	if m.ActivePane == constants.PrimaryPane {
 		m.Cursor++
 		m.scrollPrimaryViewport()
 		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
@@ -42,7 +42,7 @@ func (m Model) handleKeyDown() (tea.Model, tea.Cmd) {
 }
 
 func (m Model) handleKeyUp() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() && m.ActivePane == constants.PrimaryPane {
+	if m.ActivePane == constants.PrimaryPane {
 		m.Cursor--
 		m.scrollPrimaryViewport()
 		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
@@ -54,22 +54,22 @@ func (m Model) handleKeyUp() (tea.Model, tea.Cmd) {
 }
 
 func (m Model) handleEnterKey() (tea.Model, tea.Cmd) {
-	if m.Rename {
+	if m.ShowRenamePrompt {
 		return m, renameFileOrDir(m.Files[m.Cursor].Name(), m.Textinput.Value())
-	} else if m.Move {
+	} else if m.ShowMovePrompt {
 		if m.Files[m.Cursor].IsDir() {
 			return m, moveDir(m.Files[m.Cursor].Name(), m.Textinput.Value())
 		} else {
 			return m, moveFile(m.Files[m.Cursor].Name(), m.Textinput.Value())
 		}
-	} else if m.Delete {
+	} else if m.ShowDeletePrompt {
 		if m.Files[m.Cursor].IsDir() {
 			if m.Textinput.Value() == "y" {
 				return m, deleteDir(m.Files[m.Cursor].Name())
 			} else {
 				m.Textinput.Blur()
 				m.Textinput.Reset()
-				m.Delete = false
+				m.ShowDeletePrompt = false
 			}
 		} else {
 			if m.Textinput.Value() == "y" {
@@ -77,7 +77,7 @@ func (m Model) handleEnterKey() (tea.Model, tea.Cmd) {
 			} else {
 				m.Textinput.Blur()
 				m.Textinput.Reset()
-				m.Delete = false
+				m.ShowDeletePrompt = false
 			}
 		}
 	} else {
@@ -87,40 +87,10 @@ func (m Model) handleEnterKey() (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) handleMoveKey() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() {
-		m.Move = true
-		m.Textinput.Placeholder = "/usr/share/"
-		m.Textinput.Focus()
-	}
-
-	return m, nil
-}
-
-func (m Model) handleRenameKey() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() {
-		m.Rename = true
-		m.Textinput.Placeholder = "new_name"
-		m.Textinput.Focus()
-	}
-
-	return m, nil
-}
-
-func (m Model) handleDeleteKey() (tea.Model, tea.Cmd) {
-	if !m.Textinput.Focused() {
-		m.Delete = true
-		m.Textinput.Placeholder = "[y/n]"
-		m.Textinput.Focus()
-	}
-
-	return m, nil
-}
-
 func (m Model) handleEscKey() (tea.Model, tea.Cmd) {
-	m.Move = false
-	m.Rename = false
-	m.Delete = false
+	m.ShowMovePrompt = false
+	m.ShowRenamePrompt = false
+	m.ShowDeletePrompt = false
 	m.Textinput.Blur()
 	m.Textinput.Reset()
 
@@ -142,27 +112,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Cursor = 0
 		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 
-	case renameMsg:
-		m.Files = msg
-		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-		m.Textinput.Blur()
-		m.Textinput.Reset()
-		m.Rename = false
-
-	case moveMsg:
+	case actionMsg:
 		m.Files = msg
 		m.Cursor = 0
 		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 		m.Textinput.Blur()
 		m.Textinput.Reset()
-		m.Move = false
-
-	case deleteMsg:
-		m.Files = msg
-		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-		m.Textinput.Blur()
-		m.Textinput.Reset()
-		m.Delete = false
+		m.ShowRenamePrompt = false
+		m.ShowMovePrompt = false
+		m.ShowDeletePrompt = false
 
 	case fileContentMsg:
 		border := lipgloss.NormalBorder()
@@ -204,23 +162,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
-			if !m.Rename && !m.Delete && !m.Move {
+			if !m.ShowRenamePrompt && !m.ShowDeletePrompt && !m.ShowMovePrompt {
 				return m, tea.Quit
 			}
 		case "h":
-			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == constants.PrimaryPane {
+			if m.ActivePane == constants.PrimaryPane {
 				return m, updateDirectoryListing("..")
 			}
 		case "down", "j":
-			if !m.Rename && !m.Delete && !m.Move {
+			if !m.ShowRenamePrompt && !m.ShowDeletePrompt && !m.ShowMovePrompt {
 				return m.handleKeyDown()
 			}
 		case "up", "k":
-			if !m.Rename && !m.Delete && !m.Move {
+			if !m.ShowRenamePrompt && !m.ShowDeletePrompt && !m.ShowMovePrompt {
 				return m.handleKeyUp()
 			}
 		case "l":
-			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == constants.PrimaryPane {
+			if m.ActivePane == constants.PrimaryPane {
 				if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
 					return m, updateDirectoryListing(m.Files[m.Cursor].Name())
 				} else {
@@ -228,20 +186,30 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		case "enter":
-			if m.ActivePane == constants.PrimaryPane {
-				return m.handleEnterKey()
-			}
+			return m.handleEnterKey()
 		case "m":
-			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == constants.PrimaryPane {
-				return m.handleMoveKey()
+			if m.ActivePane == constants.PrimaryPane {
+				m.ActivePane = constants.SecondaryPane
+				m.ShowMovePrompt = true
+				m.Textinput.Placeholder = "/usr/share/"
+				m.Textinput.Focus()
+				m.SecondaryViewport.SetContent(components.MovePrompt(m.Textinput))
 			}
 		case "r":
-			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == constants.PrimaryPane {
-				return m.handleRenameKey()
+			if m.ActivePane == constants.PrimaryPane {
+				m.ActivePane = constants.SecondaryPane
+				m.ShowRenamePrompt = true
+				m.Textinput.Placeholder = "new_name"
+				m.Textinput.Focus()
+				m.SecondaryViewport.SetContent(components.RenamePrompt(m.Textinput))
 			}
 		case "d":
-			if !m.Rename && !m.Delete && !m.Move && m.ActivePane == constants.PrimaryPane {
-				return m.handleDeleteKey()
+			if m.ActivePane == constants.PrimaryPane {
+				m.ActivePane = constants.SecondaryPane
+				m.ShowDeletePrompt = true
+				m.Textinput.Placeholder = "[y/n]"
+				m.Textinput.Focus()
+				m.SecondaryViewport.SetContent(components.DeletePrompt(m.Textinput, m.Files[m.Cursor].Name()))
 			}
 		case "tab":
 			if m.ActivePane == constants.PrimaryPane {
@@ -250,9 +218,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.ActivePane = constants.PrimaryPane
 			}
 		case "esc":
-			if m.ActivePane == constants.PrimaryPane {
-				return m.handleEscKey()
-			}
+			return m.handleEscKey()
 		}
 	}
 

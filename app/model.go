@@ -21,9 +21,9 @@ type Model struct {
 	Cursor            int
 	ScreenWidth       int
 	ScreenHeight      int
-	Move              bool
-	Rename            bool
-	Delete            bool
+	ShowMovePrompt    bool
+	ShowRenamePrompt  bool
+	ShowDeletePrompt  bool
 	Ready             bool
 	ActivePane        string
 }
@@ -49,9 +49,9 @@ func CreateModel() Model {
 		Cursor:            0,
 		ScreenWidth:       0,
 		ScreenHeight:      0,
-		Move:              false,
-		Rename:            false,
-		Delete:            false,
+		ShowMovePrompt:    false,
+		ShowRenamePrompt:  false,
+		ShowDeletePrompt:  false,
 		Ready:             false,
 		ActivePane:        constants.PrimaryPane,
 	}
