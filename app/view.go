@@ -14,14 +14,8 @@ func (m Model) View() string {
 	borderRightWidth := lipgloss.Width(border.Right + border.Top)
 	borderLeftWidth := lipgloss.Width(border.Left + border.Top)
 	halfScreenWidth := m.ScreenWidth / 2
-	leftPaneActive := false
-	rightPaneActive := false
-
-	if m.ActivePane == constants.PrimaryPane {
-		leftPaneActive = true
-	} else {
-		rightPaneActive = true
-	}
+	leftPaneActive := m.ActivePane == constants.PrimaryPane
+	rightPaneActive := m.ActivePane == constants.SecondaryPane
 
 	if !m.Ready || len(m.Files) <= 0 {
 		return fmt.Sprintf("%s%s", m.Spinner.View(), "loading...")
