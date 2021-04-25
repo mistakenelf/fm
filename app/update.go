@@ -167,18 +167,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.ShowRenamePrompt && !m.ShowDeletePrompt && !m.ShowMovePrompt {
 				return m, tea.Quit
 			}
+
 		case "h":
 			if m.ActivePane == constants.PrimaryPane {
 				return m, updateDirectoryListing("..")
 			}
+
 		case "down", "j":
 			if !m.ShowRenamePrompt && !m.ShowDeletePrompt && !m.ShowMovePrompt {
 				return m.handleKeyDown()
 			}
+
 		case "up", "k":
 			if !m.ShowRenamePrompt && !m.ShowDeletePrompt && !m.ShowMovePrompt {
 				return m.handleKeyUp()
 			}
+
 		case "l":
 			if m.ActivePane == constants.PrimaryPane {
 				if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
@@ -187,8 +191,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, readFileContent(m.Files[m.Cursor].Name())
 				}
 			}
+
 		case "enter":
 			return m.handleEnterKey()
+
 		case "m":
 			if m.ActivePane == constants.PrimaryPane {
 				m.ActivePane = constants.SecondaryPane
@@ -197,6 +203,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Textinput.Focus()
 				m.SecondaryViewport.SetContent(components.MovePrompt(m.Textinput))
 			}
+
 		case "r":
 			if m.ActivePane == constants.PrimaryPane {
 				m.ActivePane = constants.SecondaryPane
@@ -205,6 +212,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Textinput.Focus()
 				m.SecondaryViewport.SetContent(components.RenamePrompt(m.Textinput))
 			}
+
 		case "d":
 			if m.ActivePane == constants.PrimaryPane {
 				m.ActivePane = constants.SecondaryPane
@@ -213,12 +221,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Textinput.Focus()
 				m.SecondaryViewport.SetContent(components.DeletePrompt(m.Textinput, m.Files[m.Cursor].Name()))
 			}
+
 		case "tab":
 			if m.ActivePane == constants.PrimaryPane {
 				m.ActivePane = constants.SecondaryPane
 			} else {
 				m.ActivePane = constants.PrimaryPane
 			}
+
 		case "esc":
 			return m.handleEscKey()
 		}
