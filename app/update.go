@@ -115,12 +115,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case actionMsg:
 		m.Files = msg
 		m.Cursor = 0
-		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-		m.Textinput.Blur()
-		m.Textinput.Reset()
 		m.ShowRenamePrompt = false
 		m.ShowMovePrompt = false
 		m.ShowDeletePrompt = false
+		m.ActivePane = constants.PrimaryPane
+		m.Textinput.Blur()
+		m.Textinput.Reset()
+		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.SecondaryViewport.SetContent(components.Instructions())
 
 	case fileContentMsg:
 		border := lipgloss.NormalBorder()
@@ -191,7 +193,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.ActivePane == constants.PrimaryPane {
 				m.ActivePane = constants.SecondaryPane
 				m.ShowMovePrompt = true
-				m.Textinput.Placeholder = "/usr/share/"
+				m.Textinput.Placeholder = "/new/dir/name"
 				m.Textinput.Focus()
 				m.SecondaryViewport.SetContent(components.MovePrompt(m.Textinput))
 			}
