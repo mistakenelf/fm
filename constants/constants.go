@@ -4,5 +4,6 @@ const (
 	PrimaryPane   = "primary"
 	SecondaryPane = "secondary"
 
-	CurrentDirectory = "."
+	CurrentDirectory  = "."
+	PreviousDirectory = ".."
 )

@@ -171,7 +171,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "h":
 			if m.ActivePane == constants.PrimaryPane {
-				return m, updateDirectoryListing("..")
+				return m, updateDirectoryListing(constants.PreviousDirectory)
 			}
 
 		case "down", "j":
