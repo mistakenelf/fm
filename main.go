@@ -17,7 +17,7 @@ func main() {
 	config.LoadConfig()
 
 	cfg := config.GetConfig()
-	m := app.CreateModel()
+	m := app.NewModel()
 
 	if cfg.Settings.StartDir == "~" {
 		home, err := os.UserHomeDir()

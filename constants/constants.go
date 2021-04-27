@@ -4,5 +4,8 @@ const (
 	PrimaryPane   = "primary"
 	SecondaryPane = "secondary"
 
-	CurrentDirectory = "."
+	CurrentDirectory  = "."
+	PreviousDirectory = ".."
+
+	StatusBarHeight = 1
 )

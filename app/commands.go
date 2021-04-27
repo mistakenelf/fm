@@ -10,9 +10,7 @@ import (
 )
 
 type updateDirMsg []fs.FileInfo
-type renameMsg []fs.FileInfo
-type moveMsg []fs.FileInfo
-type deleteMsg []fs.FileInfo
+type actionMsg []fs.FileInfo
 type fileContentMsg string
 
 func updateDirectoryListing(dir string) tea.Cmd {
@@ -28,7 +26,7 @@ func renameFileOrDir(filename, value string) tea.Cmd {
 		filesystem.RenameDirOrFile(filename, value)
 		files := filesystem.GetDirectoryListing(constants.CurrentDirectory)
 
-		return renameMsg(files)
+		return actionMsg(files)
 	}
 }
 
@@ -37,7 +35,7 @@ func moveDir(dir, value string) tea.Cmd {
 		filesystem.CopyDir(dir, value, true)
 		files := filesystem.GetDirectoryListing(constants.CurrentDirectory)
 
-		return moveMsg(files)
+		return actionMsg(files)
 	}
 }
 
@@ -46,7 +44,7 @@ func moveFile(file, value string) tea.Cmd {
 		filesystem.CopyFile(file, value, true)
 		files := filesystem.GetDirectoryListing(constants.CurrentDirectory)
 
-		return moveMsg(files)
+		return actionMsg(files)
 	}
 }
 
@@ -55,7 +53,7 @@ func deleteDir(dir string) tea.Cmd {
 		filesystem.DeleteDirectory(dir)
 		files := filesystem.GetDirectoryListing(constants.CurrentDirectory)
 
-		return deleteMsg(files)
+		return actionMsg(files)
 	}
 }
 
@@ -64,7 +62,7 @@ func deleteFile(file string) tea.Cmd {
 		filesystem.DeleteFile(file)
 		files := filesystem.GetDirectoryListing(constants.CurrentDirectory)
 
-		return deleteMsg(files)
+		return actionMsg(files)
 	}
 }
 
