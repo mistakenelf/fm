@@ -29,6 +29,10 @@ func (m *Model) scrollPrimaryViewport() {
 	}
 }
 
+func (m Model) notPerformingAction() bool {
+	return !m.ShowRenamePrompt && !m.ShowDeletePrompt && !m.ShowMovePrompt
+}
+
 func (m Model) handleKeyDown() (tea.Model, tea.Cmd) {
 	if m.ActivePane == constants.PrimaryPane {
 		m.Cursor++
@@ -48,6 +52,18 @@ func (m Model) handleKeyUp() (tea.Model, tea.Cmd) {
 		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 	} else {
 		m.SecondaryViewport.LineUp(1)
+	}
+
+	return m, nil
+}
+
+func (m Model) handleRightKey() (tea.Model, tea.Cmd) {
+	if m.ActivePane == constants.PrimaryPane {
+		if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
+			return m, updateDirectoryListing(m.Files[m.Cursor].Name())
+		} else {
+			return m, readFileContent(m.Files[m.Cursor].Name())
+		}
 	}
 
 	return m, nil
@@ -82,6 +98,50 @@ func (m Model) handleEnterKey() (tea.Model, tea.Cmd) {
 		}
 	} else {
 		return m, nil
+	}
+
+	return m, nil
+}
+
+func (m Model) handleMoveKey() (tea.Model, tea.Cmd) {
+	if m.ActivePane == constants.PrimaryPane {
+		m.ActivePane = constants.SecondaryPane
+		m.ShowMovePrompt = true
+		m.Textinput.Placeholder = "/new/dir/name"
+		m.Textinput.Focus()
+
+	}
+
+	return m, nil
+}
+
+func (m Model) handleRenameKey() (tea.Model, tea.Cmd) {
+	if m.ActivePane == constants.PrimaryPane {
+		m.ActivePane = constants.SecondaryPane
+		m.ShowRenamePrompt = true
+		m.Textinput.Placeholder = "new_name"
+		m.Textinput.Focus()
+	}
+
+	return m, nil
+}
+
+func (m Model) handleDeleteKey() (tea.Model, tea.Cmd) {
+	if m.ActivePane == constants.PrimaryPane {
+		m.ActivePane = constants.SecondaryPane
+		m.ShowDeletePrompt = true
+		m.Textinput.Placeholder = "[y/n]"
+		m.Textinput.Focus()
+	}
+
+	return m, nil
+}
+
+func (m Model) handleTabKey() (tea.Model, tea.Cmd) {
+	if m.ActivePane == constants.PrimaryPane {
+		m.ActivePane = constants.SecondaryPane
+	} else {
+		m.ActivePane = constants.PrimaryPane
 	}
 
 	return m, nil
@@ -165,7 +225,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
-			if !m.ShowRenamePrompt && !m.ShowDeletePrompt && !m.ShowMovePrompt {
+			if m.notPerformingAction() {
 				return m, tea.Quit
 			}
 
@@ -175,57 +235,38 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "down", "j":
-			if !m.ShowRenamePrompt && !m.ShowDeletePrompt && !m.ShowMovePrompt {
+			if m.notPerformingAction() {
 				return m.handleKeyDown()
 			}
 
 		case "up", "k":
-			if !m.ShowRenamePrompt && !m.ShowDeletePrompt && !m.ShowMovePrompt {
+			if m.notPerformingAction() {
 				return m.handleKeyUp()
 			}
 
 		case "l":
-			if m.ActivePane == constants.PrimaryPane {
-				if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
-					return m, updateDirectoryListing(m.Files[m.Cursor].Name())
-				} else {
-					return m, readFileContent(m.Files[m.Cursor].Name())
-				}
-			}
+			return m.handleRightKey()
 
 		case "enter":
 			return m.handleEnterKey()
 
 		case "m":
-			if m.ActivePane == constants.PrimaryPane {
-				m.ActivePane = constants.SecondaryPane
-				m.ShowMovePrompt = true
-				m.Textinput.Placeholder = "/new/dir/name"
-				m.Textinput.Focus()
+			if m.notPerformingAction() {
+				return m.handleMoveKey()
 			}
 
 		case "r":
-			if m.ActivePane == constants.PrimaryPane {
-				m.ActivePane = constants.SecondaryPane
-				m.ShowRenamePrompt = true
-				m.Textinput.Placeholder = "new_name"
-				m.Textinput.Focus()
+			if m.notPerformingAction() {
+				return m.handleRenameKey()
 			}
 
 		case "d":
-			if m.ActivePane == constants.PrimaryPane {
-				m.ActivePane = constants.SecondaryPane
-				m.ShowDeletePrompt = true
-				m.Textinput.Placeholder = "[y/n]"
-				m.Textinput.Focus()
+			if m.notPerformingAction() {
+				return m.handleDeleteKey()
 			}
 
 		case "tab":
-			if m.ActivePane == constants.PrimaryPane {
-				m.ActivePane = constants.SecondaryPane
-			} else {
-				m.ActivePane = constants.PrimaryPane
-			}
+			return m.handleTabKey()
 
 		case "esc":
 			return m.handleEscKey()
