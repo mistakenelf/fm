@@ -202,7 +202,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.ShowMovePrompt = true
 				m.Textinput.Placeholder = "/new/dir/name"
 				m.Textinput.Focus()
-				m.SecondaryViewport.SetContent(components.MovePrompt(m.Textinput))
 			}
 
 		case "r":
@@ -211,7 +210,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.ShowRenamePrompt = true
 				m.Textinput.Placeholder = "new_name"
 				m.Textinput.Focus()
-				m.SecondaryViewport.SetContent(components.RenamePrompt(m.Textinput))
 			}
 
 		case "d":
@@ -220,7 +218,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.ShowDeletePrompt = true
 				m.Textinput.Placeholder = "[y/n]"
 				m.Textinput.Focus()
-				m.SecondaryViewport.SetContent(components.DeletePrompt(m.Textinput, m.Files[m.Cursor].Name()))
 			}
 
 		case "tab":

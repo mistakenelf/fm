@@ -16,13 +16,23 @@ func (m Model) View() string {
 	halfScreenWidth := m.ScreenWidth / 2
 	leftPaneActive := m.ActivePane == constants.PrimaryPane
 	rightPaneActive := m.ActivePane == constants.SecondaryPane
+	paneHeight := m.ScreenHeight - constants.StatusBarHeight - borderRightWidth
 
 	if !m.Ready || len(m.Files) <= 0 {
 		return fmt.Sprintf("%s%s", m.Spinner.View(), "loading...")
 	}
 
-	leftPane := components.Pane(halfScreenWidth-borderLeftWidth, leftPaneActive, m.PrimaryViewport.View())
-	rightPane := components.Pane(halfScreenWidth-borderRightWidth, rightPaneActive, m.SecondaryViewport.View())
+	leftPane := components.Pane(halfScreenWidth-borderLeftWidth, paneHeight, leftPaneActive, m.PrimaryViewport.View())
+	rightPane := components.Pane(halfScreenWidth-borderRightWidth, paneHeight, rightPaneActive, m.SecondaryViewport.View())
+
+	if m.ShowMovePrompt {
+		rightPane = components.Pane(halfScreenWidth-borderRightWidth, paneHeight, rightPaneActive, components.MovePrompt(m.Textinput))
+	} else if m.ShowRenamePrompt {
+		rightPane = components.Pane(halfScreenWidth-borderRightWidth, paneHeight, rightPaneActive, components.RenamePrompt(m.Textinput))
+	} else if m.ShowDeletePrompt {
+		rightPane = components.Pane(halfScreenWidth-borderRightWidth, paneHeight, rightPaneActive, components.DeletePrompt(m.Textinput, m.Files[m.Cursor].Name()))
+	}
+
 	panes := lipgloss.JoinHorizontal(0, leftPane, rightPane)
 
 	return lipgloss.JoinVertical(

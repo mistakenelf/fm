@@ -6,7 +6,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func Pane(width int, isActive bool, content string) string {
+func Pane(width, height int, isActive bool, content string) string {
 	cfg := config.GetConfig()
 	borderColor := cfg.Colors.InactivePane
 
@@ -18,5 +18,6 @@ func Pane(width int, isActive bool, content string) string {
 		BorderForeground(lipgloss.Color(borderColor)).
 		Border(lipgloss.NormalBorder()).
 		Width(width).
+		Height(height).
 		Render(content)
 }

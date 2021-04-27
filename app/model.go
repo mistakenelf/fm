@@ -28,7 +28,7 @@ type Model struct {
 	ActivePane        string
 }
 
-func CreateModel() Model {
+func NewModel() Model {
 	cfg := config.GetConfig()
 
 	input := textinput.NewModel()
