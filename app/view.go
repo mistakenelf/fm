@@ -18,11 +18,11 @@ func (m Model) getRightPane() string {
 	rightPane := ""
 
 	if m.ShowMovePrompt {
-		rightPane = components.Pane(halfScreenWidth-borderRightWidth, paneHeight, rightPaneActive, components.MovePrompt(m.Textinput))
+		rightPane = components.Pane(halfScreenWidth-borderRightWidth, paneHeight, rightPaneActive, components.MovePrompt(m.Textinput.View()))
 	} else if m.ShowRenamePrompt {
-		rightPane = components.Pane(halfScreenWidth-borderRightWidth, paneHeight, rightPaneActive, components.RenamePrompt(m.Textinput))
+		rightPane = components.Pane(halfScreenWidth-borderRightWidth, paneHeight, rightPaneActive, components.RenamePrompt(m.Textinput.View()))
 	} else if m.ShowDeletePrompt {
-		rightPane = components.Pane(halfScreenWidth-borderRightWidth, paneHeight, rightPaneActive, components.DeletePrompt(m.Textinput, m.Files[m.Cursor].Name()))
+		rightPane = components.Pane(halfScreenWidth-borderRightWidth, paneHeight, rightPaneActive, components.DeletePrompt(m.Textinput.View(), m.Files[m.Cursor].Name()))
 	} else {
 		rightPane = components.Pane(halfScreenWidth-borderRightWidth, paneHeight, rightPaneActive, m.SecondaryViewport.View())
 	}

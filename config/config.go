@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/knipferrc/fm/constants"
 	"github.com/spf13/viper"
 )
 
@@ -15,10 +16,11 @@ type SettingsConfig struct {
 }
 
 type ColorsConfig struct {
-	SelectedItem string `mapstructure:"selected_dir_item"`
-	ActivePane   string `mapstructure:"active_pane"`
-	InactivePane string `mapstructure:"inactive_pane"`
-	Spinner      string `mapstructure:"spinner"`
+	SelectedItem      string `mapstructure:"selected_dir_item"`
+	UnselectedDirItem string `mapstructure:"unselected_dir_item"`
+	ActivePane        string `mapstructure:"active_pane"`
+	InactivePane      string `mapstructure:"inactive_pane"`
+	Spinner           string `mapstructure:"spinner"`
 }
 
 type Config struct {
@@ -64,8 +66,9 @@ func GetConfig() (config Config) {
 func SetDefaults() {
 	viper.SetDefault("settings.start_dir", ".")
 	viper.SetDefault("settings.show_icons", true)
-	viper.SetDefault("colors.selected_dir_item", "#F25D94")
-	viper.SetDefault("colors.active_pane", "#F25D94")
-	viper.SetDefault("colors.inactive_pane", "#FFFFFF")
-	viper.SetDefault("colors.spinner", "#F25D94")
+	viper.SetDefault("colors.selected_dir_item", constants.Pink)
+	viper.SetDefault("colors.unselected_dir_item", constants.White)
+	viper.SetDefault("colors.active_pane", constants.Pink)
+	viper.SetDefault("colors.inactive_pane", constants.White)
+	viper.SetDefault("colors.spinner", constants.Pink)
 }

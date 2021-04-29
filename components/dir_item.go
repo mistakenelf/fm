@@ -13,7 +13,7 @@ func DirItem(selected, isDir bool, name, ext, indicator string) string {
 	cfg := config.GetConfig()
 
 	if !cfg.Settings.ShowIcons && !selected {
-		return name
+		return lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.UnselectedDirItem)).Render(name)
 	} else if !cfg.Settings.ShowIcons && selected {
 		return lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.SelectedItem)).Render(name)
 	} else if selected && isDir {
@@ -25,7 +25,7 @@ func DirItem(selected, isDir bool, name, ext, indicator string) string {
 	} else if !selected && isDir {
 		icon, color := icons.GetIcon(name, ext, indicator)
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
-		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, name)
+		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.UnselectedDirItem)).Render(name))
 
 		return lipgloss.NewStyle().Render(listing)
 	} else if selected && !isDir {
@@ -37,7 +37,7 @@ func DirItem(selected, isDir bool, name, ext, indicator string) string {
 	} else {
 		icon, color := icons.GetIcon(name, ext, indicator)
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
-		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, name)
+		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.UnselectedDirItem)).Render(name))
 
 		return listing
 	}

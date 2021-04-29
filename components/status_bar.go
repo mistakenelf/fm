@@ -6,41 +6,39 @@ import (
 	"strings"
 
 	"github.com/knipferrc/fm/config"
+	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/helpers"
 	"github.com/knipferrc/fm/icons"
 
 	"github.com/charmbracelet/lipgloss"
 )
 
-var (
-	statusItemStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FFFDF5")).
-			Padding(0, 1)
-
-	statusBarStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.AdaptiveColor{Light: "#343433", Dark: "#C1C6B2"}).
-			Background(lipgloss.AdaptiveColor{Light: "#D9DCCF", Dark: "#353533"})
-
-	selectedFileStyle = lipgloss.NewStyle().
-				Inherit(statusBarStyle).
-				Foreground(lipgloss.Color("#FFFDF5")).
-				Background(lipgloss.Color("#FF5F87")).
-				Padding(0, 1).
-				MarginRight(1)
-
-	totalFilesStyle = statusItemStyle.Copy().
-			Background(lipgloss.Color("#A550DF")).
-			Align(lipgloss.Right)
-
-	statusText = lipgloss.NewStyle().Inherit(statusBarStyle)
-
-	logoStyle = statusItemStyle.Copy().Background(lipgloss.Color("#6124DF"))
-)
-
 func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo) string {
+	cfg := config.GetConfig()
 	doc := strings.Builder{}
 	width := lipgloss.Width
-	cfg := config.GetConfig()
+
+	statusItemStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(constants.White)).
+		Padding(0, 1)
+
+	statusBarStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(constants.White)).
+		Background(lipgloss.Color(constants.DarkGray))
+
+	selectedFileStyle := lipgloss.NewStyle().
+		Inherit(statusBarStyle).
+		Foreground(lipgloss.Color(constants.White)).
+		Background(lipgloss.Color(constants.Pink)).
+		Padding(0, 1).
+		MarginRight(1)
+
+	totalFilesStyle := statusItemStyle.Copy().
+		Background(lipgloss.Color(constants.LightPurple)).
+		Align(lipgloss.Right)
+
+	statusText := lipgloss.NewStyle().Inherit(statusBarStyle)
+	logoStyle := statusItemStyle.Copy().Background(lipgloss.Color(constants.DarkPurple))
 	fileTotals := totalFilesStyle.Render(fmt.Sprintf("%d/%d", cursor+1, totalFiles))
 	logo := ""
 
