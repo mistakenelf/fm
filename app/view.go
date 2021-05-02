@@ -9,6 +9,17 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+func (m Model) getLeftPane() string {
+	border := lipgloss.NormalBorder()
+	borderRightWidth := lipgloss.Width(border.Right + border.Top)
+	borderLeftWidth := lipgloss.Width(border.Left + border.Top)
+	halfScreenWidth := m.ScreenWidth / 2
+	leftPaneActive := m.ActivePane == constants.PrimaryPane
+	paneHeight := m.ScreenHeight - constants.StatusBarHeight - borderRightWidth
+
+	return components.Pane(halfScreenWidth-borderLeftWidth, paneHeight, leftPaneActive, m.PrimaryViewport.View())
+}
+
 func (m Model) getRightPane() string {
 	border := lipgloss.NormalBorder()
 	borderRightWidth := lipgloss.Width(border.Right + border.Top)
@@ -31,21 +42,14 @@ func (m Model) getRightPane() string {
 }
 
 func (m Model) View() string {
-	border := lipgloss.NormalBorder()
-	borderRightWidth := lipgloss.Width(border.Right + border.Top)
-	borderLeftWidth := lipgloss.Width(border.Left + border.Top)
-	halfScreenWidth := m.ScreenWidth / 2
-	leftPaneActive := m.ActivePane == constants.PrimaryPane
-	paneHeight := m.ScreenHeight - constants.StatusBarHeight - borderRightWidth
-
 	if !m.Ready || len(m.Files) <= 0 {
 		return fmt.Sprintf("%s%s", m.Spinner.View(), "loading...")
 	}
 
-	leftPane := components.Pane(halfScreenWidth-borderLeftWidth, paneHeight, leftPaneActive, m.PrimaryViewport.View())
+	leftPane := m.getLeftPane()
 	rightPane := m.getRightPane()
 
-	panes := lipgloss.JoinHorizontal(0, leftPane, rightPane)
+	panes := lipgloss.JoinHorizontal(lipgloss.Top, leftPane, rightPane)
 
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
