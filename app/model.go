@@ -38,7 +38,7 @@ func NewModel() Model {
 
 	s := spinner.NewModel()
 	s.Spinner = spinner.Dot
-	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.Spinner))
+	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.Components.Spinner))
 
 	return Model{
 		Files:             make([]fs.FileInfo, 0),

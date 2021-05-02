@@ -8,10 +8,10 @@ import (
 
 func Pane(width, height int, isActive bool, content string) string {
 	cfg := config.GetConfig()
-	borderColor := cfg.Colors.InactivePane
+	borderColor := cfg.Colors.Pane.InactivePane
 
 	if isActive {
-		borderColor = cfg.Colors.ActivePane
+		borderColor = cfg.Colors.Pane.ActivePane
 	}
 
 	return lipgloss.NewStyle().
