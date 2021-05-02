@@ -15,3 +15,7 @@ func RenamePrompt(textInputValue string) string {
 func DeletePrompt(textInputValue, currentFile string) string {
 	return fmt.Sprintf("%s %s? [y/n] %s", "Are you sure you want to delete", currentFile, textInputValue)
 }
+
+func CreatePrompt(textInputValue string) string {
+	return fmt.Sprintf("%s %s", "What would you like to name this file?", textInputValue)
+}

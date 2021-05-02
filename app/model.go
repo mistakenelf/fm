@@ -24,6 +24,7 @@ type Model struct {
 	ShowMovePrompt    bool
 	ShowRenamePrompt  bool
 	ShowDeletePrompt  bool
+	ShowCreatePrompt  bool
 	Ready             bool
 	ActivePane        string
 }
@@ -52,6 +53,7 @@ func NewModel() Model {
 		ShowMovePrompt:    false,
 		ShowRenamePrompt:  false,
 		ShowDeletePrompt:  false,
+		ShowCreatePrompt:  false,
 		Ready:             false,
 		ActivePane:        constants.PrimaryPane,
 	}

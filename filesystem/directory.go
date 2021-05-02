@@ -16,6 +16,19 @@ func RenameDirOrFile(currentName, newName string) {
 	os.Rename(currentName, newName)
 }
 
+func CreateDirectory(name string) {
+	_, err := os.Stat(name)
+
+	if os.IsNotExist(err) {
+		errDir := os.MkdirAll(name, 0755)
+
+		if errDir != nil {
+			log.Fatal(err)
+		}
+
+	}
+}
+
 func GetDirectoryListing(dir string) []fs.FileInfo {
 	cfg := config.GetConfig()
 	n := 0

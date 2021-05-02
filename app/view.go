@@ -54,6 +54,13 @@ func (m Model) getRightPane() string {
 			rightPaneActive,
 			components.DeletePrompt(m.Textinput.View(), m.Files[m.Cursor].Name()),
 		)
+	} else if m.ShowCreatePrompt {
+		rightPane = components.Pane(
+			halfScreenWidth-borderRightWidth,
+			paneHeight,
+			rightPaneActive,
+			components.CreatePrompt(m.Textinput.View()),
+		)
 	} else {
 		rightPane = components.Pane(
 			halfScreenWidth-borderRightWidth,

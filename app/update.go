@@ -78,6 +78,8 @@ func (m Model) handleEnterKey() (tea.Model, tea.Cmd) {
 		} else {
 			return m, moveFile(m.Files[m.Cursor].Name(), m.Textinput.Value())
 		}
+	} else if m.ShowCreatePrompt {
+		return m, createDir(m.Textinput.Value())
 	} else if m.ShowDeletePrompt {
 		if m.Files[m.Cursor].IsDir() {
 			if m.Textinput.Value() == "y" {
@@ -131,6 +133,17 @@ func (m Model) handleDeleteKey() (tea.Model, tea.Cmd) {
 		m.ActivePane = constants.SecondaryPane
 		m.ShowDeletePrompt = true
 		m.Textinput.Placeholder = "[y/n]"
+		m.Textinput.Focus()
+	}
+
+	return m, nil
+}
+
+func (m Model) handleCreateKey() (tea.Model, tea.Cmd) {
+	if m.ActivePane == constants.PrimaryPane {
+		m.ActivePane = constants.SecondaryPane
+		m.ShowCreatePrompt = true
+		m.Textinput.Placeholder = "new"
 		m.Textinput.Focus()
 	}
 
@@ -263,6 +276,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "d":
 			if m.notPerformingAction() {
 				return m.handleDeleteKey()
+			}
+
+		case "c":
+			if m.notPerformingAction() {
+				return m.handleCreateKey()
 			}
 
 		case "tab":

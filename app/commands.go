@@ -73,3 +73,12 @@ func readFileContent(file string) tea.Cmd {
 		return fileContentMsg(content)
 	}
 }
+
+func createDir(dir string) tea.Cmd {
+	return func() tea.Msg {
+		filesystem.CreateDirectory(dir)
+		files := filesystem.GetDirectoryListing(constants.CurrentDirectory)
+
+		return actionMsg(files)
+	}
+}
