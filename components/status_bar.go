@@ -57,7 +57,7 @@ func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo) str
 
 	status := statusText.Copy().
 		Width(screenWidth - width(selectedFileStyle.Render(currentFile.Name())) - width(fileTotals) - width(logo)).
-		Render(fmt.Sprintf("%s %s %s", helpers.ConvertBytes(currentFile.Size()), currentFile.Mode().String(), currentPath))
+		Render(fmt.Sprintf("%s %s %s", helpers.ConvertBytesToSizeString(currentFile.Size()), currentFile.Mode().String(), currentPath))
 
 	bar := lipgloss.JoinHorizontal(lipgloss.Top,
 		selectedFileStyle.Render(currentFile.Name()),

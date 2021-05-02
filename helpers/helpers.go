@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func ConvertBytes(b int64) string {
+func ConvertBytesToSizeString(b int64) string {
 	const unit = 1000
 	if b < unit {
 		return fmt.Sprintf("%d B", b)
