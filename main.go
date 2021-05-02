@@ -7,6 +7,7 @@ import (
 	"github.com/knipferrc/fm/app"
 	"github.com/knipferrc/fm/components"
 	"github.com/knipferrc/fm/config"
+	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/filesystem"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -19,7 +20,7 @@ func main() {
 	cfg := config.GetConfig()
 	m := app.NewModel()
 
-	if cfg.Settings.StartDir == "~" {
+	if cfg.Settings.StartDir == constants.HomeDirectory {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			log.Fatal(err)

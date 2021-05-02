@@ -27,7 +27,7 @@ func DirItem(selected, isDir bool, name, ext, indicator string) string {
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
 		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.DirTree.UnselectedDirItem)).Render(name))
 
-		return lipgloss.NewStyle().Render(listing)
+		return listing
 	} else if selected && !isDir {
 		icon, color := icons.GetIcon(name, ext, indicator)
 		fileIcon := fmt.Sprintf("%s%s", color, icon)

@@ -54,7 +54,11 @@ func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo) str
 		Background(lipgloss.Color(cfg.Colors.StatusBar.Bar.Background)).
 		Padding(0, 1).
 		Width(screenWidth - width(selectedFile) - width(fileTotals) - width(logo)).
-		Render(fmt.Sprintf("%s %s %s", helpers.ConvertBytesToSizeString(currentFile.Size()), currentFile.Mode().String(), currentPath))
+		Render(fmt.Sprintf("%s %s %s",
+			helpers.ConvertBytesToSizeString(currentFile.Size()),
+			currentFile.Mode().String(),
+			currentPath),
+		)
 
 	bar := lipgloss.JoinHorizontal(lipgloss.Top,
 		selectedFile,

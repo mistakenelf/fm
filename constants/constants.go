@@ -6,6 +6,7 @@ const (
 
 	CurrentDirectory  = "."
 	PreviousDirectory = ".."
+	HomeDirectory     = "~"
 
 	StatusBarHeight = 1
 

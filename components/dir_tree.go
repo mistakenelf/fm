@@ -16,7 +16,13 @@ func DirTree(files []fs.FileInfo, cursor, width int) string {
 	curFiles := ""
 
 	for i, file := range files {
-		curFiles += fmt.Sprintf("%s\n", DirItem(cursor == i, file.IsDir(), file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode())))
+		curFiles += fmt.Sprintf("%s\n",
+			DirItem(
+				cursor == i, file.IsDir(),
+				file.Name(),
+				filepath.Ext(file.Name()),
+				icons.GetIndicator(file.Mode()),
+			))
 	}
 
 	doc.WriteString(lipgloss.JoinHorizontal(
