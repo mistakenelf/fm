@@ -19,10 +19,38 @@ type ComponentColors struct {
 	Spinner string `mapstructure:"spinner"`
 }
 
+type SelectedFileColors struct {
+	Foreground string `mapstructure:"foreground"`
+	Background string `mapstructure:"background"`
+}
+
+type BarColors struct {
+	Foreground string `mapstructure:"foreground"`
+	Background string `mapstructure:"background"`
+}
+
+type TotalFilesColors struct {
+	Foreground string `mapstructure:"foreground"`
+	Background string `mapstructure:"background"`
+}
+
+type LogoColors struct {
+	Foreground string `mapstructure:"foreground"`
+	Background string `mapstructure:"background"`
+}
+
+type StatusBarColors struct {
+	SelectedFile SelectedFileColors `mapstructure:"selected_file"`
+	Bar          BarColors          `mapstructure:"bar"`
+	TotalFiles   TotalFilesColors   `mapstructure:"total_files"`
+	Logo         LogoColors         `mapstructure:"logo"`
+}
+
 type ColorsConfig struct {
 	DirTree    DirTreeColors   `mapstructure:"dir_tree"`
 	Pane       PaneColors      `mapstructure:"pane"`
 	Components ComponentColors `mapstructure:"components"`
+	StatusBar  StatusBarColors `mapstructure:"status_bar"`
 }
 
 type Config struct {

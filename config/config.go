@@ -56,5 +56,15 @@ func SetDefaults() {
 
 	viper.SetDefault("colors.pane.active_pane", constants.Pink)
 	viper.SetDefault("colors.pane.inactive_pane", constants.White)
+
 	viper.SetDefault("colors.components.spinner", constants.Pink)
+
+	viper.SetDefault("colors.status_bar.selected_file.foreground", constants.White)
+	viper.SetDefault("colors.status_bar.selected_file.background", constants.Pink)
+	viper.SetDefault("colors.status_bar.bar.foreground", constants.White)
+	viper.SetDefault("colors.status_bar.bar.background", constants.DarkGray)
+	viper.SetDefault("colors.status_bar.total_files.foreground", constants.White)
+	viper.SetDefault("colors.status_bar.total_files.background", constants.LightPurple)
+	viper.SetDefault("colors.status_bar.logo.foreground", constants.White)
+	viper.SetDefault("colors.status_bar.logo.background", constants.DarkPurple)
 }

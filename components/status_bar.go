@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/knipferrc/fm/config"
-	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/helpers"
 	"github.com/knipferrc/fm/icons"
 
@@ -25,48 +24,46 @@ func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo) str
 		log.Println(err)
 	}
 
-	statusItemStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(constants.White)).
-		Padding(0, 1)
-
-	statusBarStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(constants.White)).
-		Background(lipgloss.Color(constants.DarkGray))
-
-	selectedFileStyle := lipgloss.NewStyle().
-		Inherit(statusBarStyle).
-		Foreground(lipgloss.Color(constants.White)).
-		Background(lipgloss.Color(constants.Pink)).
+	selectedFile := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(cfg.Colors.StatusBar.SelectedFile.Foreground)).
+		Background(lipgloss.Color(cfg.Colors.StatusBar.SelectedFile.Background)).
 		Padding(0, 1).
-		MarginRight(1)
+		Render(currentFile.Name())
 
-	totalFilesStyle := statusItemStyle.Copy().
-		Background(lipgloss.Color(constants.LightPurple)).
-		Align(lipgloss.Right)
+	fileTotals := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(cfg.Colors.StatusBar.TotalFiles.Foreground)).
+		Background(lipgloss.Color(cfg.Colors.StatusBar.TotalFiles.Background)).
+		Align(lipgloss.Right).
+		Padding(0, 1).
+		Render(fmt.Sprintf("%d/%d", cursor+1, totalFiles))
 
-	statusText := lipgloss.NewStyle().Inherit(statusBarStyle)
-	logoStyle := statusItemStyle.Copy().Background(lipgloss.Color(constants.DarkPurple))
-	fileTotals := totalFilesStyle.Render(fmt.Sprintf("%d/%d", cursor+1, totalFiles))
+	logoStyle := lipgloss.NewStyle().
+		Padding(0, 1).
+		Foreground(lipgloss.Color(cfg.Colors.StatusBar.Logo.Foreground)).
+		Background(lipgloss.Color(cfg.Colors.StatusBar.Logo.Background))
+
 	logo := ""
-
 	if cfg.Settings.ShowIcons {
 		logo = logoStyle.Render(fmt.Sprintf("%s %s", icons.Icon_Def["dir"].GetGlyph(), "FM"))
 	} else {
 		logo = logoStyle.Render("FM")
 	}
 
-	status := statusText.Copy().
-		Width(screenWidth - width(selectedFileStyle.Render(currentFile.Name())) - width(fileTotals) - width(logo)).
+	status := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(cfg.Colors.StatusBar.Bar.Foreground)).
+		Background(lipgloss.Color(cfg.Colors.StatusBar.Bar.Background)).
+		Padding(0, 1).
+		Width(screenWidth - width(selectedFile) - width(fileTotals) - width(logo)).
 		Render(fmt.Sprintf("%s %s %s", helpers.ConvertBytesToSizeString(currentFile.Size()), currentFile.Mode().String(), currentPath))
 
 	bar := lipgloss.JoinHorizontal(lipgloss.Top,
-		selectedFileStyle.Render(currentFile.Name()),
+		selectedFile,
 		status,
 		fileTotals,
 		logo,
 	)
 
-	doc.WriteString(statusBarStyle.Render(bar))
+	doc.WriteString(bar)
 
 	return doc.String()
 }

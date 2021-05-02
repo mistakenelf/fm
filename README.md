@@ -69,6 +69,19 @@ colors:
   pane:
     active_pane: "#F25D94"
     inactive_pane: "#FFFDF5"
+  status_bar:
+    bar:
+      background: "#353533"
+      foreground: "#FFFDF5"
+    logo:
+      background: "#6124DF"
+      foreground: "#FFFDF5"
+    selected_file:
+      background: "#F25D94"
+      foreground: "#FFFDF5"
+    total_files:
+      background: "#A550DF"
+      foreground: "#FFFDF5"
 settings:
   show_hidden: true
   show_icons: true
