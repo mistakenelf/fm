@@ -192,6 +192,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.ShowRenamePrompt = false
 		m.ShowMovePrompt = false
 		m.ShowDeletePrompt = false
+		m.ShowCreatePrompt = false
 		m.ActivePane = constants.PrimaryPane
 		m.Textinput.Blur()
 		m.Textinput.Reset()
