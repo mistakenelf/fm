@@ -30,11 +30,9 @@ go install github.com/knipferrc/fm@latest
 
 ## Usage
 
-- Start `fm` by running `fm` from your terminal
+- Start `fm`
 - Navigate your files with the following keys
   <br />
-
-  #### <i>Note: The currently selected file or folder will be highlighted in pink</i>
 
   - <kbd>h</kbd> Go back to the previous directory
 
@@ -53,6 +51,29 @@ go install github.com/knipferrc/fm@latest
   - <kbd>tab</kbd> Toggle between panes
 
   - <kbd>esc</kbd> Cancel any current action. Pressing <kbd>esc</kbd> during any action (rename, move, or delete) will cancel that action and return you to file navigation
+
+- A config file will be generated at `.config/fm/config.yml` when you first run `fm`
+
+<br />
+<br />
+
+### Sample Config (with defaults)
+
+```yml
+colors:
+  components:
+    spinner: "#F25D94"
+  dir_tree:
+    selected_dir_item: "#F25D94"
+    unselected_dir_item: "#FFFDF5"
+  pane:
+    active_pane: "#F25D94"
+    inactive_pane: "#FFFDF5"
+settings:
+  show_hidden: true
+  show_icons: true
+  start_dir: .
+```
 
 <br />
 <br />
