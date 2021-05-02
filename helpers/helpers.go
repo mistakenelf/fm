@@ -1,6 +1,8 @@
 package helpers
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func ConvertBytes(b int64) string {
 	const unit = 1000

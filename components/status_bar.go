@@ -3,6 +3,8 @@ package components
 import (
 	"fmt"
 	"io/fs"
+	"log"
+	"os"
 	"strings"
 
 	"github.com/knipferrc/fm/config"
@@ -17,6 +19,11 @@ func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo) str
 	cfg := config.GetConfig()
 	doc := strings.Builder{}
 	width := lipgloss.Width
+	currentPath, err := os.Getwd()
+
+	if err != nil {
+		log.Println(err)
+	}
 
 	statusItemStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(constants.White)).
@@ -50,7 +57,7 @@ func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo) str
 
 	status := statusText.Copy().
 		Width(screenWidth - width(selectedFileStyle.Render(currentFile.Name())) - width(fileTotals) - width(logo)).
-		Render(fmt.Sprintf("%s %s", helpers.ConvertBytes(currentFile.Size()), currentFile.Mode().String()))
+		Render(fmt.Sprintf("%s %s %s", helpers.ConvertBytes(currentFile.Size()), currentFile.Mode().String(), currentPath))
 
 	bar := lipgloss.JoinHorizontal(lipgloss.Top,
 		selectedFileStyle.Render(currentFile.Name()),
