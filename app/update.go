@@ -29,8 +29,8 @@ func (m *Model) scrollPrimaryViewport() {
 	}
 }
 
-func (m Model) notPerformingAction() bool {
-	return !m.ShowRenamePrompt && !m.ShowDeletePrompt && !m.ShowMovePrompt
+func (m Model) performingAction() bool {
+	return m.ShowCommandBar
 }
 
 func (m Model) handleKeyDown() (tea.Model, tea.Cmd) {
@@ -38,8 +38,10 @@ func (m Model) handleKeyDown() (tea.Model, tea.Cmd) {
 		m.Cursor++
 		m.scrollPrimaryViewport()
 		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-	} else {
+	} else if !m.ShowCommandBar {
 		m.SecondaryViewport.LineDown(1)
+	} else {
+		return m, nil
 	}
 
 	return m, nil
@@ -70,83 +72,6 @@ func (m Model) handleRightKey() (tea.Model, tea.Cmd) {
 }
 
 func (m Model) handleEnterKey() (tea.Model, tea.Cmd) {
-	if m.ShowRenamePrompt {
-		return m, renameFileOrDir(m.Files[m.Cursor].Name(), m.Textinput.Value())
-	} else if m.ShowMovePrompt {
-		if m.Files[m.Cursor].IsDir() {
-			return m, moveDir(m.Files[m.Cursor].Name(), m.Textinput.Value())
-		} else {
-			return m, moveFile(m.Files[m.Cursor].Name(), m.Textinput.Value())
-		}
-	} else if m.ShowCreatePrompt {
-		return m, createDir(m.Textinput.Value())
-	} else if m.ShowDeletePrompt {
-		if m.Files[m.Cursor].IsDir() {
-			if m.Textinput.Value() == "y" {
-				return m, deleteDir(m.Files[m.Cursor].Name())
-			} else {
-				m.Textinput.Blur()
-				m.Textinput.Reset()
-				m.ShowDeletePrompt = false
-			}
-		} else {
-			if m.Textinput.Value() == "y" {
-				return m, deleteFile(m.Files[m.Cursor].Name())
-			} else {
-				m.Textinput.Blur()
-				m.Textinput.Reset()
-				m.ShowDeletePrompt = false
-			}
-		}
-	} else {
-		return m, nil
-	}
-
-	return m, nil
-}
-
-func (m Model) handleMoveKey() (tea.Model, tea.Cmd) {
-	if m.ActivePane == constants.PrimaryPane {
-		m.ActivePane = constants.SecondaryPane
-		m.ShowMovePrompt = true
-		m.Textinput.Placeholder = "/new/dir/name"
-		m.Textinput.Focus()
-
-	}
-
-	return m, nil
-}
-
-func (m Model) handleRenameKey() (tea.Model, tea.Cmd) {
-	if m.ActivePane == constants.PrimaryPane {
-		m.ActivePane = constants.SecondaryPane
-		m.ShowRenamePrompt = true
-		m.Textinput.Placeholder = "new_name"
-		m.Textinput.Focus()
-	}
-
-	return m, nil
-}
-
-func (m Model) handleDeleteKey() (tea.Model, tea.Cmd) {
-	if m.ActivePane == constants.PrimaryPane {
-		m.ActivePane = constants.SecondaryPane
-		m.ShowDeletePrompt = true
-		m.Textinput.Placeholder = "[y/n]"
-		m.Textinput.Focus()
-	}
-
-	return m, nil
-}
-
-func (m Model) handleCreateKey() (tea.Model, tea.Cmd) {
-	if m.ActivePane == constants.PrimaryPane {
-		m.ActivePane = constants.SecondaryPane
-		m.ShowCreatePrompt = true
-		m.Textinput.Placeholder = "new"
-		m.Textinput.Focus()
-	}
-
 	return m, nil
 }
 
@@ -160,10 +85,16 @@ func (m Model) handleTabKey() (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func (m Model) handleCommandBar() (tea.Model, tea.Cmd) {
+	m.ShowCommandBar = true
+	m.Textinput.Placeholder = "enter command"
+	m.Textinput.Focus()
+
+	return m, nil
+}
+
 func (m Model) handleEscKey() (tea.Model, tea.Cmd) {
-	m.ShowMovePrompt = false
-	m.ShowRenamePrompt = false
-	m.ShowDeletePrompt = false
+	m.ShowCommandBar = false
 	m.ActivePane = constants.PrimaryPane
 	m.Textinput.Blur()
 	m.Textinput.Reset()
@@ -189,10 +120,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case actionMsg:
 		m.Files = msg
 		m.Cursor = 0
-		m.ShowRenamePrompt = false
-		m.ShowMovePrompt = false
-		m.ShowDeletePrompt = false
-		m.ShowCreatePrompt = false
+		m.ShowCommandBar = false
 		m.ActivePane = constants.PrimaryPane
 		m.Textinput.Blur()
 		m.Textinput.Reset()
@@ -239,53 +167,40 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
-			if m.notPerformingAction() {
+			if !m.performingAction() {
 				return m, tea.Quit
 			}
 
 		case "h":
-			if m.ActivePane == constants.PrimaryPane {
+			if !m.performingAction() {
 				return m, updateDirectoryListing(constants.PreviousDirectory)
 			}
 
 		case "down", "j":
-			if m.notPerformingAction() {
+			if !m.performingAction() {
 				return m.handleKeyDown()
 			}
 
 		case "up", "k":
-			if m.notPerformingAction() {
+			if !m.performingAction() {
 				return m.handleKeyUp()
 			}
 
 		case "l":
-			return m.handleRightKey()
+			if !m.performingAction() {
+				return m.handleRightKey()
+			}
 
 		case "enter":
 			return m.handleEnterKey()
 
-		case "m":
-			if m.notPerformingAction() {
-				return m.handleMoveKey()
-			}
-
-		case "r":
-			if m.notPerformingAction() {
-				return m.handleRenameKey()
-			}
-
-		case "d":
-			if m.notPerformingAction() {
-				return m.handleDeleteKey()
-			}
-
-		case "c":
-			if m.notPerformingAction() {
-				return m.handleCreateKey()
-			}
+		case ":":
+			return m.handleCommandBar()
 
 		case "tab":
-			return m.handleTabKey()
+			if !m.performingAction() {
+				return m.handleTabKey()
+			}
 
 		case "esc":
 			return m.handleEscKey()

@@ -14,7 +14,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo) string {
+func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo, showCommandBar bool, textInput string) string {
 	cfg := config.GetConfig()
 	doc := strings.Builder{}
 	width := lipgloss.Width
@@ -59,6 +59,10 @@ func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo) str
 			currentFile.Mode().String(),
 			currentPath),
 		)
+
+	if showCommandBar {
+		status = lipgloss.NewStyle().Padding(0, 1).Width(screenWidth - width(selectedFile) - width(fileTotals) - width(logo)).Render(textInput)
+	}
 
 	bar := lipgloss.JoinHorizontal(lipgloss.Top,
 		selectedFile,
