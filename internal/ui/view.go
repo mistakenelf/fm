@@ -1,10 +1,10 @@
-package app
+package ui
 
 import (
 	"fmt"
 
-	"github.com/knipferrc/fm/components"
-	"github.com/knipferrc/fm/constants"
+	"github.com/knipferrc/fm/internal/components"
+	"github.com/knipferrc/fm/internal/constants"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -33,35 +33,12 @@ func (m Model) getRightPane() string {
 	paneHeight := m.ScreenHeight - constants.StatusBarHeight - borderRightWidth
 	rightPane := ""
 
-	if m.ShowMovePrompt {
-		rightPane = components.Pane(
-			halfScreenWidth-borderRightWidth,
-			paneHeight,
-			rightPaneActive,
-			components.MovePrompt(m.Textinput.View()),
-		)
-	} else if m.ShowRenamePrompt {
-		rightPane = components.Pane(
-			halfScreenWidth-borderRightWidth,
-			paneHeight,
-			rightPaneActive,
-			components.RenamePrompt(m.Textinput.View()),
-		)
-	} else if m.ShowDeletePrompt {
-		rightPane = components.Pane(
-			halfScreenWidth-borderRightWidth,
-			paneHeight,
-			rightPaneActive,
-			components.DeletePrompt(m.Textinput.View(), m.Files[m.Cursor].Name()),
-		)
-	} else {
-		rightPane = components.Pane(
-			halfScreenWidth-borderRightWidth,
-			paneHeight,
-			rightPaneActive,
-			m.SecondaryViewport.View(),
-		)
-	}
+	rightPane = components.Pane(
+		halfScreenWidth-borderRightWidth,
+		paneHeight,
+		rightPaneActive,
+		m.SecondaryViewport.View(),
+	)
 
 	return rightPane
 }
@@ -73,12 +50,11 @@ func (m Model) View() string {
 
 	leftPane := m.getLeftPane()
 	rightPane := m.getRightPane()
-
 	panes := lipgloss.JoinHorizontal(lipgloss.Top, leftPane, rightPane)
 
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
 		panes,
-		components.StatusBar(m.ScreenWidth, m.Cursor, len(m.Files), m.Files[m.Cursor]),
+		components.StatusBar(m.ScreenWidth, m.Cursor, len(m.Files), m.Files[m.Cursor], m.ShowCommandBar, m.Textinput.View()),
 	)
 }

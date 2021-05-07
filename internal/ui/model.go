@@ -1,10 +1,10 @@
-package app
+package ui
 
 import (
 	"io/fs"
 
-	"github.com/knipferrc/fm/config"
-	"github.com/knipferrc/fm/constants"
+	"github.com/knipferrc/fm/internal/config"
+	"github.com/knipferrc/fm/internal/constants"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -21,9 +21,7 @@ type Model struct {
 	Cursor            int
 	ScreenWidth       int
 	ScreenHeight      int
-	ShowMovePrompt    bool
-	ShowRenamePrompt  bool
-	ShowDeletePrompt  bool
+	ShowCommandBar    bool
 	Ready             bool
 	ActivePane        string
 }
@@ -49,9 +47,7 @@ func NewModel() Model {
 		Cursor:            0,
 		ScreenWidth:       0,
 		ScreenHeight:      0,
-		ShowMovePrompt:    false,
-		ShowRenamePrompt:  false,
-		ShowDeletePrompt:  false,
+		ShowCommandBar:    false,
 		Ready:             false,
 		ActivePane:        constants.PrimaryPane,
 	}

@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/knipferrc/fm/constants"
+	"github.com/knipferrc/fm/internal/constants"
 
 	"github.com/spf13/viper"
 )
