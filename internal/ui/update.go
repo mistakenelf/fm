@@ -1,11 +1,12 @@
 package ui
 
 import (
+	"github.com/knipferrc/fm/internal/components"
+	"github.com/knipferrc/fm/internal/constants"
+
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/knipferrc/fm/internal/components"
-	"github.com/knipferrc/fm/internal/constants"
 	"github.com/muesli/reflow/wrap"
 )
 
@@ -26,10 +27,6 @@ func (m *Model) scrollPrimaryViewport() {
 		m.Cursor = len(m.Files) - 1
 		m.PrimaryViewport.GotoBottom()
 	}
-}
-
-func (m Model) performingAction() bool {
-	return m.ShowCommandBar
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -94,17 +91,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
-			if !m.performingAction() {
+			if !m.ShowCommandBar {
 				return m, tea.Quit
 			}
 
 		case "h":
-			if !m.performingAction() {
+			if !m.ShowCommandBar {
 				return m, updateDirectoryListing(constants.PreviousDirectory)
 			}
 
 		case "down", "j":
-			if !m.performingAction() {
+			if !m.ShowCommandBar {
 				if m.ActivePane == constants.PrimaryPane {
 					m.Cursor++
 					m.scrollPrimaryViewport()
@@ -115,7 +112,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "up", "k":
-			if !m.performingAction() {
+			if !m.ShowCommandBar {
 				if m.ActivePane == constants.PrimaryPane {
 					m.Cursor--
 					m.scrollPrimaryViewport()
@@ -126,7 +123,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "l":
-			if !m.performingAction() {
+			if !m.ShowCommandBar {
 				if m.ActivePane == constants.PrimaryPane {
 					if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
 						return m, updateDirectoryListing(m.Files[m.Cursor].Name())
@@ -144,8 +141,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Textinput.Placeholder = "enter command"
 			m.Textinput.Focus()
 
+			return m, nil
+
 		case "tab":
-			if !m.performingAction() {
+			if !m.ShowCommandBar {
 				if m.ActivePane == constants.PrimaryPane {
 					m.ActivePane = constants.SecondaryPane
 				} else {

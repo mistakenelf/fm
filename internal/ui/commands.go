@@ -3,9 +3,10 @@ package ui
 import (
 	"io/fs"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/utils"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 type updateDirMsg []fs.FileInfo
