@@ -1,10 +1,10 @@
-package app
+package ui
 
 import (
 	"io/fs"
 
-	"github.com/knipferrc/fm/config"
-	"github.com/knipferrc/fm/constants"
+	"github.com/knipferrc/fm/internal/config"
+	"github.com/knipferrc/fm/internal/constants"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"

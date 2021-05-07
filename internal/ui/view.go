@@ -1,12 +1,11 @@
-package app
+package ui
 
 import (
 	"fmt"
 
-	"github.com/knipferrc/fm/components"
-	"github.com/knipferrc/fm/constants"
-
 	"github.com/charmbracelet/lipgloss"
+	"github.com/knipferrc/fm/internal/components"
+	"github.com/knipferrc/fm/internal/constants"
 )
 
 func (m Model) getLeftPane() string {

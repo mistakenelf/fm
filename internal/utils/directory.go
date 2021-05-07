@@ -1,4 +1,4 @@
-package filesystem
+package utils
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/knipferrc/fm/config"
+	"github.com/knipferrc/fm/internal/config"
 )
 
 func RenameDirOrFile(currentName, newName string) {

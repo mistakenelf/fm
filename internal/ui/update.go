@@ -1,12 +1,11 @@
-package app
+package ui
 
 import (
-	"github.com/knipferrc/fm/components"
-	"github.com/knipferrc/fm/constants"
-
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/knipferrc/fm/internal/components"
+	"github.com/knipferrc/fm/internal/constants"
 	"github.com/muesli/reflow/wrap"
 )
 
@@ -31,78 +30,6 @@ func (m *Model) scrollPrimaryViewport() {
 
 func (m Model) performingAction() bool {
 	return m.ShowCommandBar
-}
-
-func (m Model) handleKeyDown() (tea.Model, tea.Cmd) {
-	if m.ActivePane == constants.PrimaryPane {
-		m.Cursor++
-		m.scrollPrimaryViewport()
-		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-	} else if !m.ShowCommandBar {
-		m.SecondaryViewport.LineDown(1)
-	} else {
-		return m, nil
-	}
-
-	return m, nil
-}
-
-func (m Model) handleKeyUp() (tea.Model, tea.Cmd) {
-	if m.ActivePane == constants.PrimaryPane {
-		m.Cursor--
-		m.scrollPrimaryViewport()
-		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-	} else {
-		m.SecondaryViewport.LineUp(1)
-	}
-
-	return m, nil
-}
-
-func (m Model) handleRightKey() (tea.Model, tea.Cmd) {
-	if m.ActivePane == constants.PrimaryPane {
-		if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
-			return m, updateDirectoryListing(m.Files[m.Cursor].Name())
-		} else {
-			return m, readFileContent(m.Files[m.Cursor].Name())
-		}
-	}
-
-	return m, nil
-}
-
-func (m Model) handleEnterKey() (tea.Model, tea.Cmd) {
-	return m, nil
-}
-
-func (m Model) handleTabKey() (tea.Model, tea.Cmd) {
-	if m.ActivePane == constants.PrimaryPane {
-		m.ActivePane = constants.SecondaryPane
-	} else {
-		m.ActivePane = constants.PrimaryPane
-	}
-
-	return m, nil
-}
-
-func (m Model) handleCommandBar() (tea.Model, tea.Cmd) {
-	m.ShowCommandBar = true
-	m.Textinput.Placeholder = "enter command"
-	m.Textinput.Focus()
-
-	return m, nil
-}
-
-func (m Model) handleEscKey() (tea.Model, tea.Cmd) {
-	m.ShowCommandBar = false
-	m.ActivePane = constants.PrimaryPane
-	m.Textinput.Blur()
-	m.Textinput.Reset()
-
-	m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-	m.SecondaryViewport.SetContent(components.Instructions())
-
-	return m, nil
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -178,40 +105,63 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "down", "j":
 			if !m.performingAction() {
-				return m.handleKeyDown()
+				if m.ActivePane == constants.PrimaryPane {
+					m.Cursor++
+					m.scrollPrimaryViewport()
+					m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+				} else {
+					m.SecondaryViewport.LineDown(1)
+				}
 			}
 
 		case "up", "k":
 			if !m.performingAction() {
-				return m.handleKeyUp()
+				if m.ActivePane == constants.PrimaryPane {
+					m.Cursor--
+					m.scrollPrimaryViewport()
+					m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+				} else {
+					m.SecondaryViewport.LineUp(1)
+				}
 			}
 
 		case "l":
 			if !m.performingAction() {
-				return m.handleRightKey()
+				if m.ActivePane == constants.PrimaryPane {
+					if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
+						return m, updateDirectoryListing(m.Files[m.Cursor].Name())
+					} else {
+						return m, readFileContent(m.Files[m.Cursor].Name())
+					}
+				}
 			}
 
 		case "enter":
-			return m.handleEnterKey()
+			return m, nil
 
 		case ":":
-			return m.handleCommandBar()
+			m.ShowCommandBar = true
+			m.Textinput.Placeholder = "enter command"
+			m.Textinput.Focus()
 
 		case "tab":
 			if !m.performingAction() {
-				return m.handleTabKey()
+				if m.ActivePane == constants.PrimaryPane {
+					m.ActivePane = constants.SecondaryPane
+				} else {
+					m.ActivePane = constants.PrimaryPane
+				}
 			}
 
 		case "esc":
-			return m.handleEscKey()
+			m.ShowCommandBar = false
+			m.ActivePane = constants.PrimaryPane
+			m.Textinput.Blur()
+			m.Textinput.Reset()
+			m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+			m.SecondaryViewport.SetContent(components.Instructions())
 		}
 	}
-
-	m.PrimaryViewport, cmd = m.PrimaryViewport.Update(msg)
-	cmds = append(cmds, cmd)
-
-	m.SecondaryViewport, cmd = m.SecondaryViewport.Update(msg)
-	cmds = append(cmds, cmd)
 
 	m.Textinput, cmd = m.Textinput.Update(msg)
 	cmds = append(cmds, cmd)

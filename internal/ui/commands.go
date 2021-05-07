@@ -1,12 +1,11 @@
-package app
+package ui
 
 import (
 	"io/fs"
 
-	"github.com/knipferrc/fm/constants"
-	"github.com/knipferrc/fm/filesystem"
-
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/knipferrc/fm/internal/constants"
+	"github.com/knipferrc/fm/internal/utils"
 )
 
 type updateDirMsg []fs.FileInfo
@@ -15,7 +14,7 @@ type fileContentMsg string
 
 func updateDirectoryListing(dir string) tea.Cmd {
 	return func() tea.Msg {
-		files := filesystem.GetDirectoryListing(dir)
+		files := utils.GetDirectoryListing(dir)
 
 		return updateDirMsg(files)
 	}
@@ -23,8 +22,8 @@ func updateDirectoryListing(dir string) tea.Cmd {
 
 func renameFileOrDir(filename, value string) tea.Cmd {
 	return func() tea.Msg {
-		filesystem.RenameDirOrFile(filename, value)
-		files := filesystem.GetDirectoryListing(constants.CurrentDirectory)
+		utils.RenameDirOrFile(filename, value)
+		files := utils.GetDirectoryListing(constants.CurrentDirectory)
 
 		return actionMsg(files)
 	}
@@ -32,8 +31,8 @@ func renameFileOrDir(filename, value string) tea.Cmd {
 
 func moveDir(dir, value string) tea.Cmd {
 	return func() tea.Msg {
-		filesystem.CopyDir(dir, value, true)
-		files := filesystem.GetDirectoryListing(constants.CurrentDirectory)
+		utils.CopyDir(dir, value, true)
+		files := utils.GetDirectoryListing(constants.CurrentDirectory)
 
 		return actionMsg(files)
 	}
@@ -41,8 +40,8 @@ func moveDir(dir, value string) tea.Cmd {
 
 func moveFile(file, value string) tea.Cmd {
 	return func() tea.Msg {
-		filesystem.CopyFile(file, value, true)
-		files := filesystem.GetDirectoryListing(constants.CurrentDirectory)
+		utils.CopyFile(file, value, true)
+		files := utils.GetDirectoryListing(constants.CurrentDirectory)
 
 		return actionMsg(files)
 	}
@@ -50,8 +49,8 @@ func moveFile(file, value string) tea.Cmd {
 
 func deleteDir(dir string) tea.Cmd {
 	return func() tea.Msg {
-		filesystem.DeleteDirectory(dir)
-		files := filesystem.GetDirectoryListing(constants.CurrentDirectory)
+		utils.DeleteDirectory(dir)
+		files := utils.GetDirectoryListing(constants.CurrentDirectory)
 
 		return actionMsg(files)
 	}
@@ -59,8 +58,8 @@ func deleteDir(dir string) tea.Cmd {
 
 func deleteFile(file string) tea.Cmd {
 	return func() tea.Msg {
-		filesystem.DeleteFile(file)
-		files := filesystem.GetDirectoryListing(constants.CurrentDirectory)
+		utils.DeleteFile(file)
+		files := utils.GetDirectoryListing(constants.CurrentDirectory)
 
 		return actionMsg(files)
 	}
@@ -68,7 +67,7 @@ func deleteFile(file string) tea.Cmd {
 
 func readFileContent(file string) tea.Cmd {
 	return func() tea.Msg {
-		content := filesystem.ReadFileContent(file)
+		content := utils.ReadFileContent(file)
 
 		return fileContentMsg(content)
 	}
@@ -76,8 +75,8 @@ func readFileContent(file string) tea.Cmd {
 
 func createDir(dir string) tea.Cmd {
 	return func() tea.Msg {
-		filesystem.CreateDirectory(dir)
-		files := filesystem.GetDirectoryListing(constants.CurrentDirectory)
+		utils.CreateDirectory(dir)
+		files := utils.GetDirectoryListing(constants.CurrentDirectory)
 
 		return actionMsg(files)
 	}
