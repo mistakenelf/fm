@@ -3,9 +3,10 @@ package ui
 import (
 	"fmt"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/knipferrc/fm/internal/components"
 	"github.com/knipferrc/fm/internal/constants"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 func (m Model) getLeftPane() string {

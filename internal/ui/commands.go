@@ -82,3 +82,12 @@ func createDir(dir string) tea.Cmd {
 		return actionMsg(files)
 	}
 }
+
+func createFile(name string) tea.Cmd {
+	return func() tea.Msg {
+		utils.CreateFile(name)
+		files := utils.GetDirectoryListing(constants.CurrentDirectory)
+
+		return actionMsg(files)
+	}
+}

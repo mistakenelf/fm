@@ -3,6 +3,7 @@ package ui
 import (
 	"github.com/knipferrc/fm/internal/components"
 	"github.com/knipferrc/fm/internal/constants"
+	"github.com/knipferrc/fm/internal/utils"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -134,7 +135,40 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "enter":
-			return m, nil
+			cmd, value := utils.ParseCommand(m.Textinput.Value())
+
+			if cmd == "" {
+				return m, nil
+			}
+
+			switch cmd {
+			case "mkdir":
+				return m, createDir(value)
+
+			case "touch":
+				return m, createFile(value)
+
+			case "mv":
+				return m, renameFileOrDir(m.Files[m.Cursor].Name(), value)
+
+			case "cp":
+				if m.Files[m.Cursor].IsDir() {
+					return m, moveDir(m.Files[m.Cursor].Name(), value)
+				} else {
+					return m, moveFile(m.Files[m.Cursor].Name(), value)
+				}
+
+			case "rm":
+				if m.Files[m.Cursor].IsDir() {
+					return m, deleteDir(m.Files[m.Cursor].Name())
+				} else {
+					return m, deleteFile(m.Files[m.Cursor].Name())
+				}
+
+			default:
+				return m, nil
+
+			}
 
 		case ":":
 			m.ShowCommandBar = true
