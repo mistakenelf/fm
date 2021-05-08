@@ -101,6 +101,13 @@ func Instructions() string {
 func Pane(width, height int, isActive bool, content string) string {
 	cfg := config.GetConfig()
 	borderColor := cfg.Colors.Pane.InactivePane
+	borderType := lipgloss.NormalBorder()
+
+	if cfg.Settings.RoundedPanes {
+		borderType = lipgloss.RoundedBorder()
+	} else {
+		borderType = lipgloss.NormalBorder()
+	}
 
 	if isActive {
 		borderColor = cfg.Colors.Pane.ActivePane
@@ -108,7 +115,7 @@ func Pane(width, height int, isActive bool, content string) string {
 
 	return lipgloss.NewStyle().
 		BorderForeground(lipgloss.Color(borderColor)).
-		Border(lipgloss.NormalBorder()).
+		Border(borderType).
 		Width(width).
 		Height(height).
 		Render(content)

@@ -1,9 +1,10 @@
 package config
 
 type SettingsConfig struct {
-	StartDir   string `mapstructure:"start_dir"`
-	ShowIcons  bool   `mapstructure:"show_icons"`
-	ShowHidden bool   `mapstructure:"show_hidden"`
+	StartDir     string `mapstructure:"start_dir"`
+	ShowIcons    bool   `mapstructure:"show_icons"`
+	ShowHidden   bool   `mapstructure:"show_hidden"`
+	RoundedPanes bool   `mapstructure:"rounded_panes"`
 }
 
 type DirTreeColors struct {
@@ -18,32 +19,16 @@ type PaneColors struct {
 type ComponentColors struct {
 	Spinner string `mapstructure:"spinner"`
 }
-
-type SelectedFileColors struct {
-	Foreground string `mapstructure:"foreground"`
-	Background string `mapstructure:"background"`
-}
-
-type BarColors struct {
-	Foreground string `mapstructure:"foreground"`
-	Background string `mapstructure:"background"`
-}
-
-type TotalFilesColors struct {
-	Foreground string `mapstructure:"foreground"`
-	Background string `mapstructure:"background"`
-}
-
-type LogoColors struct {
+type ColorVariant struct {
 	Foreground string `mapstructure:"foreground"`
 	Background string `mapstructure:"background"`
 }
 
 type StatusBarColors struct {
-	SelectedFile SelectedFileColors `mapstructure:"selected_file"`
-	Bar          BarColors          `mapstructure:"bar"`
-	TotalFiles   TotalFilesColors   `mapstructure:"total_files"`
-	Logo         LogoColors         `mapstructure:"logo"`
+	SelectedFile ColorVariant `mapstructure:"selected_file"`
+	Bar          ColorVariant `mapstructure:"bar"`
+	TotalFiles   ColorVariant `mapstructure:"total_files"`
+	Logo         ColorVariant `mapstructure:"logo"`
 }
 
 type ColorsConfig struct {
