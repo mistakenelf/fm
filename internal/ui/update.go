@@ -96,7 +96,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 
-		case "h":
+		case "left", "h":
 			if !m.ShowCommandBar {
 				return m, updateDirectoryListing(constants.PreviousDirectory)
 			}
@@ -123,7 +123,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
-		case "l":
+		case "right", "l":
 			if !m.ShowCommandBar {
 				if m.ActivePane == constants.PrimaryPane {
 					if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
