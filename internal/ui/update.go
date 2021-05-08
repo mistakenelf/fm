@@ -191,6 +191,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.ActivePane = constants.PrimaryPane
 			m.Textinput.Blur()
 			m.Textinput.Reset()
+			m.SecondaryViewport.GotoTop()
 			m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 			m.SecondaryViewport.SetContent(components.Instructions())
 		}
