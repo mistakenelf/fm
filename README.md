@@ -34,19 +34,25 @@ go install github.com/knipferrc/fm@latest
 - Navigate your files with the following keys
   <br />
 
-  - <kbd>h</kbd> Go back to the previous directory
+  - <kbd>h</kbd> or <kbd>left</kbd> Go back to the previous directory
 
-  - <kbd>j</kbd> Move down in the file tree
+  - <kbd>j</kbd> or <kbd>down</kbd> Move down in the file tree
 
-  - <kbd>k</kbd> Move up in the file tree
+  - <kbd>k</kbd> or <kbd>up</kbd> Move up in the file tree
 
-  - <kbd>l</kbd> Opens the currently selected directory
+  - <kbd>l</kbd> or <kbd>right</kbd> Opens the currently selected directory
 
-  - <kbd>m</kbd> Move a file or folder. Once pressed you will be prompted in the status bar to type the destination for the currently highlighted file or folder. For example, `test.txt` is currently highlighted, press <kbd>m</kbd>, type `/some/new/destination` and press <kbd>enter</kbd>
+  - <kbd>:</kbd> Open command bar
 
-  - <kbd>d</kbd> Delete a file or folder. Once you have the file or folder highlighted that you wish to delete, press <kbd>d</kbd>, a prompt will show in the status bar, type <kbd>y</kbd> to delete it or <kbd>n</kbd> to cancel
+    - `mkdir /new/dir` Create a new directory in the current directory
 
-  - <kbd>r</kbd> Rename a file or folder. Once you have the file or folder highlighted that you wish to rename, press <kbd>r</kbd>, a prompt will show in the status bar, type the new name of the file or folder and then press <kbd>enter</kbd> to confirm those changes
+    - `touch filename.txt` Create new file in the current directory
+
+    - `mv newname.txt`Rename currently selected file or directory
+
+    - `cp /dir/to/move/to` Move currently selected file or directory
+
+    - `rm` Delete the currently selected file or directory
 
   - <kbd>tab</kbd> Toggle between panes
 

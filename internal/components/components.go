@@ -84,14 +84,17 @@ func Instructions() string {
 
 	instructionText := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(constants.White)).
-		Render(fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
-			"h - go back a directory",
-			"j - move cursor down",
-			"k - move cursor up",
-			"l - open selected folder / view file",
-			"m - move file or folder to another directory",
-			"d - delete a file or directory",
-			"r - rename a file or directory",
+		Render(fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+			"h or left arrow - go back a directory",
+			"j or down arrow - move cursor down",
+			"k or up arrow - move cursor up",
+			"l or right arrow - open selected folder / view file",
+			": - open command bar",
+			"mkdir /new/dir - create directory in current directory",
+			"touch filename.txt - create file in current directory",
+			"mv newname.txt - rename currently selected file or directory",
+			"cp /dir/to/move/to - move file or directory",
+			"rm - remove file or directory",
 			"tab - toggle between panes"),
 		)
 
