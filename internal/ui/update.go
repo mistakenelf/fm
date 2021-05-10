@@ -42,7 +42,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Cursor = 0
 		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 
-	case actionMsg:
+	case directoryMsg:
 		m.Files = msg
 		m.Cursor = 0
 		m.ShowCommandBar = false
@@ -71,6 +71,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				Width:  msg.Width,
 				Height: msg.Height - verticalMargin,
 			}
+
 			m.SecondaryViewport = viewport.Model{
 				Width:  msg.Width,
 				Height: msg.Height - verticalMargin,

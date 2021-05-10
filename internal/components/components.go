@@ -20,31 +20,45 @@ func DirItem(selected, isDir bool, name, ext, indicator string) string {
 	cfg := config.GetConfig()
 
 	if !cfg.Settings.ShowIcons && !selected {
-		return lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.DirTree.UnselectedDirItem)).Render(name)
+		return lipgloss.NewStyle().
+			Foreground(lipgloss.Color(cfg.Colors.DirTree.UnselectedDirItem)).
+			Render(name)
 	} else if !cfg.Settings.ShowIcons && selected {
-		return lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.DirTree.SelectedItem)).Render(name)
+		return lipgloss.NewStyle().
+			Foreground(lipgloss.Color(cfg.Colors.DirTree.SelectedItem)).
+			Render(name)
 	} else if selected && isDir {
 		icon, color := icons.GetIcon(name, ext, indicator)
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
-		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.DirTree.SelectedItem)).Render(name))
+		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
+			Foreground(lipgloss.Color(cfg.Colors.DirTree.SelectedItem)).
+			Render(name))
 
-		return lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.DirTree.SelectedItem)).Render(listing)
+		return lipgloss.NewStyle().
+			Foreground(lipgloss.Color(cfg.Colors.DirTree.SelectedItem)).
+			Render(listing)
 	} else if !selected && isDir {
 		icon, color := icons.GetIcon(name, ext, indicator)
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
-		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.DirTree.UnselectedDirItem)).Render(name))
+		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
+			Foreground(lipgloss.Color(cfg.Colors.DirTree.UnselectedDirItem)).
+			Render(name))
 
 		return listing
 	} else if selected && !isDir {
 		icon, color := icons.GetIcon(name, ext, indicator)
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
-		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.DirTree.SelectedItem)).Render(name))
+		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
+			Foreground(lipgloss.Color(cfg.Colors.DirTree.SelectedItem)).
+			Render(name))
 
 		return listing
 	} else {
 		icon, color := icons.GetIcon(name, ext, indicator)
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
-		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.DirTree.UnselectedDirItem)).Render(name))
+		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
+			Foreground(lipgloss.Color(cfg.Colors.DirTree.UnselectedDirItem)).
+			Render(name))
 
 		return listing
 	}
@@ -171,7 +185,10 @@ func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo, sho
 		)
 
 	if showCommandBar {
-		status = lipgloss.NewStyle().Padding(0, 1).Width(screenWidth - width(selectedFile) - width(fileTotals) - width(logo)).Render(textInput)
+		status = lipgloss.NewStyle().
+			Padding(0, 1).
+			Width(screenWidth - width(selectedFile) - width(fileTotals) - width(logo)).
+			Render(textInput)
 	}
 
 	bar := lipgloss.JoinHorizontal(lipgloss.Top,
