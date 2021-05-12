@@ -50,7 +50,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Textinput.Blur()
 		m.Textinput.Reset()
 		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-		m.SecondaryViewport.SetContent(components.Instructions())
+		m.SecondaryViewport.SetContent(m.Help.View())
 
 	case fileContentMsg:
 		border := lipgloss.NormalBorder()
@@ -78,7 +78,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-			m.SecondaryViewport.SetContent(components.Instructions())
+			m.SecondaryViewport.SetContent(m.Help.View())
 
 			m.Ready = true
 		} else {
@@ -130,6 +130,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
 						return m, updateDirectoryListing(m.Files[m.Cursor].Name())
 					} else {
+						m.SecondaryViewport.GotoTop()
 						return m, readFileContent(m.Files[m.Cursor].Name())
 					}
 				}
@@ -194,7 +195,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Textinput.Reset()
 			m.SecondaryViewport.GotoTop()
 			m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-			m.SecondaryViewport.SetContent(components.Instructions())
+			m.SecondaryViewport.SetContent(m.Help.View())
 		}
 	}
 

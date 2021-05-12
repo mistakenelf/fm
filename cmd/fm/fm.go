@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/knipferrc/fm/internal/components"
 	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/ui"
@@ -30,9 +29,6 @@ func Run() {
 	} else {
 		m.Files = utils.GetDirectoryListing(cfg.Settings.StartDir)
 	}
-
-	m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-	m.SecondaryViewport.SetContent(components.Instructions())
 
 	p := tea.NewProgram(m)
 

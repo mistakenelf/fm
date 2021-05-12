@@ -10,7 +10,6 @@ import (
 
 	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/internal/config"
-	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/utils"
 
 	"github.com/charmbracelet/lipgloss"
@@ -87,32 +86,6 @@ func DirTree(files []fs.FileInfo, cursor, width int) string {
 	))
 
 	return doc.String()
-}
-
-func Instructions() string {
-	header := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color(constants.White)).
-		MarginBottom(1).
-		Render("FM (File Manager)")
-
-	instructionText := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(constants.White)).
-		Render(fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
-			"h or left arrow - go back a directory",
-			"j or down arrow - move cursor down",
-			"k or up arrow - move cursor up",
-			"l or right arrow - open selected folder / view file",
-			": - open command bar",
-			"mkdir /new/dir - create directory in current directory",
-			"touch filename.txt - create file in current directory",
-			"mv newname.txt - rename currently selected file or directory",
-			"cp /dir/to/move/to - move file or directory",
-			"rm - remove file or directory",
-			"tab - toggle between panes"),
-		)
-
-	return lipgloss.JoinVertical(lipgloss.Top, header, instructionText)
 }
 
 func Pane(width, height int, isActive bool, content string) string {
