@@ -7,6 +7,7 @@ import (
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/help"
+	"github.com/knipferrc/fm/pane"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -21,6 +22,7 @@ type Model struct {
 	Textinput         textinput.Model
 	Spinner           spinner.Model
 	Help              help.Model
+	PrimaryPane       pane.Model
 	Cursor            int
 	ScreenWidth       int
 	ScreenHeight      int
@@ -71,6 +73,7 @@ func NewModel() Model {
 		Textinput:         input,
 		Spinner:           s,
 		Help:              h,
+		PrimaryPane:       pane.Model{},
 		Cursor:            0,
 		ScreenWidth:       0,
 		ScreenHeight:      0,

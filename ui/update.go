@@ -3,6 +3,7 @@ package ui
 import (
 	"github.com/knipferrc/fm/components"
 	"github.com/knipferrc/fm/constants"
+	"github.com/knipferrc/fm/pane"
 	"github.com/knipferrc/fm/utils"
 
 	"github.com/charmbracelet/bubbles/viewport"
@@ -67,8 +68,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
 
-			m.PrimaryViewport = viewport.Model{
-				Width:  msg.Width,
+			m.PrimaryPane = pane.Model{
+				Width:  (msg.Width / 2) - 3,
 				Height: msg.Height - verticalMargin,
 			}
 
@@ -77,15 +78,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				Height: msg.Height - verticalMargin,
 			}
 
-			m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+			m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 			m.SecondaryViewport.SetContent(m.Help.View())
 
 			m.Ready = true
 		} else {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
-			m.PrimaryViewport.Width = msg.Width
-			m.PrimaryViewport.Height = msg.Height - verticalMargin
+			m.PrimaryPane.Width = (msg.Width / 2) - 3
+			m.PrimaryPane.Height = msg.Height - verticalMargin
 			m.SecondaryViewport.Width = msg.Width
 			m.SecondaryViewport.Height = msg.Height - verticalMargin
 		}
@@ -107,7 +108,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.ActivePane == constants.PrimaryPane {
 					m.Cursor++
 					m.scrollPrimaryViewport()
-					m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+					m.PrimaryPane.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 				} else {
 					m.SecondaryViewport.LineDown(1)
 				}
@@ -118,7 +119,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.ActivePane == constants.PrimaryPane {
 					m.Cursor--
 					m.scrollPrimaryViewport()
-					m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+					m.PrimaryPane.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 				} else {
 					m.SecondaryViewport.LineUp(1)
 				}
@@ -194,7 +195,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Textinput.Blur()
 			m.Textinput.Reset()
 			m.SecondaryViewport.GotoTop()
-			m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+			m.PrimaryPane.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 			m.SecondaryViewport.SetContent(m.Help.View())
 		}
 	}
