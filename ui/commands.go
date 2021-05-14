@@ -3,8 +3,8 @@ package ui
 import (
 	"io/fs"
 
-	"github.com/knipferrc/fm/internal/constants"
-	"github.com/knipferrc/fm/internal/utils"
+	"github.com/knipferrc/fm/constants"
+	"github.com/knipferrc/fm/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
 )

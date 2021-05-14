@@ -3,8 +3,8 @@ package ui
 import (
 	"fmt"
 
-	"github.com/knipferrc/fm/internal/components"
-	"github.com/knipferrc/fm/internal/constants"
+	"github.com/knipferrc/fm/components"
+	"github.com/knipferrc/fm/constants"
 
 	"github.com/charmbracelet/lipgloss"
 )

@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/knipferrc/fm/internal/config"
+	"github.com/knipferrc/fm/config"
 )
 
 func RenameDirOrFile(currentName, newName string) {

@@ -1,13 +1,13 @@
-package fm
+package app
 
 import (
 	"log"
 	"os"
 
-	"github.com/knipferrc/fm/internal/config"
-	"github.com/knipferrc/fm/internal/constants"
-	"github.com/knipferrc/fm/internal/ui"
-	"github.com/knipferrc/fm/internal/utils"
+	"github.com/knipferrc/fm/config"
+	"github.com/knipferrc/fm/constants"
+	"github.com/knipferrc/fm/ui"
+	"github.com/knipferrc/fm/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
 )

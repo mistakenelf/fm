@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/icons"
-	"github.com/knipferrc/fm/internal/config"
-	"github.com/knipferrc/fm/internal/utils"
+	"github.com/knipferrc/fm/utils"
 
 	"github.com/charmbracelet/lipgloss"
 )
