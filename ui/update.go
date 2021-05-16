@@ -13,21 +13,21 @@ import (
 )
 
 func (m *Model) scrollPrimaryViewport() {
-	top := m.PrimaryViewport.YOffset
-	bottom := m.PrimaryViewport.Height + m.PrimaryViewport.YOffset - 1
+	top := m.PrimaryPane.Viewport.YOffset
+	bottom := m.PrimaryPane.Height + m.PrimaryPane.Viewport.YOffset - 1
 
 	if m.Cursor < top {
-		m.PrimaryViewport.LineUp(1)
+		m.PrimaryPane.LineUp(1)
 	} else if m.Cursor > bottom {
-		m.PrimaryViewport.LineDown(1)
+		m.PrimaryPane.LineDown(1)
 	}
 
 	if m.Cursor > len(m.Files)-1 {
 		m.Cursor = 0
-		m.PrimaryViewport.GotoTop()
+		m.PrimaryPane.GotoTop()
 	} else if m.Cursor < 0 {
 		m.Cursor = len(m.Files) - 1
-		m.PrimaryViewport.GotoBottom()
+		m.PrimaryPane.GotoBottom()
 	}
 }
 
@@ -41,7 +41,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case updateDirMsg:
 		m.Files = msg
 		m.Cursor = 0
-		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 
 	case directoryMsg:
 		m.Files = msg
@@ -50,7 +50,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.ActivePane = constants.PrimaryPane
 		m.Textinput.Blur()
 		m.Textinput.Reset()
-		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 		m.SecondaryViewport.SetContent(m.Help.View())
 
 	case fileContentMsg:
@@ -108,7 +108,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.ActivePane == constants.PrimaryPane {
 					m.Cursor++
 					m.scrollPrimaryViewport()
-					m.PrimaryPane.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+					m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 				} else {
 					m.SecondaryViewport.LineDown(1)
 				}
@@ -119,7 +119,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.ActivePane == constants.PrimaryPane {
 					m.Cursor--
 					m.scrollPrimaryViewport()
-					m.PrimaryPane.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+					m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 				} else {
 					m.SecondaryViewport.LineUp(1)
 				}
@@ -170,7 +170,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			default:
 				return m, nil
-
 			}
 
 		case ":":
@@ -195,7 +194,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Textinput.Blur()
 			m.Textinput.Reset()
 			m.SecondaryViewport.GotoTop()
-			m.PrimaryPane.Viewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+			m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 			m.SecondaryViewport.SetContent(m.Help.View())
 		}
 	}

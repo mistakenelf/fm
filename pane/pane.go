@@ -40,3 +40,19 @@ func (m *Model) View() string {
 func (m *Model) SetContent(content string) {
 	m.Viewport.SetContent(content)
 }
+
+func (m Model) LineUp(lines int) {
+	m.Viewport.LineUp(lines)
+}
+
+func (m Model) LineDown(lines int) {
+	m.Viewport.LineDown(lines)
+}
+
+func (m Model) GotoTop() {
+	m.Viewport.GotoTop()
+}
+
+func (m Model) GotoBottom() {
+	m.Viewport.GotoBottom()
+}
