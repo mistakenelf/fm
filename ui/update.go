@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"strings"
+
 	"github.com/knipferrc/fm/components"
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
@@ -9,7 +11,6 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/reflow/wrap"
 )
 
 func (m *Model) scrollPrimaryPane() {
@@ -64,7 +65,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		halfScreenWidth := m.ScreenWidth / 2
 		borderWidth := lipgloss.Width(border.Left + border.Right)
-		m.SecondaryPane.SetContent(wrap.String(string(msg), halfScreenWidth-borderWidth))
+		m.SecondaryPane.SetContent(lipgloss.NewStyle().
+			Width(halfScreenWidth - borderWidth).
+			Render((strings.Replace(string(msg), "\t", "    ", -1))))
 
 	case tea.WindowSizeMsg:
 		cfg := config.GetConfig()
