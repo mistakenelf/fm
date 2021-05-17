@@ -53,23 +53,31 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.SecondaryPane.SetContent(m.Help.View())
 
 	case fileContentMsg:
+		cfg := config.GetConfig()
 		border := lipgloss.NormalBorder()
+
+		if cfg.Settings.RoundedPanes {
+			border = lipgloss.RoundedBorder()
+		} else {
+			border = lipgloss.NormalBorder()
+		}
+
 		halfScreenWidth := m.ScreenWidth / 2
-		borderWidth := lipgloss.Width(border.Left + border.Right + border.Top + border.Bottom)
+		borderWidth := lipgloss.Width(border.Left + border.Right)
 		m.SecondaryPane.SetContent(wrap.String(string(msg), halfScreenWidth-borderWidth))
 
 	case tea.WindowSizeMsg:
 		cfg := config.GetConfig()
 		border := lipgloss.NormalBorder()
-		paneBorderWidth := lipgloss.Width(border.Top + border.Left + border.Right)
-		verticalMargin := lipgloss.Width(border.Bottom) + constants.StatusBarHeight
-		borderType := lipgloss.NormalBorder()
 
 		if cfg.Settings.RoundedPanes {
-			borderType = lipgloss.RoundedBorder()
+			border = lipgloss.RoundedBorder()
 		} else {
-			borderType = lipgloss.NormalBorder()
+			border = lipgloss.NormalBorder()
 		}
+
+		paneBorderWidth := lipgloss.Width(border.Left + border.Right)
+		verticalMargin := lipgloss.Width(border.Bottom) + constants.StatusBarHeight
 
 		if !m.Ready {
 			m.ScreenWidth = msg.Width
@@ -79,7 +87,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				IsActive:            true,
 				ActiveBorderColor:   cfg.Colors.Pane.ActivePane,
 				InactiveBorderColor: cfg.Colors.Pane.InactivePane,
-				BorderType:          borderType,
+				BorderType:          border,
 			}
 			m.PrimaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
 			m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
@@ -88,7 +96,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				IsActive:            false,
 				ActiveBorderColor:   cfg.Colors.Pane.ActivePane,
 				InactiveBorderColor: cfg.Colors.Pane.InactivePane,
-				BorderType:          borderType,
+				BorderType:          border,
 			}
 			m.SecondaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
 			m.SecondaryPane.SetContent(m.Help.View())
