@@ -11,24 +11,22 @@ import (
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type Model struct {
-	Files             []fs.FileInfo
-	PrimaryViewport   viewport.Model
-	SecondaryViewport viewport.Model
-	Textinput         textinput.Model
-	Spinner           spinner.Model
-	Help              help.Model
-	PrimaryPane       pane.Model
-	Cursor            int
-	ScreenWidth       int
-	ScreenHeight      int
-	ShowCommandBar    bool
-	Ready             bool
-	ActivePane        string
+	PrimaryPane    pane.Model
+	SecondaryPane  pane.Model
+	Files          []fs.FileInfo
+	Textinput      textinput.Model
+	Spinner        spinner.Model
+	Help           help.Model
+	Cursor         int
+	ScreenWidth    int
+	ScreenHeight   int
+	ShowCommandBar bool
+	Ready          bool
+	ActivePane     string
 }
 
 func NewModel() Model {
@@ -67,18 +65,17 @@ func NewModel() Model {
 		)
 
 	return Model{
-		Files:             make([]fs.FileInfo, 0),
-		PrimaryViewport:   viewport.Model{},
-		SecondaryViewport: viewport.Model{},
-		Textinput:         input,
-		Spinner:           s,
-		Help:              h,
-		PrimaryPane:       pane.Model{},
-		Cursor:            0,
-		ScreenWidth:       0,
-		ScreenHeight:      0,
-		ShowCommandBar:    false,
-		Ready:             false,
-		ActivePane:        constants.PrimaryPane,
+		PrimaryPane:    pane.Model{},
+		SecondaryPane:  pane.Model{},
+		Files:          make([]fs.FileInfo, 0),
+		Textinput:      input,
+		Spinner:        s,
+		Help:           h,
+		Cursor:         0,
+		ScreenWidth:    0,
+		ScreenHeight:   0,
+		ShowCommandBar: false,
+		Ready:          false,
+		ActivePane:     constants.PrimaryPane,
 	}
 }

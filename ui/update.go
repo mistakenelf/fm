@@ -6,13 +6,12 @@ import (
 	"github.com/knipferrc/fm/pane"
 	"github.com/knipferrc/fm/utils"
 
-	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/wrap"
 )
 
-func (m *Model) scrollPrimaryViewport() {
+func (m *Model) scrollPrimaryPane() {
 	top := m.PrimaryPane.Viewport.YOffset
 	bottom := m.PrimaryPane.Height + m.PrimaryPane.Viewport.YOffset - 1
 
@@ -51,44 +50,37 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Textinput.Blur()
 		m.Textinput.Reset()
 		m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-		m.SecondaryViewport.SetContent(m.Help.View())
+		m.SecondaryPane.SetContent(m.Help.View())
 
 	case fileContentMsg:
 		border := lipgloss.NormalBorder()
 		halfScreenWidth := m.ScreenWidth / 2
 		borderWidth := lipgloss.Width(border.Left + border.Right + border.Top + border.Bottom)
-		m.SecondaryViewport.SetContent(wrap.String(string(msg), halfScreenWidth-borderWidth))
+		m.SecondaryPane.SetContent(wrap.String(string(msg), halfScreenWidth-borderWidth))
 
 	case tea.WindowSizeMsg:
-		borderWidth := lipgloss.Width(lipgloss.NormalBorder().Top)
-		statusBarHeight := 2
-		verticalMargin := borderWidth + statusBarHeight
+		border := lipgloss.NormalBorder()
+		paneBorderWidth := lipgloss.Width(border.Top + border.Left + border.Right)
+		verticalMargin := lipgloss.Width(border.Bottom) + constants.StatusBarHeight
 
 		if !m.Ready {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
 
-			m.PrimaryPane = pane.Model{
-				Width:  (msg.Width / 2) - 3,
-				Height: msg.Height - verticalMargin,
-			}
-
-			m.SecondaryViewport = viewport.Model{
-				Width:  msg.Width,
-				Height: msg.Height - verticalMargin,
-			}
-
+			m.PrimaryPane = pane.Model{}
+			m.PrimaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
 			m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-			m.SecondaryViewport.SetContent(m.Help.View())
+
+			m.SecondaryPane = pane.Model{}
+			m.SecondaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
+			m.SecondaryPane.SetContent(m.Help.View())
 
 			m.Ready = true
 		} else {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
-			m.PrimaryPane.Width = (msg.Width / 2) - 3
-			m.PrimaryPane.Height = msg.Height - verticalMargin
-			m.SecondaryViewport.Width = msg.Width
-			m.SecondaryViewport.Height = msg.Height - verticalMargin
+			m.PrimaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
+			m.SecondaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
 		}
 
 	case tea.KeyMsg:
@@ -107,10 +99,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.ShowCommandBar {
 				if m.ActivePane == constants.PrimaryPane {
 					m.Cursor++
-					m.scrollPrimaryViewport()
+					m.scrollPrimaryPane()
 					m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 				} else {
-					m.SecondaryViewport.LineDown(1)
+					m.SecondaryPane.LineDown(1)
 				}
 			}
 
@@ -118,10 +110,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.ShowCommandBar {
 				if m.ActivePane == constants.PrimaryPane {
 					m.Cursor--
-					m.scrollPrimaryViewport()
+					m.scrollPrimaryPane()
 					m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 				} else {
-					m.SecondaryViewport.LineUp(1)
+					m.SecondaryPane.LineUp(1)
 				}
 			}
 
@@ -131,7 +123,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
 						return m, updateDirectoryListing(m.Files[m.Cursor].Name())
 					} else {
-						m.SecondaryViewport.GotoTop()
+						m.SecondaryPane.GotoTop()
 						return m, readFileContent(m.Files[m.Cursor].Name())
 					}
 				}
@@ -193,9 +185,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.ActivePane = constants.PrimaryPane
 			m.Textinput.Blur()
 			m.Textinput.Reset()
-			m.SecondaryViewport.GotoTop()
+			m.SecondaryPane.GotoTop()
 			m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-			m.SecondaryViewport.SetContent(m.Help.View())
+			m.SecondaryPane.SetContent(m.Help.View())
 		}
 	}
 

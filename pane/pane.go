@@ -14,7 +14,14 @@ type Model struct {
 	Viewport viewport.Model
 }
 
-func (m *Model) View() string {
+func (m *Model) SetSize(width, height int) {
+	m.Width = width
+	m.Height = height
+	m.Viewport.Width = width
+	m.Viewport.Height = height
+}
+
+func (m Model) View() string {
 	cfg := config.GetConfig()
 	borderColor := cfg.Colors.Pane.InactivePane
 	borderType := lipgloss.NormalBorder()

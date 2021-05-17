@@ -4,28 +4,9 @@ import (
 	"fmt"
 
 	"github.com/knipferrc/fm/components"
-	"github.com/knipferrc/fm/constants"
 
 	"github.com/charmbracelet/lipgloss"
 )
-
-func (m Model) getRightPane() string {
-	border := lipgloss.NormalBorder()
-	borderRightWidth := lipgloss.Width(border.Right + border.Top)
-	halfScreenWidth := m.ScreenWidth / 2
-	rightPaneActive := m.ActivePane == constants.SecondaryPane
-	paneHeight := m.ScreenHeight - constants.StatusBarHeight - borderRightWidth
-	rightPane := ""
-
-	rightPane = components.Pane(
-		halfScreenWidth-borderRightWidth,
-		paneHeight,
-		rightPaneActive,
-		m.SecondaryViewport.View(),
-	)
-
-	return rightPane
-}
 
 func (m Model) View() string {
 	if !m.Ready || len(m.Files) <= 0 {
@@ -33,7 +14,7 @@ func (m Model) View() string {
 	}
 
 	leftPane := m.PrimaryPane.View()
-	rightPane := m.getRightPane()
+	rightPane := m.SecondaryPane.View()
 	panes := lipgloss.JoinHorizontal(lipgloss.Top, leftPane, rightPane)
 
 	return lipgloss.JoinVertical(
