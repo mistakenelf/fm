@@ -1,17 +1,18 @@
 package pane
 
 import (
-	"github.com/knipferrc/fm/config"
-
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type Model struct {
-	Width    int
-	Height   int
-	IsActive bool
-	Viewport viewport.Model
+	Width       int
+	Height      int
+	IsActive    bool
+	Viewport    viewport.Model
+	ActiveBorderColor string
+	InactiveBorderColor string
+	BorderType  lipgloss.Border
 }
 
 func (m *Model) SetSize(width, height int) {
@@ -22,23 +23,15 @@ func (m *Model) SetSize(width, height int) {
 }
 
 func (m Model) View() string {
-	cfg := config.GetConfig()
-	borderColor := cfg.Colors.Pane.InactivePane
-	borderType := lipgloss.NormalBorder()
-
-	if cfg.Settings.RoundedPanes {
-		borderType = lipgloss.RoundedBorder()
-	} else {
-		borderType = lipgloss.NormalBorder()
-	}
+	borderColor := m.InactiveBorderColor
 
 	if m.IsActive {
-		borderColor = cfg.Colors.Pane.ActivePane
-	}
+		borderColor = m.ActiveBorderColor
+	} 
 
 	return lipgloss.NewStyle().
 		BorderForeground(lipgloss.Color(borderColor)).
-		Border(borderType).
+		Border(m.BorderType).
 		Width(m.Width).
 		Height(m.Height).
 		Render(m.Viewport.View())

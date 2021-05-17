@@ -2,6 +2,7 @@ package ui
 
 import (
 	"github.com/knipferrc/fm/components"
+	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/pane"
 	"github.com/knipferrc/fm/utils"
@@ -58,21 +59,37 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.SecondaryPane.SetContent(wrap.String(string(msg), halfScreenWidth-borderWidth))
 
 	case tea.WindowSizeMsg:
+		cfg := config.GetConfig()
 		border := lipgloss.NormalBorder()
 		paneBorderWidth := lipgloss.Width(border.Top + border.Left + border.Right)
 		verticalMargin := lipgloss.Width(border.Bottom) + constants.StatusBarHeight
+		borderType := lipgloss.NormalBorder()
+
+		if cfg.Settings.RoundedPanes {
+			borderType = lipgloss.RoundedBorder()
+		} else {
+			borderType = lipgloss.NormalBorder()
+		}
 
 		if !m.Ready {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
 
 			m.PrimaryPane = pane.Model{
-				IsActive: true,
+				IsActive:            true,
+				ActiveBorderColor:   cfg.Colors.Pane.ActivePane,
+				InactiveBorderColor: cfg.Colors.Pane.InactivePane,
+				BorderType:          borderType,
 			}
 			m.PrimaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
 			m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 
-			m.SecondaryPane = pane.Model{}
+			m.SecondaryPane = pane.Model{
+				IsActive:            false,
+				ActiveBorderColor:   cfg.Colors.Pane.ActivePane,
+				InactiveBorderColor: cfg.Colors.Pane.InactivePane,
+				BorderType:          borderType,
+			}
 			m.SecondaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
 			m.SecondaryPane.SetContent(m.Help.View())
 
