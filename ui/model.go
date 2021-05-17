@@ -26,7 +26,6 @@ type Model struct {
 	ScreenHeight   int
 	ShowCommandBar bool
 	Ready          bool
-	ActivePane     string
 }
 
 func NewModel() Model {
@@ -76,6 +75,5 @@ func NewModel() Model {
 		ScreenHeight:   0,
 		ShowCommandBar: false,
 		Ready:          false,
-		ActivePane:     constants.PrimaryPane,
 	}
 }

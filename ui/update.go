@@ -46,7 +46,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Files = msg
 		m.Cursor = 0
 		m.ShowCommandBar = false
-		m.ActivePane = constants.PrimaryPane
 		m.Textinput.Blur()
 		m.Textinput.Reset()
 		m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
@@ -67,7 +66,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
 
-			m.PrimaryPane = pane.Model{}
+			m.PrimaryPane = pane.Model{
+				IsActive: true,
+			}
 			m.PrimaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
 			m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 
@@ -100,7 +101,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "down", "j":
 			if !m.ShowCommandBar {
-				if m.ActivePane == constants.PrimaryPane {
+				if m.PrimaryPane.IsActive {
 					m.Cursor++
 					m.scrollPrimaryPane()
 					m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
@@ -111,7 +112,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "up", "k":
 			if !m.ShowCommandBar {
-				if m.ActivePane == constants.PrimaryPane {
+				if m.PrimaryPane.IsActive {
 					m.Cursor--
 					m.scrollPrimaryPane()
 					m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
@@ -122,7 +123,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "right", "l":
 			if !m.ShowCommandBar {
-				if m.ActivePane == constants.PrimaryPane {
+				if m.PrimaryPane.IsActive {
 					if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
 						return m, updateDirectoryListing(m.Files[m.Cursor].Name())
 					} else {
@@ -176,16 +177,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "tab":
 			if !m.ShowCommandBar {
-				if m.ActivePane == constants.PrimaryPane {
-					m.ActivePane = constants.SecondaryPane
+				if m.PrimaryPane.IsActive {
+					m.PrimaryPane.IsActive = false
+					m.SecondaryPane.IsActive = true
 				} else {
-					m.ActivePane = constants.PrimaryPane
+					m.PrimaryPane.IsActive = true
+					m.SecondaryPane.IsActive = false
 				}
 			}
 
 		case "esc":
 			m.ShowCommandBar = false
-			m.ActivePane = constants.PrimaryPane
 			m.Textinput.Blur()
 			m.Textinput.Reset()
 			m.SecondaryPane.GotoTop()

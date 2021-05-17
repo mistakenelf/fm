@@ -48,18 +48,18 @@ func (m *Model) SetContent(content string) {
 	m.Viewport.SetContent(content)
 }
 
-func (m Model) LineUp(lines int) {
+func (m *Model) LineUp(lines int) {
 	m.Viewport.LineUp(lines)
 }
 
-func (m Model) LineDown(lines int) {
+func (m *Model) LineDown(lines int) {
 	m.Viewport.LineDown(lines)
 }
 
-func (m Model) GotoTop() {
+func (m *Model) GotoTop() {
 	m.Viewport.GotoTop()
 }
 
-func (m Model) GotoBottom() {
+func (m *Model) GotoBottom() {
 	m.Viewport.GotoBottom()
 }
