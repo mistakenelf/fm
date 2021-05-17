@@ -1,14 +1,11 @@
 package constants
 
 const (
-	PrimaryPane   = "primary"
-	SecondaryPane = "secondary"
-
 	CurrentDirectory  = "."
 	PreviousDirectory = ".."
 	HomeDirectory     = "~"
 
-	StatusBarHeight = 1
+	StatusBarHeight = 2
 
 	White       = "#FFFDF5"
 	Pink        = "#F25D94"

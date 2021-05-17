@@ -2,31 +2,32 @@ package ui
 
 import (
 	"github.com/knipferrc/fm/components"
+	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
+	"github.com/knipferrc/fm/pane"
 	"github.com/knipferrc/fm/utils"
 
-	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/wrap"
 )
 
-func (m *Model) scrollPrimaryViewport() {
-	top := m.PrimaryViewport.YOffset
-	bottom := m.PrimaryViewport.Height + m.PrimaryViewport.YOffset - 1
+func (m *Model) scrollPrimaryPane() {
+	top := m.PrimaryPane.Viewport.YOffset
+	bottom := m.PrimaryPane.Height + m.PrimaryPane.Viewport.YOffset - 1
 
 	if m.Cursor < top {
-		m.PrimaryViewport.LineUp(1)
+		m.PrimaryPane.LineUp(1)
 	} else if m.Cursor > bottom {
-		m.PrimaryViewport.LineDown(1)
+		m.PrimaryPane.LineDown(1)
 	}
 
 	if m.Cursor > len(m.Files)-1 {
 		m.Cursor = 0
-		m.PrimaryViewport.GotoTop()
+		m.PrimaryPane.GotoTop()
 	} else if m.Cursor < 0 {
 		m.Cursor = len(m.Files) - 1
-		m.PrimaryViewport.GotoBottom()
+		m.PrimaryPane.GotoBottom()
 	}
 }
 
@@ -40,59 +41,72 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case updateDirMsg:
 		m.Files = msg
 		m.Cursor = 0
-		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 
 	case directoryMsg:
 		m.Files = msg
 		m.Cursor = 0
 		m.ShowCommandBar = false
-		m.ActivePane = constants.PrimaryPane
 		m.Textinput.Blur()
 		m.Textinput.Reset()
-		m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-		m.SecondaryViewport.SetContent(m.Help.View())
+		m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.SecondaryPane.SetContent(m.Help.View())
 
 	case fileContentMsg:
 		border := lipgloss.NormalBorder()
 		halfScreenWidth := m.ScreenWidth / 2
 		borderWidth := lipgloss.Width(border.Left + border.Right + border.Top + border.Bottom)
-		m.SecondaryViewport.SetContent(wrap.String(string(msg), halfScreenWidth-borderWidth))
+		m.SecondaryPane.SetContent(wrap.String(string(msg), halfScreenWidth-borderWidth))
 
 	case tea.WindowSizeMsg:
-		borderWidth := lipgloss.Width(lipgloss.NormalBorder().Top)
-		statusBarHeight := 2
-		verticalMargin := borderWidth + statusBarHeight
+		cfg := config.GetConfig()
+		border := lipgloss.NormalBorder()
+		paneBorderWidth := lipgloss.Width(border.Top + border.Left + border.Right)
+		verticalMargin := lipgloss.Width(border.Bottom) + constants.StatusBarHeight
+		borderType := lipgloss.NormalBorder()
+
+		if cfg.Settings.RoundedPanes {
+			borderType = lipgloss.RoundedBorder()
+		} else {
+			borderType = lipgloss.NormalBorder()
+		}
 
 		if !m.Ready {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
 
-			m.PrimaryViewport = viewport.Model{
-				Width:  msg.Width,
-				Height: msg.Height - verticalMargin,
+			m.PrimaryPane = pane.Model{
+				IsActive:            true,
+				ActiveBorderColor:   cfg.Colors.Pane.ActivePane,
+				InactiveBorderColor: cfg.Colors.Pane.InactivePane,
+				BorderType:          borderType,
 			}
+			m.PrimaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
+			m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 
-			m.SecondaryViewport = viewport.Model{
-				Width:  msg.Width,
-				Height: msg.Height - verticalMargin,
+			m.SecondaryPane = pane.Model{
+				IsActive:            false,
+				ActiveBorderColor:   cfg.Colors.Pane.ActivePane,
+				InactiveBorderColor: cfg.Colors.Pane.InactivePane,
+				BorderType:          borderType,
 			}
-
-			m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-			m.SecondaryViewport.SetContent(m.Help.View())
+			m.SecondaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
+			m.SecondaryPane.SetContent(m.Help.View())
 
 			m.Ready = true
 		} else {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
-			m.PrimaryViewport.Width = msg.Width
-			m.PrimaryViewport.Height = msg.Height - verticalMargin
-			m.SecondaryViewport.Width = msg.Width
-			m.SecondaryViewport.Height = msg.Height - verticalMargin
+			m.PrimaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
+			m.SecondaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
 		}
 
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+c", "q":
+		case "ctrl+c":
+			return m, tea.Quit
+
+		case "q":
 			if !m.ShowCommandBar {
 				return m, tea.Quit
 			}
@@ -104,33 +118,33 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "down", "j":
 			if !m.ShowCommandBar {
-				if m.ActivePane == constants.PrimaryPane {
+				if m.PrimaryPane.IsActive {
 					m.Cursor++
-					m.scrollPrimaryViewport()
-					m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+					m.scrollPrimaryPane()
+					m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 				} else {
-					m.SecondaryViewport.LineDown(1)
+					m.SecondaryPane.LineDown(1)
 				}
 			}
 
 		case "up", "k":
 			if !m.ShowCommandBar {
-				if m.ActivePane == constants.PrimaryPane {
+				if m.PrimaryPane.IsActive {
 					m.Cursor--
-					m.scrollPrimaryViewport()
-					m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+					m.scrollPrimaryPane()
+					m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 				} else {
-					m.SecondaryViewport.LineUp(1)
+					m.SecondaryPane.LineUp(1)
 				}
 			}
 
 		case "right", "l":
 			if !m.ShowCommandBar {
-				if m.ActivePane == constants.PrimaryPane {
+				if m.PrimaryPane.IsActive {
 					if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
 						return m, updateDirectoryListing(m.Files[m.Cursor].Name())
 					} else {
-						m.SecondaryViewport.GotoTop()
+						m.SecondaryPane.GotoTop()
 						return m, readFileContent(m.Files[m.Cursor].Name())
 					}
 				}
@@ -169,7 +183,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			default:
 				return m, nil
-
 			}
 
 		case ":":
@@ -181,21 +194,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "tab":
 			if !m.ShowCommandBar {
-				if m.ActivePane == constants.PrimaryPane {
-					m.ActivePane = constants.SecondaryPane
+				if m.PrimaryPane.IsActive {
+					m.PrimaryPane.IsActive = false
+					m.SecondaryPane.IsActive = true
 				} else {
-					m.ActivePane = constants.PrimaryPane
+					m.PrimaryPane.IsActive = true
+					m.SecondaryPane.IsActive = false
 				}
 			}
 
 		case "esc":
 			m.ShowCommandBar = false
-			m.ActivePane = constants.PrimaryPane
 			m.Textinput.Blur()
 			m.Textinput.Reset()
-			m.SecondaryViewport.GotoTop()
-			m.PrimaryViewport.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-			m.SecondaryViewport.SetContent(m.Help.View())
+			m.SecondaryPane.GotoTop()
+			m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+			m.SecondaryPane.SetContent(m.Help.View())
 		}
 	}
 
