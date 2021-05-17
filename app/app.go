@@ -32,9 +32,6 @@ func Run() {
 
 	p := tea.NewProgram(m)
 
-	p.EnableMouseCellMotion()
-	defer p.DisableMouseCellMotion()
-
 	if err := p.Start(); err != nil {
 		log.Fatal("Failed to start fm", err)
 		os.Exit(1)
