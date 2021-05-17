@@ -6,13 +6,13 @@ import (
 )
 
 type Model struct {
-	Width       int
-	Height      int
-	IsActive    bool
-	Viewport    viewport.Model
-	ActiveBorderColor string
+	Width               int
+	Height              int
+	IsActive            bool
+	Viewport            viewport.Model
+	ActiveBorderColor   string
 	InactiveBorderColor string
-	BorderType  lipgloss.Border
+	BorderType          lipgloss.Border
 }
 
 func (m *Model) SetSize(width, height int) {
@@ -27,7 +27,7 @@ func (m Model) View() string {
 
 	if m.IsActive {
 		borderColor = m.ActiveBorderColor
-	} 
+	}
 
 	return lipgloss.NewStyle().
 		BorderForeground(lipgloss.Color(borderColor)).
