@@ -88,29 +88,6 @@ func DirTree(files []fs.FileInfo, cursor, width int) string {
 	return doc.String()
 }
 
-func Pane(width, height int, isActive bool, content string) string {
-	cfg := config.GetConfig()
-	borderColor := cfg.Colors.Pane.InactivePane
-	borderType := lipgloss.NormalBorder()
-
-	if cfg.Settings.RoundedPanes {
-		borderType = lipgloss.RoundedBorder()
-	} else {
-		borderType = lipgloss.NormalBorder()
-	}
-
-	if isActive {
-		borderColor = cfg.Colors.Pane.ActivePane
-	}
-
-	return lipgloss.NewStyle().
-		BorderForeground(lipgloss.Color(borderColor)).
-		Border(borderType).
-		Width(width).
-		Height(height).
-		Render(content)
-}
-
 func StatusBar(screenWidth, cursor, totalFiles int, currentFile fs.FileInfo, showCommandBar bool, textInput string) string {
 	cfg := config.GetConfig()
 	doc := strings.Builder{}
