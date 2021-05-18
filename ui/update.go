@@ -1,9 +1,9 @@
 package ui
 
 import (
-	"github.com/knipferrc/fm/components"
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
+	"github.com/knipferrc/fm/dirtree"
 	"github.com/knipferrc/fm/pane"
 	"github.com/knipferrc/fm/utils"
 
@@ -40,7 +40,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case updateDirMsg:
 		m.Files = msg
 		m.Cursor = 0
-		m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.PrimaryPane.SetContent(dirtree.View(m.Files, m.Cursor, m.ScreenWidth))
 
 	case directoryMsg:
 		m.Files = msg
@@ -48,7 +48,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.ShowCommandBar = false
 		m.Textinput.Blur()
 		m.Textinput.Reset()
-		m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+		m.PrimaryPane.SetContent(dirtree.View(m.Files, m.Cursor, m.ScreenWidth))
 		m.SecondaryPane.SetContent(m.Text.View())
 
 	case fileContentMsg:
@@ -88,7 +88,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cfg.Colors.Pane.ActiveBorderColor,
 				cfg.Colors.Pane.InactiveBorderColor,
 			)
-			m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+			m.PrimaryPane.SetContent(dirtree.View(m.Files, m.Cursor, m.ScreenWidth))
 
 			m.SecondaryPane = pane.NewModel(
 				(msg.Width/2)-paneBorderWidth,
@@ -128,7 +128,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.PrimaryPane.IsActive {
 					m.Cursor++
 					m.scrollPrimaryPane()
-					m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+					m.PrimaryPane.SetContent(dirtree.View(m.Files, m.Cursor, m.ScreenWidth))
 				} else {
 					m.SecondaryPane.LineDown(1)
 				}
@@ -139,7 +139,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.PrimaryPane.IsActive {
 					m.Cursor--
 					m.scrollPrimaryPane()
-					m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+					m.PrimaryPane.SetContent(dirtree.View(m.Files, m.Cursor, m.ScreenWidth))
 				} else {
 					m.SecondaryPane.LineUp(1)
 				}
@@ -215,7 +215,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Textinput.Blur()
 			m.Textinput.Reset()
 			m.SecondaryPane.GotoTop()
-			m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
+			m.PrimaryPane.SetContent(dirtree.View(m.Files, m.Cursor, m.ScreenWidth))
 			m.SecondaryPane.SetContent(m.Text.View())
 		}
 	}

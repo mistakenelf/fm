@@ -3,7 +3,7 @@ package ui
 import (
 	"fmt"
 
-	"github.com/knipferrc/fm/components"
+	"github.com/knipferrc/fm/statusbar"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -20,7 +20,7 @@ func (m Model) View() string {
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
 		panes,
-		components.StatusBar(
+		statusbar.View(
 			m.ScreenWidth,
 			m.Cursor,
 			len(m.Files),
