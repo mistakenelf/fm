@@ -1,4 +1,4 @@
-package help
+package text
 
 import (
 	"github.com/charmbracelet/lipgloss"
@@ -17,5 +17,13 @@ func NewModel() Model {
 }
 
 func (m Model) View() string {
-	return lipgloss.JoinVertical(lipgloss.Top, m.HeaderText, m.BodyText)
+	text := ""
+
+	if m.HeaderText != "" {
+		text = lipgloss.JoinVertical(lipgloss.Top, m.HeaderText, m.BodyText)
+	} else {
+		text = lipgloss.JoinVertical(lipgloss.Top, m.BodyText)
+	}
+
+	return text
 }
