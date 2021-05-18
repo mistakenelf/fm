@@ -1,8 +1,6 @@
 package ui
 
 import (
-	"strings"
-
 	"github.com/knipferrc/fm/components"
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
@@ -51,7 +49,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Textinput.Blur()
 		m.Textinput.Reset()
 		m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-		m.SecondaryPane.SetContent(m.Help.View())
+		m.SecondaryPane.SetContent(m.Text.View())
 
 	case fileContentMsg:
 		cfg := config.GetConfig()
@@ -59,15 +57,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if cfg.Settings.RoundedPanes {
 			border = lipgloss.RoundedBorder()
-		} else {
-			border = lipgloss.NormalBorder()
 		}
 
 		halfScreenWidth := m.ScreenWidth / 2
 		borderWidth := lipgloss.Width(border.Left + border.Right)
 		m.SecondaryPane.SetContent(lipgloss.NewStyle().
 			Width(halfScreenWidth - borderWidth).
-			Render((strings.Replace(string(msg), "\t", "    ", -1))))
+			Render(utils.ConverTabsToSpaces(string(msg))))
 
 	case tea.WindowSizeMsg:
 		cfg := config.GetConfig()
@@ -75,8 +71,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if cfg.Settings.RoundedPanes {
 			border = lipgloss.RoundedBorder()
-		} else {
-			border = lipgloss.NormalBorder()
 		}
 
 		paneBorderWidth := lipgloss.Width(border.Left + border.Right)
@@ -86,23 +80,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
 
-			m.PrimaryPane = pane.Model{
-				IsActive:            true,
-				ActiveBorderColor:   cfg.Colors.Pane.ActivePane,
-				InactiveBorderColor: cfg.Colors.Pane.InactivePane,
-				BorderType:          border,
-			}
-			m.PrimaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
+			m.PrimaryPane = pane.NewModel(
+				(msg.Width/2)-paneBorderWidth,
+				msg.Height-verticalMargin,
+				true,
+				cfg.Settings.RoundedPanes,
+				cfg.Colors.Pane.ActiveBorderColor,
+				cfg.Colors.Pane.InactiveBorderColor,
+			)
 			m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
 
-			m.SecondaryPane = pane.Model{
-				IsActive:            false,
-				ActiveBorderColor:   cfg.Colors.Pane.ActivePane,
-				InactiveBorderColor: cfg.Colors.Pane.InactivePane,
-				BorderType:          border,
-			}
-			m.SecondaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
-			m.SecondaryPane.SetContent(m.Help.View())
+			m.SecondaryPane = pane.NewModel(
+				(msg.Width/2)-paneBorderWidth,
+				msg.Height-verticalMargin,
+				false,
+				cfg.Settings.RoundedPanes,
+				cfg.Colors.Pane.ActiveBorderColor,
+				cfg.Colors.Pane.InactiveBorderColor,
+			)
+			m.SecondaryPane.SetContent(m.Text.View())
 
 			m.Ready = true
 		} else {
@@ -220,7 +216,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Textinput.Reset()
 			m.SecondaryPane.GotoTop()
 			m.PrimaryPane.SetContent(components.DirTree(m.Files, m.Cursor, m.ScreenWidth))
-			m.SecondaryPane.SetContent(m.Help.View())
+			m.SecondaryPane.SetContent(m.Text.View())
 		}
 	}
 

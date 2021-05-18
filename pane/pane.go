@@ -12,7 +12,23 @@ type Model struct {
 	Viewport            viewport.Model
 	ActiveBorderColor   string
 	InactiveBorderColor string
-	BorderType          lipgloss.Border
+	Rounded             bool
+}
+
+func NewModel(width, height int, isActive, rounded bool, activeBorderColor, inactiveBorderColor string) Model {
+	m := Model{
+		Width:               width,
+		Height:              height,
+		IsActive:            isActive,
+		ActiveBorderColor:   activeBorderColor,
+		InactiveBorderColor: inactiveBorderColor,
+		Rounded:             rounded,
+	}
+
+	m.Viewport.Width = width
+	m.Viewport.Height = height
+
+	return m
 }
 
 func (m *Model) SetSize(width, height int) {
@@ -24,6 +40,11 @@ func (m *Model) SetSize(width, height int) {
 
 func (m Model) View() string {
 	borderColor := m.InactiveBorderColor
+	border := lipgloss.NormalBorder()
+
+	if m.Rounded {
+		border = lipgloss.RoundedBorder()
+	}
 
 	if m.IsActive {
 		borderColor = m.ActiveBorderColor
@@ -31,7 +52,7 @@ func (m Model) View() string {
 
 	return lipgloss.NewStyle().
 		BorderForeground(lipgloss.Color(borderColor)).
-		Border(m.BorderType).
+		Border(border).
 		Width(m.Width).
 		Height(m.Height).
 		Render(m.Viewport.View())

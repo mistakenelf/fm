@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"strings"
 )
 
 func ConvertBytesToSizeString(b int64) string {
@@ -19,4 +20,8 @@ func ConvertBytesToSizeString(b int64) string {
 
 	return fmt.Sprintf("%.1f %cB",
 		float64(b)/float64(div), "kMGTPE"[exp])
+}
+
+func ConverTabsToSpaces(input string) string {
+	return strings.Replace(input, "\t", "    ", -1)
 }
