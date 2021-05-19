@@ -30,6 +30,8 @@ func Run() {
 		m.Files = utils.GetDirectoryListing(cfg.Settings.StartDir)
 	}
 
+	m.DirTree.SetContent(m.Files, m.Cursor)
+
 	p := tea.NewProgram(m)
 
 	if err := p.Start(); err != nil {

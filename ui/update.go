@@ -40,7 +40,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case updateDirMsg:
 		m.Files = msg
 		m.Cursor = 0
-		m.PrimaryPane.SetContent(dirtree.View(m.Files, m.Cursor, m.ScreenWidth))
+		m.DirTree.SetContent(m.Files, m.Cursor)
+		m.PrimaryPane.SetContent(m.DirTree.View())
 
 	case directoryMsg:
 		m.Files = msg
@@ -48,7 +49,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.ShowCommandBar = false
 		m.Textinput.Blur()
 		m.Textinput.Reset()
-		m.PrimaryPane.SetContent(dirtree.View(m.Files, m.Cursor, m.ScreenWidth))
+		m.DirTree.SetContent(m.Files, m.Cursor)
+		m.PrimaryPane.SetContent(m.DirTree.View())
 		m.SecondaryPane.SetContent(m.Text.View())
 
 	case fileContentMsg:
@@ -88,7 +90,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cfg.Colors.Pane.ActiveBorderColor,
 				cfg.Colors.Pane.InactiveBorderColor,
 			)
-			m.PrimaryPane.SetContent(dirtree.View(m.Files, m.Cursor, m.ScreenWidth))
+			m.DirTree = dirtree.NewModel(m.Files, m.Cursor)
+			m.PrimaryPane.SetContent(m.DirTree.View())
 
 			m.SecondaryPane = pane.NewModel(
 				(msg.Width/2)-paneBorderWidth,
@@ -128,7 +131,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.PrimaryPane.IsActive {
 					m.Cursor++
 					m.scrollPrimaryPane()
-					m.PrimaryPane.SetContent(dirtree.View(m.Files, m.Cursor, m.ScreenWidth))
+					m.DirTree.SetContent(m.Files, m.Cursor)
+					m.PrimaryPane.SetContent(m.DirTree.View())
 				} else {
 					m.SecondaryPane.LineDown(1)
 				}
@@ -139,7 +143,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.PrimaryPane.IsActive {
 					m.Cursor--
 					m.scrollPrimaryPane()
-					m.PrimaryPane.SetContent(dirtree.View(m.Files, m.Cursor, m.ScreenWidth))
+					m.DirTree.SetContent(m.Files, m.Cursor)
+					m.PrimaryPane.SetContent(m.DirTree.View())
 				} else {
 					m.SecondaryPane.LineUp(1)
 				}
@@ -215,7 +220,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Textinput.Blur()
 			m.Textinput.Reset()
 			m.SecondaryPane.GotoTop()
-			m.PrimaryPane.SetContent(dirtree.View(m.Files, m.Cursor, m.ScreenWidth))
+			m.DirTree.SetContent(m.Files, m.Cursor)
+			m.PrimaryPane.SetContent(m.DirTree.View())
 			m.SecondaryPane.SetContent(m.Text.View())
 		}
 	}

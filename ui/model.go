@@ -6,6 +6,7 @@ import (
 
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
+	"github.com/knipferrc/fm/dirtree"
 	"github.com/knipferrc/fm/pane"
 	"github.com/knipferrc/fm/text"
 
@@ -21,6 +22,7 @@ type Model struct {
 	Textinput      textinput.Model
 	Spinner        spinner.Model
 	Text           text.Model
+	DirTree        dirtree.Model
 	Cursor         int
 	ScreenWidth    int
 	ScreenHeight   int
@@ -69,6 +71,7 @@ func NewModel() Model {
 		Textinput:      input,
 		Spinner:        s,
 		Text:           t,
+		DirTree:        dirtree.Model{},
 		Cursor:         0,
 		ScreenWidth:    0,
 		ScreenHeight:   0,
