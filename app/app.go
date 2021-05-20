@@ -33,6 +33,7 @@ func Run() {
 	m.DirTree.SetContent(m.Files, m.Cursor)
 
 	p := tea.NewProgram(m)
+	p.EnterAltScreen()
 
 	if err := p.Start(); err != nil {
 		log.Fatal("Failed to start fm", err)
