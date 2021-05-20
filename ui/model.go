@@ -8,6 +8,7 @@ import (
 	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/dirtree"
 	"github.com/knipferrc/fm/pane"
+	"github.com/knipferrc/fm/statusbar"
 	"github.com/knipferrc/fm/text"
 
 	"github.com/charmbracelet/bubbles/spinner"
@@ -23,6 +24,7 @@ type Model struct {
 	Spinner        spinner.Model
 	Text           text.Model
 	DirTree        dirtree.Model
+	StatusBar      statusbar.Model
 	Cursor         int
 	ScreenWidth    int
 	ScreenHeight   int
@@ -72,6 +74,7 @@ func NewModel() Model {
 		Spinner:        s,
 		Text:           t,
 		DirTree:        dirtree.Model{},
+		StatusBar:      statusbar.Model{},
 		Cursor:         0,
 		ScreenWidth:    0,
 		ScreenHeight:   0,

@@ -3,8 +3,6 @@ package ui
 import (
 	"fmt"
 
-	"github.com/knipferrc/fm/statusbar"
-
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -20,13 +18,6 @@ func (m Model) View() string {
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
 		panes,
-		statusbar.View(
-			m.ScreenWidth,
-			m.Cursor,
-			len(m.Files),
-			m.Files[m.Cursor],
-			m.ShowCommandBar,
-			m.Textinput.View(),
-		),
+		m.StatusBar.View(),
 	)
 }
