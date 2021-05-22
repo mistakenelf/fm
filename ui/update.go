@@ -41,13 +41,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	)
 
 	switch msg := msg.(type) {
-	case updateDirMsg:
-		m.Files = msg
-		m.Cursor = 0
-		m.DirTree.SetContent(m.Files, m.Cursor)
-		m.PrimaryPane.SetContent(m.DirTree.View())
-		m.StatusBar.SetContent(m.ScreenWidth, m.Cursor, len(m.Files), m.Files[m.Cursor], m.ShowCommandBar, m.Textinput.View())
-
 	case directoryMsg:
 		m.Files = msg
 		m.Cursor = 0
@@ -57,7 +50,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.DirTree.SetContent(m.Files, m.Cursor)
 		m.PrimaryPane.SetContent(m.DirTree.View())
 		m.SecondaryPane.SetContent(m.Text.View())
-		m.StatusBar.SetContent(m.ScreenWidth, m.Cursor, len(m.Files), m.Files[m.Cursor], m.ShowCommandBar, m.Textinput.View())
 
 	case fileContentMsg:
 		cfg := config.GetConfig()
@@ -69,10 +61,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		halfScreenWidth := m.ScreenWidth / 2
 		borderWidth := lipgloss.Width(border.Left + border.Right)
-		m.SecondaryPane.SetContent(lipgloss.NewStyle().
-			Width(halfScreenWidth - borderWidth).
-			Render(utils.ConverTabsToSpaces(string(msg))))
-		m.StatusBar.SetContent(m.ScreenWidth, m.Cursor, len(m.Files), m.Files[m.Cursor], m.ShowCommandBar, m.Textinput.View())
+		m.SecondaryPane.SetContent(lipgloss.NewStyle().Width(halfScreenWidth - borderWidth).Render(utils.ConverTabsToSpaces(string(msg))))
 
 	case tea.WindowSizeMsg:
 		cfg := config.GetConfig()
@@ -118,7 +107,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.ScreenHeight = msg.Height
 			m.PrimaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
 			m.SecondaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
-			m.StatusBar.SetContent(msg.Width, m.Cursor, len(m.Files), m.Files[m.Cursor], m.ShowCommandBar, m.Textinput.View())
 		}
 
 	case tea.KeyMsg:
@@ -135,7 +123,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.ShowCommandBar {
 				return m, updateDirectoryListing(constants.PreviousDirectory)
 			}
-			m.StatusBar.SetContent(m.ScreenWidth, m.Cursor, len(m.Files), m.Files[m.Cursor], m.ShowCommandBar, m.Textinput.View())
 
 		case "down", "j":
 			if !m.ShowCommandBar {
@@ -148,7 +135,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.SecondaryPane.LineDown(1)
 				}
 			}
-			m.StatusBar.SetContent(m.ScreenWidth, m.Cursor, len(m.Files), m.Files[m.Cursor], m.ShowCommandBar, m.Textinput.View())
 
 		case "up", "k":
 			if !m.ShowCommandBar {
@@ -161,7 +147,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.SecondaryPane.LineUp(1)
 				}
 			}
-			m.StatusBar.SetContent(m.ScreenWidth, m.Cursor, len(m.Files), m.Files[m.Cursor], m.ShowCommandBar, m.Textinput.View())
 
 		case "right", "l":
 			if !m.ShowCommandBar {
@@ -174,7 +159,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}
 				}
 			}
-			m.StatusBar.SetContent(m.ScreenWidth, m.Cursor, len(m.Files), m.Files[m.Cursor], m.ShowCommandBar, m.Textinput.View())
 
 		case "enter":
 			cmd, value := utils.ParseCommand(m.Textinput.Value())
@@ -219,12 +203,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		case "~":
-			home, err := os.UserHomeDir()
-			if err != nil {
-				log.Fatal(err)
-			}
+			if !m.ShowCommandBar {
+				home, err := os.UserHomeDir()
+				if err != nil {
+					log.Fatal(err)
+				}
 
-			return m, updateDirectoryListing(home)
+				return m, updateDirectoryListing(home)
+			}
 
 		case "tab":
 			if !m.ShowCommandBar {
@@ -247,6 +233,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.SecondaryPane.SetContent(m.Text.View())
 		}
 	}
+
+	m.StatusBar.SetContent(m.ScreenWidth, m.Cursor, len(m.Files), m.Files[m.Cursor], m.ShowCommandBar, m.Textinput.View())
 
 	m.Textinput, cmd = m.Textinput.Update(msg)
 	cmds = append(cmds, cmd)

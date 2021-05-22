@@ -9,7 +9,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type updateDirMsg []fs.FileInfo
 type directoryMsg []fs.FileInfo
 type fileContentMsg string
 
@@ -17,7 +16,7 @@ func updateDirectoryListing(dir string) tea.Cmd {
 	return func() tea.Msg {
 		files := utils.GetDirectoryListing(dir)
 
-		return updateDirMsg(files)
+		return directoryMsg(files)
 	}
 }
 
