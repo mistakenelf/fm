@@ -1,6 +1,9 @@
 package ui
 
 import (
+	"log"
+	"os"
+
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/dirtree"
@@ -214,6 +217,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Textinput.Focus()
 
 			return m, nil
+
+		case "~":
+			home, err := os.UserHomeDir()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			return m, updateDirectoryListing(home)
 
 		case "tab":
 			if !m.ShowCommandBar {
