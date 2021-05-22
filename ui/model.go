@@ -52,11 +52,12 @@ func NewModel() Model {
 
 	t.BodyText = lipgloss.NewStyle().
 		Foreground(lipgloss.Color(constants.White)).
-		Render(fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+		Render(fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
 			"h or left arrow - go back a directory",
 			"j or down arrow - move cursor down",
 			"k or up arrow - move cursor up",
 			"l or right arrow - open selected folder / view file",
+			"~ - switch to home directory",
 			": - open command bar",
 			"mkdir /new/dir - create directory in current directory",
 			"touch filename.txt - create file in current directory",

@@ -30,7 +30,7 @@ go install github.com/knipferrc/fm@latest
 
 ## Usage
 
-- Start `fm`
+- Run `fm`
 - Navigate your files with the following keys
   <br />
 
@@ -43,6 +43,12 @@ go install github.com/knipferrc/fm@latest
   - <kbd>l</kbd> or <kbd>right</kbd> Opens the currently selected directory
 
   - <kbd>:</kbd> Open command bar
+
+  - <kbd>~</kbd> Switch to home directory
+
+  - <kbd>ctrl+c</kbd> Exit FM
+
+  - <kbd>q</kbd> Exit FM if command bar not open
 
     - `mkdir /new/dir` Create a new directory in the current directory
 
