@@ -78,11 +78,11 @@ colors:
   components:
     spinner: "#F25D94"
   dir_tree:
-    selected_dir_item: "#F25D94"
-    unselected_dir_item: "#FFFDF5"
+    selected_item: "#F25D94"
+    unselected_item: "#FFFDF5"
   pane:
-    active_pane: "#F25D94"
-    inactive_pane: "#FFFDF5"
+    active_border_color: "#F25D94"
+    inactive_border_color: "#FFFDF5"
   status_bar:
     bar:
       background: "#353533"
@@ -97,6 +97,7 @@ colors:
       background: "#A550DF"
       foreground: "#FFFDF5"
 settings:
+  rounded_panes: false
   show_hidden: true
   show_icons: true
   start_dir: .
