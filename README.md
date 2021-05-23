@@ -46,6 +46,8 @@ go install github.com/knipferrc/fm@latest
 
   - <kbd>~</kbd> Switch to home directory
 
+  -<kbd>-</kbd> Go to previous directory
+
   - <kbd>ctrl+c</kbd> Exit FM
 
   - <kbd>q</kbd> Exit FM if command bar not open

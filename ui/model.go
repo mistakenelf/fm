@@ -17,19 +17,20 @@ import (
 )
 
 type Model struct {
-	PrimaryPane    pane.Model
-	SecondaryPane  pane.Model
-	Files          []fs.FileInfo
-	Textinput      textinput.Model
-	Spinner        spinner.Model
-	Text           text.Model
-	DirTree        dirtree.Model
-	StatusBar      statusbar.Model
-	Cursor         int
-	ScreenWidth    int
-	ScreenHeight   int
-	ShowCommandBar bool
-	Ready          bool
+	PrimaryPane       pane.Model
+	SecondaryPane     pane.Model
+	Files             []fs.FileInfo
+	Textinput         textinput.Model
+	Spinner           spinner.Model
+	Text              text.Model
+	DirTree           dirtree.Model
+	StatusBar         statusbar.Model
+	PreviousDirectory string
+	Cursor            int
+	ScreenWidth       int
+	ScreenHeight      int
+	ShowCommandBar    bool
+	Ready             bool
 }
 
 func NewModel() Model {
@@ -52,34 +53,36 @@ func NewModel() Model {
 
 	t.BodyText = lipgloss.NewStyle().
 		Foreground(lipgloss.Color(constants.White)).
-		Render(fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
-			"h or left arrow - go back a directory",
-			"j or down arrow - move cursor down",
-			"k or up arrow - move cursor up",
-			"l or right arrow - open selected folder / view file",
-			"~ - switch to home directory",
-			": - open command bar",
-			"mkdir /new/dir - create directory in current directory",
-			"touch filename.txt - create file in current directory",
-			"mv newname.txt - rename currently selected file or directory",
-			"cp /dir/to/move/to - move file or directory",
-			"rm - remove file or directory",
-			"tab - toggle between panes"),
+		Render(fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+			"h or left arrow    | go back a directory",
+			"j or down arrow    | move cursor down",
+			"k or up arrow      | move cursor up",
+			"l or right arrow   | open selected folder / view file",
+			"~                  | switch to home directory",
+			"-                  | Go To previous directory",
+			":                  | open command bar",
+			"mkdir /new/dir     | create directory in current directory",
+			"touch filename.txt | create file in current directory",
+			"mv newname.txt     | rename currently selected file or directory",
+			"cp /dir/to/move/to | move file or directory",
+			"rm                 | remove file or directory",
+			"tab                | toggle between panes"),
 		)
 
 	return Model{
-		PrimaryPane:    pane.Model{},
-		SecondaryPane:  pane.Model{},
-		Files:          make([]fs.FileInfo, 0),
-		Textinput:      input,
-		Spinner:        s,
-		Text:           t,
-		DirTree:        dirtree.Model{},
-		StatusBar:      statusbar.Model{},
-		Cursor:         0,
-		ScreenWidth:    0,
-		ScreenHeight:   0,
-		ShowCommandBar: false,
-		Ready:          false,
+		PrimaryPane:       pane.Model{},
+		SecondaryPane:     pane.Model{},
+		Files:             make([]fs.FileInfo, 0),
+		Textinput:         input,
+		Spinner:           s,
+		Text:              t,
+		DirTree:           dirtree.Model{},
+		StatusBar:         statusbar.Model{},
+		PreviousDirectory: "",
+		Cursor:            0,
+		ScreenWidth:       0,
+		ScreenHeight:      0,
+		ShowCommandBar:    false,
+		Ready:             false,
 	}
 }

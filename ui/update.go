@@ -121,6 +121,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "left", "h":
 			if !m.ShowCommandBar {
+				previousPath, err := os.Getwd()
+
+				if err != nil {
+					log.Fatal("error getting working directory")
+				}
+
+				m.PreviousDirectory = previousPath
 				return m, updateDirectoryListing(constants.PreviousDirectory)
 			}
 
@@ -210,6 +217,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 
 				return m, updateDirectoryListing(home)
+			}
+
+		case "-":
+			if !m.ShowCommandBar && m.PreviousDirectory != "" {
+				return m, updateDirectoryListing(m.PreviousDirectory)
 			}
 
 		case "tab":
