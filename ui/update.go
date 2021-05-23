@@ -16,8 +16,8 @@ import (
 )
 
 func (m *Model) scrollPrimaryPane() {
-	top := m.PrimaryPane.Viewport.YOffset
-	bottom := m.PrimaryPane.Height + m.PrimaryPane.Viewport.YOffset - 1
+	top := m.PrimaryPane.YOffset
+	bottom := m.PrimaryPane.Height + m.PrimaryPane.YOffset - 1
 
 	if m.Cursor < top {
 		m.PrimaryPane.LineUp(1)

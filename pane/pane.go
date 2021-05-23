@@ -8,6 +8,7 @@ import (
 type Model struct {
 	Width               int
 	Height              int
+	YOffset             int
 	IsActive            bool
 	Viewport            viewport.Model
 	ActiveBorderColor   string
@@ -27,6 +28,7 @@ func NewModel(width, height int, isActive, rounded bool, activeBorderColor, inac
 
 	m.Viewport.Width = width
 	m.Viewport.Height = height
+	m.YOffset = m.Viewport.YOffset
 
 	return m
 }
