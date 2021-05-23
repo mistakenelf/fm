@@ -25,9 +25,9 @@ func Run() {
 			log.Fatal(err)
 		}
 
-		m.Files = utils.GetDirectoryListing(home)
+		m.Files = utils.GetDirectoryListing(home, cfg.Settings.ShowHidden)
 	} else {
-		m.Files = utils.GetDirectoryListing(cfg.Settings.StartDir)
+		m.Files = utils.GetDirectoryListing(cfg.Settings.StartDir, cfg.Settings.ShowHidden)
 	}
 
 	m.DirTree.SetContent(m.Files, m.Cursor)

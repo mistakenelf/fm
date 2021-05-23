@@ -24,23 +24,6 @@ func NewModel(files []fs.FileInfo, cursor int) Model {
 	}
 }
 
-func (m Model) View() string {
-	doc := strings.Builder{}
-	curFiles := ""
-
-	for i, file := range m.Files {
-		curFiles += fmt.Sprintf("%s\n",
-			dirItem(
-				m.Cursor == i,
-				file,
-			))
-	}
-
-	doc.WriteString(curFiles)
-
-	return doc.String()
-}
-
 func (m *Model) SetContent(files []fs.FileInfo, cursor int) {
 	m.Files = files
 	m.Cursor = cursor
@@ -92,4 +75,17 @@ func dirItem(selected bool, file fs.FileInfo) string {
 
 		return listing
 	}
+}
+
+func (m Model) View() string {
+	doc := strings.Builder{}
+	curFiles := ""
+
+	for i, file := range m.Files {
+		curFiles += fmt.Sprintf("%s\n", dirItem(m.Cursor == i, file))
+	}
+
+	doc.WriteString(curFiles)
+
+	return doc.String()
 }

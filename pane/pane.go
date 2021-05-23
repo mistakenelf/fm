@@ -38,26 +38,6 @@ func (m *Model) SetSize(width, height int) {
 	m.Viewport.Height = height
 }
 
-func (m Model) View() string {
-	borderColor := m.InactiveBorderColor
-	border := lipgloss.NormalBorder()
-
-	if m.Rounded {
-		border = lipgloss.RoundedBorder()
-	}
-
-	if m.IsActive {
-		borderColor = m.ActiveBorderColor
-	}
-
-	return lipgloss.NewStyle().
-		BorderForeground(lipgloss.Color(borderColor)).
-		Border(border).
-		Width(m.Width).
-		Height(m.Height).
-		Render(m.Viewport.View())
-}
-
 func (m *Model) SetContent(content string) {
 	m.Viewport.SetContent(content)
 }
@@ -76,4 +56,24 @@ func (m *Model) GotoTop() {
 
 func (m *Model) GotoBottom() {
 	m.Viewport.GotoBottom()
+}
+
+func (m Model) View() string {
+	borderColor := m.InactiveBorderColor
+	border := lipgloss.NormalBorder()
+
+	if m.Rounded {
+		border = lipgloss.RoundedBorder()
+	}
+
+	if m.IsActive {
+		borderColor = m.ActiveBorderColor
+	}
+
+	return lipgloss.NewStyle().
+		BorderForeground(lipgloss.Color(borderColor)).
+		Border(border).
+		Width(m.Width).
+		Height(m.Height).
+		Render(m.Viewport.View())
 }

@@ -17,13 +17,9 @@ func NewModel() Model {
 }
 
 func (m Model) View() string {
-	text := ""
-
 	if m.HeaderText != "" {
-		text = lipgloss.JoinVertical(lipgloss.Top, m.HeaderText, m.BodyText)
+		return lipgloss.JoinVertical(lipgloss.Top, m.HeaderText, m.BodyText)
 	} else {
-		text = lipgloss.JoinVertical(lipgloss.Top, m.BodyText)
+		return m.BodyText
 	}
-
-	return text
 }

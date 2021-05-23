@@ -8,8 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/knipferrc/fm/config"
 )
 
 func RenameDirOrFile(currentName, newName string) {
@@ -29,8 +27,7 @@ func CreateDirectory(name string) {
 	}
 }
 
-func GetDirectoryListing(dir string) []fs.FileInfo {
-	cfg := config.GetConfig()
+func GetDirectoryListing(dir string, showHidden bool) []fs.FileInfo {
 	n := 0
 
 	files, err := ioutil.ReadDir(dir)
@@ -41,7 +38,7 @@ func GetDirectoryListing(dir string) []fs.FileInfo {
 		os.Exit(1)
 	}
 
-	if !cfg.Settings.ShowHidden {
+	if !showHidden {
 		for _, file := range files {
 			if !strings.HasPrefix(file.Name(), ".") {
 				files[n] = file
