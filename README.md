@@ -71,7 +71,7 @@ go install github.com/knipferrc/fm@latest
 <br />
 <br />
 
-### Sample Config (with defaults)
+### Default Config
 
 ```yml
 colors:
