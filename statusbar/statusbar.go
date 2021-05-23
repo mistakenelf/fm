@@ -99,7 +99,7 @@ func (m Model) View() string {
 	return doc.String()
 }
 
-func (m *Model) SetContent(width, cursor, totalFiles int, currentFile fs.FileInfo, showCommandBar bool, textInput string) {
+func (m *Model) Update(width, cursor, totalFiles int, currentFile fs.FileInfo, showCommandBar bool, textInput string) {
 	m.Width = width
 	m.Cursor = cursor
 	m.TotalFiles = totalFiles

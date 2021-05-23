@@ -19,8 +19,8 @@ type SettingsConfig struct {
 }
 
 type DirTreeColors struct {
-	SelectedItem      string `mapstructure:"selected_dir_item"`
-	UnselectedDirItem string `mapstructure:"unselected_dir_item"`
+	SelectedItem   string `mapstructure:"selected_item"`
+	UnselectedItem string `mapstructure:"unselected_item"`
 }
 type PaneColors struct {
 	ActiveBorderColor   string `mapstructure:"active_border_color"`
@@ -96,8 +96,8 @@ func SetDefaults() {
 	viper.SetDefault("settings.rounded_panes", false)
 
 	// DirTree colors
-	viper.SetDefault("colors.dir_tree.selected_dir_item", constants.Pink)
-	viper.SetDefault("colors.dir_tree.unselected_dir_item", constants.White)
+	viper.SetDefault("colors.dir_tree.selected_item", constants.Pink)
+	viper.SetDefault("colors.dir_tree.unselected_item", constants.White)
 
 	// Pane colors
 	viper.SetDefault("colors.pane.active_border_color", constants.Pink)

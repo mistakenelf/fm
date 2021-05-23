@@ -44,9 +44,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case directoryMsg:
 		m.Files = msg
 		m.Cursor = 0
-		m.ShowCommandBar = false
-		m.Textinput.Blur()
-		m.Textinput.Reset()
 		m.DirTree.SetContent(m.Files, m.Cursor)
 		m.PrimaryPane.SetContent(m.DirTree.View())
 		m.SecondaryPane.SetContent(m.Text.View())
@@ -121,14 +118,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "left", "h":
 			if !m.ShowCommandBar {
-				previousPath, err := os.Getwd()
+				if m.PrimaryPane.IsActive {
+					previousPath, err := os.Getwd()
 
-				if err != nil {
-					log.Fatal("error getting working directory")
+					if err != nil {
+						log.Fatal("error getting working directory")
+					}
+
+					m.PreviousDirectory = previousPath
+					return m, updateDirectoryListing(constants.PreviousDirectory)
 				}
-
-				m.PreviousDirectory = previousPath
-				return m, updateDirectoryListing(constants.PreviousDirectory)
 			}
 
 		case "down", "j":
@@ -246,7 +245,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	m.StatusBar.SetContent(m.ScreenWidth, m.Cursor, len(m.Files), m.Files[m.Cursor], m.ShowCommandBar, m.Textinput.View())
+	m.StatusBar.Update(m.ScreenWidth, m.Cursor, len(m.Files), m.Files[m.Cursor], m.ShowCommandBar, m.Textinput.View())
 
 	m.Textinput, cmd = m.Textinput.Update(msg)
 	cmds = append(cmds, cmd)

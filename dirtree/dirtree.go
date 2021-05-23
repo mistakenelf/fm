@@ -36,12 +36,7 @@ func (m Model) View() string {
 			))
 	}
 
-	doc.WriteString(lipgloss.JoinHorizontal(
-		lipgloss.Top,
-		lipgloss.NewStyle().
-			Align(lipgloss.Left).
-			Render(curFiles),
-	))
+	doc.WriteString(curFiles)
 
 	return doc.String()
 }
@@ -56,7 +51,7 @@ func dirItem(selected bool, file fs.FileInfo) string {
 
 	if !cfg.Settings.ShowIcons && !selected {
 		return lipgloss.NewStyle().
-			Foreground(lipgloss.Color(cfg.Colors.DirTree.UnselectedDirItem)).
+			Foreground(lipgloss.Color(cfg.Colors.DirTree.UnselectedItem)).
 			Render(file.Name())
 	} else if !cfg.Settings.ShowIcons && selected {
 		return lipgloss.NewStyle().
@@ -76,7 +71,7 @@ func dirItem(selected bool, file fs.FileInfo) string {
 		icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
 		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
-			Foreground(lipgloss.Color(cfg.Colors.DirTree.UnselectedDirItem)).
+			Foreground(lipgloss.Color(cfg.Colors.DirTree.UnselectedItem)).
 			Render(file.Name()))
 
 		return listing
@@ -92,7 +87,7 @@ func dirItem(selected bool, file fs.FileInfo) string {
 		icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
 		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
-			Foreground(lipgloss.Color(cfg.Colors.DirTree.UnselectedDirItem)).
+			Foreground(lipgloss.Color(cfg.Colors.DirTree.UnselectedItem)).
 			Render(file.Name()))
 
 		return listing
