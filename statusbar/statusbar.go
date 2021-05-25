@@ -1,109 +1,88 @@
 package statusbar
 
 import (
-	"fmt"
-	"io/fs"
-	"log"
-	"os"
-	"strings"
-
-	"github.com/knipferrc/fm/config"
-	"github.com/knipferrc/fm/icons"
-	"github.com/knipferrc/fm/utils"
-
 	"github.com/charmbracelet/lipgloss"
 )
 
-type Model struct {
-	Width          int
-	Cursor         int
-	TotalFiles     int
-	CurrentFile    fs.FileInfo
-	ShowCommandBar bool
-	TextInput      string
+type Color struct {
+	Background string
+	Foreground string
 }
 
-func NewModel(width, cursor, totalFiles int, currentFile fs.FileInfo, showCommandBar bool, textInput string) Model {
+type Model struct {
+	Width               int
+	FirstColumnContent  string
+	SecondColumnContent string
+	ThirdColumnContent  string
+	FourthColumnContent string
+	FirstColumnColors   Color
+	SecondColumnColors  Color
+	ThirdColumnColors   Color
+	FourthColumnColors  Color
+}
+
+func NewModel(
+	width int,
+	firstColumnContent, secondColumnContent, thirdColumnContent, fourthColumnContent string,
+	firstColumnColors, secondColumnColors, thirdColumnColors, fourthColumnColors Color,
+) Model {
 	return Model{
-		Width:          width,
-		Cursor:         cursor,
-		TotalFiles:     totalFiles,
-		CurrentFile:    currentFile,
-		ShowCommandBar: showCommandBar,
-		TextInput:      textInput,
+		Width:               width,
+		FirstColumnContent:  firstColumnContent,
+		SecondColumnContent: secondColumnContent,
+		ThirdColumnContent:  thirdColumnContent,
+		FourthColumnContent: fourthColumnContent,
+		FirstColumnColors:   firstColumnColors,
+		SecondColumnColors:  secondColumnColors,
+		ThirdColumnColors:   thirdColumnColors,
+		FourthColumnColors:  fourthColumnColors,
 	}
+}
+
+func (m *Model) SetContent(firstColumnContent, secondColumnContent, thirdColumnContent, fourthColumnContent string) {
+	m.FirstColumnContent = firstColumnContent
+	m.SecondColumnContent = secondColumnContent
+	m.ThirdColumnContent = thirdColumnContent
+	m.FourthColumnContent = fourthColumnContent
+}
+
+func (m *Model) SetSize(width int) {
+	m.Width = width
 }
 
 func (m Model) View() string {
-	cfg := config.GetConfig()
-	doc := strings.Builder{}
 	width := lipgloss.Width
-	currentPath, err := os.Getwd()
 
-	if err != nil {
-		log.Println(err)
-	}
-
-	selectedFile := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(cfg.Colors.StatusBar.SelectedFile.Foreground)).
-		Background(lipgloss.Color(cfg.Colors.StatusBar.SelectedFile.Background)).
+	firstColumn := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(m.FirstColumnColors.Foreground)).
+		Background(lipgloss.Color(m.FirstColumnColors.Background)).
 		Padding(0, 1).
-		Render(m.CurrentFile.Name())
+		Render(m.FirstColumnContent)
 
-	fileTotals := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(cfg.Colors.StatusBar.TotalFiles.Foreground)).
-		Background(lipgloss.Color(cfg.Colors.StatusBar.TotalFiles.Background)).
+	thirdColumn := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(m.ThirdColumnColors.Foreground)).
+		Background(lipgloss.Color(m.ThirdColumnColors.Background)).
 		Align(lipgloss.Right).
 		Padding(0, 1).
-		Render(fmt.Sprintf("%d/%d", m.Cursor+1, m.TotalFiles))
+		Render(m.ThirdColumnContent)
 
-	logoStyle := lipgloss.NewStyle().
+	fourthColumn := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(m.FourthColumnColors.Foreground)).
+		Background(lipgloss.Color(m.FourthColumnColors.Background)).
 		Padding(0, 1).
-		Foreground(lipgloss.Color(cfg.Colors.StatusBar.Logo.Foreground)).
-		Background(lipgloss.Color(cfg.Colors.StatusBar.Logo.Background))
+		Render(m.FourthColumnContent)
 
-	logo := ""
-	if cfg.Settings.ShowIcons {
-		logo = logoStyle.Render(fmt.Sprintf("%s %s", icons.Icon_Def["dir"].GetGlyph(), "FM"))
-	} else {
-		logo = logoStyle.Render("FM")
-	}
-
-	status := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(cfg.Colors.StatusBar.Bar.Foreground)).
-		Background(lipgloss.Color(cfg.Colors.StatusBar.Bar.Background)).
+	secondColumn := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(m.SecondColumnColors.Foreground)).
+		Background(lipgloss.Color(m.SecondColumnColors.Background)).
 		Padding(0, 1).
-		Width(m.Width - width(selectedFile) - width(fileTotals) - width(logo)).
-		Render(fmt.Sprintf("%s %s %s",
-			utils.ConvertBytesToSizeString(m.CurrentFile.Size()),
-			m.CurrentFile.Mode().String(),
-			currentPath),
-		)
+		Width(m.Width - width(firstColumn) - width(thirdColumn) - width(fourthColumn)).
+		Render(m.SecondColumnContent)
 
-	if m.ShowCommandBar {
-		status = lipgloss.NewStyle().
-			Padding(0, 1).
-			Width(m.Width - width(selectedFile) - width(fileTotals) - width(logo)).
-			Render(m.TextInput)
-	}
-
-	bar := lipgloss.JoinHorizontal(lipgloss.Top,
-		selectedFile,
-		status,
-		fileTotals,
-		logo,
+	return lipgloss.JoinHorizontal(lipgloss.Top,
+		firstColumn,
+		secondColumn,
+		thirdColumn,
+		fourthColumn,
 	)
-
-	doc.WriteString(bar)
-
-	return doc.String()
-}
-
-func (m *Model) Update(width, cursor, totalFiles int, currentFile fs.FileInfo, showCommandBar bool, textInput string) {
-	m.Width = width
-	m.Cursor = cursor
-	m.TotalFiles = totalFiles
-	m.CurrentFile = currentFile
-	m.ShowCommandBar = showCommandBar
-	m.TextInput = textInput
 }

@@ -6,55 +6,80 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/icons"
 
 	"github.com/charmbracelet/lipgloss"
 )
 
 type Model struct {
-	Files  []fs.FileInfo
-	Cursor int
+	Files               []fs.FileInfo
+	Cursor              int
+	ShowIcons           bool
+	SelectedItemColor   string
+	UnselectedItemColor string
 }
 
-func NewModel(files []fs.FileInfo, cursor int) Model {
+func NewModel(files []fs.FileInfo, showIcons bool, selectedItemColor, unselectedItemColor string) Model {
 	return Model{
-		Files:  files,
-		Cursor: cursor,
+		Files:               files,
+		ShowIcons:           showIcons,
+		SelectedItemColor:   selectedItemColor,
+		UnselectedItemColor: unselectedItemColor,
 	}
 }
 
-func (m *Model) SetContent(files []fs.FileInfo, cursor int) {
+func (m *Model) SetContent(files []fs.FileInfo) {
 	m.Files = files
-	m.Cursor = cursor
 }
 
-func dirItem(selected bool, file fs.FileInfo) string {
-	cfg := config.GetConfig()
+func (m *Model) GotoTop() {
+	m.Cursor = 0
+}
 
-	if !cfg.Settings.ShowIcons && !selected {
+func (m *Model) GotoBottom() {
+	m.Cursor = len(m.Files) - 1
+}
+
+func (m Model) GetSelectedFile() fs.FileInfo {
+	return m.Files[m.Cursor]
+}
+
+func (m Model) GetCursor() int {
+	return m.Cursor
+}
+
+func (m *Model) GoDown() {
+	m.Cursor++
+}
+
+func (m *Model) GoUp() {
+	m.Cursor--
+}
+
+func (m Model) dirItem(selected bool, file fs.FileInfo) string {
+	if !m.ShowIcons && !selected {
 		return lipgloss.NewStyle().
-			Foreground(lipgloss.Color(cfg.Colors.DirTree.UnselectedItem)).
+			Foreground(lipgloss.Color(m.UnselectedItemColor)).
 			Render(file.Name())
-	} else if !cfg.Settings.ShowIcons && selected {
+	} else if !m.ShowIcons && selected {
 		return lipgloss.NewStyle().
-			Foreground(lipgloss.Color(cfg.Colors.DirTree.SelectedItem)).
+			Foreground(lipgloss.Color(m.SelectedItemColor)).
 			Render(file.Name())
 	} else if selected && file.IsDir() {
 		icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
 		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
-			Foreground(lipgloss.Color(cfg.Colors.DirTree.SelectedItem)).
+			Foreground(lipgloss.Color(m.SelectedItemColor)).
 			Render(file.Name()))
 
 		return lipgloss.NewStyle().
-			Foreground(lipgloss.Color(cfg.Colors.DirTree.SelectedItem)).
+			Foreground(lipgloss.Color(m.SelectedItemColor)).
 			Render(listing)
 	} else if !selected && file.IsDir() {
 		icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
 		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
-			Foreground(lipgloss.Color(cfg.Colors.DirTree.UnselectedItem)).
+			Foreground(lipgloss.Color(m.UnselectedItemColor)).
 			Render(file.Name()))
 
 		return listing
@@ -62,7 +87,7 @@ func dirItem(selected bool, file fs.FileInfo) string {
 		icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
 		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
-			Foreground(lipgloss.Color(cfg.Colors.DirTree.SelectedItem)).
+			Foreground(lipgloss.Color(m.SelectedItemColor)).
 			Render(file.Name()))
 
 		return listing
@@ -70,7 +95,7 @@ func dirItem(selected bool, file fs.FileInfo) string {
 		icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
 		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
-			Foreground(lipgloss.Color(cfg.Colors.DirTree.UnselectedItem)).
+			Foreground(lipgloss.Color(m.UnselectedItemColor)).
 			Render(file.Name()))
 
 		return listing
@@ -82,7 +107,7 @@ func (m Model) View() string {
 	curFiles := ""
 
 	for i, file := range m.Files {
-		curFiles += fmt.Sprintf("%s\n", dirItem(m.Cursor == i, file))
+		curFiles += fmt.Sprintf("%s\n", m.dirItem(m.Cursor == i, file))
 	}
 
 	doc.WriteString(curFiles)

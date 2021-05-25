@@ -22,11 +22,10 @@ type Model struct {
 	Files             []fs.FileInfo
 	Textinput         textinput.Model
 	Spinner           spinner.Model
-	Text              text.Model
+	HelpText          text.Model
 	DirTree           dirtree.Model
 	StatusBar         statusbar.Model
 	PreviousDirectory string
-	Cursor            int
 	ScreenWidth       int
 	ScreenHeight      int
 	ShowCommandBar    bool
@@ -75,11 +74,10 @@ func NewModel() Model {
 		Files:             make([]fs.FileInfo, 0),
 		Textinput:         input,
 		Spinner:           s,
-		Text:              t,
+		HelpText:          t,
 		DirTree:           dirtree.Model{},
 		StatusBar:         statusbar.Model{},
 		PreviousDirectory: "",
-		Cursor:            0,
 		ScreenWidth:       0,
 		ScreenHeight:      0,
 		ShowCommandBar:    false,

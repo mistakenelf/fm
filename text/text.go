@@ -11,8 +11,8 @@ type Model struct {
 
 func NewModel() Model {
 	return Model{
-		HeaderText: "Help Header",
-		BodyText:   "Help Body Text",
+		HeaderText: "Header",
+		BodyText:   "Body Text",
 	}
 }
 

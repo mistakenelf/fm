@@ -6,6 +6,7 @@ import (
 
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
+	"github.com/knipferrc/fm/dirtree"
 	"github.com/knipferrc/fm/ui"
 	"github.com/knipferrc/fm/utils"
 
@@ -30,7 +31,7 @@ func Run() {
 		m.Files = utils.GetDirectoryListing(cfg.Settings.StartDir, cfg.Settings.ShowHidden)
 	}
 
-	m.DirTree.SetContent(m.Files, m.Cursor)
+	m.DirTree = dirtree.NewModel(m.Files, cfg.Settings.ShowIcons, cfg.Colors.DirTree.SelectedItem, cfg.Colors.DirTree.UnselectedItem)
 
 	p := tea.NewProgram(m)
 	p.EnterAltScreen()

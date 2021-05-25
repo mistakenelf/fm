@@ -1,37 +1,65 @@
 package ui
 
 import (
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
-	"github.com/knipferrc/fm/dirtree"
+	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/pane"
 	"github.com/knipferrc/fm/statusbar"
 	"github.com/knipferrc/fm/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 func (m *Model) scrollPrimaryPane() {
 	top := m.PrimaryPane.YOffset
 	bottom := m.PrimaryPane.Height + m.PrimaryPane.YOffset - 1
 
-	if m.Cursor < top {
+	if m.DirTree.GetCursor() < top {
 		m.PrimaryPane.LineUp(1)
-	} else if m.Cursor > bottom {
+	} else if m.DirTree.GetCursor() > bottom {
 		m.PrimaryPane.LineDown(1)
 	}
 
-	if m.Cursor > len(m.Files)-1 {
-		m.Cursor = 0
+	if m.DirTree.GetCursor() > len(m.Files)-1 {
+		m.DirTree.GotoTop()
 		m.PrimaryPane.GotoTop()
-	} else if m.Cursor < 0 {
-		m.Cursor = len(m.Files) - 1
+	} else if m.DirTree.GetCursor() < 0 {
+		m.DirTree.GotoBottom()
 		m.PrimaryPane.GotoBottom()
 	}
+}
+
+func (m Model) getStatusBarContent() (string, string, string, string) {
+	cfg := config.GetConfig()
+	currentPath, err := os.Getwd()
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	logo := ""
+	if cfg.Settings.ShowIcons {
+		logo = fmt.Sprintf("%s %s", icons.Icon_Def["dir"].GetGlyph(), "FM")
+	} else {
+		logo = "FM"
+	}
+
+	status := fmt.Sprintf("%s %s %s",
+		utils.ConvertBytesToSizeString(m.DirTree.GetSelectedFile().Size()),
+		m.DirTree.GetSelectedFile().Mode().String(),
+		currentPath,
+	)
+
+	if m.ShowCommandBar {
+		status = m.Textinput.View()
+	}
+
+	return m.DirTree.GetSelectedFile().Name(), status, fmt.Sprintf("%d/%d", m.DirTree.GetCursor()+1, len(m.Files)), logo
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -43,67 +71,79 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case directoryMsg:
 		m.Files = msg
-		m.Cursor = 0
-		m.DirTree.SetContent(m.Files, m.Cursor)
+		m.DirTree.SetContent(m.Files)
+		m.DirTree.GotoTop()
 		m.PrimaryPane.SetContent(m.DirTree.View())
-		m.SecondaryPane.SetContent(m.Text.View())
+		m.ShowCommandBar = false
+		m.Textinput.Blur()
+		m.Textinput.Reset()
+		selectedFile, status, fileTotals, logo := m.getStatusBarContent()
+		m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
 
 	case fileContentMsg:
-		cfg := config.GetConfig()
-		border := lipgloss.NormalBorder()
-
-		if cfg.Settings.RoundedPanes {
-			border = lipgloss.RoundedBorder()
-		}
-
-		halfScreenWidth := m.ScreenWidth / 2
-		borderWidth := lipgloss.Width(border.Left + border.Right)
-		m.SecondaryPane.SetContent(lipgloss.NewStyle().Width(halfScreenWidth - borderWidth).Render(utils.ConverTabsToSpaces(string(msg))))
+		m.SecondaryPane.SetContent(utils.ConverTabsToSpaces(string(msg)))
 
 	case tea.WindowSizeMsg:
 		cfg := config.GetConfig()
-		border := lipgloss.NormalBorder()
-
-		if cfg.Settings.RoundedPanes {
-			border = lipgloss.RoundedBorder()
-		}
-
-		paneBorderWidth := lipgloss.Width(border.Left + border.Right)
-		verticalMargin := lipgloss.Width(border.Bottom) + constants.StatusBarHeight
 
 		if !m.Ready {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
 
 			m.PrimaryPane = pane.NewModel(
-				(msg.Width/2)-paneBorderWidth,
-				msg.Height-verticalMargin,
+				msg.Width/2,
+				msg.Height-constants.StatusBarHeight,
 				true,
 				cfg.Settings.RoundedPanes,
 				cfg.Colors.Pane.ActiveBorderColor,
 				cfg.Colors.Pane.InactiveBorderColor,
 			)
-			m.DirTree = dirtree.NewModel(m.Files, m.Cursor)
 			m.PrimaryPane.SetContent(m.DirTree.View())
 
 			m.SecondaryPane = pane.NewModel(
-				(msg.Width/2)-paneBorderWidth,
-				msg.Height-verticalMargin,
+				msg.Width/2,
+				msg.Height-constants.StatusBarHeight,
 				false,
 				cfg.Settings.RoundedPanes,
 				cfg.Colors.Pane.ActiveBorderColor,
 				cfg.Colors.Pane.InactiveBorderColor,
 			)
-			m.SecondaryPane.SetContent(m.Text.View())
+			m.SecondaryPane.SetContent(m.HelpText.View())
 
-			m.StatusBar = statusbar.NewModel(msg.Width, m.Cursor, len(m.Files), m.Files[m.Cursor], m.ShowCommandBar, m.Textinput.View())
+			selectedFile, status, fileTotals, logo := m.getStatusBarContent()
+			m.StatusBar = statusbar.NewModel(
+				msg.Width,
+				selectedFile,
+				status,
+				fileTotals,
+				logo,
+				statusbar.Color{
+					Background: cfg.Colors.StatusBar.SelectedFile.Background,
+					Foreground: cfg.Colors.StatusBar.SelectedFile.Foreground,
+				},
+				statusbar.Color{
+					Background: cfg.Colors.StatusBar.Bar.Background,
+					Foreground: cfg.Colors.StatusBar.Bar.Foreground,
+				},
+				statusbar.Color{
+					Background: cfg.Colors.StatusBar.TotalFiles.Background,
+					Foreground: cfg.Colors.StatusBar.TotalFiles.Foreground,
+				},
+				statusbar.Color{
+					Background: cfg.Colors.StatusBar.Logo.Background,
+					Foreground: cfg.Colors.StatusBar.Logo.Foreground,
+				},
+			)
+
+			m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
 
 			m.Ready = true
 		} else {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
-			m.PrimaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
-			m.SecondaryPane.SetSize((msg.Width/2)-paneBorderWidth, msg.Height-verticalMargin)
+			m.PrimaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
+			m.SecondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
+			m.StatusBar.SetSize(msg.Width)
 		}
 
 	case tea.KeyMsg:
@@ -133,10 +173,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "down", "j":
 			if !m.ShowCommandBar {
 				if m.PrimaryPane.IsActive {
-					m.Cursor++
+					m.DirTree.GoDown()
 					m.scrollPrimaryPane()
-					m.DirTree.SetContent(m.Files, m.Cursor)
 					m.PrimaryPane.SetContent(m.DirTree.View())
+					selectedFile, status, fileTotals, logo := m.getStatusBarContent()
+					m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
 				} else {
 					m.SecondaryPane.LineDown(1)
 				}
@@ -145,10 +186,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "up", "k":
 			if !m.ShowCommandBar {
 				if m.PrimaryPane.IsActive {
-					m.Cursor--
+					m.DirTree.GoUp()
 					m.scrollPrimaryPane()
-					m.DirTree.SetContent(m.Files, m.Cursor)
 					m.PrimaryPane.SetContent(m.DirTree.View())
+					selectedFile, status, fileTotals, logo := m.getStatusBarContent()
+					m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
 				} else {
 					m.SecondaryPane.LineUp(1)
 				}
@@ -157,11 +199,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "right", "l":
 			if !m.ShowCommandBar {
 				if m.PrimaryPane.IsActive {
-					if m.Files[m.Cursor].IsDir() && !m.Textinput.Focused() {
-						return m, updateDirectoryListing(m.Files[m.Cursor].Name())
+					if m.DirTree.GetSelectedFile().IsDir() && !m.Textinput.Focused() {
+						return m, updateDirectoryListing(m.DirTree.GetSelectedFile().Name())
 					} else {
 						m.SecondaryPane.GotoTop()
-						return m, readFileContent(m.Files[m.Cursor].Name())
+						return m, readFileContent(m.DirTree.GetSelectedFile().Name())
 					}
 				}
 			}
@@ -181,20 +223,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, createFile(value)
 
 			case "mv":
-				return m, renameFileOrDir(m.Files[m.Cursor].Name(), value)
+				return m, renameFileOrDir(m.DirTree.GetSelectedFile().Name(), value)
 
 			case "cp":
-				if m.Files[m.Cursor].IsDir() {
-					return m, moveDir(m.Files[m.Cursor].Name(), value)
+				if m.DirTree.GetSelectedFile().IsDir() {
+					return m, moveDir(m.DirTree.GetSelectedFile().Name(), value)
 				} else {
-					return m, moveFile(m.Files[m.Cursor].Name(), value)
+					return m, moveFile(m.DirTree.GetSelectedFile().Name(), value)
 				}
 
 			case "rm":
-				if m.Files[m.Cursor].IsDir() {
-					return m, deleteDir(m.Files[m.Cursor].Name())
+				if m.DirTree.GetSelectedFile().IsDir() {
+					return m, deleteDir(m.DirTree.GetSelectedFile().Name())
 				} else {
-					return m, deleteFile(m.Files[m.Cursor].Name())
+					return m, deleteFile(m.DirTree.GetSelectedFile().Name())
 				}
 
 			default:
@@ -239,13 +281,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Textinput.Blur()
 			m.Textinput.Reset()
 			m.SecondaryPane.GotoTop()
-			m.DirTree.SetContent(m.Files, m.Cursor)
-			m.PrimaryPane.SetContent(m.DirTree.View())
-			m.SecondaryPane.SetContent(m.Text.View())
+			m.SecondaryPane.SetContent(m.HelpText.View())
+			m.PrimaryPane.IsActive = true
+			m.SecondaryPane.IsActive = false
+			selectedFile, status, fileTotals, logo := m.getStatusBarContent()
+			m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
 		}
 	}
 
-	m.StatusBar.Update(m.ScreenWidth, m.Cursor, len(m.Files), m.Files[m.Cursor], m.ShowCommandBar, m.Textinput.View())
+	if m.ShowCommandBar {
+		selectedFile, status, fileTotals, logo := m.getStatusBarContent()
+		m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
+	}
 
 	m.Textinput, cmd = m.Textinput.Update(msg)
 	cmds = append(cmds, cmd)

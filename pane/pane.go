@@ -17,31 +17,49 @@ type Model struct {
 }
 
 func NewModel(width, height int, isActive, rounded bool, activeBorderColor, inactiveBorderColor string) Model {
+	border := lipgloss.NormalBorder()
+
+	if rounded {
+		border = lipgloss.RoundedBorder()
+	}
+
 	m := Model{
-		Width:               width,
-		Height:              height,
+		Width:               width - lipgloss.Width(border.Right+border.Top),
+		Height:              height - lipgloss.Height(border.Bottom),
 		IsActive:            isActive,
 		ActiveBorderColor:   activeBorderColor,
 		InactiveBorderColor: inactiveBorderColor,
 		Rounded:             rounded,
 	}
 
-	m.Viewport.Width = width
-	m.Viewport.Height = height
+	m.Viewport.Width = width - lipgloss.Width(border.Right+border.Top)
+	m.Viewport.Height = height - lipgloss.Height(border.Bottom)
 	m.YOffset = m.Viewport.YOffset
 
 	return m
 }
 
 func (m *Model) SetSize(width, height int) {
-	m.Width = width
-	m.Height = height
-	m.Viewport.Width = width
-	m.Viewport.Height = height
+	border := lipgloss.NormalBorder()
+
+	if m.Rounded {
+		border = lipgloss.RoundedBorder()
+	}
+
+	m.Width = width - lipgloss.Width(border.Right+border.Top)
+	m.Height = height - lipgloss.Width(border.Bottom)
+	m.Viewport.Width = width - lipgloss.Width(border.Right+border.Top)
+	m.Viewport.Height = height - lipgloss.Height(border.Bottom)
 }
 
 func (m *Model) SetContent(content string) {
-	m.Viewport.SetContent(content)
+	border := lipgloss.NormalBorder()
+
+	if m.Rounded {
+		border = lipgloss.RoundedBorder()
+	}
+
+	m.Viewport.SetContent(lipgloss.NewStyle().Width(m.Width - lipgloss.Width(border.Top+border.Left)).Render(content))
 }
 
 func (m *Model) LineUp(lines int) {
