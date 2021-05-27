@@ -42,15 +42,19 @@ go install github.com/knipferrc/fm@latest
 
   - <kbd>l</kbd> or <kbd>right</kbd> Opens the currently selected directory
 
-  - <kbd>:</kbd> Open command bar
+  - <kbd>gg</kbd> Go to bottom of pane
+
+  - <kbd>G</kbd> Go to top of pane
 
   - <kbd>~</kbd> Switch to home directory
 
-  -<kbd>-</kbd> Go to previous directory
+  - <kbd>-</kbd> Go to previous directory
 
   - <kbd>ctrl+c</kbd> Exit FM
 
   - <kbd>q</kbd> Exit FM if command bar not open
+
+  - <kbd>:</kbd> Open command bar
 
     - `mkdir /new/dir` Create a new directory in the current directory
 

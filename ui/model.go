@@ -13,6 +13,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -25,6 +26,7 @@ type Model struct {
 	HelpText          text.Model
 	DirTree           dirtree.Model
 	StatusBar         statusbar.Model
+	LastKey           tea.KeyMsg
 	PreviousDirectory string
 	ScreenWidth       int
 	ScreenHeight      int
@@ -52,11 +54,13 @@ func NewModel() Model {
 
 	t.BodyText = lipgloss.NewStyle().
 		Foreground(lipgloss.Color(constants.White)).
-		Render(fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+		Render(fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
 			"h or left arrow    | go back a directory",
 			"j or down arrow    | move cursor down",
 			"k or up arrow      | move cursor up",
 			"l or right arrow   | open selected folder / view file",
+			"gg                 | go to top of pane",
+			"G                  | go to botom of pane",
 			"~                  | switch to home directory",
 			"-                  | Go To previous directory",
 			":                  | open command bar",
@@ -77,6 +81,7 @@ func NewModel() Model {
 		HelpText:          t,
 		DirTree:           dirtree.Model{},
 		StatusBar:         statusbar.Model{},
+		LastKey:           tea.KeyMsg{},
 		PreviousDirectory: "",
 		ScreenWidth:       0,
 		ScreenHeight:      0,

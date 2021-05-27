@@ -15,7 +15,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m *Model) scrollPrimaryPane() {
+func (m Model) scrollPrimaryPane() {
 	top := m.PrimaryPane.YOffset
 	bottom := m.PrimaryPane.Height + m.PrimaryPane.YOffset - 1
 
@@ -147,6 +147,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case tea.KeyMsg:
+		if msg.String() == "g" && m.LastKey.String() == "g" {
+			if !m.ShowCommandBar {
+				if m.PrimaryPane.IsActive {
+					m.DirTree.GotoTop()
+					m.PrimaryPane.GotoTop()
+					m.PrimaryPane.SetContent(m.DirTree.View())
+				} else {
+					m.SecondaryPane.GotoTop()
+				}
+			}
+		}
+
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
@@ -193,6 +205,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
 				} else {
 					m.SecondaryPane.LineUp(1)
+				}
+			}
+
+		case "G":
+			if !m.ShowCommandBar {
+				if m.PrimaryPane.IsActive {
+					m.DirTree.GotoBottom()
+					m.PrimaryPane.GotoBottom()
+					m.PrimaryPane.SetContent(m.DirTree.View())
+				} else {
+					m.SecondaryPane.GotoBottom()
 				}
 			}
 
@@ -287,6 +310,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			selectedFile, status, fileTotals, logo := m.getStatusBarContent()
 			m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
 		}
+
+		m.LastKey = msg
 	}
 
 	if m.ShowCommandBar {
