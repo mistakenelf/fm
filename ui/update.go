@@ -15,8 +15,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m Model) scrollPrimaryPane() {
-	top := m.PrimaryPane.YOffset
+func (m *Model) scrollPrimaryPane() {
+	top := m.PrimaryPane.Viewport.YOffset
 	bottom := m.PrimaryPane.Height + m.PrimaryPane.YOffset - 1
 
 	if m.DirTree.GetCursor() < top {
@@ -25,10 +25,10 @@ func (m Model) scrollPrimaryPane() {
 		m.PrimaryPane.LineDown(1)
 	}
 
-	if m.DirTree.GetCursor() > len(m.Files)-1 {
+	if m.DirTree.GetCursor() > m.DirTree.GetTotalFiles()-1 {
 		m.DirTree.GotoTop()
 		m.PrimaryPane.GotoTop()
-	} else if m.DirTree.GetCursor() < 0 {
+	} else if m.DirTree.GetCursor() < top {
 		m.DirTree.GotoBottom()
 		m.PrimaryPane.GotoBottom()
 	}
@@ -59,7 +59,7 @@ func (m Model) getStatusBarContent() (string, string, string, string) {
 		status = m.Textinput.View()
 	}
 
-	return m.DirTree.GetSelectedFile().Name(), status, fmt.Sprintf("%d/%d", m.DirTree.GetCursor()+1, len(m.Files)), logo
+	return m.DirTree.GetSelectedFile().Name(), status, fmt.Sprintf("%d/%d", m.DirTree.GetCursor()+1, m.DirTree.GetTotalFiles()), logo
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -70,8 +70,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case directoryMsg:
-		m.Files = msg
-		m.DirTree.SetContent(m.Files)
+		m.DirTree.SetContent(msg)
 		m.DirTree.GotoTop()
 		m.PrimaryPane.SetContent(m.DirTree.View())
 		m.ShowCommandBar = false
@@ -187,9 +186,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.PrimaryPane.IsActive {
 					m.DirTree.GoDown()
 					m.scrollPrimaryPane()
-					m.PrimaryPane.SetContent(m.DirTree.View())
 					selectedFile, status, fileTotals, logo := m.getStatusBarContent()
 					m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
+					m.PrimaryPane.SetContent(m.DirTree.View())
 				} else {
 					m.SecondaryPane.LineDown(1)
 				}

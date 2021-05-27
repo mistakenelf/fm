@@ -1,6 +1,7 @@
 package app
 
 import (
+	"io/fs"
 	"log"
 	"os"
 
@@ -19,6 +20,7 @@ func Run() {
 
 	cfg := config.GetConfig()
 	m := ui.NewModel()
+	files := make([]fs.FileInfo, 0)
 
 	if cfg.Settings.StartDir == constants.HomeDirectory {
 		home, err := os.UserHomeDir()
@@ -26,12 +28,12 @@ func Run() {
 			log.Fatal(err)
 		}
 
-		m.Files = utils.GetDirectoryListing(home, cfg.Settings.ShowHidden)
+		files = utils.GetDirectoryListing(home, cfg.Settings.ShowHidden)
 	} else {
-		m.Files = utils.GetDirectoryListing(cfg.Settings.StartDir, cfg.Settings.ShowHidden)
+		files = utils.GetDirectoryListing(cfg.Settings.StartDir, cfg.Settings.ShowHidden)
 	}
 
-	m.DirTree = dirtree.NewModel(m.Files, cfg.Settings.ShowIcons, cfg.Colors.DirTree.SelectedItem, cfg.Colors.DirTree.UnselectedItem)
+	m.DirTree = dirtree.NewModel(files, cfg.Settings.ShowIcons, cfg.Colors.DirTree.SelectedItem, cfg.Colors.DirTree.UnselectedItem)
 
 	p := tea.NewProgram(m)
 	p.EnterAltScreen()

@@ -56,7 +56,7 @@ go install github.com/knipferrc/fm@latest
 
   - <kbd>:</kbd> Open command bar
 
-    - `mkdir /new/dir` Create a new directory in the current directory
+    - `mkdir dirname` Create a new directory in the current directory
 
     - `touch filename.txt` Create new file in the current directory
 

@@ -22,6 +22,7 @@ type Model struct {
 func NewModel(files []fs.FileInfo, showIcons bool, selectedItemColor, unselectedItemColor string) Model {
 	return Model{
 		Files:               files,
+		Cursor:              0,
 		ShowIcons:           showIcons,
 		SelectedItemColor:   selectedItemColor,
 		UnselectedItemColor: unselectedItemColor,
@@ -54,6 +55,10 @@ func (m *Model) GoDown() {
 
 func (m *Model) GoUp() {
 	m.Cursor--
+}
+
+func (m Model) GetTotalFiles() int {
+	return len(m.Files)
 }
 
 func (m Model) dirItem(selected bool, file fs.FileInfo) string {

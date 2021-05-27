@@ -7,7 +7,7 @@ import (
 )
 
 func (m Model) View() string {
-	if !m.Ready || len(m.Files) <= 0 {
+	if !m.Ready || m.DirTree.GetTotalFiles() <= 0 {
 		return fmt.Sprintf("%s%s", m.Spinner.View(), "loading...")
 	}
 

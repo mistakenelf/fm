@@ -2,7 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"io/fs"
 
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
@@ -20,7 +19,6 @@ import (
 type Model struct {
 	PrimaryPane       pane.Model
 	SecondaryPane     pane.Model
-	Files             []fs.FileInfo
 	Textinput         textinput.Model
 	Spinner           spinner.Model
 	HelpText          text.Model
@@ -64,7 +62,7 @@ func NewModel() Model {
 			"~                  | switch to home directory",
 			"-                  | Go To previous directory",
 			":                  | open command bar",
-			"mkdir /new/dir     | create directory in current directory",
+			"mkdir dirname      | create directory in current directory",
 			"touch filename.txt | create file in current directory",
 			"mv newname.txt     | rename currently selected file or directory",
 			"cp /dir/to/move/to | move file or directory",
@@ -75,7 +73,6 @@ func NewModel() Model {
 	return Model{
 		PrimaryPane:       pane.Model{},
 		SecondaryPane:     pane.Model{},
-		Files:             make([]fs.FileInfo, 0),
 		Textinput:         input,
 		Spinner:           s,
 		HelpText:          t,
