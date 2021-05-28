@@ -122,3 +122,12 @@ func CopyDir(src, dst string, shouldRemove bool) (err error) {
 
 	return
 }
+
+func GetHomeDirectory() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return home
+}

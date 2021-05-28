@@ -274,12 +274,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "~":
 			if !m.ShowCommandBar {
-				home, err := os.UserHomeDir()
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				return m, updateDirectoryListing(home)
+				return m, updateDirectoryListing(utils.GetHomeDirectory())
 			}
 
 		case "-":

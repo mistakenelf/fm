@@ -20,15 +20,10 @@ func Run() {
 
 	cfg := config.GetConfig()
 	m := ui.NewModel()
-	files := make([]fs.FileInfo, 0)
+	var files []fs.FileInfo
 
 	if cfg.Settings.StartDir == constants.HomeDirectory {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		files = utils.GetDirectoryListing(home, cfg.Settings.ShowHidden)
+		files = utils.GetDirectoryListing(utils.GetHomeDirectory(), cfg.Settings.ShowHidden)
 	} else {
 		files = utils.GetDirectoryListing(cfg.Settings.StartDir, cfg.Settings.ShowHidden)
 	}

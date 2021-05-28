@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/knipferrc/fm/constants"
+	"github.com/knipferrc/fm/utils"
 
 	"github.com/spf13/viper"
 )
@@ -55,9 +56,8 @@ type Config struct {
 }
 
 func LoadConfig() {
-	home, _ := os.UserHomeDir()
-	configPath := filepath.Join(home, ".config", "fm")
-	configFile := filepath.Join(home, ".config", "fm", "config.yml")
+	configPath := filepath.Join(utils.GetHomeDirectory(), ".config", "fm")
+	configFile := filepath.Join(utils.GetHomeDirectory(), ".config", "fm", "config.yml")
 
 	viper.SetConfigName("config")
 	viper.SetConfigType("yml")
