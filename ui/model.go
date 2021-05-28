@@ -24,7 +24,7 @@ type Model struct {
 	HelpText          text.Model
 	DirTree           dirtree.Model
 	StatusBar         statusbar.Model
-	LastKey           tea.KeyMsg
+	PreviousKey       tea.KeyMsg
 	PreviousDirectory string
 	ScreenWidth       int
 	ScreenHeight      int
@@ -79,7 +79,7 @@ func NewModel() Model {
 		HelpText:          t,
 		DirTree:           dirtree.Model{},
 		StatusBar:         statusbar.Model{},
-		LastKey:           tea.KeyMsg{},
+		PreviousKey:       tea.KeyMsg{},
 		PreviousDirectory: "",
 		ScreenWidth:       0,
 		ScreenHeight:      0,

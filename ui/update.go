@@ -39,7 +39,7 @@ func (m Model) getStatusBarContent() (string, string, string, string) {
 	currentPath, err := os.Getwd()
 
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 
 	logo := ""
@@ -146,7 +146,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case tea.KeyMsg:
-		if msg.String() == "g" && m.LastKey.String() == "g" {
+		if msg.String() == "g" && m.PreviousKey.String() == "g" {
 			if !m.ShowCommandBar {
 				if m.PrimaryPane.IsActive {
 					m.DirTree.GotoTop()
@@ -312,7 +312,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
 		}
 
-		m.LastKey = msg
+		m.PreviousKey = msg
 	}
 
 	if m.ShowCommandBar {

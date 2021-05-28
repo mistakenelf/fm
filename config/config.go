@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -73,7 +72,7 @@ func LoadConfig() {
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			fmt.Println("Error loading config:", err)
+			log.Fatal("Error loading config:", err)
 		}
 	}
 }
@@ -82,7 +81,7 @@ func GetConfig() (config Config) {
 	err := viper.Unmarshal(&config)
 
 	if err != nil {
-		fmt.Println("Error parsing config", err)
+		log.Fatal("Error parsing config", err)
 	}
 
 	return
