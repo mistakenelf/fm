@@ -177,7 +177,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}
 
 					m.PreviousDirectory = previousPath
-					return m, updateDirectoryListing(constants.PreviousDirectory)
+					return m, updateDirectoryListing(constants.PreviousDirectory, m.DirTree.ShowHidden)
 				}
 			}
 
@@ -222,7 +222,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.ShowCommandBar {
 				if m.PrimaryPane.IsActive {
 					if m.DirTree.GetSelectedFile().IsDir() && !m.Textinput.Focused() {
-						return m, updateDirectoryListing(m.DirTree.GetSelectedFile().Name())
+						return m, updateDirectoryListing(m.DirTree.GetSelectedFile().Name(), m.DirTree.ShowHidden)
 					} else {
 						m.SecondaryPane.GotoTop()
 						return m, readFileContent(m.DirTree.GetSelectedFile().Name())
@@ -239,26 +239,26 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			switch cmd {
 			case "mkdir":
-				return m, createDir(value)
+				return m, createDir(value, m.DirTree.ShowHidden)
 
 			case "touch":
-				return m, createFile(value)
+				return m, createFile(value, m.DirTree.ShowHidden)
 
 			case "mv":
-				return m, renameFileOrDir(m.DirTree.GetSelectedFile().Name(), value)
+				return m, renameFileOrDir(m.DirTree.GetSelectedFile().Name(), value, m.DirTree.ShowHidden)
 
 			case "cp":
 				if m.DirTree.GetSelectedFile().IsDir() {
-					return m, moveDir(m.DirTree.GetSelectedFile().Name(), value)
+					return m, moveDir(m.DirTree.GetSelectedFile().Name(), value, m.DirTree.ShowHidden)
 				} else {
-					return m, moveFile(m.DirTree.GetSelectedFile().Name(), value)
+					return m, moveFile(m.DirTree.GetSelectedFile().Name(), value, m.DirTree.ShowHidden)
 				}
 
 			case "rm":
 				if m.DirTree.GetSelectedFile().IsDir() {
-					return m, deleteDir(m.DirTree.GetSelectedFile().Name())
+					return m, deleteDir(m.DirTree.GetSelectedFile().Name(), m.DirTree.ShowHidden)
 				} else {
-					return m, deleteFile(m.DirTree.GetSelectedFile().Name())
+					return m, deleteFile(m.DirTree.GetSelectedFile().Name(), m.DirTree.ShowHidden)
 				}
 
 			default:
@@ -274,12 +274,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "~":
 			if !m.ShowCommandBar {
-				return m, updateDirectoryListing(utils.GetHomeDirectory())
+				return m, updateDirectoryListing(utils.GetHomeDirectory(), m.DirTree.ShowHidden)
 			}
 
 		case "-":
 			if !m.ShowCommandBar && m.PreviousDirectory != "" {
-				return m, updateDirectoryListing(m.PreviousDirectory)
+				return m, updateDirectoryListing(m.PreviousDirectory, m.DirTree.ShowHidden)
+			}
+
+		case ".":
+			if !m.ShowCommandBar && m.PrimaryPane.IsActive {
+				m.DirTree.ToggleHidden()
+
+				return m, updateDirectoryListing(constants.CurrentDirectory, m.DirTree.ShowHidden)
 			}
 
 		case "tab":

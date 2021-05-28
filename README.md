@@ -48,6 +48,8 @@ go install github.com/knipferrc/fm@latest
 
   - <kbd>~</kbd> Switch to home directory
 
+  - <kbd>.</kbd> Toggle hidden files and directories
+
   - <kbd>-</kbd> Go to previous directory
 
   - <kbd>ctrl+c</kbd> Exit
@@ -102,7 +104,6 @@ colors:
       foreground: "#FFFDF5"
 settings:
   rounded_panes: false
-  show_hidden: true
   show_icons: true
   start_dir: .
 ```

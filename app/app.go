@@ -23,9 +23,9 @@ func Run() {
 	var files []fs.FileInfo
 
 	if cfg.Settings.StartDir == constants.HomeDirectory {
-		files = utils.GetDirectoryListing(utils.GetHomeDirectory(), cfg.Settings.ShowHidden)
+		files = utils.GetDirectoryListing(utils.GetHomeDirectory(), true)
 	} else {
-		files = utils.GetDirectoryListing(cfg.Settings.StartDir, cfg.Settings.ShowHidden)
+		files = utils.GetDirectoryListing(cfg.Settings.StartDir, true)
 	}
 
 	m.DirTree = dirtree.NewModel(files, cfg.Settings.ShowIcons, cfg.Colors.DirTree.SelectedItem, cfg.Colors.DirTree.UnselectedItem)

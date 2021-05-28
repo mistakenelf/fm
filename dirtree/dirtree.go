@@ -15,6 +15,7 @@ type Model struct {
 	Files               []fs.FileInfo
 	Cursor              int
 	ShowIcons           bool
+	ShowHidden          bool
 	SelectedItemColor   string
 	UnselectedItemColor string
 }
@@ -24,6 +25,7 @@ func NewModel(files []fs.FileInfo, showIcons bool, selectedItemColor, unselected
 		Files:               files,
 		Cursor:              0,
 		ShowIcons:           showIcons,
+		ShowHidden:          true,
 		SelectedItemColor:   selectedItemColor,
 		UnselectedItemColor: unselectedItemColor,
 	}
@@ -59,6 +61,10 @@ func (m *Model) GoUp() {
 
 func (m Model) GetTotalFiles() int {
 	return len(m.Files)
+}
+
+func (m *Model) ToggleHidden() {
+	m.ShowHidden = !m.ShowHidden
 }
 
 func (m Model) dirItem(selected bool, file fs.FileInfo) string {

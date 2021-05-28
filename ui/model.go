@@ -52,7 +52,7 @@ func NewModel() Model {
 
 	t.BodyText = lipgloss.NewStyle().
 		Foreground(lipgloss.Color(constants.White)).
-		Render(fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+		Render(fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
 			"h or left arrow    | go back a directory",
 			"j or down arrow    | move cursor down",
 			"k or up arrow      | move cursor up",
@@ -60,6 +60,7 @@ func NewModel() Model {
 			"gg                 | go to top of pane",
 			"G                  | go to botom of pane",
 			"~                  | switch to home directory",
+			".                  | toggle hidden files and directories",
 			"-                  | Go To previous directory",
 			":                  | open command bar",
 			"mkdir dirname      | create directory in current directory",

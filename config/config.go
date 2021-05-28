@@ -15,7 +15,6 @@ import (
 type SettingsConfig struct {
 	StartDir     string `mapstructure:"start_dir"`
 	ShowIcons    bool   `mapstructure:"show_icons"`
-	ShowHidden   bool   `mapstructure:"show_hidden"`
 	RoundedPanes bool   `mapstructure:"rounded_panes"`
 }
 
@@ -92,7 +91,6 @@ func GetConfig() (config Config) {
 func SetDefaults() {
 	viper.SetDefault("settings.start_dir", ".")
 	viper.SetDefault("settings.show_icons", true)
-	viper.SetDefault("settings.show_hidden", true)
 	viper.SetDefault("settings.rounded_panes", false)
 
 	// DirTree colors
