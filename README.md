@@ -50,9 +50,9 @@ go install github.com/knipferrc/fm@latest
 
   - <kbd>-</kbd> Go to previous directory
 
-  - <kbd>ctrl+c</kbd> Exit FM
+  - <kbd>ctrl+c</kbd> Exit
 
-  - <kbd>q</kbd> Exit FM if command bar not open
+  - <kbd>q</kbd> Exit if command bar not open
 
   - <kbd>:</kbd> Open command bar
 
