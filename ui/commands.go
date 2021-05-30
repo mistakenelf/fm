@@ -4,6 +4,7 @@ import (
 	"io/fs"
 	"log"
 
+	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/utils"
 
@@ -69,15 +70,11 @@ func deleteFile(file string, showHidden bool) tea.Cmd {
 
 func readFileContent(file string, isMarkdown bool) tea.Cmd {
 	return func() tea.Msg {
+		cfg := config.GetConfig()
 		content := utils.ReadFileContent(file)
 
-		if isMarkdown {
-			r, _ := glamour.NewTermRenderer(
-				glamour.WithAutoStyle(),
-			)
-
-			out, err := r.Render(content)
-
+		if isMarkdown && cfg.Settings.PrettyMarkdown {
+			out, err := glamour.Render(content, "dark")
 			if err != nil {
 				log.Fatal(err)
 			}

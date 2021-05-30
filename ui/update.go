@@ -147,8 +147,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case tea.KeyMsg:
-		log.Output(2, msg.String())
-
 		if msg.String() == "g" && m.PreviousKey.String() == "g" {
 			if !m.ShowCommandBar {
 				if m.PrimaryPane.IsActive {
