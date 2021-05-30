@@ -19,6 +19,7 @@ A terminal based file manager
 - [bubbletea](https://github.com/charmbracelet/bubbletea)
 - [bubbles](https://github.com/charmbracelet/bubbles)
 - [lipgloss](https://github.com/charmbracelet/lipgloss)
+- [Glamour](https://github.com/charmbracelet/glamour)
 
 <br />
 
@@ -103,6 +104,7 @@ colors:
       background: "#A550DF"
       foreground: "#FFFDF5"
 settings:
+  pretty_markdown: true
   rounded_panes: false
   show_icons: true
   start_dir: .

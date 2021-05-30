@@ -2,6 +2,7 @@ package app
 
 import (
 	"flag"
+	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -22,6 +23,14 @@ func Run() {
 	cfg := config.GetConfig()
 	m := ui.NewModel()
 	var files []fs.FileInfo
+
+	f, err := tea.LogToFile("debug.log", "debug")
+	if err != nil {
+		fmt.Println("fatal:", err)
+		os.Exit(1)
+	}
+
+	defer f.Close()
 
 	startDir := flag.String("start", "", "Starting directory")
 

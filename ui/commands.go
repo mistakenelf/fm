@@ -2,11 +2,14 @@ package ui
 
 import (
 	"io/fs"
+	"log"
 
+	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/glamour"
 )
 
 type directoryMsg []fs.FileInfo
@@ -65,11 +68,21 @@ func deleteFile(file string, showHidden bool) tea.Cmd {
 	}
 }
 
-func readFileContent(file string) tea.Cmd {
+func readFileContent(file string, isMarkdown bool) tea.Cmd {
 	return func() tea.Msg {
+		cfg := config.GetConfig()
 		content := utils.ReadFileContent(file)
 
-		return fileContentMsg(content)
+		if isMarkdown && cfg.Settings.PrettyMarkdown {
+			out, err := glamour.Render(content, "dark")
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			return fileContentMsg(out)
+		} else {
+			return fileContentMsg(content)
+		}
 	}
 }
 
