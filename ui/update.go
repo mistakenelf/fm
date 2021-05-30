@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
@@ -224,8 +225,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					if m.DirTree.GetSelectedFile().IsDir() && !m.Textinput.Focused() {
 						return m, updateDirectoryListing(m.DirTree.GetSelectedFile().Name(), m.DirTree.ShowHidden)
 					} else {
+						isMarkdown := filepath.Ext(m.DirTree.GetSelectedFile().Name()) == ".md"
 						m.SecondaryPane.GotoTop()
-						return m, readFileContent(m.DirTree.GetSelectedFile().Name())
+						return m, readFileContent(m.DirTree.GetSelectedFile().Name(), isMarkdown)
 					}
 				}
 			}
