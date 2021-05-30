@@ -1,6 +1,7 @@
 package app
 
 import (
+	"flag"
 	"io/fs"
 	"log"
 	"os"
@@ -22,7 +23,13 @@ func Run() {
 	m := ui.NewModel()
 	var files []fs.FileInfo
 
-	if cfg.Settings.StartDir == constants.HomeDirectory {
+	startDir := flag.String("start", "", "Starting directory")
+
+	flag.Parse()
+
+	if *startDir != "" {
+		files = utils.GetDirectoryListing(*startDir, true)
+	} else if cfg.Settings.StartDir == constants.HomeDirectory {
 		files = utils.GetDirectoryListing(utils.GetHomeDirectory(), true)
 	} else {
 		files = utils.GetDirectoryListing(cfg.Settings.StartDir, true)
