@@ -227,7 +227,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					} else {
 						isMarkdown := filepath.Ext(m.DirTree.GetSelectedFile().Name()) == ".md"
 						m.SecondaryPane.GotoTop()
-						return m, readFileContent(m.DirTree.GetSelectedFile().Name(), isMarkdown)
+						return m, readFileContent(m.DirTree.GetSelectedFile().Name(), isMarkdown, m.SecondaryPane.Width)
 					}
 				}
 			}

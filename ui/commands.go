@@ -69,7 +69,7 @@ func deleteFile(file string, showHidden bool) tea.Cmd {
 	}
 }
 
-func readFileContent(file string, isMarkdown bool) tea.Cmd {
+func readFileContent(file string, isMarkdown bool, width int) tea.Cmd {
 	return func() tea.Msg {
 		cfg := config.GetConfig()
 		content := utils.ReadFileContent(file)
@@ -80,7 +80,12 @@ func readFileContent(file string, isMarkdown bool) tea.Cmd {
 				bg = "dark"
 			}
 
-			out, err := glamour.Render(content, bg)
+			r, _ := glamour.NewTermRenderer(
+				glamour.WithWordWrap(width),
+				glamour.WithStandardStyle(bg),
+			)
+
+			out, err := r.Render(content)
 			if err != nil {
 				log.Fatal(err)
 			}
