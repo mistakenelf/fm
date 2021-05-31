@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -11,6 +12,7 @@ import (
 	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/pane"
 	"github.com/knipferrc/fm/statusbar"
+	"github.com/knipferrc/fm/text"
 	"github.com/knipferrc/fm/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -89,6 +91,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if !m.Ready {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
+
+			helpContent, err := ioutil.ReadFile("assets/help.md")
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			m.HelpText = text.NewModel(msg.Width/2, string(helpContent))
 
 			m.PrimaryPane = pane.NewModel(
 				msg.Width/2,

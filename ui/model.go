@@ -1,10 +1,7 @@
 package ui
 
 import (
-	"fmt"
-
 	"github.com/knipferrc/fm/config"
-	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/dirtree"
 	"github.com/knipferrc/fm/pane"
 	"github.com/knipferrc/fm/statusbar"
@@ -43,40 +40,12 @@ func NewModel() Model {
 	s.Spinner = spinner.Dot
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.Components.Spinner))
 
-	t := text.NewModel()
-	t.HeaderText = lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color(constants.White)).
-		MarginBottom(1).
-		Render("FM (File Manager)")
-
-	t.BodyText = lipgloss.NewStyle().
-		Foreground(lipgloss.Color(constants.White)).
-		Render(fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
-			"h or left arrow    | go back a directory",
-			"j or down arrow    | move cursor down",
-			"k or up arrow      | move cursor up",
-			"l or right arrow   | open selected folder / view file",
-			"gg                 | go to top of pane",
-			"G                  | go to botom of pane",
-			"~                  | switch to home directory",
-			".                  | toggle hidden files and directories",
-			"-                  | Go To previous directory",
-			":                  | open command bar",
-			"mkdir dirname      | create directory in current directory",
-			"touch filename.txt | create file in current directory",
-			"mv newname.txt     | rename currently selected file or directory",
-			"cp /dir/to/move/to | move file or directory",
-			"rm                 | remove file or directory",
-			"tab                | toggle between panes"),
-		)
-
 	return Model{
 		PrimaryPane:       pane.Model{},
 		SecondaryPane:     pane.Model{},
 		Textinput:         input,
 		Spinner:           s,
-		HelpText:          t,
+		HelpText:          text.Model{},
 		DirTree:           dirtree.Model{},
 		StatusBar:         statusbar.Model{},
 		PreviousKey:       tea.KeyMsg{},
