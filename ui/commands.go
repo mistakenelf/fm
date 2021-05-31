@@ -10,6 +10,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type directoryMsg []fs.FileInfo
@@ -74,7 +75,12 @@ func readFileContent(file string, isMarkdown bool) tea.Cmd {
 		content := utils.ReadFileContent(file)
 
 		if isMarkdown && cfg.Settings.PrettyMarkdown {
-			out, err := glamour.Render(content, "dark")
+			bg := "light"
+			if lipgloss.HasDarkBackground() {
+				bg = "dark"
+			}
+
+			out, err := glamour.Render(content, bg)
 			if err != nil {
 				log.Fatal(err)
 			}
