@@ -82,8 +82,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		selectedFile, status, fileTotals, logo := m.getStatusBarContent()
 		m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
 
+		return m, cmd
+
 	case fileContentMsg:
 		m.SecondaryPane.SetContent(utils.ConverTabsToSpaces(string(msg)))
+
+		return m, cmd
 
 	case tea.WindowSizeMsg:
 		cfg := config.GetConfig()
@@ -155,6 +159,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.StatusBar.SetSize(msg.Width)
 		}
 
+		return m, cmd
+
 	case tea.KeyMsg:
 		if msg.String() == "g" && m.PreviousKey.String() == "g" {
 			if !m.ShowCommandBar {
@@ -166,6 +172,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.SecondaryPane.GotoTop()
 				}
 			}
+
+			return m, cmd
 		}
 
 		switch msg.String() {
@@ -191,6 +199,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
+			return m, cmd
+
 		case "down", "j":
 			if !m.ShowCommandBar {
 				if m.PrimaryPane.IsActive {
@@ -203,6 +213,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.SecondaryPane.LineDown(1)
 				}
 			}
+
+			return m, cmd
 
 		case "up", "k":
 			if !m.ShowCommandBar {
@@ -217,6 +229,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
+			return m, cmd
+
 		case "G":
 			if !m.ShowCommandBar {
 				if m.PrimaryPane.IsActive {
@@ -227,6 +241,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.SecondaryPane.GotoBottom()
 				}
 			}
+
+			return m, cmd
 
 		case "right", "l":
 			if !m.ShowCommandBar {
@@ -241,14 +257,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
-		case "enter":
-			cmd, value := utils.ParseCommand(m.Textinput.Value())
+			return m, cmd
 
-			if cmd == "" {
+		case "enter":
+			command, value := utils.ParseCommand(m.Textinput.Value())
+
+			if command == "" {
 				return m, nil
 			}
 
-			switch cmd {
+			switch command {
 			case "mkdir":
 				return m, createDir(value, m.DirTree.ShowHidden)
 
@@ -281,17 +299,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Textinput.Placeholder = "enter command"
 			m.Textinput.Focus()
 
-			return m, nil
+			return m, cmd
 
 		case "~":
 			if !m.ShowCommandBar {
 				return m, updateDirectoryListing(utils.GetHomeDirectory(), m.DirTree.ShowHidden)
 			}
 
+			return m, cmd
+
 		case "-":
 			if !m.ShowCommandBar && m.PreviousDirectory != "" {
 				return m, updateDirectoryListing(m.PreviousDirectory, m.DirTree.ShowHidden)
 			}
+
+			return m, cmd
 
 		case ".":
 			if !m.ShowCommandBar && m.PrimaryPane.IsActive {
@@ -299,6 +321,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				return m, updateDirectoryListing(constants.CurrentDirectory, m.DirTree.ShowHidden)
 			}
+
+			return m, cmd
 
 		case "tab":
 			if !m.ShowCommandBar {
@@ -311,6 +335,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
+			return m, cmd
+
 		case "esc":
 			m.ShowCommandBar = false
 			m.Textinput.Blur()
@@ -321,6 +347,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.SecondaryPane.IsActive = false
 			selectedFile, status, fileTotals, logo := m.getStatusBarContent()
 			m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
+
+			return m, cmd
 		}
 
 		m.PreviousKey = msg
