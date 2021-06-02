@@ -50,8 +50,7 @@ func Run() {
 
 	m.DirTree = dirtree.NewModel(files, cfg.Settings.ShowIcons, cfg.Colors.DirTree.SelectedItem, cfg.Colors.DirTree.UnselectedItem)
 
-	p := tea.NewProgram(m)
-	p.EnterAltScreen()
+	p := tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseAllMotion())
 
 	if err := p.Start(); err != nil {
 		log.Fatal("Failed to start fm", err)

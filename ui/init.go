@@ -7,5 +7,5 @@ import (
 )
 
 func (m Model) Init() tea.Cmd {
-	return tea.Batch(tea.EnableMouseCellMotion, textinput.Blink, spinner.Tick)
+	return tea.Batch(textinput.Blink, spinner.Tick)
 }
