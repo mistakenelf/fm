@@ -2,7 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -95,13 +94,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if !m.Ready {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
-
-			helpContent, err := ioutil.ReadFile("assets/help.md")
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			m.HelpText = text.NewModel(msg.Width/2, string(helpContent))
+			m.HelpText = text.NewModel(msg.Width/2, `
+# FM (File Manager)
+- h or left arrow     | go back a directory
+- j or down arrow     | move cursor down
+- k or up arrow       | move cursor up
+- l or right arrow    | open selected folder / view file
+- gg                  | go to top of pane
+- G                   | go to botom of pane
+- ~                   | switch to home directory
+- .                   | toggle hidden files and directories
+- (-)                   | Go To previous directory
+- :                   | open command bar
+- mkdir dirname       | create directory in current directory
+- touch filename.txt  | create file in current directory
+- mv newname.txt      | rename currently selected file or directory
+- cp /dir/to/move/to  | move file or directory
+- rm                 | remove file or directory
+- tab                | toggle between panes
+`)
 
 			m.PrimaryPane = pane.NewModel(
 				msg.Width/2,
