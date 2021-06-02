@@ -16,6 +16,7 @@ type SettingsConfig struct {
 	ShowIcons      bool   `mapstructure:"show_icons"`
 	RoundedPanes   bool   `mapstructure:"rounded_panes"`
 	PrettyMarkdown bool   `mapstructure:"pretty_markdown"`
+	EnableLogging  bool   `mapstructure:"enable_logging"`
 }
 
 type DirTreeColors struct {
@@ -94,6 +95,7 @@ func SetDefaults() {
 	viper.SetDefault("settings.show_icons", true)
 	viper.SetDefault("settings.rounded_panes", false)
 	viper.SetDefault("settings.pretty_markdown", true)
+	viper.SetDefault("settings.enable_logging", false)
 
 	// DirTree colors
 	viper.SetDefault("colors.dir_tree.selected_item", constants.Pink)
