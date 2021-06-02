@@ -42,8 +42,10 @@ func Run() {
 		files = utils.GetDirectoryListing(*startDir, true)
 	} else if cfg.Settings.StartDir == constants.HomeDirectory {
 		files = utils.GetDirectoryListing(utils.GetHomeDirectory(), true)
-	} else {
+	} else if cfg.Settings.StartDir != "" {
 		files = utils.GetDirectoryListing(cfg.Settings.StartDir, true)
+	} else {
+		files = utils.GetDirectoryListing(".", true)
 	}
 
 	m.DirTree = dirtree.NewModel(files, cfg.Settings.ShowIcons, cfg.Colors.DirTree.SelectedItem, cfg.Colors.DirTree.UnselectedItem)
