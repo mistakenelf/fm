@@ -42,7 +42,7 @@ func Run() {
 		files = utils.GetDirectoryListing(*startDir, true)
 	} else if cfg.Settings.StartDir == constants.HomeDirectory {
 		files = utils.GetDirectoryListing(utils.GetHomeDirectory(), true)
-	} else if cfg.Settings.StartDir != "" {
+	} else if _, err := os.Stat(cfg.Settings.StartDir); err == nil {
 		files = utils.GetDirectoryListing(cfg.Settings.StartDir, true)
 	} else {
 		files = utils.GetDirectoryListing(".", true)
