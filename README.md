@@ -104,6 +104,8 @@ colors:
       background: "#A550DF"
       foreground: "#FFFDF5"
 settings:
+  enable_logging: false
+  enable_mousewheel: true
   pretty_markdown: true
   rounded_panes: false
   show_icons: true
