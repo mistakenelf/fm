@@ -154,6 +154,35 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, cmd
 
+	case tea.MouseMsg:
+		switch msg.Type {
+		case tea.MouseWheelUp:
+			if !m.ShowCommandBar {
+				if m.PrimaryPane.IsActive {
+					m.DirTree.GoUp()
+					m.scrollPrimaryPane()
+					m.PrimaryPane.SetContent(m.DirTree.View())
+				} else {
+					m.SecondaryPane.LineUp(3)
+				}
+			}
+
+			return m, cmd
+
+		case tea.MouseWheelDown:
+			if !m.ShowCommandBar {
+				if m.PrimaryPane.IsActive {
+					m.DirTree.GoDown()
+					m.scrollPrimaryPane()
+					m.PrimaryPane.SetContent(m.DirTree.View())
+				} else {
+					m.SecondaryPane.LineDown(3)
+				}
+			}
+
+			return m, cmd
+		}
+
 	case tea.KeyMsg:
 		if msg.String() == "g" && m.PreviousKey.String() == "g" {
 			if !m.ShowCommandBar {
@@ -188,6 +217,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}
 
 					m.PreviousDirectory = previousPath
+
 					return m, updateDirectoryListing(constants.PreviousDirectory, m.DirTree.ShowHidden)
 				}
 			}
@@ -245,6 +275,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					} else {
 						isMarkdown := filepath.Ext(m.DirTree.GetSelectedFile().Name()) == ".md"
 						m.SecondaryPane.GotoTop()
+
 						return m, readFileContent(m.DirTree.GetSelectedFile().Name(), isMarkdown, m.SecondaryPane.Width)
 					}
 				}
