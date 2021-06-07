@@ -21,8 +21,6 @@ A terminal based file manager
 - [lipgloss](https://github.com/charmbracelet/lipgloss)
 - [Glamour](https://github.com/charmbracelet/glamour)
 
-<br />
-
 ## Installation
 
 ```
@@ -74,8 +72,6 @@ go install github.com/knipferrc/fm@latest
   - <kbd>esc</kbd> Cancel any current action. Pressing <kbd>esc</kbd> during any action (rename, move, or delete) will cancel that action and return you to file navigation
 
 - A config file will be generated at `.config/fm/config.yml` when you first run `fm`
-
-<br />
 
 ### Default Config
 
@@ -132,8 +128,6 @@ make run
 ```sh
 make build
 ```
-
-<br />
 
 ### Credit
 
