@@ -76,7 +76,6 @@ go install github.com/knipferrc/fm@latest
 - A config file will be generated at `.config/fm/config.yml` when you first run `fm`
 
 <br />
-<br />
 
 ### Default Config
 
@@ -111,9 +110,6 @@ settings:
   show_icons: true
   start_dir: .
 ```
-
-<br />
-<br />
 
 ## Local Development
 
