@@ -1,7 +1,6 @@
 package app
 
 import (
-	"flag"
 	"fmt"
 	"io/fs"
 	"log"
@@ -22,7 +21,9 @@ func Run() {
 
 	cfg := config.GetConfig()
 	m := ui.NewModel()
+
 	var files []fs.FileInfo
+	var startDir string
 
 	if cfg.Settings.EnableLogging {
 		f, err := tea.LogToFile("debug.log", "debug")
@@ -34,12 +35,12 @@ func Run() {
 		defer f.Close()
 	}
 
-	startDir := flag.String("start", "", "Starting directory")
+	if len(os.Args) > 1 {
+		startDir = os.Args[1]
+	}
 
-	flag.Parse()
-
-	if *startDir != "" {
-		files = utils.GetDirectoryListing(*startDir, true)
+	if startDir != "" {
+		files = utils.GetDirectoryListing(startDir, true)
 	} else if cfg.Settings.StartDir == constants.HomeDirectory {
 		files = utils.GetDirectoryListing(utils.GetHomeDirectory(), true)
 	} else if _, err := os.Stat(cfg.Settings.StartDir); err == nil {
@@ -48,7 +49,12 @@ func Run() {
 		files = utils.GetDirectoryListing(".", true)
 	}
 
-	m.DirTree = dirtree.NewModel(files, cfg.Settings.ShowIcons, cfg.Colors.DirTree.SelectedItem, cfg.Colors.DirTree.UnselectedItem)
+	m.DirTree = dirtree.NewModel(
+		files,
+		cfg.Settings.ShowIcons,
+		cfg.Colors.DirTree.SelectedItem,
+		cfg.Colors.DirTree.UnselectedItem,
+	)
 
 	p := tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseAllMotion())
 
