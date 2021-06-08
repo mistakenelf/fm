@@ -65,7 +65,7 @@ func (m Model) getStatusBarContent() (string, string, string, string) {
 	return m.DirTree.GetSelectedFile().Name(), status, fmt.Sprintf("%d/%d", m.DirTree.GetCursor()+1, m.DirTree.GetTotalFiles()), logo
 }
 
-func (m Model) renderMarkdown(str *string) string {
+func (m Model) renderMarkdown(str string) string {
 	bg := "light"
 
 	if lipgloss.HasDarkBackground() {
@@ -77,7 +77,7 @@ func (m Model) renderMarkdown(str *string) string {
 		glamour.WithStandardStyle(bg),
 	)
 
-	out, err := r.Render(*str)
+	out, err := r.Render(str)
 	if err != nil {
 		// FIXME: show an error in the UI
 		log.Fatal(err)
@@ -111,7 +111,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if filepath.Ext(m.DirTree.GetSelectedFile().Name()) == ".md" && cfg.Settings.PrettyMarkdown {
 			m.activeMarkdownSource = string(msg)
-			content = m.renderMarkdown(&m.activeMarkdownSource)
+			content = m.renderMarkdown(m.activeMarkdownSource)
 		} else {
 			m.activeMarkdownSource = ""
 		}
@@ -183,7 +183,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if m.activeMarkdownSource != "" {
-			m.SecondaryPane.SetContent(m.renderMarkdown(&m.activeMarkdownSource))
+			m.SecondaryPane.SetContent(m.renderMarkdown(m.activeMarkdownSource))
 		}
 
 		return m, cmd
@@ -400,7 +400,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Textinput.Reset()
 			m.SecondaryPane.GotoTop()
 			m.activeMarkdownSource = constants.HelpText
-			m.SecondaryPane.SetContent(m.renderMarkdown(&m.activeMarkdownSource))
+			m.SecondaryPane.SetContent(m.renderMarkdown(m.activeMarkdownSource))
 			m.PrimaryPane.IsActive = true
 			m.SecondaryPane.IsActive = false
 			selectedFile, status, fileTotals, logo := m.getStatusBarContent()
