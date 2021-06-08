@@ -59,7 +59,11 @@ func (m *Model) SetContent(content string) {
 		border = lipgloss.RoundedBorder()
 	}
 
-	m.Viewport.SetContent(lipgloss.NewStyle().Width(m.Width - lipgloss.Width(border.Top+border.Left)).Render(content))
+	m.Viewport.SetContent(
+		lipgloss.NewStyle().
+			Width(m.Width - lipgloss.Width(border.Top+border.Left)).
+			Render(content),
+	)
 }
 
 func (m *Model) LineUp(lines int) {

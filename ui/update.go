@@ -96,7 +96,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case directoryMsg:
 		m.dirTree.SetContent(msg)
 		m.dirTree.GotoTop()
-		m.primaryPane.SetContent(m.dirTree.View())
+		m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
 		m.showCommandBar = false
 		m.textInput.Blur()
 		m.textInput.Reset()
@@ -135,7 +135,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cfg.Colors.Pane.ActiveBorderColor,
 				cfg.Colors.Pane.InactiveBorderColor,
 			)
-			m.primaryPane.SetContent(m.dirTree.View())
+			m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
 
 			m.secondaryPane = pane.NewModel(
 				msg.Width/2,
@@ -195,7 +195,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.primaryPane.IsActive {
 					m.dirTree.GoUp()
 					m.scrollPrimaryPane()
-					m.primaryPane.SetContent(m.dirTree.View())
+					m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
 				} else {
 					m.secondaryPane.LineUp(3)
 				}
@@ -208,7 +208,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.primaryPane.IsActive {
 					m.dirTree.GoDown()
 					m.scrollPrimaryPane()
-					m.primaryPane.SetContent(m.dirTree.View())
+					m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
 				} else {
 					m.secondaryPane.LineDown(3)
 				}
@@ -223,7 +223,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.primaryPane.IsActive {
 					m.dirTree.GotoTop()
 					m.primaryPane.GotoTop()
-					m.primaryPane.SetContent(m.dirTree.View())
+					m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
 				} else {
 					m.secondaryPane.GotoTop()
 				}
@@ -265,7 +265,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.scrollPrimaryPane()
 					selectedFile, status, fileTotals, logo := m.getStatusBarContent()
 					m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
-					m.primaryPane.SetContent(m.dirTree.View())
+					m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
 				} else {
 					m.secondaryPane.LineDown(1)
 				}
@@ -278,7 +278,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.primaryPane.IsActive {
 					m.dirTree.GoUp()
 					m.scrollPrimaryPane()
-					m.primaryPane.SetContent(m.dirTree.View())
+					m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
 					selectedFile, status, fileTotals, logo := m.getStatusBarContent()
 					m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
 				} else {
@@ -293,7 +293,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.primaryPane.IsActive {
 					m.dirTree.GotoBottom()
 					m.primaryPane.GotoBottom()
-					m.primaryPane.SetContent(m.dirTree.View())
+					m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
 				} else {
 					m.secondaryPane.GotoBottom()
 				}
