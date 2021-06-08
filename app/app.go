@@ -56,15 +56,15 @@ func Run() {
 		cfg.Colors.DirTree.UnselectedItem,
 	)
 
-	var cmds []tea.ProgramOption
+	var opts []tea.ProgramOption
 
-	cmds = append(cmds, tea.WithAltScreen())
+	opts = append(opts, tea.WithAltScreen())
 
 	if cfg.Settings.EnableMouseWheel {
-		cmds = append(cmds, tea.WithMouseAllMotion())
+		opts = append(opts, tea.WithMouseAllMotion())
 	}
 
-	p := tea.NewProgram(m, cmds...)
+	p := tea.NewProgram(m, opts...)
 
 	if err := p.Start(); err != nil {
 		log.Fatal("Failed to start fm", err)
