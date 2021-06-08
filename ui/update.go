@@ -15,6 +15,8 @@ import (
 	"github.com/knipferrc/fm/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/glamour"
+	"github.com/charmbracelet/lipgloss"
 )
 
 func (m *Model) scrollPrimaryPane() {
@@ -84,7 +86,30 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 
 	case fileContentMsg:
-		m.SecondaryPane.SetContent(utils.ConverTabsToSpaces(string(msg)))
+		cfg := config.GetConfig()
+		content := string(msg)
+
+		if filepath.Ext(m.DirTree.GetSelectedFile().Name()) == ".md" && cfg.Settings.PrettyMarkdown {
+			bg := "light"
+
+			if lipgloss.HasDarkBackground() {
+				bg = "dark"
+			}
+
+			r, _ := glamour.NewTermRenderer(
+				glamour.WithWordWrap((m.ScreenWidth/2)-3),
+				glamour.WithStandardStyle(bg),
+			)
+
+			out, err := r.Render(string(msg))
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			content = out
+		}
+
+		m.SecondaryPane.SetContent(utils.ConverTabsToSpaces(content))
 
 		return m, cmd
 
@@ -273,10 +298,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					if m.DirTree.GetSelectedFile().IsDir() && !m.Textinput.Focused() {
 						return m, updateDirectoryListing(m.DirTree.GetSelectedFile().Name(), m.DirTree.ShowHidden)
 					} else {
-						isMarkdown := filepath.Ext(m.DirTree.GetSelectedFile().Name()) == ".md"
 						m.SecondaryPane.GotoTop()
 
-						return m, readFileContent(m.DirTree.GetSelectedFile().Name(), isMarkdown, m.SecondaryPane.Width)
+						return m, readFileContent(m.DirTree.GetSelectedFile().Name())
 					}
 				}
 			}
