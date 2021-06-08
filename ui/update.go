@@ -97,7 +97,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			r, _ := glamour.NewTermRenderer(
-				glamour.WithWordWrap((m.ScreenWidth/2)-3),
+				glamour.WithWordWrap(m.SecondaryPane.Width),
 				glamour.WithStandardStyle(bg),
 			)
 
