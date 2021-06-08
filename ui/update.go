@@ -18,26 +18,26 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func (m *Model) scrollPrimaryPane() {
-	top := m.PrimaryPane.Viewport.YOffset
-	bottom := m.PrimaryPane.Height + m.PrimaryPane.YOffset - 1
+func (m *model) scrollPrimaryPane() {
+	top := m.primaryPane.Viewport.YOffset
+	bottom := m.primaryPane.Height + m.primaryPane.YOffset - 1
 
-	if m.DirTree.GetCursor() < top {
-		m.PrimaryPane.LineUp(1)
-	} else if m.DirTree.GetCursor() > bottom {
-		m.PrimaryPane.LineDown(1)
+	if m.dirTree.GetCursor() < top {
+		m.primaryPane.LineUp(1)
+	} else if m.dirTree.GetCursor() > bottom {
+		m.primaryPane.LineDown(1)
 	}
 
-	if m.DirTree.GetCursor() > m.DirTree.GetTotalFiles()-1 {
-		m.DirTree.GotoTop()
-		m.PrimaryPane.GotoTop()
-	} else if m.DirTree.GetCursor() < top {
-		m.DirTree.GotoBottom()
-		m.PrimaryPane.GotoBottom()
+	if m.dirTree.GetCursor() > m.dirTree.GetTotalFiles()-1 {
+		m.dirTree.GotoTop()
+		m.primaryPane.GotoTop()
+	} else if m.dirTree.GetCursor() < top {
+		m.dirTree.GotoBottom()
+		m.primaryPane.GotoBottom()
 	}
 }
 
-func (m Model) getStatusBarContent() (string, string, string, string) {
+func (m model) getStatusBarContent() (string, string, string, string) {
 	cfg := config.GetConfig()
 	currentPath, err := os.Getwd()
 
@@ -53,19 +53,19 @@ func (m Model) getStatusBarContent() (string, string, string, string) {
 	}
 
 	status := fmt.Sprintf("%s %s %s",
-		utils.ConvertBytesToSizeString(m.DirTree.GetSelectedFile().Size()),
-		m.DirTree.GetSelectedFile().Mode().String(),
+		utils.ConvertBytesToSizeString(m.dirTree.GetSelectedFile().Size()),
+		m.dirTree.GetSelectedFile().Mode().String(),
 		currentPath,
 	)
 
-	if m.ShowCommandBar {
-		status = m.Textinput.View()
+	if m.showCommandBar {
+		status = m.textInput.View()
 	}
 
-	return m.DirTree.GetSelectedFile().Name(), status, fmt.Sprintf("%d/%d", m.DirTree.GetCursor()+1, m.DirTree.GetTotalFiles()), logo
+	return m.dirTree.GetSelectedFile().Name(), status, fmt.Sprintf("%d/%d", m.dirTree.GetCursor()+1, m.dirTree.GetTotalFiles()), logo
 }
 
-func (m Model) renderMarkdown(str string) string {
+func (m model) renderMarkdown(str string) string {
 	bg := "light"
 
 	if lipgloss.HasDarkBackground() {
@@ -73,7 +73,7 @@ func (m Model) renderMarkdown(str string) string {
 	}
 
 	r, _ := glamour.NewTermRenderer(
-		glamour.WithWordWrap(m.SecondaryPane.Width),
+		glamour.WithWordWrap(m.secondaryPane.Width),
 		glamour.WithStandardStyle(bg),
 	)
 
@@ -86,7 +86,7 @@ func (m Model) renderMarkdown(str string) string {
 	return out
 }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
 		cmd  tea.Cmd
 		cmds []tea.Cmd
@@ -94,14 +94,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case directoryMsg:
-		m.DirTree.SetContent(msg)
-		m.DirTree.GotoTop()
-		m.PrimaryPane.SetContent(m.DirTree.View())
-		m.ShowCommandBar = false
-		m.Textinput.Blur()
-		m.Textinput.Reset()
+		m.dirTree.SetContent(msg)
+		m.dirTree.GotoTop()
+		m.primaryPane.SetContent(m.dirTree.View())
+		m.showCommandBar = false
+		m.textInput.Blur()
+		m.textInput.Reset()
 		selectedFile, status, fileTotals, logo := m.getStatusBarContent()
-		m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
+		m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
 
 		return m, cmd
 
@@ -109,25 +109,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cfg := config.GetConfig()
 		content := string(msg)
 
-		if filepath.Ext(m.DirTree.GetSelectedFile().Name()) == ".md" && cfg.Settings.PrettyMarkdown {
+		if filepath.Ext(m.dirTree.GetSelectedFile().Name()) == ".md" && cfg.Settings.PrettyMarkdown {
 			m.activeMarkdownSource = string(msg)
 			content = m.renderMarkdown(m.activeMarkdownSource)
 		} else {
 			m.activeMarkdownSource = ""
 		}
 
-		m.SecondaryPane.SetContent(utils.ConverTabsToSpaces(content))
+		m.secondaryPane.SetContent(utils.ConverTabsToSpaces(content))
 
 		return m, cmd
 
 	case tea.WindowSizeMsg:
 		cfg := config.GetConfig()
 
-		if !m.Ready {
-			m.ScreenWidth = msg.Width
-			m.ScreenHeight = msg.Height
+		if !m.ready {
+			m.screenWidth = msg.Width
+			m.screenHeight = msg.Height
 
-			m.PrimaryPane = pane.NewModel(
+			m.primaryPane = pane.NewModel(
 				msg.Width/2,
 				msg.Height-constants.StatusBarHeight,
 				true,
@@ -135,9 +135,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cfg.Colors.Pane.ActiveBorderColor,
 				cfg.Colors.Pane.InactiveBorderColor,
 			)
-			m.PrimaryPane.SetContent(m.DirTree.View())
+			m.primaryPane.SetContent(m.dirTree.View())
 
-			m.SecondaryPane = pane.NewModel(
+			m.secondaryPane = pane.NewModel(
 				msg.Width/2,
 				msg.Height-constants.StatusBarHeight,
 				false,
@@ -147,7 +147,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			)
 
 			selectedFile, status, fileTotals, logo := m.getStatusBarContent()
-			m.StatusBar = statusbar.NewModel(
+			m.statusBar = statusbar.NewModel(
 				msg.Width,
 				selectedFile,
 				status,
@@ -171,19 +171,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				},
 			)
 
-			m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
+			m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
 
-			m.Ready = true
+			m.ready = true
 		} else {
-			m.ScreenWidth = msg.Width
-			m.ScreenHeight = msg.Height
-			m.PrimaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.SecondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.StatusBar.SetSize(msg.Width)
+			m.screenHeight = msg.Width
+			m.screenHeight = msg.Height
+			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
+			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
+			m.statusBar.SetSize(msg.Width)
 		}
 
 		if m.activeMarkdownSource != "" {
-			m.SecondaryPane.SetContent(m.renderMarkdown(m.activeMarkdownSource))
+			m.secondaryPane.SetContent(m.renderMarkdown(m.activeMarkdownSource))
 		}
 
 		return m, cmd
@@ -191,26 +191,26 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.MouseMsg:
 		switch msg.Type {
 		case tea.MouseWheelUp:
-			if !m.ShowCommandBar {
-				if m.PrimaryPane.IsActive {
-					m.DirTree.GoUp()
+			if !m.showCommandBar {
+				if m.primaryPane.IsActive {
+					m.dirTree.GoUp()
 					m.scrollPrimaryPane()
-					m.PrimaryPane.SetContent(m.DirTree.View())
+					m.primaryPane.SetContent(m.dirTree.View())
 				} else {
-					m.SecondaryPane.LineUp(3)
+					m.secondaryPane.LineUp(3)
 				}
 			}
 
 			return m, cmd
 
 		case tea.MouseWheelDown:
-			if !m.ShowCommandBar {
-				if m.PrimaryPane.IsActive {
-					m.DirTree.GoDown()
+			if !m.showCommandBar {
+				if m.primaryPane.IsActive {
+					m.dirTree.GoDown()
 					m.scrollPrimaryPane()
-					m.PrimaryPane.SetContent(m.DirTree.View())
+					m.primaryPane.SetContent(m.dirTree.View())
 				} else {
-					m.SecondaryPane.LineDown(3)
+					m.secondaryPane.LineDown(3)
 				}
 			}
 
@@ -218,14 +218,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case tea.KeyMsg:
-		if msg.String() == "g" && m.PreviousKey.String() == "g" {
-			if !m.ShowCommandBar {
-				if m.PrimaryPane.IsActive {
-					m.DirTree.GotoTop()
-					m.PrimaryPane.GotoTop()
-					m.PrimaryPane.SetContent(m.DirTree.View())
+		if msg.String() == "g" && m.previousKey.String() == "g" {
+			if !m.showCommandBar {
+				if m.primaryPane.IsActive {
+					m.dirTree.GotoTop()
+					m.primaryPane.GotoTop()
+					m.primaryPane.SetContent(m.dirTree.View())
 				} else {
-					m.SecondaryPane.GotoTop()
+					m.secondaryPane.GotoTop()
 				}
 			}
 
@@ -237,79 +237,79 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "q":
-			if !m.ShowCommandBar {
+			if !m.showCommandBar {
 				return m, tea.Quit
 			}
 
 		case "left", "h":
-			if !m.ShowCommandBar {
-				if m.PrimaryPane.IsActive {
+			if !m.showCommandBar {
+				if m.primaryPane.IsActive {
 					previousPath, err := os.Getwd()
 
 					if err != nil {
 						log.Fatal("error getting working directory")
 					}
 
-					m.PreviousDirectory = previousPath
+					m.previousDirectory = previousPath
 
-					return m, updateDirectoryListing(constants.PreviousDirectory, m.DirTree.ShowHidden)
+					return m, updateDirectoryListing(constants.PreviousDirectory, m.dirTree.ShowHidden)
 				}
 			}
 
 			return m, cmd
 
 		case "down", "j":
-			if !m.ShowCommandBar {
-				if m.PrimaryPane.IsActive {
-					m.DirTree.GoDown()
+			if !m.showCommandBar {
+				if m.primaryPane.IsActive {
+					m.dirTree.GoDown()
 					m.scrollPrimaryPane()
 					selectedFile, status, fileTotals, logo := m.getStatusBarContent()
-					m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
-					m.PrimaryPane.SetContent(m.DirTree.View())
+					m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
+					m.primaryPane.SetContent(m.dirTree.View())
 				} else {
-					m.SecondaryPane.LineDown(1)
+					m.secondaryPane.LineDown(1)
 				}
 			}
 
 			return m, cmd
 
 		case "up", "k":
-			if !m.ShowCommandBar {
-				if m.PrimaryPane.IsActive {
-					m.DirTree.GoUp()
+			if !m.showCommandBar {
+				if m.primaryPane.IsActive {
+					m.dirTree.GoUp()
 					m.scrollPrimaryPane()
-					m.PrimaryPane.SetContent(m.DirTree.View())
+					m.primaryPane.SetContent(m.dirTree.View())
 					selectedFile, status, fileTotals, logo := m.getStatusBarContent()
-					m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
+					m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
 				} else {
-					m.SecondaryPane.LineUp(1)
+					m.secondaryPane.LineUp(1)
 				}
 			}
 
 			return m, cmd
 
 		case "G":
-			if !m.ShowCommandBar {
-				if m.PrimaryPane.IsActive {
-					m.DirTree.GotoBottom()
-					m.PrimaryPane.GotoBottom()
-					m.PrimaryPane.SetContent(m.DirTree.View())
+			if !m.showCommandBar {
+				if m.primaryPane.IsActive {
+					m.dirTree.GotoBottom()
+					m.primaryPane.GotoBottom()
+					m.primaryPane.SetContent(m.dirTree.View())
 				} else {
-					m.SecondaryPane.GotoBottom()
+					m.secondaryPane.GotoBottom()
 				}
 			}
 
 			return m, cmd
 
 		case "right", "l":
-			if !m.ShowCommandBar {
-				if m.PrimaryPane.IsActive {
-					if m.DirTree.GetSelectedFile().IsDir() && !m.Textinput.Focused() {
-						return m, updateDirectoryListing(m.DirTree.GetSelectedFile().Name(), m.DirTree.ShowHidden)
+			if !m.showCommandBar {
+				if m.primaryPane.IsActive {
+					if m.dirTree.GetSelectedFile().IsDir() && !m.textInput.Focused() {
+						return m, updateDirectoryListing(m.dirTree.GetSelectedFile().Name(), m.dirTree.ShowHidden)
 					} else {
-						m.SecondaryPane.GotoTop()
+						m.secondaryPane.GotoTop()
 
-						return m, readFileContent(m.DirTree.GetSelectedFile().Name())
+						return m, readFileContent(m.dirTree.GetSelectedFile().Name())
 					}
 				}
 			}
@@ -317,7 +317,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, cmd
 
 		case "enter":
-			command, value := utils.ParseCommand(m.Textinput.Value())
+			command, value := utils.ParseCommand(m.textInput.Value())
 
 			if command == "" {
 				return m, nil
@@ -325,26 +325,26 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			switch command {
 			case "mkdir":
-				return m, createDir(value, m.DirTree.ShowHidden)
+				return m, createDir(value, m.dirTree.ShowHidden)
 
 			case "touch":
-				return m, createFile(value, m.DirTree.ShowHidden)
+				return m, createFile(value, m.dirTree.ShowHidden)
 
 			case "mv":
-				return m, renameFileOrDir(m.DirTree.GetSelectedFile().Name(), value, m.DirTree.ShowHidden)
+				return m, renameFileOrDir(m.dirTree.GetSelectedFile().Name(), value, m.dirTree.ShowHidden)
 
 			case "cp":
-				if m.DirTree.GetSelectedFile().IsDir() {
-					return m, moveDir(m.DirTree.GetSelectedFile().Name(), value, m.DirTree.ShowHidden)
+				if m.dirTree.GetSelectedFile().IsDir() {
+					return m, moveDir(m.dirTree.GetSelectedFile().Name(), value, m.dirTree.ShowHidden)
 				} else {
-					return m, moveFile(m.DirTree.GetSelectedFile().Name(), value, m.DirTree.ShowHidden)
+					return m, moveFile(m.dirTree.GetSelectedFile().Name(), value, m.dirTree.ShowHidden)
 				}
 
 			case "rm":
-				if m.DirTree.GetSelectedFile().IsDir() {
-					return m, deleteDir(m.DirTree.GetSelectedFile().Name(), m.DirTree.ShowHidden)
+				if m.dirTree.GetSelectedFile().IsDir() {
+					return m, deleteDir(m.dirTree.GetSelectedFile().Name(), m.dirTree.ShowHidden)
 				} else {
-					return m, deleteFile(m.DirTree.GetSelectedFile().Name(), m.DirTree.ShowHidden)
+					return m, deleteFile(m.dirTree.GetSelectedFile().Name(), m.dirTree.ShowHidden)
 				}
 
 			default:
@@ -352,75 +352,75 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case ":":
-			m.ShowCommandBar = true
-			m.Textinput.Placeholder = "enter command"
-			m.Textinput.Focus()
+			m.showCommandBar = true
+			m.textInput.Placeholder = "enter command"
+			m.textInput.Focus()
 
 			return m, cmd
 
 		case "~":
-			if !m.ShowCommandBar {
-				return m, updateDirectoryListing(utils.GetHomeDirectory(), m.DirTree.ShowHidden)
+			if !m.showCommandBar {
+				return m, updateDirectoryListing(utils.GetHomeDirectory(), m.dirTree.ShowHidden)
 			}
 
 			return m, cmd
 
 		case "-":
-			if !m.ShowCommandBar && m.PreviousDirectory != "" {
-				return m, updateDirectoryListing(m.PreviousDirectory, m.DirTree.ShowHidden)
+			if !m.showCommandBar && m.previousDirectory != "" {
+				return m, updateDirectoryListing(m.previousDirectory, m.dirTree.ShowHidden)
 			}
 
 			return m, cmd
 
 		case ".":
-			if !m.ShowCommandBar && m.PrimaryPane.IsActive {
-				m.DirTree.ToggleHidden()
+			if !m.showCommandBar && m.primaryPane.IsActive {
+				m.dirTree.ToggleHidden()
 
-				return m, updateDirectoryListing(constants.CurrentDirectory, m.DirTree.ShowHidden)
+				return m, updateDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
 			}
 
 			return m, cmd
 
 		case "tab":
-			if !m.ShowCommandBar {
-				if m.PrimaryPane.IsActive {
-					m.PrimaryPane.IsActive = false
-					m.SecondaryPane.IsActive = true
+			if !m.showCommandBar {
+				if m.primaryPane.IsActive {
+					m.primaryPane.IsActive = false
+					m.secondaryPane.IsActive = true
 				} else {
-					m.PrimaryPane.IsActive = true
-					m.SecondaryPane.IsActive = false
+					m.primaryPane.IsActive = true
+					m.secondaryPane.IsActive = false
 				}
 			}
 
 			return m, cmd
 
 		case "esc":
-			m.ShowCommandBar = false
-			m.Textinput.Blur()
-			m.Textinput.Reset()
-			m.SecondaryPane.GotoTop()
+			m.showCommandBar = false
+			m.textInput.Blur()
+			m.textInput.Reset()
+			m.secondaryPane.GotoTop()
 			m.activeMarkdownSource = constants.HelpText
-			m.SecondaryPane.SetContent(m.renderMarkdown(m.activeMarkdownSource))
-			m.PrimaryPane.IsActive = true
-			m.SecondaryPane.IsActive = false
+			m.secondaryPane.SetContent(m.renderMarkdown(m.activeMarkdownSource))
+			m.primaryPane.IsActive = true
+			m.secondaryPane.IsActive = false
 			selectedFile, status, fileTotals, logo := m.getStatusBarContent()
-			m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
+			m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
 
 			return m, cmd
 		}
 
-		m.PreviousKey = msg
+		m.previousKey = msg
 	}
 
-	if m.ShowCommandBar {
+	if m.showCommandBar {
 		selectedFile, status, fileTotals, logo := m.getStatusBarContent()
-		m.StatusBar.SetContent(selectedFile, status, fileTotals, logo)
+		m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
 	}
 
-	m.Textinput, cmd = m.Textinput.Update(msg)
+	m.textInput, cmd = m.textInput.Update(msg)
 	cmds = append(cmds, cmd)
 
-	m.Spinner, cmd = m.Spinner.Update(msg)
+	m.loader, cmd = m.loader.Update(msg)
 	cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)

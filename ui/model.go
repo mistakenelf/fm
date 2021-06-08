@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"io/fs"
+
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/dirtree"
@@ -13,48 +15,53 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type Model struct {
-	PrimaryPane       pane.Model
-	SecondaryPane     pane.Model
-	Textinput         textinput.Model
-	Spinner           spinner.Model
-	DirTree           dirtree.Model
-	StatusBar         statusbar.Model
-	PreviousKey       tea.KeyMsg
-	PreviousDirectory string
-	ScreenWidth       int
-	ScreenHeight      int
-	ShowCommandBar    bool
-	Ready             bool
-
+type model struct {
+	primaryPane          pane.Model
+	secondaryPane        pane.Model
+	textInput            textinput.Model
+	loader               spinner.Model
+	dirTree              dirtree.Model
+	statusBar            statusbar.Model
+	previousKey          tea.KeyMsg
+	previousDirectory    string
+	screenWidth          int
+	screenHeight         int
+	showCommandBar       bool
+	ready                bool
 	activeMarkdownSource string
 }
 
-func NewModel() Model {
+func NewModel(files []fs.FileInfo) model {
 	cfg := config.GetConfig()
 
 	input := textinput.NewModel()
 	input.Prompt = "❯ "
 	input.CharLimit = 250
 
-	s := spinner.NewModel()
-	s.Spinner = spinner.Dot
-	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.Components.Spinner))
+	l := spinner.NewModel()
+	l.Spinner = spinner.Dot
+	l.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.Components.Spinner))
 
-	return Model{
-		PrimaryPane:       pane.Model{},
-		SecondaryPane:     pane.Model{},
-		Textinput:         input,
-		Spinner:           s,
-		DirTree:           dirtree.Model{},
-		StatusBar:         statusbar.Model{},
-		PreviousKey:       tea.KeyMsg{},
-		PreviousDirectory: "",
-		ScreenWidth:       0,
-		ScreenHeight:      0,
-		ShowCommandBar:    false,
-		Ready:             false,
+	dirTree := dirtree.NewModel(
+		files,
+		cfg.Settings.ShowIcons,
+		cfg.Colors.DirTree.SelectedItem,
+		cfg.Colors.DirTree.UnselectedItem,
+	)
 
+	return model{
+		primaryPane:          pane.Model{},
+		secondaryPane:        pane.Model{},
+		textInput:            input,
+		loader:               l,
+		dirTree:              dirTree,
+		statusBar:            statusbar.Model{},
+		previousKey:          tea.KeyMsg{},
+		previousDirectory:    "",
+		screenWidth:          0,
+		screenHeight:         0,
+		showCommandBar:       false,
+		ready:                false,
 		activeMarkdownSource: constants.HelpText,
 	}
 }

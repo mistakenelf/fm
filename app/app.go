@@ -8,7 +8,6 @@ import (
 
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
-	"github.com/knipferrc/fm/dirtree"
 	"github.com/knipferrc/fm/ui"
 	"github.com/knipferrc/fm/utils"
 
@@ -20,7 +19,6 @@ func Run() {
 	config.LoadConfig()
 
 	cfg := config.GetConfig()
-	m := ui.NewModel()
 
 	var files []fs.FileInfo
 	var startDir string
@@ -49,12 +47,7 @@ func Run() {
 		files = utils.GetDirectoryListing(".", true)
 	}
 
-	m.DirTree = dirtree.NewModel(
-		files,
-		cfg.Settings.ShowIcons,
-		cfg.Colors.DirTree.SelectedItem,
-		cfg.Colors.DirTree.UnselectedItem,
-	)
+	m := ui.NewModel(files)
 
 	var opts []tea.ProgramOption
 
