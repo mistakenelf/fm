@@ -27,6 +27,8 @@ type Model struct {
 	ScreenHeight      int
 	ShowCommandBar    bool
 	Ready             bool
+
+	activeMarkdownSource string
 }
 
 func NewModel() Model {

@@ -66,6 +66,27 @@ func (m Model) getStatusBarContent() (string, string, string, string) {
 	return m.DirTree.GetSelectedFile().Name(), status, fmt.Sprintf("%d/%d", m.DirTree.GetCursor()+1, m.DirTree.GetTotalFiles()), logo
 }
 
+func (m Model) renderMarkdown(str *string) string {
+	bg := "light"
+
+	if lipgloss.HasDarkBackground() {
+		bg = "dark"
+	}
+
+	r, _ := glamour.NewTermRenderer(
+		glamour.WithWordWrap(m.SecondaryPane.Width),
+		glamour.WithStandardStyle(bg),
+	)
+
+	out, err := r.Render(*str)
+	if err != nil {
+		// FIXME: show an error in the UI
+		log.Fatal(err)
+	}
+
+	return out
+}
+
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
 		cmd  tea.Cmd
@@ -90,23 +111,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		content := string(msg)
 
 		if filepath.Ext(m.DirTree.GetSelectedFile().Name()) == ".md" && cfg.Settings.PrettyMarkdown {
-			bg := "light"
-
-			if lipgloss.HasDarkBackground() {
-				bg = "dark"
-			}
-
-			r, _ := glamour.NewTermRenderer(
-				glamour.WithWordWrap(m.SecondaryPane.Width),
-				glamour.WithStandardStyle(bg),
-			)
-
-			out, err := r.Render(string(msg))
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			content = out
+			m.activeMarkdownSource = string(msg)
+			content = m.renderMarkdown(&m.activeMarkdownSource)
+		} else {
+			m.activeMarkdownSource = ""
 		}
 
 		m.SecondaryPane.SetContent(utils.ConverTabsToSpaces(content))
@@ -175,6 +183,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.PrimaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.SecondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.StatusBar.SetSize(msg.Width)
+		}
+
+		if m.activeMarkdownSource != "" {
+			m.SecondaryPane.SetContent(m.renderMarkdown(&m.activeMarkdownSource))
 		}
 
 		return m, cmd
