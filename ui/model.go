@@ -2,10 +2,10 @@ package ui
 
 import (
 	"github.com/knipferrc/fm/config"
+	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/dirtree"
 	"github.com/knipferrc/fm/pane"
 	"github.com/knipferrc/fm/statusbar"
-	"github.com/knipferrc/fm/text"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -18,7 +18,6 @@ type Model struct {
 	SecondaryPane     pane.Model
 	Textinput         textinput.Model
 	Spinner           spinner.Model
-	HelpText          text.Model
 	DirTree           dirtree.Model
 	StatusBar         statusbar.Model
 	PreviousKey       tea.KeyMsg
@@ -27,6 +26,8 @@ type Model struct {
 	ScreenHeight      int
 	ShowCommandBar    bool
 	Ready             bool
+
+	activeMarkdownSource string
 }
 
 func NewModel() Model {
@@ -45,7 +46,6 @@ func NewModel() Model {
 		SecondaryPane:     pane.Model{},
 		Textinput:         input,
 		Spinner:           s,
-		HelpText:          text.Model{},
 		DirTree:           dirtree.Model{},
 		StatusBar:         statusbar.Model{},
 		PreviousKey:       tea.KeyMsg{},
@@ -54,5 +54,7 @@ func NewModel() Model {
 		ScreenHeight:      0,
 		ShowCommandBar:    false,
 		Ready:             false,
+
+		activeMarkdownSource: constants.HelpText,
 	}
 }

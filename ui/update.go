@@ -11,7 +11,6 @@ import (
 	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/pane"
 	"github.com/knipferrc/fm/statusbar"
-	"github.com/knipferrc/fm/text"
 	"github.com/knipferrc/fm/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -66,6 +65,27 @@ func (m Model) getStatusBarContent() (string, string, string, string) {
 	return m.DirTree.GetSelectedFile().Name(), status, fmt.Sprintf("%d/%d", m.DirTree.GetCursor()+1, m.DirTree.GetTotalFiles()), logo
 }
 
+func (m Model) renderMarkdown(str string) string {
+	bg := "light"
+
+	if lipgloss.HasDarkBackground() {
+		bg = "dark"
+	}
+
+	r, _ := glamour.NewTermRenderer(
+		glamour.WithWordWrap(m.SecondaryPane.Width),
+		glamour.WithStandardStyle(bg),
+	)
+
+	out, err := r.Render(str)
+	if err != nil {
+		// FIXME: show an error in the UI
+		log.Fatal(err)
+	}
+
+	return out
+}
+
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
 		cmd  tea.Cmd
@@ -90,23 +110,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		content := string(msg)
 
 		if filepath.Ext(m.DirTree.GetSelectedFile().Name()) == ".md" && cfg.Settings.PrettyMarkdown {
-			bg := "light"
-
-			if lipgloss.HasDarkBackground() {
-				bg = "dark"
-			}
-
-			r, _ := glamour.NewTermRenderer(
-				glamour.WithWordWrap(m.SecondaryPane.Width),
-				glamour.WithStandardStyle(bg),
-			)
-
-			out, err := r.Render(string(msg))
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			content = out
+			m.activeMarkdownSource = string(msg)
+			content = m.renderMarkdown(m.activeMarkdownSource)
+		} else {
+			m.activeMarkdownSource = ""
 		}
 
 		m.SecondaryPane.SetContent(utils.ConverTabsToSpaces(content))
@@ -119,7 +126,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if !m.Ready {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
-			m.HelpText = text.NewModel(msg.Width/2, constants.HelpText)
 
 			m.PrimaryPane = pane.NewModel(
 				msg.Width/2,
@@ -139,7 +145,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cfg.Colors.Pane.ActiveBorderColor,
 				cfg.Colors.Pane.InactiveBorderColor,
 			)
-			m.SecondaryPane.SetContent(m.HelpText.View())
 
 			selectedFile, status, fileTotals, logo := m.getStatusBarContent()
 			m.StatusBar = statusbar.NewModel(
@@ -175,6 +180,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.PrimaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.SecondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.StatusBar.SetSize(msg.Width)
+		}
+
+		if m.activeMarkdownSource != "" {
+			m.SecondaryPane.SetContent(m.renderMarkdown(m.activeMarkdownSource))
 		}
 
 		return m, cmd
@@ -390,7 +399,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Textinput.Blur()
 			m.Textinput.Reset()
 			m.SecondaryPane.GotoTop()
-			m.SecondaryPane.SetContent(m.HelpText.View())
+			m.activeMarkdownSource = constants.HelpText
+			m.SecondaryPane.SetContent(m.renderMarkdown(m.activeMarkdownSource))
 			m.PrimaryPane.IsActive = true
 			m.SecondaryPane.IsActive = false
 			selectedFile, status, fileTotals, logo := m.getStatusBarContent()
