@@ -11,7 +11,6 @@ import (
 	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/pane"
 	"github.com/knipferrc/fm/statusbar"
-	"github.com/knipferrc/fm/text"
 	"github.com/knipferrc/fm/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -127,7 +126,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if !m.Ready {
 			m.ScreenWidth = msg.Width
 			m.ScreenHeight = msg.Height
-			m.HelpText = text.NewModel(msg.Width/2, constants.HelpText)
 
 			m.PrimaryPane = pane.NewModel(
 				msg.Width/2,
@@ -147,7 +145,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cfg.Colors.Pane.ActiveBorderColor,
 				cfg.Colors.Pane.InactiveBorderColor,
 			)
-			m.SecondaryPane.SetContent(m.HelpText.View())
 
 			selectedFile, status, fileTotals, logo := m.getStatusBarContent()
 			m.StatusBar = statusbar.NewModel(
@@ -402,7 +399,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Textinput.Blur()
 			m.Textinput.Reset()
 			m.SecondaryPane.GotoTop()
-			m.SecondaryPane.SetContent(m.HelpText.View())
+			m.activeMarkdownSource = constants.HelpText
+			m.SecondaryPane.SetContent(m.renderMarkdown(&m.activeMarkdownSource))
 			m.PrimaryPane.IsActive = true
 			m.SecondaryPane.IsActive = false
 			selectedFile, status, fileTotals, logo := m.getStatusBarContent()
