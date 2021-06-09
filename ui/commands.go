@@ -11,10 +11,13 @@ import (
 	"github.com/knipferrc/fm/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/glamour"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type directoryMsg []fs.FileInfo
 type fileContentMsg string
+type markdownMsg string
 
 func updateDirectoryListing(dir string, showHidden bool) tea.Cmd {
 	return func() tea.Msg {
@@ -69,12 +72,28 @@ func deleteFile(file string, showHidden bool) tea.Cmd {
 	}
 }
 
-func readFileContent(file fs.FileInfo) tea.Cmd {
+func (m model) readFileContent(file fs.FileInfo) tea.Cmd {
 	return func() tea.Msg {
 		content := utils.ReadFileContent(file.Name())
 
 		if filepath.Ext(file.Name()) == ".md" {
-			return fileContentMsg(content)
+			bg := "light"
+
+			if lipgloss.HasDarkBackground() {
+				bg = "dark"
+			}
+
+			r, _ := glamour.NewTermRenderer(
+				glamour.WithWordWrap(m.secondaryPane.Width),
+				glamour.WithStandardStyle(bg),
+			)
+
+			out, err := r.Render(content)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			return fileContentMsg(out)
 		}
 
 		buf := new(bytes.Buffer)
@@ -85,6 +104,28 @@ func readFileContent(file fs.FileInfo) tea.Cmd {
 		}
 
 		return fileContentMsg(buf.String())
+	}
+}
+
+func (m model) renderMarkdownContent(content string) tea.Cmd {
+	return func() tea.Msg {
+		bg := "light"
+
+		if lipgloss.HasDarkBackground() {
+			bg = "dark"
+		}
+
+		r, _ := glamour.NewTermRenderer(
+			glamour.WithWordWrap(m.secondaryPane.Width),
+			glamour.WithStandardStyle(bg),
+		)
+
+		out, err := r.Render(content)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		return markdownMsg(out)
 	}
 }
 

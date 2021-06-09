@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
@@ -14,7 +13,6 @@ import (
 	"github.com/knipferrc/fm/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -65,27 +63,6 @@ func (m model) getStatusBarContent() (string, string, string, string) {
 	return m.dirTree.GetSelectedFile().Name(), status, fmt.Sprintf("%d/%d", m.dirTree.GetCursor()+1, m.dirTree.GetTotalFiles()), logo
 }
 
-func (m model) renderMarkdown(str string) string {
-	bg := "light"
-
-	if lipgloss.HasDarkBackground() {
-		bg = "dark"
-	}
-
-	r, _ := glamour.NewTermRenderer(
-		glamour.WithWordWrap(m.secondaryPane.Width),
-		glamour.WithStandardStyle(bg),
-	)
-
-	out, err := r.Render(str)
-	if err != nil {
-		// FIXME: show an error in the UI
-		log.Fatal(err)
-	}
-
-	return out
-}
-
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
 		cmd  tea.Cmd
@@ -106,17 +83,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 
 	case fileContentMsg:
-		cfg := config.GetConfig()
-		content := string(msg)
+		m.secondaryPane.SetContent(utils.ConverTabsToSpaces(string(msg)))
 
-		if filepath.Ext(m.dirTree.GetSelectedFile().Name()) == ".md" && cfg.Settings.PrettyMarkdown {
-			m.activeMarkdownSource = string(msg)
-			content = m.renderMarkdown(m.activeMarkdownSource)
-		} else {
-			m.activeMarkdownSource = ""
-		}
+		return m, cmd
 
-		m.secondaryPane.SetContent(utils.ConverTabsToSpaces(content))
+	case markdownMsg:
+		m.secondaryPane.SetContent(utils.ConverTabsToSpaces(string(msg)))
 
 		return m, cmd
 
@@ -183,7 +155,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if m.activeMarkdownSource != "" {
-			m.secondaryPane.SetContent(m.renderMarkdown(m.activeMarkdownSource))
+			return m, m.renderMarkdownContent(constants.HelpText)
 		}
 
 		return m, cmd
@@ -310,7 +282,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					} else {
 						m.secondaryPane.GotoTop()
 
-						return m, readFileContent(m.dirTree.GetSelectedFile())
+						return m, m.readFileContent(m.dirTree.GetSelectedFile())
 					}
 				}
 			}
@@ -401,13 +373,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.textInput.Reset()
 			m.secondaryPane.GotoTop()
 			m.activeMarkdownSource = constants.HelpText
-			m.secondaryPane.SetContent(m.renderMarkdown(m.activeMarkdownSource))
 			m.primaryPane.IsActive = true
 			m.secondaryPane.IsActive = false
 			selectedFile, status, fileTotals, logo := m.getStatusBarContent()
 			m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
 
-			return m, cmd
+			return m, m.renderMarkdownContent(constants.HelpText)
 		}
 
 		m.previousKey = msg
