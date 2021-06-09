@@ -221,6 +221,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.String() == "g" && m.previousKey.String() == "g" {
 			if !m.showCommandBar {
 				if m.primaryPane.IsActive {
+					m.previousKey = tea.KeyMsg{}
 					m.dirTree.GotoTop()
 					m.primaryPane.GotoTop()
 					m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
