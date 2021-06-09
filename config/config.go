@@ -15,7 +15,6 @@ type SettingsConfig struct {
 	StartDir         string `mapstructure:"start_dir"`
 	ShowIcons        bool   `mapstructure:"show_icons"`
 	RoundedPanes     bool   `mapstructure:"rounded_panes"`
-	PrettyMarkdown   bool   `mapstructure:"pretty_markdown"`
 	EnableLogging    bool   `mapstructure:"enable_logging"`
 	EnableMouseWheel bool   `mapstructure:"enable_mousewheel"`
 }
@@ -95,7 +94,6 @@ func SetDefaults() {
 	viper.SetDefault("settings.start_dir", ".")
 	viper.SetDefault("settings.show_icons", true)
 	viper.SetDefault("settings.rounded_panes", false)
-	viper.SetDefault("settings.pretty_markdown", true)
 	viper.SetDefault("settings.enable_logging", false)
 	viper.SetDefault("settings.enable_mousewheel", true)
 
