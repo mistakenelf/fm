@@ -309,7 +309,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					} else {
 						m.secondaryPane.GotoTop()
 
-						return m, readFileContent(m.dirTree.GetSelectedFile().Name())
+						return m, readFileContent(m.dirTree.GetSelectedFile())
 					}
 				}
 			}

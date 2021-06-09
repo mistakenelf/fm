@@ -1,8 +1,12 @@
 package ui
 
 import (
+	"bytes"
 	"io/fs"
+	"log"
+	"path/filepath"
 
+	"github.com/alecthomas/chroma/quick"
 	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/utils"
 
@@ -65,11 +69,22 @@ func deleteFile(file string, showHidden bool) tea.Cmd {
 	}
 }
 
-func readFileContent(file string) tea.Cmd {
+func readFileContent(file fs.FileInfo) tea.Cmd {
 	return func() tea.Msg {
-		content := utils.ReadFileContent(file)
+		content := utils.ReadFileContent(file.Name())
 
-		return fileContentMsg(content)
+		if filepath.Ext(file.Name()) == ".md" {
+			return fileContentMsg(content)
+		}
+
+		buf := new(bytes.Buffer)
+		err := quick.Highlight(buf, content, filepath.Ext(file.Name()), "terminal256", "dracula")
+
+		if err != nil {
+			log.Fatal("error")
+		}
+
+		return fileContentMsg(buf.String())
 	}
 }
 
