@@ -44,7 +44,7 @@ func Run() {
 	} else if _, err := os.Stat(cfg.Settings.StartDir); err == nil {
 		files = utils.GetDirectoryListing(cfg.Settings.StartDir, true)
 	} else {
-		files = utils.GetDirectoryListing(".", true)
+		files = utils.GetDirectoryListing(constants.CurrentDirectory, true)
 	}
 
 	m := ui.NewModel(files)

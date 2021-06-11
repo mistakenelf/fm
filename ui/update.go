@@ -1,13 +1,11 @@
 package ui
 
 import (
-	"fmt"
 	"log"
 	"os"
 
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
-	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/pane"
 	"github.com/knipferrc/fm/statusbar"
 	"github.com/knipferrc/fm/utils"
@@ -15,53 +13,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
-
-func (m *model) scrollPrimaryPane() {
-	top := m.primaryPane.Viewport.YOffset
-	bottom := m.primaryPane.Height + m.primaryPane.YOffset - 1
-
-	if m.dirTree.GetCursor() < top {
-		m.primaryPane.LineUp(1)
-	} else if m.dirTree.GetCursor() > bottom {
-		m.primaryPane.LineDown(1)
-	}
-
-	if m.dirTree.GetCursor() > m.dirTree.GetTotalFiles()-1 {
-		m.dirTree.GotoTop()
-		m.primaryPane.GotoTop()
-	} else if m.dirTree.GetCursor() < top {
-		m.dirTree.GotoBottom()
-		m.primaryPane.GotoBottom()
-	}
-}
-
-func (m model) getStatusBarContent() (string, string, string, string) {
-	cfg := config.GetConfig()
-	currentPath, err := os.Getwd()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	logo := ""
-	if cfg.Settings.ShowIcons {
-		logo = fmt.Sprintf("%s %s", icons.Icon_Def["dir"].GetGlyph(), "FM")
-	} else {
-		logo = "FM"
-	}
-
-	status := fmt.Sprintf("%s %s %s",
-		utils.ConvertBytesToSizeString(m.dirTree.GetSelectedFile().Size()),
-		m.dirTree.GetSelectedFile().Mode().String(),
-		currentPath,
-	)
-
-	if m.showCommandBar {
-		status = m.textInput.View()
-	}
-
-	return m.dirTree.GetSelectedFile().Name(), status, fmt.Sprintf("%d/%d", m.dirTree.GetCursor()+1, m.dirTree.GetTotalFiles()), logo
-}
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
@@ -83,7 +34,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 
 	case fileContentMsg:
-		m.secondaryPane.SetContent(utils.ConverTabsToSpaces(string(msg)))
+		m.activeMarkdownSource = string(msg.markdownContent)
+		m.secondaryPane.SetContent(utils.ConverTabsToSpaces(string(msg.fileContent)))
 
 		return m, cmd
 
@@ -155,7 +107,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if m.activeMarkdownSource != "" {
-			return m, m.renderMarkdownContent(constants.HelpText)
+			return m, renderMarkdownContent(m.secondaryPane.Width, m.activeMarkdownSource)
 		}
 
 		return m, cmd
@@ -372,13 +324,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.textInput.Blur()
 			m.textInput.Reset()
 			m.secondaryPane.GotoTop()
-			m.activeMarkdownSource = constants.HelpText
 			m.primaryPane.IsActive = true
 			m.secondaryPane.IsActive = false
 			selectedFile, status, fileTotals, logo := m.getStatusBarContent()
 			m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
 
-			return m, m.renderMarkdownContent(constants.HelpText)
+			return m, renderMarkdownContent(m.secondaryPane.Width, constants.HelpText)
 		}
 
 		m.previousKey = msg

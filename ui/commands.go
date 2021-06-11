@@ -6,17 +6,20 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/alecthomas/chroma/quick"
 	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/utils"
 
+	"github.com/alecthomas/chroma/quick"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type directoryMsg []fs.FileInfo
-type fileContentMsg string
+type fileContentMsg struct {
+	markdownContent string
+	fileContent     string
+}
 type markdownMsg string
 
 func updateDirectoryListing(dir string, showHidden bool) tea.Cmd {
@@ -73,60 +76,55 @@ func deleteFile(file string, showHidden bool) tea.Cmd {
 }
 
 func (m model) readFileContent(file fs.FileInfo) tea.Cmd {
+	width := m.secondaryPane.Width
+
 	return func() tea.Msg {
 		content := utils.ReadFileContent(file.Name())
 
 		if filepath.Ext(file.Name()) == ".md" {
-			bg := "light"
-
-			if lipgloss.HasDarkBackground() {
-				bg = "dark"
+			return fileContentMsg{
+				fileContent:     renderMarkdown(width, content),
+				markdownContent: content,
 			}
+		} else {
+			buf := new(bytes.Buffer)
+			err := quick.Highlight(buf, content, filepath.Ext(file.Name()), "terminal256", "dracula")
 
-			r, _ := glamour.NewTermRenderer(
-				glamour.WithWordWrap(m.secondaryPane.Width),
-				glamour.WithStandardStyle(bg),
-			)
-
-			out, err := r.Render(content)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal("error")
 			}
 
-			return fileContentMsg(out)
+			return fileContentMsg{
+				fileContent:     buf.String(),
+				markdownContent: "",
+			}
 		}
-
-		buf := new(bytes.Buffer)
-		err := quick.Highlight(buf, content, filepath.Ext(file.Name()), "terminal256", "dracula")
-
-		if err != nil {
-			log.Fatal("error")
-		}
-
-		return fileContentMsg(buf.String())
 	}
 }
 
-func (m model) renderMarkdownContent(content string) tea.Cmd {
+func renderMarkdownContent(width int, content string) tea.Cmd {
 	return func() tea.Msg {
-		bg := "light"
-
-		if lipgloss.HasDarkBackground() {
-			bg = "dark"
-		}
-
-		r, _ := glamour.NewTermRenderer(
-			glamour.WithWordWrap(m.secondaryPane.Width),
-			glamour.WithStandardStyle(bg),
-		)
-
-		out, err := r.Render(content)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		return markdownMsg(out)
+		return markdownMsg(renderMarkdown(width, content))
 	}
+}
+
+func renderMarkdown(width int, content string) string {
+	bg := "light"
+	if lipgloss.HasDarkBackground() {
+		bg = "dark"
+	}
+
+	r, _ := glamour.NewTermRenderer(
+		glamour.WithWordWrap(width),
+		glamour.WithStandardStyle(bg),
+	)
+
+	out, err := r.Render(content)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return out
 }
 
 func createDir(dir string, showHidden bool) tea.Cmd {
