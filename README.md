@@ -101,6 +101,7 @@ colors:
 settings:
   enable_logging: false
   enable_mousewheel: true
+  pretty_markdown: true
   rounded_panes: false
   show_icons: true
   start_dir: .

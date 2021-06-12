@@ -17,6 +17,7 @@ type SettingsConfig struct {
 	RoundedPanes     bool   `mapstructure:"rounded_panes"`
 	EnableLogging    bool   `mapstructure:"enable_logging"`
 	EnableMouseWheel bool   `mapstructure:"enable_mousewheel"`
+	PrettyMarkdown   bool   `mapstructure:"pretty_markdown"`
 }
 
 type DirTreeColors struct {
@@ -96,6 +97,7 @@ func SetDefaults() {
 	viper.SetDefault("settings.rounded_panes", false)
 	viper.SetDefault("settings.enable_logging", false)
 	viper.SetDefault("settings.enable_mousewheel", true)
+	viper.SetDefault("settings.pretty_markdown", true)
 
 	// DirTree colors
 	viper.SetDefault("colors.dir_tree.selected_item", constants.Pink)

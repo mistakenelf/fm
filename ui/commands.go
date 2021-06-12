@@ -6,6 +6,7 @@ import (
 	"log"
 	"path/filepath"
 
+	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/utils"
 
@@ -76,12 +77,13 @@ func deleteFile(file string, showHidden bool) tea.Cmd {
 }
 
 func (m model) readFileContent(file fs.FileInfo) tea.Cmd {
+	cfg := config.GetConfig()
 	width := m.secondaryPane.Width
 
 	return func() tea.Msg {
 		content := utils.ReadFileContent(file.Name())
 
-		if filepath.Ext(file.Name()) == ".md" {
+		if filepath.Ext(file.Name()) == ".md" && cfg.Settings.PrettyMarkdown {
 			return fileContentMsg{
 				fileContent:     renderMarkdown(width, content),
 				markdownContent: content,
