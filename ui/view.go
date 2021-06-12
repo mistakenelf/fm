@@ -11,7 +11,11 @@ func (m model) View() string {
 		return fmt.Sprintf("%s%s", m.loader.View(), "loading...")
 	}
 
-	panes := lipgloss.JoinHorizontal(lipgloss.Top, m.primaryPane.View(), m.secondaryPane.View())
+	panes := lipgloss.JoinHorizontal(
+		lipgloss.Top,
+		m.primaryPane.View(),
+		m.secondaryPane.View(),
+	)
 
 	return lipgloss.JoinVertical(
 		lipgloss.Top,

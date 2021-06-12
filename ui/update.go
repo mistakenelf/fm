@@ -15,21 +15,19 @@ import (
 )
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var (
-		cmd  tea.Cmd
-		cmds []tea.Cmd
-	)
+	var cmd tea.Cmd
+	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
 	case directoryMsg:
+		m.showCommandBar = false
 		m.dirTree.SetContent(msg)
 		m.dirTree.GotoTop()
-		m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
-		m.showCommandBar = false
 		m.textInput.Blur()
 		m.textInput.Reset()
 		selectedFile, status, fileTotals, logo := m.getStatusBarContent()
 		m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
+		m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
 
 		return m, cmd
 
@@ -48,9 +46,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cfg := config.GetConfig()
 
 		if !m.ready {
-			m.screenWidth = msg.Width
-			m.screenHeight = msg.Height
-
 			m.primaryPane = pane.NewModel(
 				msg.Width/2,
 				msg.Height-constants.StatusBarHeight,
@@ -99,8 +94,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			m.ready = true
 		} else {
-			m.screenHeight = msg.Width
-			m.screenHeight = msg.Height
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetSize(msg.Width)

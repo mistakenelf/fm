@@ -24,8 +24,6 @@ type model struct {
 	statusBar            statusbar.Model
 	previousKey          tea.KeyMsg
 	previousDirectory    string
-	screenWidth          int
-	screenHeight         int
 	showCommandBar       bool
 	ready                bool
 	activeMarkdownSource string
@@ -58,8 +56,6 @@ func NewModel(files []fs.FileInfo) model {
 		statusBar:            statusbar.Model{},
 		previousKey:          tea.KeyMsg{},
 		previousDirectory:    "",
-		screenWidth:          0,
-		screenHeight:         0,
 		showCommandBar:       false,
 		ready:                false,
 		activeMarkdownSource: constants.HelpText,

@@ -50,7 +50,6 @@ func Run() {
 	m := ui.NewModel(files)
 
 	var opts []tea.ProgramOption
-
 	opts = append(opts, tea.WithAltScreen())
 
 	if cfg.Settings.EnableMouseWheel {

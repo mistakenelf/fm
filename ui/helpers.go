@@ -54,5 +54,8 @@ func (m model) getStatusBarContent() (string, string, string, string) {
 		status = m.textInput.View()
 	}
 
-	return m.dirTree.GetSelectedFile().Name(), status, fmt.Sprintf("%d/%d", m.dirTree.GetCursor()+1, m.dirTree.GetTotalFiles()), logo
+	return m.dirTree.GetSelectedFile().Name(),
+		status,
+		fmt.Sprintf("%d/%d", m.dirTree.GetCursor()+1, m.dirTree.GetTotalFiles()),
+		logo
 }
