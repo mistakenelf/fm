@@ -174,8 +174,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
-			return m, cmd
-
 		case "down", "j":
 			if !m.showCommandBar {
 				if m.primaryPane.IsActive {
@@ -188,8 +186,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.secondaryPane.LineDown(1)
 				}
 			}
-
-			return m, cmd
 
 		case "up", "k":
 			if !m.showCommandBar {
@@ -204,8 +200,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
-			return m, cmd
-
 		case "G":
 			if !m.showCommandBar {
 				if m.primaryPane.IsActive {
@@ -216,8 +210,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.secondaryPane.GotoBottom()
 				}
 			}
-
-			return m, cmd
 
 		case "right", "l":
 			if !m.showCommandBar {
@@ -231,8 +223,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}
 				}
 			}
-
-			return m, cmd
 
 		case "enter":
 			command, value := utils.ParseCommand(m.textInput.Value())
@@ -248,7 +238,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "touch":
 				return m, createFile(value, m.dirTree.ShowHidden)
 
-			case "mv":
+			case "mv", "rename":
 				return m, renameFileOrDir(m.dirTree.GetSelectedFile().Name(), value, m.dirTree.ShowHidden)
 
 			case "cp":
@@ -258,7 +248,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, moveFile(m.dirTree.GetSelectedFile().Name(), value, m.dirTree.ShowHidden)
 				}
 
-			case "rm":
+			case "rm", "delete":
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, deleteDir(m.dirTree.GetSelectedFile().Name(), m.dirTree.ShowHidden)
 				} else {
@@ -281,14 +271,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, updateDirectoryListing(utils.GetHomeDirectory(), m.dirTree.ShowHidden)
 			}
 
-			return m, cmd
-
 		case "-":
 			if !m.showCommandBar && m.previousDirectory != "" {
 				return m, updateDirectoryListing(m.previousDirectory, m.dirTree.ShowHidden)
 			}
-
-			return m, cmd
 
 		case ".":
 			if !m.showCommandBar && m.primaryPane.IsActive {
@@ -296,8 +282,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				return m, updateDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
 			}
-
-			return m, cmd
 
 		case "tab":
 			if !m.showCommandBar {
@@ -309,8 +293,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.secondaryPane.IsActive = false
 				}
 			}
-
-			return m, cmd
 
 		case "esc":
 			m.showCommandBar = false

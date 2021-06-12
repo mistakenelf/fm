@@ -61,11 +61,11 @@ go install github.com/knipferrc/fm@latest
 
     - `touch filename.txt` Create new file in the current directory
 
-    - `mv newname.txt`Rename currently selected file or directory
+    - `(rename or mv) newname.txt`Rename currently selected file or directory
 
     - `cp /dir/to/move/to` Move currently selected file or directory
 
-    - `rm` Delete the currently selected file or directory
+    - `delete or rm` Delete the currently selected file or directory
 
   - <kbd>tab</kbd> Toggle between panes
 
