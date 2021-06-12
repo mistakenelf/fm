@@ -82,6 +82,10 @@ func (m *Model) GotoBottom() {
 	m.Viewport.GotoBottom()
 }
 
+func (m *Model) SetActiveBorderColor(color string) {
+	m.ActiveBorderColor = color
+}
+
 func (m Model) View() string {
 	borderColor := m.InactiveBorderColor
 	border := lipgloss.NormalBorder()

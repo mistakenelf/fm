@@ -12,6 +12,7 @@ const (
 	LightPurple = "#A550DF"
 	DarkPurple  = "#6124DF"
 	DarkGray    = "#353533"
+	Blue        = "#1D4ED8"
 
 	HelpText = `# FM (File Manager)
 - h or left arrow               | go back a directory
@@ -24,10 +25,10 @@ const (
 - .                             | toggle hidden files and directories
 - (-)                           | Go To previous directory
 - :                             | open command bar
+- m                             | enter into move mode
 - mkdir dirname                 | create directory in current directory
 - touch filename.txt            | create file in current directory
 - mv or rename newname.txt      | rename currently selected file or directory
-- cp /dir/to/move/to            | move file or directory
 - delete or rm                  | remove file or directory
 - tab                           | toggle between panes
 	`

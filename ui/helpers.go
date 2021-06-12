@@ -54,6 +54,10 @@ func (m model) getStatusBarContent() (string, string, string, string) {
 		status = m.textInput.View()
 	}
 
+	if m.inMoveMode {
+		status = fmt.Sprintf("Currently moving %s", m.itemToMove.Name())
+	}
+
 	return m.dirTree.GetSelectedFile().Name(),
 		status,
 		fmt.Sprintf("%d/%d", m.dirTree.GetCursor()+1, m.dirTree.GetTotalFiles()),

@@ -1,17 +1,15 @@
 package utils
 
 import (
-	"fmt"
 	"io/fs"
 	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
-func RenameDirOrFile(currentName, newName string) {
-	os.Rename(currentName, newName)
+func RenameDirOrFile(src, dst string) {
+	os.Rename(src, dst)
 }
 
 func CreateDirectory(name string) {
@@ -60,67 +58,8 @@ func DeleteDirectory(dirname string) {
 	}
 }
 
-func CopyDir(src, dst string, shouldRemove bool) (err error) {
-	src = filepath.Clean(src)
-	dst = filepath.Clean(dst)
-
-	si, err := os.Stat(src)
-	if err != nil {
-		return err
-	}
-	if !si.IsDir() {
-		return fmt.Errorf("source is not a directory")
-	}
-
-	_, err = os.Stat(dst)
-	if err != nil && !os.IsNotExist(err) {
-		return
-	}
-
-	if err == nil {
-		return fmt.Errorf("destination already exists")
-	}
-
-	err = os.MkdirAll(dst, si.Mode())
-	if err != nil {
-		return
-	}
-
-	entries, err := ioutil.ReadDir(src)
-	if err != nil {
-		return
-	}
-
-	for _, entry := range entries {
-		srcPath := filepath.Join(src, entry.Name())
-		dstPath := filepath.Join(dst, entry.Name())
-
-		if entry.IsDir() {
-			err = CopyDir(srcPath, dstPath, true)
-			if err != nil {
-				return
-			}
-		} else {
-			if entry.Mode()&os.ModeSymlink != 0 {
-				continue
-			}
-
-			err = CopyFile(srcPath, dstPath, false)
-			if err != nil {
-				return
-			}
-		}
-	}
-
-	if shouldRemove {
-		removeError := os.RemoveAll(src)
-
-		if removeError != nil {
-			log.Fatal("error removing directory", removeError)
-		}
-	}
-
-	return
+func MoveDirectory(src, dst string) {
+	os.Rename(src, dst)
 }
 
 func GetHomeDirectory() string {
@@ -130,4 +69,46 @@ func GetHomeDirectory() string {
 	}
 
 	return home
+}
+
+func GetWorkingDirectory() string {
+	directory, err := os.Getwd()
+
+	if err != nil {
+		log.Fatal("error getting working directory")
+	}
+
+	return directory
+}
+
+func DeleteFile(filename string) {
+	removeError := os.Remove(filename)
+
+	if removeError != nil {
+		log.Fatal("Error deleting file", removeError)
+	}
+}
+
+func MoveFile(src, dst string) {
+	os.Rename(src, dst)
+}
+
+func ReadFileContent(name string) string {
+	dat, err := os.ReadFile(name)
+
+	if err != nil {
+		log.Fatal("Error occured reading file")
+	}
+
+	return string(dat)
+}
+
+func CreateFile(name string) {
+	f, err := os.OpenFile(name, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	f.Close()
 }

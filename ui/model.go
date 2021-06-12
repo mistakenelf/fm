@@ -25,8 +25,11 @@ type model struct {
 	previousKey          tea.KeyMsg
 	previousDirectory    string
 	showCommandBar       bool
-	ready                bool
 	activeMarkdownSource string
+	inMoveMode           bool
+	initialMoveDirectory string
+	itemToMove           fs.FileInfo
+	ready                bool
 }
 
 func NewModel(files []fs.FileInfo) model {
@@ -57,7 +60,10 @@ func NewModel(files []fs.FileInfo) model {
 		previousKey:          tea.KeyMsg{},
 		previousDirectory:    "",
 		showCommandBar:       false,
-		ready:                false,
 		activeMarkdownSource: constants.HelpText,
+		inMoveMode:           false,
+		initialMoveDirectory: "",
+		itemToMove:           nil,
+		ready:                false,
 	}
 }

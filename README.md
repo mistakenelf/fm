@@ -55,6 +55,10 @@ go install github.com/knipferrc/fm@latest
 
   - <kbd>q</kbd> Exit if command bar not open
 
+  - <kbd>m</kbd> Move the currently selected file or directory. Once pressed the file manager
+    enters into move mode. Navigate the tree as usual and press enter in the destination directory. It will navigate
+    to the starting directory in which the move was initiated
+
   - <kbd>:</kbd> Open command bar
 
     - `mkdir dirname` Create a new directory in the current directory
@@ -62,8 +66,6 @@ go install github.com/knipferrc/fm@latest
     - `touch filename.txt` Create new file in the current directory
 
     - `(rename or mv) newname.txt`Rename currently selected file or directory
-
-    - `cp /dir/to/move/to` Move currently selected file or directory
 
     - `delete or rm` Delete the currently selected file or directory
 

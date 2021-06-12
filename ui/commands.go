@@ -2,6 +2,7 @@ package ui
 
 import (
 	"bytes"
+	"fmt"
 	"io/fs"
 	"log"
 	"path/filepath"
@@ -17,11 +18,12 @@ import (
 )
 
 type directoryMsg []fs.FileInfo
+type moveFileMsg []fs.FileInfo
+type markdownMsg string
 type fileContentMsg struct {
 	markdownContent string
 	fileContent     string
 }
-type markdownMsg string
 
 func updateDirectoryListing(dir string, showHidden bool) tea.Cmd {
 	return func() tea.Msg {
@@ -40,21 +42,27 @@ func renameFileOrDir(filename, value string, showHidden bool) tea.Cmd {
 	}
 }
 
-func moveDir(dir, value string, showHidden bool) tea.Cmd {
+func (m model) moveDir(dir string, showHidden bool) tea.Cmd {
 	return func() tea.Msg {
-		utils.CopyDir(dir, value, true)
-		files := utils.GetDirectoryListing(constants.CurrentDirectory, showHidden)
+		src := fmt.Sprintf("%s/%s", m.initialMoveDirectory, dir)
+		dst := fmt.Sprintf("%s/%s", utils.GetWorkingDirectory(), dir)
 
-		return directoryMsg(files)
+		utils.MoveDirectory(src, dst)
+		files := utils.GetDirectoryListing(m.initialMoveDirectory, showHidden)
+
+		return moveFileMsg(files)
 	}
 }
 
-func moveFile(file, value string, showHidden bool) tea.Cmd {
+func (m model) moveFile(file string, showHidden bool) tea.Cmd {
 	return func() tea.Msg {
-		utils.CopyFile(file, value, true)
-		files := utils.GetDirectoryListing(constants.CurrentDirectory, showHidden)
+		src := fmt.Sprintf("%s/%s", m.initialMoveDirectory, file)
+		dst := fmt.Sprintf("%s/%s", utils.GetWorkingDirectory(), file)
 
-		return directoryMsg(files)
+		utils.MoveFile(src, dst)
+		files := utils.GetDirectoryListing(m.initialMoveDirectory, showHidden)
+
+		return moveFileMsg(files)
 	}
 }
 

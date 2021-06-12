@@ -1,9 +1,6 @@
 package ui
 
 import (
-	"log"
-	"os"
-
 	"github.com/knipferrc/fm/config"
 	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/pane"
@@ -28,6 +25,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		selectedFile, status, fileTotals, logo := m.getStatusBarContent()
 		m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
 		m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
+
+		return m, cmd
+
+	case moveFileMsg:
+		cfg := config.GetConfig()
+
+		m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
+		m.dirTree.SetContent(msg)
+		m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
+		m.inMoveMode = false
+		m.initialMoveDirectory = ""
+		m.itemToMove = nil
+		selectedFile, status, fileTotals, logo := m.getStatusBarContent()
+		m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
 
 		return m, cmd
 
@@ -89,8 +100,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					Foreground: cfg.Colors.StatusBar.Logo.Foreground,
 				},
 			)
-
-			m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
 
 			m.ready = true
 		} else {
@@ -162,13 +171,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "left", "h":
 			if !m.showCommandBar {
 				if m.primaryPane.IsActive {
-					previousPath, err := os.Getwd()
-
-					if err != nil {
-						log.Fatal("error getting working directory")
-					}
-
-					m.previousDirectory = previousPath
+					m.previousDirectory = utils.GetWorkingDirectory()
 
 					return m, updateDirectoryListing(constants.PreviousDirectory, m.dirTree.ShowHidden)
 				}
@@ -225,44 +228,48 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "enter":
-			command, value := utils.ParseCommand(m.textInput.Value())
-
-			if command == "" {
-				return m, nil
-			}
-
-			switch command {
-			case "mkdir":
-				return m, createDir(value, m.dirTree.ShowHidden)
-
-			case "touch":
-				return m, createFile(value, m.dirTree.ShowHidden)
-
-			case "mv", "rename":
-				return m, renameFileOrDir(m.dirTree.GetSelectedFile().Name(), value, m.dirTree.ShowHidden)
-
-			case "cp":
-				if m.dirTree.GetSelectedFile().IsDir() {
-					return m, moveDir(m.dirTree.GetSelectedFile().Name(), value, m.dirTree.ShowHidden)
+			if m.inMoveMode {
+				if m.itemToMove.IsDir() {
+					return m, m.moveDir(m.itemToMove.Name(), m.dirTree.ShowHidden)
 				} else {
-					return m, moveFile(m.dirTree.GetSelectedFile().Name(), value, m.dirTree.ShowHidden)
+					return m, m.moveFile(m.itemToMove.Name(), m.dirTree.ShowHidden)
+				}
+			} else {
+
+				command, value := utils.ParseCommand(m.textInput.Value())
+
+				if command == "" {
+					return m, nil
 				}
 
-			case "rm", "delete":
-				if m.dirTree.GetSelectedFile().IsDir() {
-					return m, deleteDir(m.dirTree.GetSelectedFile().Name(), m.dirTree.ShowHidden)
-				} else {
-					return m, deleteFile(m.dirTree.GetSelectedFile().Name(), m.dirTree.ShowHidden)
-				}
+				switch command {
+				case "mkdir":
+					return m, createDir(value, m.dirTree.ShowHidden)
 
-			default:
-				return m, nil
+				case "touch":
+					return m, createFile(value, m.dirTree.ShowHidden)
+
+				case "mv", "rename":
+					return m, renameFileOrDir(m.dirTree.GetSelectedFile().Name(), value, m.dirTree.ShowHidden)
+
+				case "rm", "delete":
+					if m.dirTree.GetSelectedFile().IsDir() {
+						return m, deleteDir(m.dirTree.GetSelectedFile().Name(), m.dirTree.ShowHidden)
+					} else {
+						return m, deleteFile(m.dirTree.GetSelectedFile().Name(), m.dirTree.ShowHidden)
+					}
+
+				default:
+					return m, nil
+				}
 			}
 
 		case ":":
-			m.showCommandBar = true
-			m.textInput.Placeholder = "enter command"
-			m.textInput.Focus()
+			if !m.inMoveMode {
+				m.showCommandBar = true
+				m.textInput.Placeholder = "enter command"
+				m.textInput.Focus()
+			}
 
 			return m, cmd
 
@@ -294,13 +301,29 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
+		case "m":
+			if !m.showCommandBar && m.primaryPane.IsActive {
+				m.inMoveMode = true
+				m.primaryPane.SetActiveBorderColor(constants.Blue)
+				m.initialMoveDirectory = utils.GetWorkingDirectory()
+				m.itemToMove = m.dirTree.GetSelectedFile()
+				selectedFile, status, fileTotals, logo := m.getStatusBarContent()
+				m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
+			}
+
 		case "esc":
+			cfg := config.GetConfig()
+
 			m.showCommandBar = false
+			m.inMoveMode = false
+			m.itemToMove = nil
+			m.initialMoveDirectory = ""
 			m.textInput.Blur()
 			m.textInput.Reset()
 			m.secondaryPane.GotoTop()
 			m.primaryPane.IsActive = true
 			m.secondaryPane.IsActive = false
+			m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
 			selectedFile, status, fileTotals, logo := m.getStatusBarContent()
 			m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
 
