@@ -20,6 +20,7 @@ A terminal based file manager
 - [bubbles](https://github.com/charmbracelet/bubbles)
 - [lipgloss](https://github.com/charmbracelet/lipgloss)
 - [Glamour](https://github.com/charmbracelet/glamour)
+- [Chroma](https://github.com/alecthomas/chroma)
 
 ## Installation
 
@@ -27,55 +28,46 @@ A terminal based file manager
 go install github.com/knipferrc/fm@latest
 ```
 
+## Features
+
+- Double pane layout
+- File icons
+- Layout adjusts to terminal resize
+- Syntax highlighting for source code
+- Mouse support
+- Customizable colors |
+
 ## Usage
 
-- Run `fm`
-- Navigate your files with the following keys
-  <br />
+- Run `fm` or `fm /some/dir`
 
-  - <kbd>h</kbd> or <kbd>left</kbd> Go back to the previous directory
+## Navigation
 
-  - <kbd>j</kbd> or <kbd>down</kbd> Move down in the file tree
+| Key                | Description                                                                                                                                                                                                                                                      |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| h or left          | Go back to previous directory                                                                                                                                                                                                                                    |
+| j or down          | Move down in the file tree or scroll pane down                                                                                                                                                                                                                   |
+| k or up            | Move up in the file tree or scroll pane up                                                                                                                                                                                                                       |
+| l or right         | Opens the currently selected directory or file                                                                                                                                                                                                                   |
+| gg                 | Jump to bottom of file tree or pane                                                                                                                                                                                                                              |
+| G                  | Jump to top of file tree or pane                                                                                                                                                                                                                                 |
+| ~                  | Go to home directory                                                                                                                                                                                                                                             |
+| .                  | Toggle hide files and directories                                                                                                                                                                                                                                |
+| -                  | Go to previous directory                                                                                                                                                                                                                                         |
+| ctrl+c             | Exit                                                                                                                                                                                                                                                             |
+| q                  | Exit if command bar is not open                                                                                                                                                                                                                                  |
+| m                  | Move the currently selected file or directory. Once pressed, the file manager enters move mode. Navigate the tree as usual and press enter in the desired destination directory. It will navigate back to the starting direcotry in which the move was initiated |
+| :                  | Open command bar                                                                                                                                                                                                                                                 |
+| mkdir dirname      | Create a new directory in the current directory                                                                                                                                                                                                                  |
+| touch filename.txt | Create a new file in the current directory                                                                                                                                                                                                                       |
+| rename or mv       | Rename currently selected file or directory                                                                                                                                                                                                                      |
+| delete or rm       | Delete the currently selected file or directory                                                                                                                                                                                                                  |
+| tab                | Toggle between panes                                                                                                                                                                                                                                             |
+| esc                | Cancel any current action. Pressing escape during any action (rename, move, delete) will cancel that operation and return back to file navigation                                                                                                                |
 
-  - <kbd>k</kbd> or <kbd>up</kbd> Move up in the file tree
-
-  - <kbd>l</kbd> or <kbd>right</kbd> Opens the currently selected directory
-
-  - <kbd>gg</kbd> Go to bottom of pane
-
-  - <kbd>G</kbd> Go to top of pane
-
-  - <kbd>~</kbd> Switch to home directory
-
-  - <kbd>.</kbd> Toggle hidden files and directories
-
-  - <kbd>-</kbd> Go to previous directory
-
-  - <kbd>ctrl+c</kbd> Exit
-
-  - <kbd>q</kbd> Exit if command bar not open
-
-  - <kbd>m</kbd> Move the currently selected file or directory. Once pressed the file manager
-    enters into move mode. Navigate the tree as usual and press enter in the destination directory. It will navigate
-    to the starting directory in which the move was initiated
-
-  - <kbd>:</kbd> Open command bar
-
-    - `mkdir dirname` Create a new directory in the current directory
-
-    - `touch filename.txt` Create new file in the current directory
-
-    - `(rename or mv) newname.txt`Rename currently selected file or directory
-
-    - `delete or rm` Delete the currently selected file or directory
-
-  - <kbd>tab</kbd> Toggle between panes
-
-  - <kbd>esc</kbd> Cancel any current action. Pressing <kbd>esc</kbd> during any action (rename, move, or delete) will cancel that action and return you to file navigation
+## Configuration
 
 - A config file will be generated at `.config/fm/config.yml` when you first run `fm`
-
-### Default Config
 
 ```yml
 colors:
@@ -131,6 +123,6 @@ make run
 make build
 ```
 
-### Credit
+## Credit
 
 - Thank you to this repo https://github.com/Yash-Handa/logo-ls for the icons
