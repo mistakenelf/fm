@@ -22,8 +22,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.dirTree.GotoTop()
 		m.textInput.Blur()
 		m.textInput.Reset()
-		selectedFile, status, fileTotals, logo := m.getStatusBarContent()
-		m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
+		m.statusBar.SetContent(m.getStatusBarContent())
 		m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
 
 		return m, cmd
@@ -37,8 +36,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.inMoveMode = false
 		m.initialMoveDirectory = ""
 		m.itemToMove = nil
-		selectedFile, status, fileTotals, logo := m.getStatusBarContent()
-		m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
+		m.statusBar.SetContent(m.getStatusBarContent())
 
 		return m, cmd
 
@@ -182,8 +180,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.primaryPane.IsActive {
 					m.dirTree.GoDown()
 					m.scrollPrimaryPane()
-					selectedFile, status, fileTotals, logo := m.getStatusBarContent()
-					m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
+					m.statusBar.SetContent(m.getStatusBarContent())
 					m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
 				} else {
 					m.secondaryPane.LineDown(1)
@@ -196,8 +193,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.dirTree.GoUp()
 					m.scrollPrimaryPane()
 					m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
-					selectedFile, status, fileTotals, logo := m.getStatusBarContent()
-					m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
+					m.statusBar.SetContent(m.getStatusBarContent())
 				} else {
 					m.secondaryPane.LineUp(1)
 				}
@@ -307,8 +303,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.primaryPane.SetActiveBorderColor(constants.Blue)
 				m.initialMoveDirectory = utils.GetWorkingDirectory()
 				m.itemToMove = m.dirTree.GetSelectedFile()
-				selectedFile, status, fileTotals, logo := m.getStatusBarContent()
-				m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
+				m.statusBar.SetContent(m.getStatusBarContent())
 			}
 
 		case "esc":
@@ -324,8 +319,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.primaryPane.IsActive = true
 			m.secondaryPane.IsActive = false
 			m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
-			selectedFile, status, fileTotals, logo := m.getStatusBarContent()
-			m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
+			m.statusBar.SetContent(m.getStatusBarContent())
 
 			return m, renderMarkdownContent(m.secondaryPane.Width, constants.HelpText)
 		}
@@ -334,8 +328,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	if m.showCommandBar {
-		selectedFile, status, fileTotals, logo := m.getStatusBarContent()
-		m.statusBar.SetContent(selectedFile, status, fileTotals, logo)
+		m.statusBar.SetContent(m.getStatusBarContent())
 	}
 
 	m.textInput, cmd = m.textInput.Update(msg)
