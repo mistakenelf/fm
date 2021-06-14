@@ -57,8 +57,9 @@ type Config struct {
 }
 
 func LoadConfig() {
-	configPath := filepath.Join(utils.GetHomeDirectory(), ".config", "fm")
-	configFile := filepath.Join(utils.GetHomeDirectory(), ".config", "fm", "config.yml")
+	homeDir, _ := utils.GetHomeDirectory()
+	configPath := filepath.Join(homeDir, ".config", "fm")
+	configFile := filepath.Join(homeDir, ".config", "fm", "config.yml")
 
 	viper.SetConfigName("config")
 	viper.SetConfigType("yml")

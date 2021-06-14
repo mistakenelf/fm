@@ -14,9 +14,10 @@ type Model struct {
 	ActiveBorderColor   string
 	InactiveBorderColor string
 	Rounded             bool
+	IsPadded            bool
 }
 
-func NewModel(width, height int, isActive, rounded bool, activeBorderColor, inactiveBorderColor string) Model {
+func NewModel(width, height int, isActive, rounded, isPadded bool, activeBorderColor, inactiveBorderColor string) Model {
 	border := lipgloss.NormalBorder()
 
 	if rounded {
@@ -30,6 +31,7 @@ func NewModel(width, height int, isActive, rounded bool, activeBorderColor, inac
 		ActiveBorderColor:   activeBorderColor,
 		InactiveBorderColor: inactiveBorderColor,
 		Rounded:             rounded,
+		IsPadded:            isPadded,
 	}
 
 	m.Viewport.Width = width - lipgloss.Width(border.Right+border.Top)
@@ -54,13 +56,19 @@ func (m *Model) SetSize(width, height int) {
 
 func (m *Model) SetContent(content string) {
 	border := lipgloss.NormalBorder()
+	padding := 0
 
 	if m.Rounded {
 		border = lipgloss.RoundedBorder()
 	}
 
+	if m.IsPadded {
+		padding = 1
+	}
+
 	m.Viewport.SetContent(
 		lipgloss.NewStyle().
+			PaddingLeft(padding).
 			Width(m.Width - lipgloss.Width(border.Top+border.Left)).
 			Render(content),
 	)

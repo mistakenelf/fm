@@ -3,37 +3,47 @@ package utils
 import (
 	"io/fs"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 )
 
-func RenameDirOrFile(src, dst string) {
-	os.Rename(src, dst)
+func RenameDirOrFile(src, dst string) error {
+	err := os.Rename(src, dst)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func CreateDirectory(name string) {
+func CreateDirectory(name string) error {
 	_, err := os.Stat(name)
 
 	if os.IsNotExist(err) {
-		errDir := os.MkdirAll(name, 0755)
+		err := os.MkdirAll(name, 0755)
 
-		if errDir != nil {
-			log.Fatal(err)
+		if err != nil {
+			return err
 		}
 
 	}
+
+	return nil
 }
 
-func GetDirectoryListing(dir string, showHidden bool) []fs.FileInfo {
+func GetDirectoryListing(dir string, showHidden bool) ([]fs.FileInfo, error) {
 	n := 0
 
 	files, err := ioutil.ReadDir(dir)
-	os.Chdir(dir)
 
 	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
+		return nil, err
+	}
+
+	err = os.Chdir(dir)
+	if err != nil {
+		return nil, err
 	}
 
 	if !showHidden {
@@ -47,68 +57,86 @@ func GetDirectoryListing(dir string, showHidden bool) []fs.FileInfo {
 		files = files[:n]
 	}
 
-	return files
+	return files, nil
 }
 
-func DeleteDirectory(dirname string) {
-	removeError := os.RemoveAll(dirname)
+func DeleteDirectory(dirname string) error {
+	err := os.RemoveAll(dirname)
 
-	if removeError != nil {
-		log.Fatal("Error deleting directory", removeError)
+	if err != nil {
+		return err
 	}
+
+	return nil
 }
 
-func MoveDirectory(src, dst string) {
-	os.Rename(src, dst)
+func MoveDirectory(src, dst string) error {
+	err := os.Rename(src, dst)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func GetHomeDirectory() string {
+func GetHomeDirectory() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
-	return home
+	return home, nil
 }
 
-func GetWorkingDirectory() string {
+func GetWorkingDirectory() (string, error) {
 	directory, err := os.Getwd()
 
 	if err != nil {
-		log.Fatal("error getting working directory")
+		return "", err
 	}
 
-	return directory
+	return directory, nil
 }
 
-func DeleteFile(filename string) {
-	removeError := os.Remove(filename)
+func DeleteFile(filename string) error {
+	err := os.Remove(filename)
 
-	if removeError != nil {
-		log.Fatal("Error deleting file", removeError)
+	if err != nil {
+		return err
 	}
+
+	return nil
 }
 
-func MoveFile(src, dst string) {
-	os.Rename(src, dst)
+func MoveFile(src, dst string) error {
+	err := os.Rename(src, dst)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func ReadFileContent(name string) string {
+func ReadFileContent(name string) (string, error) {
 	dat, err := os.ReadFile(name)
 
 	if err != nil {
-		log.Fatal("Error occured reading file")
+		return "", err
 	}
 
-	return string(dat)
+	return string(dat), nil
 }
 
-func CreateFile(name string) {
+func CreateFile(name string) error {
 	f, err := os.OpenFile(name, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	f.Close()
+
+	return nil
 }

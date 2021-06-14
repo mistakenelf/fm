@@ -38,13 +38,14 @@ func Run() {
 	}
 
 	if startDir != "" {
-		files = utils.GetDirectoryListing(startDir, true)
+		files, _ = utils.GetDirectoryListing(startDir, true)
 	} else if cfg.Settings.StartDir == constants.HomeDirectory {
-		files = utils.GetDirectoryListing(utils.GetHomeDirectory(), true)
+		homeDir, _ := utils.GetHomeDirectory()
+		files, _ = utils.GetDirectoryListing(homeDir, true)
 	} else if _, err := os.Stat(cfg.Settings.StartDir); err == nil {
-		files = utils.GetDirectoryListing(cfg.Settings.StartDir, true)
+		files, _ = utils.GetDirectoryListing(cfg.Settings.StartDir, true)
 	} else {
-		files = utils.GetDirectoryListing(constants.CurrentDirectory, true)
+		files, _ = utils.GetDirectoryListing(constants.CurrentDirectory, true)
 	}
 
 	m := ui.NewModel(files)

@@ -20,6 +20,7 @@ import (
 type directoryMsg []fs.FileInfo
 type moveFileMsg []fs.FileInfo
 type markdownMsg string
+type errorMsg string
 type fileContentMsg struct {
 	markdownContent string
 	fileContent     string
@@ -27,7 +28,10 @@ type fileContentMsg struct {
 
 func (m model) updateDirectoryListing(dir string) tea.Cmd {
 	return func() tea.Msg {
-		files := utils.GetDirectoryListing(dir, m.dirTree.ShowHidden)
+		files, err := utils.GetDirectoryListing(dir, m.dirTree.ShowHidden)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
 
 		return directoryMsg(files)
 	}
@@ -35,8 +39,15 @@ func (m model) updateDirectoryListing(dir string) tea.Cmd {
 
 func (m model) renameFileOrDir(filename, value string) tea.Cmd {
 	return func() tea.Msg {
-		utils.RenameDirOrFile(filename, value)
-		files := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
+		err := utils.RenameDirOrFile(filename, value)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
 
 		return directoryMsg(files)
 	}
@@ -44,11 +55,23 @@ func (m model) renameFileOrDir(filename, value string) tea.Cmd {
 
 func (m model) moveDir(dir string) tea.Cmd {
 	return func() tea.Msg {
-		src := fmt.Sprintf("%s/%s", m.initialMoveDirectory, dir)
-		dst := fmt.Sprintf("%s/%s", utils.GetWorkingDirectory(), dir)
+		workingDir, err := utils.GetWorkingDirectory()
+		if err != nil {
+			return errorMsg(err.Error())
+		}
 
-		utils.MoveDirectory(src, dst)
-		files := utils.GetDirectoryListing(m.initialMoveDirectory, m.dirTree.ShowHidden)
+		src := fmt.Sprintf("%s/%s", m.initialMoveDirectory, dir)
+		dst := fmt.Sprintf("%s/%s", workingDir, dir)
+
+		err = utils.MoveDirectory(src, dst)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		files, err := utils.GetDirectoryListing(m.initialMoveDirectory, m.dirTree.ShowHidden)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
 
 		return moveFileMsg(files)
 	}
@@ -56,11 +79,24 @@ func (m model) moveDir(dir string) tea.Cmd {
 
 func (m model) moveFile(file string) tea.Cmd {
 	return func() tea.Msg {
-		src := fmt.Sprintf("%s/%s", m.initialMoveDirectory, file)
-		dst := fmt.Sprintf("%s/%s", utils.GetWorkingDirectory(), file)
+		workingDir, err := utils.GetWorkingDirectory()
+		if err != nil {
+			return errorMsg(err.Error())
+		}
 
-		utils.MoveFile(src, dst)
-		files := utils.GetDirectoryListing(m.initialMoveDirectory, m.dirTree.ShowHidden)
+		src := fmt.Sprintf("%s/%s", m.initialMoveDirectory, file)
+		dst := fmt.Sprintf("%s/%s", workingDir, file)
+
+		err = utils.MoveFile(src, dst)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		files, err := utils.GetDirectoryListing(m.initialMoveDirectory, m.dirTree.ShowHidden)
+
+		if err != nil {
+			return errorMsg(err.Error())
+		}
 
 		return moveFileMsg(files)
 	}
@@ -68,8 +104,15 @@ func (m model) moveFile(file string) tea.Cmd {
 
 func (m model) deleteDir(dir string) tea.Cmd {
 	return func() tea.Msg {
-		utils.DeleteDirectory(dir)
-		files := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
+		err := utils.DeleteDirectory(dir)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
 
 		return directoryMsg(files)
 	}
@@ -77,8 +120,15 @@ func (m model) deleteDir(dir string) tea.Cmd {
 
 func (m model) deleteFile(file string) tea.Cmd {
 	return func() tea.Msg {
-		utils.DeleteFile(file)
-		files := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
+		err := utils.DeleteFile(file)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
 
 		return directoryMsg(files)
 	}
@@ -89,7 +139,10 @@ func (m model) readFileContent(file fs.FileInfo) tea.Cmd {
 	width := m.secondaryPane.Width
 
 	return func() tea.Msg {
-		content := utils.ReadFileContent(file.Name())
+		content, err := utils.ReadFileContent(file.Name())
+		if err != nil {
+			return errorMsg(err.Error())
+		}
 
 		if filepath.Ext(file.Name()) == ".md" && cfg.Settings.PrettyMarkdown {
 			return fileContentMsg{
@@ -101,7 +154,7 @@ func (m model) readFileContent(file fs.FileInfo) tea.Cmd {
 			err := quick.Highlight(buf, content, filepath.Ext(file.Name()), "terminal256", "dracula")
 
 			if err != nil {
-				log.Fatal("error")
+				return errorMsg(err.Error())
 			}
 
 			return fileContentMsg{
@@ -139,8 +192,15 @@ func renderMarkdown(width int, content string) string {
 
 func (m model) createDir(dir string) tea.Cmd {
 	return func() tea.Msg {
-		utils.CreateDirectory(dir)
-		files := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
+		err := utils.CreateDirectory(dir)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
 
 		return directoryMsg(files)
 	}
@@ -148,8 +208,15 @@ func (m model) createDir(dir string) tea.Cmd {
 
 func (m model) createFile(name string) tea.Cmd {
 	return func() tea.Msg {
-		utils.CreateFile(name)
-		files := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
+		err := utils.CreateFile(name)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
 
 		return directoryMsg(files)
 	}

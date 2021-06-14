@@ -13,6 +13,7 @@ const (
 	DarkPurple  = "#6124DF"
 	DarkGray    = "#353533"
 	Blue        = "#1D4ED8"
+	Red         = "#DC2626"
 
 	HelpText = `# FM (File Manager)
 | Key                | Description                                                                                                                                                                                                                                                      |

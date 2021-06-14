@@ -17,13 +17,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case directoryMsg:
+		if len(msg) == 0 {
+			m.primaryPane.SetContent("Directory is empty")
+		} else {
+			m.dirTree.SetContent(msg)
+			m.dirTree.GotoTop()
+			m.primaryPane.SetContent(m.dirTree.View())
+		}
+
 		m.showCommandBar = false
-		m.dirTree.SetContent(msg)
-		m.dirTree.GotoTop()
 		m.textInput.Blur()
 		m.textInput.Reset()
 		m.statusBar.SetContent(m.getStatusBarContent())
-		m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
 
 		return m, cmd
 
@@ -32,7 +37,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
 		m.dirTree.SetContent(msg)
-		m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
+		m.primaryPane.SetContent(m.dirTree.View())
 		m.inMoveMode = false
 		m.initialMoveDirectory = ""
 		m.itemToMove = nil
@@ -51,6 +56,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, cmd
 
+	case errorMsg:
+		m.secondaryPane.SetContent(
+			lipgloss.NewStyle().
+				Bold(true).
+				Foreground(lipgloss.Color(constants.Red)).
+				Render(string(msg)),
+		)
+
+		return m, cmd
+
 	case tea.WindowSizeMsg:
 		cfg := config.GetConfig()
 
@@ -60,14 +75,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				msg.Height-constants.StatusBarHeight,
 				true,
 				cfg.Settings.RoundedPanes,
+				true,
 				cfg.Colors.Pane.ActiveBorderColor,
 				cfg.Colors.Pane.InactiveBorderColor,
 			)
-			m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
+			m.primaryPane.SetContent(m.dirTree.View())
 
 			m.secondaryPane = pane.NewModel(
 				msg.Width/2,
 				msg.Height-constants.StatusBarHeight,
+				false,
 				false,
 				cfg.Settings.RoundedPanes,
 				cfg.Colors.Pane.ActiveBorderColor,
@@ -115,27 +132,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.MouseMsg:
 		switch msg.Type {
 		case tea.MouseWheelUp:
-			if !m.showCommandBar {
-				if m.primaryPane.IsActive {
-					m.dirTree.GoUp()
-					m.scrollPrimaryPane()
-					m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
-				} else {
-					m.secondaryPane.LineUp(3)
-				}
+			if !m.showCommandBar && m.primaryPane.IsActive {
+				m.dirTree.GoUp()
+				m.scrollPrimaryPane()
+				m.primaryPane.SetContent(m.dirTree.View())
+			} else {
+				m.secondaryPane.LineUp(3)
 			}
 
 			return m, cmd
 
 		case tea.MouseWheelDown:
-			if !m.showCommandBar {
-				if m.primaryPane.IsActive {
-					m.dirTree.GoDown()
-					m.scrollPrimaryPane()
-					m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
-				} else {
-					m.secondaryPane.LineDown(3)
-				}
+			if !m.showCommandBar && m.primaryPane.IsActive {
+				m.dirTree.GoDown()
+				m.scrollPrimaryPane()
+				m.primaryPane.SetContent(m.dirTree.View())
+			} else {
+				m.secondaryPane.LineDown(3)
 			}
 
 			return m, cmd
@@ -143,15 +156,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		if msg.String() == "g" && m.previousKey.String() == "g" {
-			if !m.showCommandBar {
-				if m.primaryPane.IsActive {
-					m.previousKey = tea.KeyMsg{}
-					m.dirTree.GotoTop()
-					m.primaryPane.GotoTop()
-					m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
-				} else {
-					m.secondaryPane.GotoTop()
-				}
+			if !m.showCommandBar && m.primaryPane.IsActive {
+				m.previousKey = tea.KeyMsg{}
+				m.dirTree.GotoTop()
+				m.primaryPane.GotoTop()
+				m.primaryPane.SetContent(m.dirTree.View())
+			} else {
+				m.secondaryPane.GotoTop()
 			}
 
 			return m, cmd
@@ -167,60 +178,49 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "left", "h":
-			if !m.showCommandBar {
-				if m.primaryPane.IsActive {
-					m.previousDirectory = utils.GetWorkingDirectory()
+			if !m.showCommandBar && m.primaryPane.IsActive {
+				m.previousDirectory, _ = utils.GetWorkingDirectory()
 
-					return m, m.updateDirectoryListing(constants.PreviousDirectory)
-				}
+				return m, m.updateDirectoryListing(constants.PreviousDirectory)
 			}
 
 		case "down", "j":
-			if !m.showCommandBar {
-				if m.primaryPane.IsActive {
-					m.dirTree.GoDown()
-					m.scrollPrimaryPane()
-					m.statusBar.SetContent(m.getStatusBarContent())
-					m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
-				} else {
-					m.secondaryPane.LineDown(1)
-				}
+			if !m.showCommandBar && m.primaryPane.IsActive {
+				m.dirTree.GoDown()
+				m.scrollPrimaryPane()
+				m.statusBar.SetContent(m.getStatusBarContent())
+				m.primaryPane.SetContent(m.dirTree.View())
+			} else {
+				m.secondaryPane.LineDown(1)
 			}
 
 		case "up", "k":
-			if !m.showCommandBar {
-				if m.primaryPane.IsActive {
-					m.dirTree.GoUp()
-					m.scrollPrimaryPane()
-					m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
-					m.statusBar.SetContent(m.getStatusBarContent())
+			if !m.showCommandBar && m.primaryPane.IsActive {
+				m.dirTree.GoUp()
+				m.scrollPrimaryPane()
+				m.primaryPane.SetContent(m.dirTree.View())
+				m.statusBar.SetContent(m.getStatusBarContent())
+			} else {
+				m.secondaryPane.LineUp(1)
+			}
+
+		case "right", "l":
+			if !m.showCommandBar && m.primaryPane.IsActive {
+				if m.dirTree.GetSelectedFile().IsDir() && !m.textInput.Focused() {
+					return m, m.updateDirectoryListing(m.dirTree.GetSelectedFile().Name())
 				} else {
-					m.secondaryPane.LineUp(1)
+					m.secondaryPane.GotoTop()
+					return m, m.readFileContent(m.dirTree.GetSelectedFile())
 				}
 			}
 
 		case "G":
-			if !m.showCommandBar {
-				if m.primaryPane.IsActive {
-					m.dirTree.GotoBottom()
-					m.primaryPane.GotoBottom()
-					m.primaryPane.SetContent(lipgloss.NewStyle().PaddingLeft(1).Render(m.dirTree.View()))
-				} else {
-					m.secondaryPane.GotoBottom()
-				}
-			}
-
-		case "right", "l":
-			if !m.showCommandBar {
-				if m.primaryPane.IsActive {
-					if m.dirTree.GetSelectedFile().IsDir() && !m.textInput.Focused() {
-						return m, m.updateDirectoryListing(m.dirTree.GetSelectedFile().Name())
-					} else {
-						m.secondaryPane.GotoTop()
-
-						return m, m.readFileContent(m.dirTree.GetSelectedFile())
-					}
-				}
+			if !m.showCommandBar && m.primaryPane.IsActive {
+				m.dirTree.GotoBottom()
+				m.primaryPane.GotoBottom()
+				m.primaryPane.SetContent(m.dirTree.View())
+			} else {
+				m.secondaryPane.GotoBottom()
 			}
 
 		case "enter":
@@ -231,7 +231,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, m.moveFile(m.itemToMove.Name())
 				}
 			} else {
-
 				command, value := utils.ParseCommand(m.textInput.Value())
 
 				if command == "" {
@@ -271,7 +270,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "~":
 			if !m.showCommandBar {
-				return m, m.updateDirectoryListing(utils.GetHomeDirectory())
+				homeDir, _ := utils.GetHomeDirectory()
+				return m, m.updateDirectoryListing(homeDir)
 			}
 
 		case "-":
@@ -282,7 +282,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ".":
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.dirTree.ToggleHidden()
-
 				return m, m.updateDirectoryListing(constants.CurrentDirectory)
 			}
 
@@ -301,7 +300,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.inMoveMode = true
 				m.primaryPane.SetActiveBorderColor(constants.Blue)
-				m.initialMoveDirectory = utils.GetWorkingDirectory()
+				m.initialMoveDirectory, _ = utils.GetWorkingDirectory()
 				m.itemToMove = m.dirTree.GetSelectedFile()
 				m.statusBar.SetContent(m.getStatusBarContent())
 			}
