@@ -25,60 +25,60 @@ type fileContentMsg struct {
 	fileContent     string
 }
 
-func updateDirectoryListing(dir string, showHidden bool) tea.Cmd {
+func (m model) updateDirectoryListing(dir string) tea.Cmd {
 	return func() tea.Msg {
-		files := utils.GetDirectoryListing(dir, showHidden)
+		files := utils.GetDirectoryListing(dir, m.dirTree.ShowHidden)
 
 		return directoryMsg(files)
 	}
 }
 
-func renameFileOrDir(filename, value string, showHidden bool) tea.Cmd {
+func (m model) renameFileOrDir(filename, value string) tea.Cmd {
 	return func() tea.Msg {
 		utils.RenameDirOrFile(filename, value)
-		files := utils.GetDirectoryListing(constants.CurrentDirectory, showHidden)
+		files := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
 
 		return directoryMsg(files)
 	}
 }
 
-func (m model) moveDir(dir string, showHidden bool) tea.Cmd {
+func (m model) moveDir(dir string) tea.Cmd {
 	return func() tea.Msg {
 		src := fmt.Sprintf("%s/%s", m.initialMoveDirectory, dir)
 		dst := fmt.Sprintf("%s/%s", utils.GetWorkingDirectory(), dir)
 
 		utils.MoveDirectory(src, dst)
-		files := utils.GetDirectoryListing(m.initialMoveDirectory, showHidden)
+		files := utils.GetDirectoryListing(m.initialMoveDirectory, m.dirTree.ShowHidden)
 
 		return moveFileMsg(files)
 	}
 }
 
-func (m model) moveFile(file string, showHidden bool) tea.Cmd {
+func (m model) moveFile(file string) tea.Cmd {
 	return func() tea.Msg {
 		src := fmt.Sprintf("%s/%s", m.initialMoveDirectory, file)
 		dst := fmt.Sprintf("%s/%s", utils.GetWorkingDirectory(), file)
 
 		utils.MoveFile(src, dst)
-		files := utils.GetDirectoryListing(m.initialMoveDirectory, showHidden)
+		files := utils.GetDirectoryListing(m.initialMoveDirectory, m.dirTree.ShowHidden)
 
 		return moveFileMsg(files)
 	}
 }
 
-func deleteDir(dir string, showHidden bool) tea.Cmd {
+func (m model) deleteDir(dir string) tea.Cmd {
 	return func() tea.Msg {
 		utils.DeleteDirectory(dir)
-		files := utils.GetDirectoryListing(constants.CurrentDirectory, showHidden)
+		files := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
 
 		return directoryMsg(files)
 	}
 }
 
-func deleteFile(file string, showHidden bool) tea.Cmd {
+func (m model) deleteFile(file string) tea.Cmd {
 	return func() tea.Msg {
 		utils.DeleteFile(file)
-		files := utils.GetDirectoryListing(constants.CurrentDirectory, showHidden)
+		files := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
 
 		return directoryMsg(files)
 	}
@@ -137,19 +137,19 @@ func renderMarkdown(width int, content string) string {
 	return out
 }
 
-func createDir(dir string, showHidden bool) tea.Cmd {
+func (m model) createDir(dir string) tea.Cmd {
 	return func() tea.Msg {
 		utils.CreateDirectory(dir)
-		files := utils.GetDirectoryListing(constants.CurrentDirectory, showHidden)
+		files := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
 
 		return directoryMsg(files)
 	}
 }
 
-func createFile(name string, showHidden bool) tea.Cmd {
+func (m model) createFile(name string) tea.Cmd {
 	return func() tea.Msg {
 		utils.CreateFile(name)
-		files := utils.GetDirectoryListing(constants.CurrentDirectory, showHidden)
+		files := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
 
 		return directoryMsg(files)
 	}
