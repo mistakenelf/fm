@@ -305,6 +305,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.statusBar.SetContent(m.getStatusBarContent())
 			}
 
+		case "z":
+			if !m.showCommandBar && m.primaryPane.IsActive {
+				return m, m.zipDirectory(m.dirTree.GetSelectedFile().Name())
+			}
+
 		case "esc":
 			cfg := config.GetConfig()
 

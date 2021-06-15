@@ -1,10 +1,15 @@
 package utils
 
 import (
+	"archive/zip"
+	"fmt"
+	"io"
 	"io/fs"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
+	"time"
 )
 
 func RenameDirOrFile(src, dst string) error {
@@ -137,6 +142,59 @@ func CreateFile(name string) error {
 	}
 
 	f.Close()
+
+	return nil
+}
+
+func ZipDirectory(dir string) error {
+	var files []string
+
+	filepath.Walk(dir, func(path string, f fs.FileInfo, err error) error {
+		if f.Name() != "." && !f.IsDir() {
+			files = append(files, path)
+		}
+
+		return nil
+	})
+
+	output := fmt.Sprintf("%s_%d.zip", dir, time.Now().Unix())
+	newfile, err := os.Create(output)
+	if err != nil {
+		return err
+	}
+	defer newfile.Close()
+
+	zipWriter := zip.NewWriter(newfile)
+	defer zipWriter.Close()
+
+	for _, file := range files {
+		zipfile, err := os.Open(file)
+		if err != nil {
+			return err
+		}
+		defer zipfile.Close()
+
+		info, err := zipfile.Stat()
+		if err != nil {
+			return err
+		}
+
+		header, err := zip.FileInfoHeader(info)
+		if err != nil {
+			return err
+		}
+
+		header.Method = zip.Deflate
+		writer, err := zipWriter.CreateHeader(header)
+		if err != nil {
+			return err
+		}
+
+		_, err = io.Copy(writer, zipfile)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }

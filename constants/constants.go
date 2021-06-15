@@ -38,5 +38,6 @@ const (
 | tab                | Toggle between panes                                                                                                                                                                                                                                             |
 | esc                | Cancel any current action. Pressing escape during any action (rename, move, delete) will cancel that operation and return back to file navigation                                                                                                                |                          
 | tab                | toggle between panes
+| z                  | zip the currently selected directory item |
 	`
 )

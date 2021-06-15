@@ -64,6 +64,7 @@ go install github.com/knipferrc/fm@latest
 | delete or rm       | Delete the currently selected file or directory                                                                                                                                                                                                                  |
 | tab                | Toggle between panes                                                                                                                                                                                                                                             |
 | esc                | Cancel any current action. Pressing escape during any action (rename, move, delete) will cancel that operation and return back to file navigation                                                                                                                |
+| z                  | Create a zip file of the currently selected directory item                                                                                                                                                                                                       |
 
 ## Configuration
 
