@@ -32,7 +32,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, cmd
 
-	case moveFileMsg:
+	case moveMsg:
 		cfg := config.GetConfig()
 
 		m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
