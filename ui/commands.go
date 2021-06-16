@@ -237,3 +237,19 @@ func (m model) zipDirectory(name string) tea.Cmd {
 		return directoryMsg(files)
 	}
 }
+
+func (m model) unzipDirectory(name string) tea.Cmd {
+	return func() tea.Msg {
+		err := utils.UnzipDirectory(name)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		return directoryMsg(files)
+	}
+}

@@ -310,6 +310,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, m.zipDirectory(m.dirTree.GetSelectedFile().Name())
 			}
 
+		case "u":
+			if !m.showCommandBar && m.primaryPane.IsActive {
+				return m, m.unzipDirectory(m.dirTree.GetSelectedFile().Name())
+			}
+
 		case "esc":
 			cfg := config.GetConfig()
 
