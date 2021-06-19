@@ -41,7 +41,7 @@ func NewModel(files []fs.FileInfo) model {
 
 	l := spinner.NewModel()
 	l.Spinner = spinner.Dot
-	l.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.Components.Spinner))
+	l.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.Spinner))
 
 	dirTree := dirtree.NewModel(
 		files,

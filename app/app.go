@@ -37,7 +37,7 @@ func Run() {
 	}
 
 	// FM can be started with a starting directory as an argument,
-	// check if an argument exists and use it as a starting directory
+	// check if an argument exists and use it as the starting directory
 	if len(os.Args) > 1 {
 		startDir = os.Args[1]
 	}
