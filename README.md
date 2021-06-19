@@ -73,14 +73,13 @@ go install github.com/knipferrc/fm@latest
 
 ```yml
 colors:
-  components:
-    spinner: "#F25D94"
   dir_tree:
     selected_item: "#F25D94"
     unselected_item: "#FFFDF5"
   pane:
     active_border_color: "#F25D94"
     inactive_border_color: "#FFFDF5"
+  spinner: "#F25D94"
   status_bar:
     bar:
       background: "#353533"
