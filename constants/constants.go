@@ -1,12 +1,15 @@
 package constants
 
 const (
+	// Directory paths
 	CurrentDirectory  = "."
 	PreviousDirectory = ".."
 	HomeDirectory     = "~"
 
+	// Height of the status bar
 	StatusBarHeight = 2
 
+	// Default color palette
 	White       = "#FFFDF5"
 	Pink        = "#F25D94"
 	LightPurple = "#A550DF"
@@ -15,6 +18,7 @@ const (
 	Blue        = "#1D4ED8"
 	Red         = "#DC2626"
 
+	// Help text displayed in right pane
 	HelpText = `# FM (File Manager)
 | Key                | Description                                                                                                                                                                                                                                                      |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Convert bytes to readable strings such as 5MB, 2kB
 func ConvertBytesToSizeString(b int64) string {
 	const unit = 1000
 
@@ -22,6 +23,7 @@ func ConvertBytesToSizeString(b int64) string {
 		float64(b)/float64(div), "kMGTPE"[exp])
 }
 
+// Remove tabs and convert them to spaces
 func ConverTabsToSpaces(input string) string {
 	return strings.Replace(input, "\t", "    ", -1)
 }
