@@ -21,6 +21,7 @@ A terminal based file manager
 - [lipgloss](https://github.com/charmbracelet/lipgloss)
 - [Glamour](https://github.com/charmbracelet/glamour)
 - [Chroma](https://github.com/alecthomas/chroma)
+- [Viper](https://github.com/spf13/viper)
 
 ## Installation
 
@@ -35,7 +36,7 @@ go install github.com/knipferrc/fm@latest
 - Layout adjusts to terminal resize
 - Syntax highlighting for source code
 - Mouse support
-- Customizable colors |
+- Customizable colors
 
 ## Usage
 
