@@ -20,6 +20,7 @@ type Model struct {
 	UnselectedItemColor string
 }
 
+// Create a new instance of a dirtree
 func NewModel(files []fs.FileInfo, showIcons bool, selectedItemColor, unselectedItemColor string) Model {
 	return Model{
 		Files:               files,
@@ -31,54 +32,71 @@ func NewModel(files []fs.FileInfo, showIcons bool, selectedItemColor, unselected
 	}
 }
 
+// Update the set of files the dirtree is currently displaying
 func (m *Model) SetContent(files []fs.FileInfo) {
 	m.Files = files
 }
 
+// Go to the top of the dirtree
 func (m *Model) GotoTop() {
 	m.Cursor = 0
 }
 
+// Go to the bottom of the dirtree which is the length of all the files
+// minus one
 func (m *Model) GotoBottom() {
 	m.Cursor = len(m.Files) - 1
 }
 
+// Get the currently selected file
 func (m Model) GetSelectedFile() fs.FileInfo {
 	return m.Files[m.Cursor]
 }
 
+// Get the current position of the cursor in the dirtree
 func (m Model) GetCursor() int {
 	return m.Cursor
 }
 
+// Move down the dirtree by 1
 func (m *Model) GoDown() {
 	m.Cursor++
 }
 
+// Move up the dirtree by one
 func (m *Model) GoUp() {
 	m.Cursor--
 }
 
+// Get the total number of files currently being displayed in the tree
 func (m Model) GetTotalFiles() int {
 	return len(m.Files)
 }
 
+// Toggle weather or not to show hidden files and folders
 func (m *Model) ToggleHidden() {
 	m.ShowHidden = !m.ShowHidden
 }
 
+// diritem needs to know if the item is currently selected and the file
+// in which to display
 func (m Model) dirItem(selected bool, file fs.FileInfo) string {
 	if !m.ShowIcons && !selected {
+		// If icons are not enabled and the item is not currently selected
 		return lipgloss.NewStyle().
 			Foreground(lipgloss.Color(m.UnselectedItemColor)).
 			Render(file.Name())
 	} else if !m.ShowIcons && selected {
+		// If icons are not enabled but the item is selected
 		return lipgloss.NewStyle().
 			Foreground(lipgloss.Color(m.SelectedItemColor)).
 			Render(file.Name())
 	} else if selected && file.IsDir() {
+		// If the item is selected and its a directory get the icon based on its name, its extension and its mode
 		icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
+
+		// Reset the color of the text after getting the color of the icons
 		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 			Foreground(lipgloss.Color(m.SelectedItemColor)).
 			Render(file.Name()))
@@ -87,24 +105,33 @@ func (m Model) dirItem(selected bool, file fs.FileInfo) string {
 			Foreground(lipgloss.Color(m.SelectedItemColor)).
 			Render(listing)
 	} else if !selected && file.IsDir() {
+		// If the item is not selected and it is a direcotry get the icon based on its name, its extension and its mode
 		icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
+
+		// Reset the color of the text after getting the color of the icon
 		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 			Foreground(lipgloss.Color(m.UnselectedItemColor)).
 			Render(file.Name()))
 
 		return listing
 	} else if selected && !file.IsDir() {
+		// If the item is selected and its not a directory, get the icon based its name, extension and mode
 		icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
+
+		// Reset the color of the text after getting the color of the icon
 		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 			Foreground(lipgloss.Color(m.SelectedItemColor)).
 			Render(file.Name()))
 
 		return listing
 	} else {
+		// If icons are show and the item is not selected get the icon based on its name, extension and mode
 		icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
+
+		// Reset the color of the text after getting the color of the icon
 		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 			Foreground(lipgloss.Color(m.UnselectedItemColor)).
 			Render(file.Name()))
@@ -113,10 +140,12 @@ func (m Model) dirItem(selected bool, file fs.FileInfo) string {
 	}
 }
 
+// Display the dirtree and all of its dir items
 func (m Model) View() string {
 	doc := strings.Builder{}
 	curFiles := ""
 
+	// Loop through all the files and return a dirItem for each
 	for i, file := range m.Files {
 		curFiles += fmt.Sprintf("%s\n", m.dirItem(m.Cursor == i, file))
 	}

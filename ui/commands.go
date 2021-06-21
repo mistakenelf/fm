@@ -28,10 +28,10 @@ type fileContentMsg struct {
 
 // Get an updated directory listing based on the name
 // of a directory passed in
-func (m model) updateDirectoryListing(dir string) tea.Cmd {
+func (m model) updateDirectoryListing(name string) tea.Cmd {
 	return func() tea.Msg {
 		// Get directory listing and determine to show hidden files/folders or not
-		files, err := utils.GetDirectoryListing(dir, m.dirTree.ShowHidden)
+		files, err := utils.GetDirectoryListing(name, m.dirTree.ShowHidden)
 
 		// Something went wrong getting the directory listing, return
 		// the error back to the UI and display it in a pane
@@ -47,9 +47,9 @@ func (m model) updateDirectoryListing(dir string) tea.Cmd {
 
 // Rename a file or directory based on its current filename
 // and its new value
-func (m model) renameFileOrDir(filename, value string) tea.Cmd {
+func (m model) renameFileOrDir(name, value string) tea.Cmd {
 	return func() tea.Msg {
-		err := utils.RenameDirOrFile(filename, value)
+		err := utils.RenameDirOrFile(name, value)
 
 		// Something went wrong renaming the file or directory
 		// return the error back to the UI to be displayed
@@ -73,7 +73,7 @@ func (m model) renameFileOrDir(filename, value string) tea.Cmd {
 }
 
 // Move a directory from one directory to another
-func (m model) moveDir(dir string) tea.Cmd {
+func (m model) moveDir(name string) tea.Cmd {
 	return func() tea.Msg {
 		// Get the working directory so we know where to
 		// move to
@@ -87,11 +87,11 @@ func (m model) moveDir(dir string) tea.Cmd {
 
 		// Get the directory from which the move was intiated from
 		// and give it the same folder name
-		src := fmt.Sprintf("%s/%s", m.initialMoveDirectory, dir)
+		src := fmt.Sprintf("%s/%s", m.initialMoveDirectory, name)
 
 		// Destination is the current working directory with
 		// the same folder name that it had
-		dst := fmt.Sprintf("%s/%s", workingDir, dir)
+		dst := fmt.Sprintf("%s/%s", workingDir, name)
 
 		err = utils.MoveDirectory(src, dst)
 
@@ -117,7 +117,7 @@ func (m model) moveDir(dir string) tea.Cmd {
 }
 
 // Move a file from one directory to another
-func (m model) moveFile(file string) tea.Cmd {
+func (m model) moveFile(name string) tea.Cmd {
 	return func() tea.Msg {
 		// Get the current working directory
 		// so we know where to move the file to
@@ -131,11 +131,11 @@ func (m model) moveFile(file string) tea.Cmd {
 
 		// Get the directory from which the move was intiated from
 		// and give it the same file name
-		src := fmt.Sprintf("%s/%s", m.initialMoveDirectory, file)
+		src := fmt.Sprintf("%s/%s", m.initialMoveDirectory, name)
 
 		// Destination is the current working directory with
 		// the same file name that it had
-		dst := fmt.Sprintf("%s/%s", workingDir, file)
+		dst := fmt.Sprintf("%s/%s", workingDir, name)
 
 		err = utils.MoveFile(src, dst)
 
@@ -161,9 +161,9 @@ func (m model) moveFile(file string) tea.Cmd {
 }
 
 // Delete a directory based on name
-func (m model) deleteDir(dir string) tea.Cmd {
+func (m model) deleteDir(name string) tea.Cmd {
 	return func() tea.Msg {
-		err := utils.DeleteDirectory(dir)
+		err := utils.DeleteDirectory(name)
 
 		// Something went wrong deleting the directory
 		// send the error to the UI to display
@@ -186,9 +186,9 @@ func (m model) deleteDir(dir string) tea.Cmd {
 }
 
 // Delete a file based on name
-func (m model) deleteFile(file string) tea.Cmd {
+func (m model) deleteFile(name string) tea.Cmd {
 	return func() tea.Msg {
-		err := utils.DeleteFile(file)
+		err := utils.DeleteFile(name)
 
 		// Something went wrong deleting a file
 		// send the error to the UI to display
