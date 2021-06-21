@@ -196,32 +196,38 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Down arrow or j is pressed
 		case "down", "j":
-			// If the command bar is not shown and the primary pane is active
-			// go down in the dirtree, update the status bar content and set the content
-			// of the primary pane to the dirtree
-			if !m.showCommandBar && m.primaryPane.IsActive {
-				m.dirTree.GoDown()
-				m.scrollPrimaryPane()
-				m.statusBar.SetContent(m.getStatusBarContent())
-				m.primaryPane.SetContent(m.dirTree.View())
-			} else {
-				// Secondary pane is active so scroll its content down
-				m.secondaryPane.LineDown(1)
+			// If the command bar is not shown
+			if !m.showCommandBar {
+				// The primary pane is active go down in the dirtree,
+				// update the status bar content and set the content
+				// of the primary pane to the dirtree
+				if m.primaryPane.IsActive {
+					m.dirTree.GoDown()
+					m.scrollPrimaryPane()
+					m.statusBar.SetContent(m.getStatusBarContent())
+					m.primaryPane.SetContent(m.dirTree.View())
+				} else {
+					// Secondary pane is active so scroll its content down
+					m.secondaryPane.LineDown(1)
+				}
 			}
 
 		// Up arrow or k is pressed
 		case "up", "k":
-			// If the command bar is not shown and the primary pane is active
-			// go up in the dirtree, update the status bar content and set the content
-			// of the primary pane to the dirtree
-			if !m.showCommandBar && m.primaryPane.IsActive {
-				m.dirTree.GoUp()
-				m.scrollPrimaryPane()
-				m.primaryPane.SetContent(m.dirTree.View())
-				m.statusBar.SetContent(m.getStatusBarContent())
-			} else {
-				// Secondary pane is active so scroll its content up
-				m.secondaryPane.LineUp(1)
+			// If the command bar is not shown
+			if !m.showCommandBar {
+				// the primary pane is active go up in the dirtree,
+				// update the status bar content and set the content
+				// of the primary pane to the dirtree
+				if m.primaryPane.IsActive {
+					m.dirTree.GoUp()
+					m.scrollPrimaryPane()
+					m.primaryPane.SetContent(m.dirTree.View())
+					m.statusBar.SetContent(m.getStatusBarContent())
+				} else {
+					// Secondary pane is active so scroll its content up
+					m.secondaryPane.LineUp(1)
+				}
 			}
 
 		// Right arrow or l is pressed
