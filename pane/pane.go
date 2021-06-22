@@ -46,7 +46,7 @@ func (m *Model) SetSize(width, height int) {
 
 	// Set widths of both the pane and viewport taking into account borders
 	m.Width = width - lipgloss.Width(border.Right+border.Top)
-	m.Height = height - lipgloss.Width(border.Bottom)
+	m.Height = height - lipgloss.Height(border.Bottom)
 	m.Viewport.Width = width - lipgloss.Width(border.Right+border.Top)
 	m.Viewport.Height = height - lipgloss.Height(border.Bottom)
 }
@@ -63,6 +63,8 @@ func (m *Model) SetContent(content string) {
 	// Set the content inside a viewport
 	m.Viewport.SetContent(
 		lipgloss.NewStyle().
+			Width(m.Width).
+			Height(m.Height).
 			PaddingLeft(padding).
 			Render(content),
 	)
