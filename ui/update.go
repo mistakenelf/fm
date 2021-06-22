@@ -281,6 +281,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 
 				switch command {
+				// Exit FM
+				case "exit", "q", "quit":
+					return m, tea.Quit
+
 				// Create a new directory based on the value passed
 				case "mkdir":
 					return m, m.createDir(value)
