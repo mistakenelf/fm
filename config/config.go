@@ -3,10 +3,8 @@ package config
 import (
 	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/knipferrc/fm/constants"
-	"github.com/knipferrc/fm/utils"
 
 	"github.com/spf13/viper"
 )
@@ -63,27 +61,25 @@ type Config struct {
 
 // Load users config and create the config if it does not exist
 func LoadConfig() {
+	// Create an fm directory is the .config dir in the users home
+	// directory if it does not already exist
+	if _, err := os.Stat(os.ExpandEnv("$HOME/.config/fm")); os.IsNotExist(err) {
+		err := os.Mkdir(os.ExpandEnv("$HOME/.config/fm"), os.ModePerm)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 	// Get users home directory and get path to create a config at
 	// if it does not exist
-	homeDir, _ := utils.GetHomeDirectory()
-	configPath := filepath.Join(homeDir, ".config", "fm")
-	configFile := filepath.Join(homeDir, ".config", "fm", "config.yml")
+	viper.SetConfigFile(os.ExpandEnv("$HOME/.config/fm/config.yml"))
 
 	// Set viper config name, type and path
-	viper.SetConfigName("config")
-	viper.SetConfigType("yml")
-	viper.AddConfigPath(configPath)
+	viper.SafeWriteConfigAs(os.ExpandEnv("$HOME/.config/fm/config.yml"))
 
-	// if a config file already exists, do nothing, else create a new config
-	// file in the .config/fm directory
-	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		if err := os.MkdirAll(filepath.Dir(configFile), 0770); err != nil {
-			log.Fatal("Error creating config file")
-		}
-
-		// Create the config and write it to viper
-		os.Create(configFile)
-		viper.WriteConfig()
+	// Read the current config file in and catch an error if it occurs
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
