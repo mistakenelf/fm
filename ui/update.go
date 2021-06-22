@@ -183,7 +183,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 
-		// Left arrow of h key is pressed
+		// Left arrow or h key is pressed
 		case "left", "h":
 			// If the command bar is not shown and the primary pane is active
 			// set the previous directory to the current directory,
