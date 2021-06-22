@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Main app settings
 type SettingsConfig struct {
 	StartDir         string `mapstructure:"start_dir"`
 	ShowIcons        bool   `mapstructure:"show_icons"`
@@ -19,25 +18,21 @@ type SettingsConfig struct {
 	PrettyMarkdown   bool   `mapstructure:"pretty_markdown"`
 }
 
-// Directory tree has a selected item and unselected item color
 type DirTreeColors struct {
 	SelectedItem   string `mapstructure:"selected_item"`
 	UnselectedItem string `mapstructure:"unselected_item"`
 }
 
-// A pane has a active and inactive border color
 type PaneColors struct {
 	ActiveBorderColor   string `mapstructure:"active_border_color"`
 	InactiveBorderColor string `mapstructure:"inactive_border_color"`
 }
 
-// Color consists of both a background and foreground
 type ColorVariant struct {
 	Foreground string `mapstructure:"foreground"`
 	Background string `mapstructure:"background"`
 }
 
-// Colors for the 4 different parts of the status bar
 type StatusBarColors struct {
 	SelectedFile ColorVariant `mapstructure:"selected_file"`
 	Bar          ColorVariant `mapstructure:"bar"`
@@ -45,7 +40,6 @@ type StatusBarColors struct {
 	Logo         ColorVariant `mapstructure:"logo"`
 }
 
-// Color config for the different components
 type ColorsConfig struct {
 	DirTree   DirTreeColors   `mapstructure:"dir_tree"`
 	Pane      PaneColors      `mapstructure:"pane"`
@@ -69,6 +63,7 @@ func LoadConfig() {
 			log.Fatal(err)
 		}
 	}
+
 	// Get users home directory and get path to create a config at
 	// if it does not exist
 	viper.SetConfigFile(os.ExpandEnv("$HOME/.config/fm/config.yml"))

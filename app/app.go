@@ -14,8 +14,7 @@ import (
 )
 
 func Run() {
-	// Setup default and load the users
-	// app configuration
+	// Setup default config and load the users config
 	config.SetDefaults()
 	config.LoadConfig()
 
@@ -24,8 +23,7 @@ func Run() {
 	var files []fs.FileInfo
 	var startDir string
 
-	// If logging is enabled in the config, log to the
-	// debug.log file
+	// If logging is enabled, logs will be output to debug.log
 	if cfg.Settings.EnableLogging {
 		f, err := tea.LogToFile("debug.log", "debug")
 		if err != nil {

@@ -16,8 +16,6 @@ import (
 // returning an error if it exists
 func RenameDirOrFile(src, dst string) error {
 	err := os.Rename(src, dst)
-
-	// Something went wrong renaming the file or directory
 	if err != nil {
 		return err
 	}
@@ -33,8 +31,6 @@ func CreateDirectory(name string) error {
 	// If the directory does not already exist, create it
 	if os.IsNotExist(err) {
 		err := os.MkdirAll(name, 0755)
-
-		// Something went wrong creating the directory
 		if err != nil {
 			return err
 		}
@@ -51,8 +47,6 @@ func GetDirectoryListing(dir string, showHidden bool) ([]fs.FileInfo, error) {
 
 	// Read files from the directory
 	files, err := ioutil.ReadDir(dir)
-
-	// Something went wrong getting the file listing
 	if err != nil {
 		return nil, err
 	}
@@ -100,8 +94,6 @@ func DeleteDirectory(name string) error {
 // returning an error if it exists
 func MoveDirectory(src, dst string) error {
 	err := os.Rename(src, dst)
-
-	// Something went wrong moving the directory
 	if err != nil {
 		return err
 	}
@@ -113,8 +105,6 @@ func MoveDirectory(src, dst string) error {
 // error if it exists
 func GetHomeDirectory() (string, error) {
 	home, err := os.UserHomeDir()
-
-	// Something went wrong getting the home directory
 	if err != nil {
 		return "", err
 	}
@@ -127,8 +117,6 @@ func GetHomeDirectory() (string, error) {
 // returning an error if it exists
 func GetWorkingDirectory() (string, error) {
 	directory, err := os.Getwd()
-
-	// Something went wrong getting the working directory
 	if err != nil {
 		return "", err
 	}
@@ -140,8 +128,6 @@ func GetWorkingDirectory() (string, error) {
 // returning an error if it exists
 func DeleteFile(name string) error {
 	err := os.Remove(name)
-
-	// Something went wrong deleting the file
 	if err != nil {
 		return err
 	}
@@ -153,8 +139,6 @@ func DeleteFile(name string) error {
 // and destination, returning an error if it exists
 func MoveFile(src, dst string) error {
 	err := os.Rename(src, dst)
-
-	// Something went wrong moving the file
 	if err != nil {
 		return err
 	}
@@ -166,8 +150,6 @@ func MoveFile(src, dst string) error {
 // an error if it exists
 func ReadFileContent(name string) (string, error) {
 	dat, err := os.ReadFile(name)
-
-	// Something went wrong reading the files content
 	if err != nil {
 		return "", err
 	}
@@ -180,8 +162,6 @@ func ReadFileContent(name string) (string, error) {
 // error if it exists
 func CreateFile(name string) error {
 	f, err := os.OpenFile(name, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-
-	// Something went wrong creating the file
 	if err != nil {
 		return err
 	}
