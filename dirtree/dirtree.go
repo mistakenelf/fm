@@ -78,65 +78,37 @@ func (m *Model) ToggleHidden() {
 	m.ShowHidden = !m.ShowHidden
 }
 
-// diritem needs to know if the item is currently selected and the file
-// in which to display
+// dirItem is each individual item within the dirtree
 func (m Model) dirItem(selected bool, file fs.FileInfo) string {
-	if !m.ShowIcons && !selected {
-		// If icons are not enabled and the item is not currently selected
-		return lipgloss.NewStyle().
-			Foreground(lipgloss.Color(m.UnselectedItemColor)).
-			Render(file.Name())
-	} else if !m.ShowIcons && selected {
-		// If icons are not enabled but the item is selected
-		return lipgloss.NewStyle().
-			Foreground(lipgloss.Color(m.SelectedItemColor)).
-			Render(file.Name())
-	} else if selected && file.IsDir() {
-		// If the item is selected and its a directory get the icon based on its name, its extension and its mode
-		icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))
-		fileIcon := fmt.Sprintf("%s%s", color, icon)
-
-		// Reset the color of the text after getting the color of the icons
-		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
-			Foreground(lipgloss.Color(m.SelectedItemColor)).
-			Render(file.Name()))
-
-		return lipgloss.NewStyle().
-			Foreground(lipgloss.Color(m.SelectedItemColor)).
-			Render(listing)
-	} else if !selected && file.IsDir() {
-		// If the item is not selected and it is a direcotry get the icon based on its name, its extension and its mode
-		icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))
-		fileIcon := fmt.Sprintf("%s%s", color, icon)
-
-		// Reset the color of the text after getting the color of the icon
-		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
-			Foreground(lipgloss.Color(m.UnselectedItemColor)).
-			Render(file.Name()))
-
-		return listing
-	} else if selected && !file.IsDir() {
+	if m.ShowIcons && selected {
 		// If the item is selected and its not a directory, get the icon based its name, extension and mode
 		icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
 
 		// Reset the color of the text after getting the color of the icon
-		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
+		return fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 			Foreground(lipgloss.Color(m.SelectedItemColor)).
 			Render(file.Name()))
-
-		return listing
-	} else {
+	} else if m.ShowIcons && !selected {
 		// If icons are show and the item is not selected get the icon based on its name, extension and mode
 		icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
 
 		// Reset the color of the text after getting the color of the icon
-		listing := fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
+		return fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 			Foreground(lipgloss.Color(m.UnselectedItemColor)).
 			Render(file.Name()))
 
-		return listing
+	} else if !m.ShowIcons && selected {
+		// If icons are not enabled but the item is selected
+		return lipgloss.NewStyle().
+			Foreground(lipgloss.Color(m.SelectedItemColor)).
+			Render(file.Name())
+	} else {
+		// If icons are not enabled and the item is not currently selected
+		return lipgloss.NewStyle().
+			Foreground(lipgloss.Color(m.UnselectedItemColor)).
+			Render(file.Name())
 	}
 }
 
