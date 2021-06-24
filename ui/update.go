@@ -101,6 +101,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.primaryPane.SetContent(m.dirTree.View())
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
+			m.secondaryPane.SetContent(constants.IntroText)
 			m.statusBar.SetContent(m.getStatusBarContent())
 			m.statusBar.SetSize(msg.Width)
 			m.ready = true
@@ -408,8 +409,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.IsActive = false
 			m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
 			m.statusBar.SetContent(m.getStatusBarContent())
-
-			return m, renderMarkdownContent(m.secondaryPane.Width, constants.HelpText)
+			m.secondaryPane.SetContent(constants.IntroText)
 		}
 
 		// Capture the previous key so that we can capture

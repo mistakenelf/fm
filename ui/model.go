@@ -4,7 +4,6 @@ import (
 	"io/fs"
 
 	"github.com/knipferrc/fm/config"
-	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/dirtree"
 	"github.com/knipferrc/fm/pane"
 	"github.com/knipferrc/fm/statusbar"
@@ -105,7 +104,7 @@ func NewModel(files []fs.FileInfo) model {
 		previousKey:          tea.KeyMsg{},
 		previousDirectory:    "",
 		showCommandBar:       false,
-		activeMarkdownSource: constants.HelpText,
+		activeMarkdownSource: "",
 		inMoveMode:           false,
 		initialMoveDirectory: "",
 		itemToMove:           nil,
