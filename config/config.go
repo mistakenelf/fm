@@ -55,7 +55,7 @@ type Config struct {
 
 // Load users config and create the config if it does not exist
 func LoadConfig() {
-	// Create an fm directory is the .config dir in the users home
+	// Create an fm directory in the .config dir in the users home
 	// directory if it does not already exist
 	if _, err := os.Stat(os.ExpandEnv("$HOME/.config/fm")); os.IsNotExist(err) {
 		err := os.Mkdir(os.ExpandEnv("$HOME/.config/fm"), os.ModePerm)
@@ -64,8 +64,7 @@ func LoadConfig() {
 		}
 	}
 
-	// Get users home directory and get path to create a config at
-	// if it does not exist
+	// Set config file inside .config folder under an fm folder
 	viper.SetConfigFile(os.ExpandEnv("$HOME/.config/fm/config.yml"))
 
 	// Set viper config name, type and path

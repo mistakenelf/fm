@@ -389,3 +389,37 @@ func (m model) unzipDirectory(name string) tea.Cmd {
 		return directoryMsg(files)
 	}
 }
+
+// Copy a file given a name
+func (m model) copyFile(name string) tea.Cmd {
+	return func() tea.Msg {
+		err := utils.CopyFile(name)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		return directoryMsg(files)
+	}
+}
+
+// Copy a directory given a name
+func (m model) copyDirectory(name string) tea.Cmd {
+	return func() tea.Msg {
+		err := utils.CopyDirectory(name)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		return directoryMsg(files)
+	}
+}

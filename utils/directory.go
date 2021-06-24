@@ -282,3 +282,89 @@ func UnzipDirectory(name string) error {
 
 	return nil
 }
+
+func CopyFile(name string) error {
+	srcFile, err := os.Open(name)
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
+
+	splitName := strings.Split(name, ".")
+	output := fmt.Sprintf("%s_%d.%s", splitName[0], time.Now().Unix(), splitName[1])
+	destFile, err := os.Create(output)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	_, err = io.Copy(destFile, srcFile)
+	if err != nil {
+		return err
+	}
+
+	err = destFile.Sync()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Copy a directory given a name
+func CopyDirectory(name string) error {
+	// Generate a unique name for the output folder
+	output := fmt.Sprintf("%s_%d", name, time.Now().Unix())
+
+	f, err := os.Open(name)
+	if err != nil {
+		return err
+	}
+
+	file, err := f.Stat()
+	if err != nil {
+		return err
+	}
+
+	if !file.IsDir() {
+		return fmt.Errorf("Source " + file.Name() + " is not a directory!")
+	}
+
+	// Create the output folder
+	err = os.Mkdir(output, 0755)
+	if err != nil {
+		return err
+	}
+
+	// Read all files in the directory
+	files, err := ioutil.ReadDir(name)
+	if err != nil {
+		return err
+	}
+
+	// Loop through the directory getting a list of all its files
+	for _, f := range files {
+		// If its a directory, copy it
+		if f.IsDir() {
+			err = CopyDirectory(name + "/" + f.Name())
+			if err != nil {
+				return err
+			}
+		}
+
+		// If its not a directory, read the file and write it to the new folder
+		if !f.IsDir() {
+			content, err := ioutil.ReadFile(name + "/" + f.Name())
+			if err != nil {
+				return err
+			}
+
+			err = ioutil.WriteFile(output+"/"+f.Name(), content, 0755)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}

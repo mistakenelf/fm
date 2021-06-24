@@ -384,6 +384,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, m.unzipDirectory(m.dirTree.GetSelectedFile().Name())
 			}
 
+		case "c":
+			if !m.showCommandBar && m.primaryPane.IsActive {
+				if m.dirTree.GetSelectedFile().IsDir() {
+					return m, m.copyDirectory(m.dirTree.GetSelectedFile().Name())
+				} else {
+					return m, m.copyFile(m.dirTree.GetSelectedFile().Name())
+				}
+			}
+
 		// Reset FM to its initial state
 		case "esc":
 			cfg := config.GetConfig()
