@@ -23,12 +23,13 @@ type model struct {
 	dirTree              dirtree.Model
 	statusBar            statusbar.Model
 	previousKey          tea.KeyMsg
-	previousDirectory    string
-	showCommandBar       bool
-	activeMarkdownSource string
-	inMoveMode           bool
-	initialMoveDirectory string
 	itemToMove           fs.FileInfo
+	activeMarkdownSource string
+	previousDirectory    string
+	initialMoveDirectory string
+	secondaryPaneContent string
+	showCommandBar       bool
+	inMoveMode           bool
 	ready                bool
 }
 
@@ -102,12 +103,13 @@ func NewModel(files []fs.FileInfo) model {
 		dirTree:              dirTree,
 		statusBar:            statusBar,
 		previousKey:          tea.KeyMsg{},
-		previousDirectory:    "",
-		showCommandBar:       false,
-		activeMarkdownSource: "",
-		inMoveMode:           false,
-		initialMoveDirectory: "",
 		itemToMove:           nil,
+		activeMarkdownSource: "",
+		previousDirectory:    "",
+		initialMoveDirectory: "",
+		secondaryPaneContent: "",
+		showCommandBar:       false,
+		inMoveMode:           false,
 		ready:                false,
 	}
 }

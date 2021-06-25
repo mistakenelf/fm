@@ -68,6 +68,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Update the active markdown source to the markdownContent
 		m.activeMarkdownSource = string(msg.markdownContent)
 
+		// Set secondary pane content so that when resizing we can resize the content
+		// with the pane
+		m.secondaryPaneContent = utils.ConverTabsToSpaces(string(msg.fileContent))
+
 		// Set the content of the secondary pane to the file content removing any tabs
 		// and converting them to spaces
 		m.secondaryPane.SetContent(utils.ConverTabsToSpaces(string(msg.fileContent)))
@@ -108,6 +112,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
+			m.secondaryPane.SetContent(lipgloss.NewStyle().Width(m.secondaryPane.Width).Render(m.secondaryPaneContent))
 			m.statusBar.SetSize(msg.Width)
 		}
 
@@ -409,7 +414,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.IsActive = false
 			m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
 			m.statusBar.SetContent(m.getStatusBarContent())
-			m.secondaryPane.SetContent(constants.IntroText)
+			m.secondaryPane.SetContent(lipgloss.NewStyle().Width(m.secondaryPane.Width).Render(constants.IntroText))
+			m.secondaryPaneContent = constants.IntroText
 		}
 
 		// Capture the previous key so that we can capture
