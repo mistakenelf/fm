@@ -102,17 +102,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// is first started
 	case tea.WindowSizeMsg:
 		if !m.ready {
-			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.primaryPane.SetContent(m.dirTree.View())
-			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
+			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.secondaryPane.SetContent(constants.IntroText)
+			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetContent(m.getStatusBarContent())
 			m.statusBar.SetSize(msg.Width)
 			m.ready = true
 		} else {
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.secondaryPane.SetContent(lipgloss.NewStyle().Width(m.secondaryPane.Width).Render(m.secondaryPaneContent))
+			m.secondaryPane.SetContent(m.secondaryPaneContent)
 			m.statusBar.SetSize(msg.Width)
 		}
 
@@ -414,7 +414,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.IsActive = false
 			m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
 			m.statusBar.SetContent(m.getStatusBarContent())
-			m.secondaryPane.SetContent(lipgloss.NewStyle().Width(m.secondaryPane.Width).Render(constants.IntroText))
+			m.secondaryPane.SetContent(constants.IntroText)
 			m.secondaryPaneContent = constants.IntroText
 		}
 
