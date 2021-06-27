@@ -66,6 +66,8 @@ go install github.com/knipferrc/fm@latest
 | tab                  | Toggle between panes                                                                                                                                                                                                                                             |
 | esc                  | Cancel any current action. Pressing escape during any action (rename, move, delete) will cancel that operation and return back to file navigation                                                                                                                |
 | z                    | Create a zip file of the currently selected directory item                                                                                                                                                                                                       |
+| u                    | Unzip a zip file                                                                                                                                                                                                                                                 |
+| c                    | Create a copy of a file or directory                                                                                                                                                                                                                             |
 
 ## Configuration
 
