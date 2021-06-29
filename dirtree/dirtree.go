@@ -21,9 +21,8 @@ type Model struct {
 }
 
 // Create a new instance of a dirtree
-func NewModel(files []fs.FileInfo, showIcons bool, selectedItemColor, unselectedItemColor string) Model {
+func NewModel(showIcons bool, selectedItemColor, unselectedItemColor string) Model {
 	return Model{
-		Files:               files,
 		Cursor:              0,
 		ShowIcons:           showIcons,
 		ShowHidden:          true,

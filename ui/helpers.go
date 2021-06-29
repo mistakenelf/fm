@@ -42,6 +42,10 @@ func (m model) getStatusBarContent() (string, string, string, string) {
 	cfg := config.GetConfig()
 	currentPath, err := os.Getwd()
 
+	if m.dirTree.GetTotalFiles() == 0 {
+		return "", "", "", ""
+	}
+
 	// TODO handle this error
 	if err != nil {
 		log.Fatal(err)

@@ -35,7 +35,7 @@ type model struct {
 
 // Create a new model for the UI passing in an array of files
 // to initialize the app with
-func NewModel(files []fs.FileInfo) model {
+func NewModel() model {
 	cfg := config.GetConfig()
 
 	// Setup the input for the command bar
@@ -51,7 +51,6 @@ func NewModel(files []fs.FileInfo) model {
 	// Create a new instance of dirtree passing in the initial file list
 	// and some configuration values
 	dirTree := dirtree.NewModel(
-		files,
 		cfg.Settings.ShowIcons,
 		cfg.Colors.DirTree.SelectedItem,
 		cfg.Colors.DirTree.UnselectedItem,
