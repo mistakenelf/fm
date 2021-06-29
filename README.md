@@ -22,6 +22,7 @@ A terminal based file manager
 - [Glamour](https://github.com/charmbracelet/glamour)
 - [Chroma](https://github.com/alecthomas/chroma)
 - [Viper](https://github.com/spf13/viper)
+- [Cobra](https://github.com/spf13/cobra)
 
 ## Installation
 
