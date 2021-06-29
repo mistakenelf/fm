@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/knipferrc/fm/config"
+	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/ui"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -15,7 +16,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:     "fm",
 	Short:   "FM is a simple, configurable and fun to use file manager",
-	Version: "v0.0.5",
+	Version: constants.AppVersion,
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Setup default config and load the users config

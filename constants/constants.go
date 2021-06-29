@@ -6,6 +6,9 @@ const (
 	PreviousDirectory = ".."
 	HomeDirectory     = "~"
 
+	// Current app version
+	AppVersion = "0.0.5"
+
 	// Height of the status bar
 	StatusBarHeight = 2
 
