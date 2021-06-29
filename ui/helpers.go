@@ -2,10 +2,10 @@ package ui
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/knipferrc/fm/config"
+	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/utils"
 )
@@ -46,9 +46,10 @@ func (m model) getStatusBarContent() (string, string, string, string) {
 		return "", "", "", ""
 	}
 
-	// TODO handle this error
+	// If we fail to get the working directory
+	// just use the current directory
 	if err != nil {
-		log.Fatal(err)
+		currentPath = constants.CurrentDirectory
 	}
 
 	logo := ""
