@@ -16,9 +16,16 @@ import (
 func (m model) Init() tea.Cmd {
 	var cmds []tea.Cmd
 	cfg := config.GetConfig()
+	startDir := ""
+
+	if len(os.Args) > 1 {
+		startDir = os.Args[1]
+	}
 
 	// Get the initial directory listing to be displayed
-	if cfg.Settings.StartDir == constants.HomeDirectory {
+	if _, err := os.Stat(startDir); err == nil {
+		cmds = append(cmds, m.updateDirectoryListing(startDir))
+	} else if cfg.Settings.StartDir == constants.HomeDirectory {
 		homeDir, err := utils.GetHomeDirectory()
 		if err != nil {
 			log.Fatal(err)
