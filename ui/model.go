@@ -4,6 +4,7 @@ import (
 	"io/fs"
 
 	"github.com/knipferrc/fm/config"
+	"github.com/knipferrc/fm/constants"
 	"github.com/knipferrc/fm/dirtree"
 	"github.com/knipferrc/fm/pane"
 	"github.com/knipferrc/fm/statusbar"
@@ -106,7 +107,7 @@ func NewModel() model {
 		activeMarkdownSource: "",
 		previousDirectory:    "",
 		initialMoveDirectory: "",
-		secondaryPaneContent: "",
+		secondaryPaneContent: constants.IntroText,
 		showCommandBar:       false,
 		inMoveMode:           false,
 		ready:                false,
