@@ -15,7 +15,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Main app model
+// Main App model
 type model struct {
 	primaryPane          pane.Model
 	secondaryPane        pane.Model

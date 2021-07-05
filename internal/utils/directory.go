@@ -81,8 +81,6 @@ func GetDirectoryListing(dir string, showHidden bool) ([]fs.FileInfo, error) {
 // returning an error if it exists
 func DeleteDirectory(name string) error {
 	err := os.RemoveAll(name)
-
-	// Something went wrong removing the directory
 	if err != nil {
 		return err
 	}
@@ -109,7 +107,6 @@ func GetHomeDirectory() (string, error) {
 		return "", err
 	}
 
-	// Return the home directory
 	return home, nil
 }
 
@@ -154,7 +151,6 @@ func ReadFileContent(name string) (string, error) {
 		return "", err
 	}
 
-	// Return file data as a string and no error
 	return string(dat), nil
 }
 
@@ -166,7 +162,6 @@ func CreateFile(name string) error {
 		return err
 	}
 
-	// Close the file that was created
 	f.Close()
 
 	return nil
@@ -283,6 +278,7 @@ func UnzipDirectory(name string) error {
 	return nil
 }
 
+// Copy a file given a name
 func CopyFile(name string) error {
 	srcFile, err := os.Open(name)
 	if err != nil {

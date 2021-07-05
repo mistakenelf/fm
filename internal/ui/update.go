@@ -24,15 +24,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if len(msg) == 0 {
 			m.primaryPane.SetContent("Directory is empty")
 		} else {
-			// Update the dirtree with new content, scroll to the top
-			// of the dirtree and set the primary panes content to the dirtree
 			m.dirTree.SetContent(msg)
 			m.dirTree.GotoTop()
 			m.primaryPane.SetContent(m.dirTree.View())
 		}
 
-		// Hide the command bar, reset the textinput, blur its focus
-		// and update the status bars content
 		m.showCommandBar = false
 		m.textInput.Blur()
 		m.textInput.Reset()
@@ -40,21 +36,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, cmd
 
-	// A moveMsg is received any time a move operation has been performed
-	// returning an updated listing of files
+	// A moveMsg is received any time a file or directory has been moved
 	case moveMsg:
 		cfg := config.GetConfig()
 
 		// Set active color back to the config default
 		m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
 
-		// Set the dirtrees content to the new file listing and
-		// display it in the primary pane
 		m.dirTree.SetContent(msg)
 		m.primaryPane.SetContent(m.dirTree.View())
 
-		// Set move mode back to false, set the initial moving directory to empty
-		// the item that was moving back to nil and update the status bars content
+		// Set move mode back to false, set the initial moving directory to empty,
+		// the item that was moving back to nil, and update the status bars content
 		m.inMoveMode = false
 		m.initialMoveDirectory = ""
 		m.itemToMove = nil
@@ -80,8 +73,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Anytime markdown is being rendered, this message is received
 	case markdownMsg:
-		// Set the content of the secondary pane to the markdown content
-		// converting any tabs into spaces
 		m.secondaryPane.SetContent(utils.ConverTabsToSpaces(string(msg)))
 
 		return m, cmd
@@ -116,7 +107,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.statusBar.SetSize(msg.Width)
 		}
 
-		// If we have some active markdown source to render, re render its content
+		// If we have some active markdown source to render, re-render its content
 		// when the window is resized so that glamour knows how to wrap its text
 		if m.activeMarkdownSource != "" {
 			return m, renderMarkdownContent(m.secondaryPane.Width, m.activeMarkdownSource)
@@ -127,7 +118,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Any time a mouse event is received, we get this message
 	case tea.MouseMsg:
 		switch msg.Type {
-		// Scroll up on the mouse wheel
 		case tea.MouseWheelUp:
 			// The command bar is not open and the primary pane is active
 			// so scroll the dirtree up and update the primary panes content
@@ -142,7 +132,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			return m, cmd
 
-		// Scroll down on the mouse wheel
 		case tea.MouseWheelDown:
 			// Command bar is not shown and the primary pane is active
 			// so scroll the dirtree down and update the primary panes content
@@ -183,13 +172,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c":
 			return m, tea.Quit
 
-		// Exit FM is the command bar is not open
+		// Exit FM if the command bar is not open
 		case "q":
 			if !m.showCommandBar {
 				return m, tea.Quit
 			}
 
-		// Left arrow or h key is pressed
 		case "left", "h":
 			// If the command bar is not shown and the primary pane is active
 			// set the previous directory to the current directory,
@@ -200,9 +188,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, m.updateDirectoryListing(constants.PreviousDirectory)
 			}
 
-		// Down arrow or j is pressed
 		case "down", "j":
-			// If the command bar is not shown
 			if !m.showCommandBar {
 				// The primary pane is active go down in the dirtree,
 				// update the status bar content and set the content
@@ -218,9 +204,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
-		// Up arrow or k is pressed
 		case "up", "k":
-			// If the command bar is not shown
 			if !m.showCommandBar {
 				// the primary pane is active go up in the dirtree,
 				// update the status bar content and set the content
@@ -236,9 +220,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
-		// Right arrow or l is pressed
 		case "right", "l":
-			// Command bar is not shown and the primary pane is active
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				// If the selected file is a directory and the textinput is not focused,
 				// get an updated directory listing based on the currently selected file
@@ -337,15 +319,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, m.updateDirectoryListing(homeDir)
 			}
 
-		// Shortcut to go back to the previous directory when your switching
-		// between different directories, will only go back once to the previous
-		// directory
+		// Shortcut to go back to the previous directory when switching directories
+		// at-least once
 		case "-":
 			if !m.showCommandBar && m.previousDirectory != "" {
 				return m, m.updateDirectoryListing(m.previousDirectory)
 			}
 
-		// Toggle weather or not to show hidden files and folders
+		// Toggle wether or not to show hidden files and folders
 		case ".":
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.dirTree.ToggleHidden()
@@ -390,6 +371,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, m.unzipDirectory(m.dirTree.GetSelectedFile().Name())
 			}
 
+		// Copy the currently selected item
 		case "c":
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				if m.dirTree.GetSelectedFile().IsDir() {
@@ -423,8 +405,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.previousKey = msg
 	}
 
-	// If the command bar is shown, make sure to keep it updated
-	// for when the user is typing into the command bar
+	// If the command bar is shown, make sure to keep the statusbar updated
 	if m.showCommandBar {
 		m.statusBar.SetContent(m.getStatusBarContent())
 	}
