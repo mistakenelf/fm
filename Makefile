@@ -1,5 +1,11 @@
+make:
+	go run main.go
+
+test:
+	go test ./... -short
+
 build:
 	go build -o fm main.go
 
-run:
-	go run main.go
+install:
+	go install
