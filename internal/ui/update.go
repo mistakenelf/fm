@@ -32,7 +32,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.showCommandBar = false
 		m.textInput.Blur()
 		m.textInput.Reset()
-		m.statusBar.SetContent(m.getStatusBarContent())
 
 		return m, cmd
 
@@ -51,7 +50,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.inMoveMode = false
 		m.initialMoveDirectory = ""
 		m.itemToMove = nil
-		m.statusBar.SetContent(m.getStatusBarContent())
 
 		return m, cmd
 
@@ -60,10 +58,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case fileContentMsg:
 		// Update the active markdown source to the markdownContent
 		m.activeMarkdownSource = string(msg.markdownContent)
-
-		// Set secondary pane content so that when resizing we can resize the content
-		// with the pane
-		m.secondaryPaneContent = utils.ConverTabsToSpaces(string(msg.fileContent))
 
 		// Set the content of the secondary pane to the file content removing any tabs
 		// and converting them to spaces
@@ -97,13 +91,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.secondaryPane.SetContent(constants.IntroText)
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.statusBar.SetContent(m.getStatusBarContent())
 			m.statusBar.SetSize(msg.Width)
 			m.ready = true
 		} else {
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.secondaryPane.SetContent(m.secondaryPaneContent)
 			m.statusBar.SetSize(msg.Width)
 		}
 
@@ -196,7 +188,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.primaryPane.IsActive {
 					m.dirTree.GoDown()
 					m.scrollPrimaryPane()
-					m.statusBar.SetContent(m.getStatusBarContent())
 					m.primaryPane.SetContent(m.dirTree.View())
 				} else {
 					// Secondary pane is active so scroll its content down
@@ -213,7 +204,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.dirTree.GoUp()
 					m.scrollPrimaryPane()
 					m.primaryPane.SetContent(m.dirTree.View())
-					m.statusBar.SetContent(m.getStatusBarContent())
 				} else {
 					// Secondary pane is active so scroll its content up
 					m.secondaryPane.LineUp(1)
@@ -356,7 +346,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.primaryPane.SetActiveBorderColor(constants.Blue)
 				m.initialMoveDirectory, _ = utils.GetWorkingDirectory()
 				m.itemToMove = m.dirTree.GetSelectedFile()
-				m.statusBar.SetContent(m.getStatusBarContent())
 			}
 
 		// Zip up the currently selected item
@@ -389,15 +378,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.inMoveMode = false
 			m.itemToMove = nil
 			m.initialMoveDirectory = ""
+			m.primaryPane.IsActive = true
+			m.secondaryPane.IsActive = false
+			m.activeMarkdownSource = ""
 			m.textInput.Blur()
 			m.textInput.Reset()
 			m.secondaryPane.GotoTop()
-			m.primaryPane.IsActive = true
-			m.secondaryPane.IsActive = false
 			m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
-			m.statusBar.SetContent(m.getStatusBarContent())
 			m.secondaryPane.SetContent(constants.IntroText)
-			m.secondaryPaneContent = constants.IntroText
 		}
 
 		// Capture the previous key so that we can capture
@@ -405,10 +393,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.previousKey = msg
 	}
 
-	// If the command bar is shown, make sure to keep the statusbar updated
-	if m.showCommandBar {
-		m.statusBar.SetContent(m.getStatusBarContent())
-	}
+	m.statusBar.SetContent(m.getStatusBarContent())
 
 	m.textInput, cmd = m.textInput.Update(msg)
 	cmds = append(cmds, cmd)
