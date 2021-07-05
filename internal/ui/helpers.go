@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/knipferrc/fm/config"
-	"github.com/knipferrc/fm/constants"
-	"github.com/knipferrc/fm/icons"
-	"github.com/knipferrc/fm/utils"
+	"github.com/knipferrc/fm/internal/config"
+	"github.com/knipferrc/fm/internal/constants"
+	"github.com/knipferrc/fm/internal/icons"
+	"github.com/knipferrc/fm/internal/utils"
 )
 
 // Handles scrolling of the primary pane dir tree to determine when to go back

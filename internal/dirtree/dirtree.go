@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/knipferrc/fm/icons"
+	"github.com/knipferrc/fm/internal/icons"
 
 	"github.com/charmbracelet/lipgloss"
 )

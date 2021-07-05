@@ -1,9 +1,9 @@
 package ui
 
 import (
-	"github.com/knipferrc/fm/config"
-	"github.com/knipferrc/fm/constants"
-	"github.com/knipferrc/fm/utils"
+	"github.com/knipferrc/fm/internal/config"
+	"github.com/knipferrc/fm/internal/constants"
+	"github.com/knipferrc/fm/internal/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"

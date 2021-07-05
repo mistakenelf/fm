@@ -3,11 +3,11 @@ package ui
 import (
 	"io/fs"
 
-	"github.com/knipferrc/fm/config"
-	"github.com/knipferrc/fm/constants"
-	"github.com/knipferrc/fm/dirtree"
-	"github.com/knipferrc/fm/pane"
-	"github.com/knipferrc/fm/statusbar"
+	"github.com/knipferrc/fm/internal/config"
+	"github.com/knipferrc/fm/internal/constants"
+	"github.com/knipferrc/fm/internal/dirtree"
+	"github.com/knipferrc/fm/internal/pane"
+	"github.com/knipferrc/fm/internal/statusbar"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"

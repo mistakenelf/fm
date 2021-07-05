@@ -1,13 +1,13 @@
-package app
+package cmd
 
 import (
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/knipferrc/fm/config"
-	"github.com/knipferrc/fm/constants"
-	"github.com/knipferrc/fm/ui"
+	"github.com/knipferrc/fm/internal/config"
+	"github.com/knipferrc/fm/internal/constants"
+	"github.com/knipferrc/fm/internal/ui"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
@@ -58,7 +58,7 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-func Run() {
+func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

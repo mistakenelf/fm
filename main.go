@@ -1,7 +1,7 @@
 package main
 
-import "github.com/knipferrc/fm/app"
+import "github.com/knipferrc/fm/cmd"
 
 func main() {
-	app.Run()
+	cmd.Execute()
 }

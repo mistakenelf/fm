@@ -7,9 +7,9 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/knipferrc/fm/config"
-	"github.com/knipferrc/fm/constants"
-	"github.com/knipferrc/fm/utils"
+	"github.com/knipferrc/fm/internal/config"
+	"github.com/knipferrc/fm/internal/constants"
+	"github.com/knipferrc/fm/internal/utils"
 
 	"github.com/alecthomas/chroma/quick"
 	tea "github.com/charmbracelet/bubbletea"
