@@ -6,7 +6,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Main app view
+// Display the App
 func (m model) View() string {
 	// If the viewport on the panes is not ready or we dont have any files to display
 	// show the spinner

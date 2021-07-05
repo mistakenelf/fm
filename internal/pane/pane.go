@@ -17,7 +17,6 @@ type Model struct {
 	IsPadded            bool
 }
 
-// Create a new instance of a pane
 func NewModel(isActive, rounded, isPadded bool, activeBorderColor, inactiveBorderColor string) Model {
 	m := Model{
 		IsActive:            isActive,
@@ -51,7 +50,7 @@ func (m *Model) SetSize(width, height int) {
 	m.Viewport.Height = height - lipgloss.Height(border.Bottom)
 }
 
-// Set the content of what to be displayed inside it
+// Set content of the pane
 func (m *Model) SetContent(content string) {
 	padding := 0
 
@@ -60,7 +59,7 @@ func (m *Model) SetContent(content string) {
 		padding = 1
 	}
 
-	// Set the content inside a viewport
+	// Place the pane content in a viewport
 	m.Viewport.SetContent(
 		lipgloss.NewStyle().
 			Width(m.Width).
@@ -70,32 +69,32 @@ func (m *Model) SetContent(content string) {
 	)
 }
 
-// Scroll the viewport up a specified number of lines
+// Scroll pane up the number of specified lines
 func (m *Model) LineUp(lines int) {
 	m.Viewport.LineUp(lines)
 }
 
-// Scroll the viewport down a specified number of lines
+// Scroll pane down the specified number of lines
 func (m *Model) LineDown(lines int) {
 	m.Viewport.LineDown(lines)
 }
 
-// Go to the top of the viewport
+// Go to the top of the pane
 func (m *Model) GotoTop() {
 	m.Viewport.GotoTop()
 }
 
-// Go to the bottom of the viewport
+// Go to the bottom of the pane
 func (m *Model) GotoBottom() {
 	m.Viewport.GotoBottom()
 }
 
-// Set the color of the active border
+// Set active border color
 func (m *Model) SetActiveBorderColor(color string) {
 	m.ActiveBorderColor = color
 }
 
-// Return the pane and all of its content
+// Display the pane
 func (m Model) View() string {
 	borderColor := m.InactiveBorderColor
 	border := lipgloss.NormalBorder()

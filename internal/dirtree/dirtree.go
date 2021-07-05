@@ -20,7 +20,6 @@ type Model struct {
 	UnselectedItemColor string
 }
 
-// Create a new instance of a dirtree
 func NewModel(showIcons bool, selectedItemColor, unselectedItemColor string) Model {
 	return Model{
 		Cursor:              0,
@@ -41,8 +40,7 @@ func (m *Model) GotoTop() {
 	m.Cursor = 0
 }
 
-// Go to the bottom of the tree which is the length of all the files
-// minus one
+// Go to the bottom of the tree
 func (m *Model) GotoBottom() {
 	m.Cursor = len(m.Files) - 1
 }
@@ -84,30 +82,26 @@ func (m Model) dirItem(selected bool, file fs.FileInfo) string {
 	fileIcon := fmt.Sprintf("%s%s", color, icon)
 
 	if m.ShowIcons && selected {
-		// Reset the color of the text after getting the color of the icon
 		return fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 			Foreground(lipgloss.Color(m.SelectedItemColor)).
 			Render(file.Name()))
 	} else if m.ShowIcons && !selected {
-		// Reset the color of the text after getting the color of the icon
 		return fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 			Foreground(lipgloss.Color(m.UnselectedItemColor)).
 			Render(file.Name()))
 
 	} else if !m.ShowIcons && selected {
-		// If icons are not enabled but the item is selected
 		return lipgloss.NewStyle().
 			Foreground(lipgloss.Color(m.SelectedItemColor)).
 			Render(file.Name())
 	} else {
-		// If icons are not enabled and the item is not currently selected
 		return lipgloss.NewStyle().
 			Foreground(lipgloss.Color(m.UnselectedItemColor)).
 			Render(file.Name())
 	}
 }
 
-// Display the dirtree and all of its dir items
+// Display the directory tree
 func (m Model) View() string {
 	doc := strings.Builder{}
 	curFiles := ""

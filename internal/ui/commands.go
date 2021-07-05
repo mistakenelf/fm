@@ -30,57 +30,38 @@ type fileContentMsg struct {
 // of a directory passed in
 func (m model) updateDirectoryListing(name string) tea.Cmd {
 	return func() tea.Msg {
-		// Get directory listing and determine to show hidden files/folders or not
 		files, err := utils.GetDirectoryListing(name, m.dirTree.ShowHidden)
-
-		// Something went wrong getting the directory listing, return
-		// the error back to the UI and display it in a pane
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Return the new directory listing back to
-		// the UI to be displayed in the dirtree
 		return directoryMsg(files)
 	}
 }
 
 // Rename a file or directory based on its current filename
-// and its new value
+// and its new value, returning an updated directory listing
 func (m model) renameFileOrDir(name, value string) tea.Cmd {
 	return func() tea.Msg {
 		err := utils.RenameDirOrFile(name, value)
-
-		// Something went wrong renaming the file or directory
-		// return the error back to the UI to be displayed
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Need to get the updated directory listing after renaming
 		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
-
-		// Something went wrong getting the listing, return
-		// the error back to the UI and display it
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Now that the file or folder has been renamed, return
-		// the updated directory listing to reflect those changes
 		return directoryMsg(files)
 	}
 }
 
-// Move a directory from one directory to another
+// Move a directory to the current working directory
+// returning an updated directory listing
 func (m model) moveDir(name string) tea.Cmd {
 	return func() tea.Msg {
-		// Get the working directory so we know where to
-		// move to
 		workingDir, err := utils.GetWorkingDirectory()
-
-		// Failed to get the current working directory
-		// send the error back to the UI to display
 		if err != nil {
 			return errorMsg(err.Error())
 		}
@@ -94,37 +75,24 @@ func (m model) moveDir(name string) tea.Cmd {
 		dst := fmt.Sprintf("%s/%s", workingDir, name)
 
 		err = utils.MoveDirectory(src, dst)
-
-		// Something went wrong moving the directory
-		// send the error back to the UI to display
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Need to get an updated directory listing now that the directory has been moved
 		files, err := utils.GetDirectoryListing(m.initialMoveDirectory, m.dirTree.ShowHidden)
-
-		// Something went wrong getting the directory listing, return
-		// the error back to the UI and display it in a pane
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Now that the directory has been moved, return
-		// the updated directory listing to the UI
 		return moveMsg(files)
 	}
 }
 
-// Move a file from one directory to another
+// Move a file to the current working directory
+// returning an updated directory listing
 func (m model) moveFile(name string) tea.Cmd {
 	return func() tea.Msg {
-		// Get the current working directory
-		// so we know where to move the file to
 		workingDir, err := utils.GetWorkingDirectory()
-
-		// Something went wrong getting the working directory
-		// send the error back to the UI to display
 		if err != nil {
 			return errorMsg(err.Error())
 		}
@@ -138,107 +106,78 @@ func (m model) moveFile(name string) tea.Cmd {
 		dst := fmt.Sprintf("%s/%s", workingDir, name)
 
 		err = utils.MoveFile(src, dst)
-
-		// Something went wrong moving the file
-		// send the error to the UI to display
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Need to get an updated directory listing now that a file has been moved
 		files, err := utils.GetDirectoryListing(m.initialMoveDirectory, m.dirTree.ShowHidden)
-
-		// Something went wrong getting the listing, return
-		// the error back to the UI and display it in a pane
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Now that the file has been moved, return
-		// the updated directory listing to the UI
 		return moveMsg(files)
 	}
 }
 
-// Delete a directory based on name
+// Delete a directory based on name and
+// return an updated directory listing
 func (m model) deleteDir(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := utils.DeleteDirectory(name)
-
-		// Something went wrong deleting the directory
-		// send the error to the UI to display
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Need to get an updated directory listing now that the file has been deleted
 		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
-
-		// Something went wrong getting the listing, return
-		// the error back to the UI and display it in a pane
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Return the updated directory listing to the UI
 		return directoryMsg(files)
 	}
 }
 
-// Delete a file based on name
+// Delete a file based on name and return an
+// updated directory listing
 func (m model) deleteFile(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := utils.DeleteFile(name)
-
-		// Something went wrong deleting a file
-		// send the error to the UI to display
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Now that the file has been deleted, we need an updated directory listing
 		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
-
-		// Something went wrong getting the listing, return
-		// the error back to the UI and display it in a pane
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Send updated directory listing to UI
 		return directoryMsg(files)
 	}
 }
 
-// Read a files content based on its name
+// Read a files content based on its name and return its content as a string.
+// If the file is markdown and pretty markdown is enabled, run the content
+// through glamour else run the content through chroma to get syntax highlighting
 func (m model) readFileContent(file fs.FileInfo) tea.Cmd {
 	cfg := config.GetConfig()
 	width := m.secondaryPane.Width
 
 	return func() tea.Msg {
 		content, err := utils.ReadFileContent(file.Name())
-
-		// Something went wrong reading the files content
-		// send the error to the UI to display
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// If the file is markdown and we want pretty_markdown displayed
-		// return the pretty markdown as well as returning the unprettified
-		// version so that we can use it later
+		// Return both the pretty markdown as well as the plain content without glamour
+		// to use later when resizing the window
 		if filepath.Ext(file.Name()) == ".md" && cfg.Settings.PrettyMarkdown {
 			return fileContentMsg{
 				fileContent:     renderMarkdown(width, content),
 				markdownContent: content,
 			}
 		} else {
-			// Its not a markdown file so we want to try to run it through syntax highlighting
 			buf := new(bytes.Buffer)
 			err := quick.Highlight(buf, content, filepath.Ext(file.Name()), "terminal256", "dracula")
-
-			// Somethign went wrong highlighting the file so
-			// lets send it to the UI to display
 			if err != nil {
 				return errorMsg(err.Error())
 			}
@@ -262,7 +201,6 @@ func renderMarkdownContent(width int, content string) tea.Cmd {
 }
 
 // Render some markdown passing it a width and content
-// returning the pretty markdown
 func renderMarkdown(width int, content string) string {
 	bg := "light"
 
@@ -286,111 +224,84 @@ func renderMarkdown(width int, content string) string {
 		log.Fatal(err)
 	}
 
-	// Return pretty markdown
 	return out
 }
 
-// Create a new directory given a name
+// Create a new directory given a name and return an
+// updated directory listing
 func (m model) createDir(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := utils.CreateDirectory(name)
-
-		// Something went wrong creating the directory
-		// send the error the UI to display
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Now that a new directory has been created, we need an updated directory listing
 		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
-
-		// Somethign went wrong getting the updated directory listing
-		// return it to the UI to display
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Return updated directory listing to the UI
 		return directoryMsg(files)
 	}
 }
 
-// Create a new file given a name
+// Create a new file given a name and return
+// an updated directory listing
 func (m model) createFile(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := utils.CreateFile(name)
-
-		// Something went wrong creating a new file
-		// lets send the error to the UI to display
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Need an updated directory listing now that a new file has been created
 		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
 
-		// Something went wrong getting the directory listing, return
-		// the error back to the UI and display it in a pane
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Return updated directory listing to the UI
 		return directoryMsg(files)
 	}
 }
 
-// Create a zipped directory given a name
+// Create a zipped directory given a name and return
+// an updated directory listing
 func (m model) zipDirectory(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := utils.ZipDirectory(name)
-
-		// Something went wrong zipping up the directory
-		// send the error to the UI to display
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Since a new zipped directory has been created, we need an updated directory listing
 		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
-
-		// Something went wrong getting the directory listing, return
-		// the error back to the UI and display it in a pane
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Return the updated directory listing to the UI
 		return directoryMsg(files)
 	}
 }
 
-// Unzip a zipped directory given a name
+// Unzip a zipped directory given a name and
+// return an updated directory listing
 func (m model) unzipDirectory(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := utils.UnzipDirectory(name)
-
-		// Something went wrong unzipping the directory
-		// lets send the error to the UI to display
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Since the folder has been unzipped, we need an updated directory listing
 		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
 
-		// Something went wrong getting the directory listing, return
-		// the error back to the UI and display it in a pane
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Return the updated directory listing to the UI
 		return directoryMsg(files)
 	}
 }
 
-// Copy a file given a name
+// Copy a file given a name and return an updated directory listing
 func (m model) copyFile(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := utils.CopyFile(name)
@@ -407,7 +318,7 @@ func (m model) copyFile(name string) tea.Cmd {
 	}
 }
 
-// Copy a directory given a name
+// Copy a directory given a name and return an updated directory listing
 func (m model) copyDirectory(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := utils.CopyDirectory(name)

@@ -34,12 +34,10 @@ type model struct {
 	ready                bool
 }
 
-// Create a new model for the UI passing in an array of files
-// to initialize the app with
 func NewModel() model {
 	cfg := config.GetConfig()
 
-	// Setup the input for the command bar
+	// Create a new textinput
 	input := textinput.NewModel()
 	input.Prompt = "❯ "
 	input.CharLimit = 250
@@ -49,8 +47,7 @@ func NewModel() model {
 	l.Spinner = spinner.Dot
 	l.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.Spinner))
 
-	// Create a new instance of dirtree passing in the initial file list
-	// and some configuration values
+	// Create a new dirtree
 	dirTree := dirtree.NewModel(
 		cfg.Settings.ShowIcons,
 		cfg.Colors.DirTree.SelectedItem,

@@ -10,8 +10,7 @@ import (
 	"github.com/knipferrc/fm/internal/utils"
 )
 
-// Handles scrolling of the primary pane dir tree to determine when to go back
-// to the top and bottom of the viewport and set the cursor accordingly
+// Handles scrolling of the primary panes dirtree
 func (m *model) scrollPrimaryPane() {
 	top := m.primaryPane.YOffset
 	bottom := m.primaryPane.Height + m.primaryPane.YOffset - 1
@@ -37,24 +36,21 @@ func (m *model) scrollPrimaryPane() {
 	}
 }
 
-// Get the content for the status bar to display
+// Get the content for the status bar
 func (m model) getStatusBarContent() (string, string, string, string) {
 	cfg := config.GetConfig()
 	currentPath, err := os.Getwd()
+	if err != nil {
+		currentPath = constants.CurrentDirectory
+	}
 
 	if m.dirTree.GetTotalFiles() == 0 {
 		return "", "", "", ""
 	}
 
-	// If we fail to get the working directory
-	// just use the current directory
-	if err != nil {
-		currentPath = constants.CurrentDirectory
-	}
-
 	logo := ""
 
-	// If icons are enabled show the directory icon next to the logo text
+	// If icons are enabled, show the directory icon next to the logo text
 	// else just show the text of the LOGO
 	if cfg.Settings.ShowIcons {
 		logo = fmt.Sprintf("%s %s", icons.Icon_Def["dir"].GetGlyph(), "FM")

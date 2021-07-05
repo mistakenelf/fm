@@ -21,7 +21,6 @@ type Model struct {
 	FourthColumnColors  Color
 }
 
-// Create a new instance of a status bar
 func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthColumnColors Color) Model {
 	return Model{
 		FirstColumnColors:  firstColumnColors,
@@ -44,7 +43,7 @@ func (m *Model) SetSize(width int) {
 	m.Width = width
 }
 
-// Return the statusbar and all its content
+// Display the statusbar
 func (m Model) View() string {
 	width := lipgloss.Width
 
