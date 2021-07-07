@@ -35,11 +35,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, cmd
 
-		// A moveMsg is received any time a file or directory has been moved
+	// A moveMsg is received any time a file or directory has been moved
 	case moveMsg:
 		cfg := config.GetConfig()
 
-		// Set active color back to the config default
+		// Set active color back to default
 		m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
 
 		m.dirTree.SetContent(msg)
