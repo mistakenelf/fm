@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/knipferrc/fm/internal/icons"
+	"github.com/knipferrc/fm/icons"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -75,7 +75,7 @@ func (m *Model) ToggleHidden() {
 	m.ShowHidden = !m.ShowHidden
 }
 
-// dirItem is each individual item within the tree
+// Individual tree items
 func (m Model) dirItem(selected bool, file fs.FileInfo) string {
 	// Get the icon and color based on the current file
 	icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))

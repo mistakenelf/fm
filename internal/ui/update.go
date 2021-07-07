@@ -35,7 +35,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, cmd
 
-	// A moveMsg is received any time a file or directory has been moved
+		// A moveMsg is received any time a file or directory has been moved
 	case moveMsg:
 		cfg := config.GetConfig()
 
@@ -56,11 +56,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// A fileContentMsg is received anytime a file is read from returning its content
 	// along with the markdown content to be rendered by glamour
 	case fileContentMsg:
-		// Update the active markdown source to the markdownContent
 		m.activeMarkdownSource = string(msg.markdownContent)
-
-		// Set the content of the secondary pane to the file content removing any tabs
-		// and converting them to spaces
+		m.secondaryPane.GotoTop()
 		m.secondaryPane.SetContent(utils.ConverTabsToSpaces(string(msg.fileContent)))
 
 		return m, cmd
@@ -91,12 +88,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.secondaryPane.SetContent(constants.IntroText)
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.statusBar.SetSize(msg.Width)
+			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
 			m.ready = true
 		} else {
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.statusBar.SetSize(msg.Width)
+			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
 		}
 
 		// If we have some active markdown source to render, re-render its content
@@ -143,9 +140,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// If gg is pressed
 		if msg.String() == "g" && m.previousKey.String() == "g" {
 			// If the command bar is not shown and the primary pane is active,
-			// reset the previous key, go to the top of the dirtree, and the
-			// primary pane and set the content of the primary pane to the contents
-			// of the dirtree
+			// reset the previous key, go to the top of the dirtree and pane
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.previousKey = tea.KeyMsg{}
 				m.dirTree.GotoTop()
@@ -181,53 +176,41 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "down", "j":
+			// Scroll down in pane
 			if !m.showCommandBar {
-				// The primary pane is active go down in the dirtree,
-				// update the status bar content and set the content
-				// of the primary pane to the dirtree
 				if m.primaryPane.IsActive {
 					m.dirTree.GoDown()
 					m.scrollPrimaryPane()
 					m.primaryPane.SetContent(m.dirTree.View())
 				} else {
-					// Secondary pane is active so scroll its content down
 					m.secondaryPane.LineDown(1)
 				}
 			}
 
 		case "up", "k":
+			// Scroll up in pane
 			if !m.showCommandBar {
-				// the primary pane is active go up in the dirtree,
-				// update the status bar content and set the content
-				// of the primary pane to the dirtree
 				if m.primaryPane.IsActive {
 					m.dirTree.GoUp()
 					m.scrollPrimaryPane()
 					m.primaryPane.SetContent(m.dirTree.View())
 				} else {
-					// Secondary pane is active so scroll its content up
 					m.secondaryPane.LineUp(1)
 				}
 			}
 
 		case "right", "l":
+			// Open director or read file content
 			if !m.showCommandBar && m.primaryPane.IsActive {
-				// If the selected file is a directory and the textinput is not focused,
-				// get an updated directory listing based on the currently selected file
 				if m.dirTree.GetSelectedFile().IsDir() && !m.textInput.Focused() {
 					return m, m.updateDirectoryListing(m.dirTree.GetSelectedFile().Name())
 				} else {
-					// The currently selected item is a file so scroll the secondary pane to the top
-					// and get the file content to display
-					m.secondaryPane.GotoTop()
 					return m, m.readFileContent(m.dirTree.GetSelectedFile())
 				}
 			}
 
 		case "G":
-			// If the command bar is not shown and the primary pane is active
-			// go to the bottom of the dirtree, and the bottom of the pane and set its
-			// content to the dirtree
+			// Go to the bottom of the pane
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.dirTree.GotoBottom()
 				m.primaryPane.GotoBottom()
@@ -238,14 +221,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "enter":
-			// If a file or folder is currently being moved
+			// If pressing enter while in move mode
 			if m.inMoveMode {
-				// The item to move is a directory
 				if m.itemToMove.IsDir() {
-					return m, m.moveDir(m.itemToMove.Name())
+					return m, tea.Sequentially(
+						m.moveDir(m.itemToMove.Name()),
+						m.updateDirectoryListing(m.initialMoveDirectory),
+					)
 				} else {
-					// The item to move is a file
-					return m, m.moveFile(m.itemToMove.Name())
+					return m, tea.Sequentially(
+						m.moveFile(m.itemToMove.Name()),
+						m.updateDirectoryListing(m.initialMoveDirectory),
+					)
 				}
 			} else {
 				// Parse the commands from the command bar, command is the name
@@ -265,24 +252,37 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				// Create a new directory based on the value passed
 				case "mkdir":
-					return m, m.createDir(value)
+					return m, tea.Sequentially(
+						m.createDir(value),
+						m.updateDirectoryListing(constants.CurrentDirectory),
+					)
 
 				// Create a new file based on the value passed
 				case "touch":
-					return m, m.createFile(value)
+					return m, tea.Sequentially(
+						m.createFile(value),
+						m.updateDirectoryListing(constants.CurrentDirectory),
+					)
 
 				// Rename the currently selected file or folder based on the value passed
 				case "mv", "rename":
-					return m, m.renameFileOrDir(m.dirTree.GetSelectedFile().Name(), value)
+					return m, tea.Sequentially(
+						m.renameFileOrDir(m.dirTree.GetSelectedFile().Name(), value),
+						m.updateDirectoryListing(constants.CurrentDirectory),
+					)
 
 				// Delete the currently selected item
 				case "rm", "delete":
-					// If a directory is being deleted
 					if m.dirTree.GetSelectedFile().IsDir() {
-						return m, m.deleteDir(m.dirTree.GetSelectedFile().Name())
+						return m, tea.Sequentially(
+							m.deleteDir(m.dirTree.GetSelectedFile().Name()),
+							m.updateDirectoryListing(constants.CurrentDirectory),
+						)
 					} else {
-						// The currently highlighted item is a file
-						return m, m.deleteFile(m.dirTree.GetSelectedFile().Name())
+						return m, tea.Sequentially(
+							m.deleteFile(m.dirTree.GetSelectedFile().Name()),
+							m.updateDirectoryListing(constants.CurrentDirectory),
+						)
 					}
 
 				default:
@@ -292,7 +292,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case ":":
 			// If move mode is not active, activate the command bar,
-			// focus the text input and give it a placeholder
 			if !m.inMoveMode {
 				m.showCommandBar = true
 				m.textInput.Placeholder = "enter command"
@@ -309,14 +308,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, m.updateDirectoryListing(homeDir)
 			}
 
-		// Shortcut to go back to the previous directory when switching directories
-		// at-least once
+		// Shortcut to go back to the previous directory
 		case "-":
 			if !m.showCommandBar && m.previousDirectory != "" {
 				return m, m.updateDirectoryListing(m.previousDirectory)
 			}
 
-		// Toggle wether or not to show hidden files and folders
+		// Toggle hidden files and folders
 		case ".":
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.dirTree.ToggleHidden()
@@ -326,20 +324,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Toggle between the two panes if the command bar is not currently active
 		case "tab":
 			if !m.showCommandBar {
-				if m.primaryPane.IsActive {
-					m.primaryPane.IsActive = false
-					m.secondaryPane.IsActive = true
-				} else {
-					m.primaryPane.IsActive = true
-					m.secondaryPane.IsActive = false
-				}
+				m.primaryPane.IsActive = !m.primaryPane.IsActive
+				m.secondaryPane.IsActive = !m.secondaryPane.IsActive
 			}
 
-		// If the command bar is not active and the primary pane is active
-		// enter move mode, setting the active border color of the primary pane
-		// to blue to indicate move mode. Get the directory in which the move was initiated
-		// from, along with the selected file. Update the content of the status bar to indicate
-		// a move is in progress
+		// Enter move mode
 		case "m":
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.inMoveMode = true
@@ -351,22 +340,34 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Zip up the currently selected item
 		case "z":
 			if !m.showCommandBar && m.primaryPane.IsActive {
-				return m, m.zipDirectory(m.dirTree.GetSelectedFile().Name())
+				return m, tea.Sequentially(
+					m.zipDirectory(m.dirTree.GetSelectedFile().Name()),
+					m.updateDirectoryListing(constants.CurrentDirectory),
+				)
 			}
 
 		// Unzip the currently selected zip file
 		case "u":
 			if !m.showCommandBar && m.primaryPane.IsActive {
-				return m, m.unzipDirectory(m.dirTree.GetSelectedFile().Name())
+				return m, tea.Sequentially(
+					m.unzipDirectory(m.dirTree.GetSelectedFile().Name()),
+					m.updateDirectoryListing(constants.CurrentDirectory),
+				)
 			}
 
 		// Copy the currently selected item
 		case "c":
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				if m.dirTree.GetSelectedFile().IsDir() {
-					return m, m.copyDirectory(m.dirTree.GetSelectedFile().Name())
+					return m, tea.Sequentially(
+						m.copyDirectory(m.dirTree.GetSelectedFile().Name()),
+						m.updateDirectoryListing(constants.CurrentDirectory),
+					)
 				} else {
-					return m, m.copyFile(m.dirTree.GetSelectedFile().Name())
+					return m, tea.Sequentially(
+						m.copyFile(m.dirTree.GetSelectedFile().Name()),
+						m.updateDirectoryListing(constants.CurrentDirectory),
+					)
 				}
 			}
 
@@ -393,6 +394,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.previousKey = msg
 	}
 
+	// Keep status bar content updated
 	m.statusBar.SetContent(m.getStatusBarContent())
 
 	m.textInput, cmd = m.textInput.Update(msg)

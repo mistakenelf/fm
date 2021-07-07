@@ -2,11 +2,10 @@ package ui
 
 import (
 	"fmt"
-	"os"
 
+	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/constants"
-	"github.com/knipferrc/fm/internal/icons"
 	"github.com/knipferrc/fm/internal/utils"
 )
 
@@ -39,7 +38,7 @@ func (m *model) scrollPrimaryPane() {
 // Get the content for the status bar
 func (m model) getStatusBarContent() (string, string, string, string) {
 	cfg := config.GetConfig()
-	currentPath, err := os.Getwd()
+	currentPath, err := utils.GetWorkingDirectory()
 	if err != nil {
 		currentPath = constants.CurrentDirectory
 	}

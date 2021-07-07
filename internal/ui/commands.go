@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 
 	"github.com/knipferrc/fm/internal/config"
-	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/utils"
 
 	"github.com/alecthomas/chroma/quick"
@@ -48,12 +47,7 @@ func (m model) renameFileOrDir(name, value string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return directoryMsg(files)
+		return nil
 	}
 }
 
@@ -128,12 +122,7 @@ func (m model) deleteDir(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return directoryMsg(files)
+		return nil
 	}
 }
 
@@ -146,12 +135,7 @@ func (m model) deleteFile(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return directoryMsg(files)
+		return nil
 	}
 }
 
@@ -236,12 +220,7 @@ func (m model) createDir(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return directoryMsg(files)
+		return nil
 	}
 }
 
@@ -254,13 +233,7 @@ func (m model) createFile(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
-
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return directoryMsg(files)
+		return nil
 	}
 }
 
@@ -273,12 +246,7 @@ func (m model) zipDirectory(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return directoryMsg(files)
+		return nil
 	}
 }
 
@@ -291,13 +259,7 @@ func (m model) unzipDirectory(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
-
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return directoryMsg(files)
+		return nil
 	}
 }
 
@@ -309,12 +271,7 @@ func (m model) copyFile(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return directoryMsg(files)
+		return nil
 	}
 }
 
@@ -326,11 +283,6 @@ func (m model) copyDirectory(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		files, err := utils.GetDirectoryListing(constants.CurrentDirectory, m.dirTree.ShowHidden)
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return directoryMsg(files)
+		return nil
 	}
 }
