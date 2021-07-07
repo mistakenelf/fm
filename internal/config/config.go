@@ -66,7 +66,6 @@ func LoadConfig() {
 	viper.SetConfigFile(os.ExpandEnv("$HOME/.config/fm/config.yml"))
 	viper.SafeWriteConfigAs(os.ExpandEnv("$HOME/.config/fm/config.yml"))
 
-	// Read the current config file in and catch an error if it occurs
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Fatal(err)
