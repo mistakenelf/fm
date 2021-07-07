@@ -10,7 +10,7 @@ const (
 	AppVersion = "0.0.5"
 
 	// Height of the status bar
-	StatusBarHeight = 2
+	StatusBarHeight = 1
 
 	// Default color palette
 	White       = "#FFFDF5"
