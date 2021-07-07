@@ -19,7 +19,6 @@ var rootCmd = &cobra.Command{
 	Version: constants.AppVersion,
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		// Setup default config and load the users config
 		config.SetDefaults()
 		config.LoadConfig()
 
@@ -49,8 +48,6 @@ var rootCmd = &cobra.Command{
 
 		// Initialize new app
 		p := tea.NewProgram(m, opts...)
-
-		// If the program fails to start, exit the program
 		if err := p.Start(); err != nil {
 			log.Fatal("Failed to start fm", err)
 			os.Exit(1)
