@@ -3,6 +3,11 @@
   <p align="center">
     Keep those files organized
   </p>
+  <p align="center">
+    <a href="https://github.com/knipferrc/fm/releases"><img src="https://img.shields.io/github/v/release/knipferrc/fm" alt="Latest Release"></a>
+    <a href="https://pkg.go.dev/github.com/knipferrc/fm?tab=doc"><img src="https://godoc.org/github.com/golang/gddo?status.svg" alt="GoDoc"></a>
+    <a href="https://github.com/knipferrc/fm/actions"><img src="https://img.shields.io/github/workflow/status/knipferrc/fm/Release" alt="Build Status"></a>
+  </p>
 </p>
 
 <p align="center" style="margin-top: 30px; margin-bottom: 20px;">
