@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io/fs"
-	"log"
 	"path/filepath"
 
 	"github.com/knipferrc/fm/internal/config"
@@ -155,8 +154,13 @@ func (m model) readFileContent(file fs.FileInfo) tea.Cmd {
 		// Return both the pretty markdown as well as the plain content without glamour
 		// to use later when resizing the window
 		if filepath.Ext(file.Name()) == ".md" && cfg.Settings.PrettyMarkdown {
+			markdownContent, err := renderMarkdown(width, content)
+			if err != nil {
+				return errorMsg(err.Error())
+			}
+
 			return fileContentMsg{
-				fileContent:     renderMarkdown(width, content),
+				fileContent:     markdownContent,
 				markdownContent: content,
 			}
 		} else {
@@ -180,12 +184,17 @@ func (m model) readFileContent(file fs.FileInfo) tea.Cmd {
 // when the terminal is resized
 func renderMarkdownContent(width int, content string) tea.Cmd {
 	return func() tea.Msg {
-		return markdownMsg(renderMarkdown(width, content))
+		markdownContent, err := renderMarkdown(width, content)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		return markdownMsg(markdownContent)
 	}
 }
 
 // Render some markdown passing it a width and content
-func renderMarkdown(width int, content string) string {
+func renderMarkdown(width int, content string) (string, error) {
 	bg := "light"
 
 	// if the terminal has a dark background, use a dark background
@@ -202,13 +211,11 @@ func renderMarkdown(width int, content string) string {
 	)
 
 	out, err := r.Render(content)
-
-	// TODO need to handle this error
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
-	return out
+	return out, nil
 }
 
 // Create a new directory given a name and return an
