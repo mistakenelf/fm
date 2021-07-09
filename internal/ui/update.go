@@ -58,13 +58,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case fileContentMsg:
 		m.activeMarkdownSource = string(msg.markdownContent)
 		m.secondaryPane.GotoTop()
-		m.secondaryPane.SetContent(utils.ConverTabsToSpaces(string(msg.fileContent)))
+		m.secondaryPane.SetContent(utils.ConvertTabsToSpaces(string(msg.fileContent)))
+		m.secondaryPaneContent = utils.ConvertTabsToSpaces(string(msg.fileContent))
 
 		return m, cmd
 
 	// Anytime markdown is being rendered, this message is received
 	case markdownMsg:
-		m.secondaryPane.SetContent(utils.ConverTabsToSpaces(string(msg)))
+		m.secondaryPane.SetContent(utils.ConvertTabsToSpaces(string(msg)))
+		m.secondaryPaneContent = utils.ConvertTabsToSpaces(string(msg))
 
 		return m, cmd
 
@@ -85,14 +87,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		if !m.ready {
 			m.primaryPane.SetContent(m.dirTree.View())
+			m.dirTree.SetSize(msg.Width / 2)
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.secondaryPane.SetContent(constants.IntroText)
-			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
+			m.secondaryPane.SetSize(m.primaryPane.Width-2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
 			m.ready = true
 		} else {
+			m.primaryPane.SetContent(m.dirTree.View())
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
+			m.dirTree.SetSize(m.primaryPane.Width - 3)
+			m.secondaryPane.SetContent(m.secondaryPaneContent)
+			m.secondaryPane.SetSize(m.primaryPane.Width-2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
 		}
 
@@ -386,7 +392,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.textInput.Reset()
 			m.secondaryPane.GotoTop()
 			m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
-			m.secondaryPane.SetContent(constants.IntroText)
+			m.secondaryPaneContent = utils.ConvertTabsToSpaces(constants.IntroText)
+			m.secondaryPane.SetContent(m.secondaryPaneContent)
 		}
 
 		// Capture the previous key so that we can capture
