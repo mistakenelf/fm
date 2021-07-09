@@ -2,6 +2,7 @@ package statusbar
 
 import (
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/reflow/truncate"
 )
 
 type Color struct {
@@ -56,7 +57,7 @@ func (m Model) View() string {
 		Background(lipgloss.Color(m.FirstColumnColors.Background)).
 		Padding(0, 1).
 		Height(m.Height).
-		Render(m.FirstColumnContent)
+		Render(truncate.StringWithTail(m.FirstColumnContent, 30, "..."))
 
 	// Third column of the status bar displayed on the left with configurable
 	// foreground and background colors and some padding
