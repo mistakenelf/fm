@@ -3,10 +3,10 @@ package ui
 import (
 	"fmt"
 
-	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/utils"
+	"github.com/knipferrc/fm/pkg/icons"
 )
 
 // Handles scrolling of the primary panes dirtree
