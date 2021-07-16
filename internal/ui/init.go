@@ -6,7 +6,7 @@ import (
 
 	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/constants"
-	"github.com/knipferrc/fm/internal/utils"
+	"github.com/knipferrc/fm/internal/helpers"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -26,7 +26,7 @@ func (m model) Init() tea.Cmd {
 	if _, err := os.Stat(startDir); err == nil {
 		cmds = append(cmds, m.updateDirectoryListing(startDir))
 	} else if cfg.Settings.StartDir == constants.HomeDirectory {
-		homeDir, err := utils.GetHomeDirectory()
+		homeDir, err := helpers.GetHomeDirectory()
 		if err != nil {
 			log.Fatal(err)
 		}
