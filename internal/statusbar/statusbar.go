@@ -50,8 +50,6 @@ func (m *Model) SetSize(width, height int) {
 func (m Model) View() string {
 	width := lipgloss.Width
 
-	// First column of the status bar displayed on the left with configurable
-	// foreground and background colors and some padding
 	firstColumn := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(m.FirstColumnColors.Foreground)).
 		Background(lipgloss.Color(m.FirstColumnColors.Background)).
@@ -59,8 +57,6 @@ func (m Model) View() string {
 		Height(m.Height).
 		Render(truncate.StringWithTail(m.FirstColumnContent, 30, "..."))
 
-	// Third column of the status bar displayed on the left with configurable
-	// foreground and background colors and some padding
 	thirdColumn := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(m.ThirdColumnColors.Foreground)).
 		Background(lipgloss.Color(m.ThirdColumnColors.Background)).
@@ -69,8 +65,6 @@ func (m Model) View() string {
 		Height(m.Height).
 		Render(m.ThirdColumnContent)
 
-	// Fourth column of the status bar displayed on the left with configurable
-	// foreground and background colors and some padding
 	fourthColumn := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(m.FourthColumnColors.Foreground)).
 		Background(lipgloss.Color(m.FourthColumnColors.Background)).
@@ -78,10 +72,9 @@ func (m Model) View() string {
 		Height(m.Height).
 		Render(m.FourthColumnContent)
 
-	// Second column of the status bar displayed on the left with configurable
+	// Second column of the status bar displayed in the center with configurable
 	// foreground and background colors and some padding. Also calculate the
 	// width of the other three columns so that this one can take up the rest of the space
-	// in the center of the bar
 	secondColumn := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(m.SecondColumnColors.Foreground)).
 		Background(lipgloss.Color(m.SecondColumnColors.Background)).

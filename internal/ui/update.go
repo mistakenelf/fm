@@ -7,6 +7,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/reflow/wordwrap"
+	"github.com/muesli/reflow/wrap"
 )
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -89,16 +91,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.primaryPane.SetContent(m.dirTree.View())
 			m.dirTree.SetSize(msg.Width / 2)
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.secondaryPane.SetContent(constants.IntroText)
-			m.secondaryPane.SetSize(m.primaryPane.Width-2, msg.Height-constants.StatusBarHeight)
+			m.secondaryPane.SetContent(wrap.String(wordwrap.String(constants.IntroText, msg.Width/2), msg.Width/2))
+			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
 			m.ready = true
 		} else {
 			m.primaryPane.SetContent(m.dirTree.View())
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.dirTree.SetSize(m.primaryPane.Width - 3)
-			m.secondaryPane.SetContent(m.secondaryPaneContent)
-			m.secondaryPane.SetSize(m.primaryPane.Width-2, msg.Height-constants.StatusBarHeight)
+			m.dirTree.SetSize(msg.Width / 2)
+			m.secondaryPane.SetContent(wrap.String(wordwrap.String(m.secondaryPaneContent, msg.Width/2), msg.Width/2))
+			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
 		}
 

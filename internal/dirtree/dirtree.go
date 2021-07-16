@@ -113,7 +113,8 @@ func (m Model) View() string {
 	curFiles := ""
 
 	for i, file := range m.Files {
-		curFiles += fmt.Sprintf("%s\n", truncate.StringWithTail(m.dirItem(m.Cursor == i, file), uint(m.Width-8), "..."))
+		curFiles += truncate.StringWithTail(m.dirItem(m.Cursor == i, file), uint(m.Width-8), "...")
+		curFiles += "\n"
 	}
 
 	doc.WriteString(curFiles)
