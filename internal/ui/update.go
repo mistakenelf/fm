@@ -3,10 +3,12 @@ package ui
 import (
 	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/constants"
-	"github.com/knipferrc/fm/internal/utils"
+	"github.com/knipferrc/fm/internal/helpers"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/reflow/wordwrap"
+	"github.com/muesli/reflow/wrap"
 )
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -58,13 +60,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case fileContentMsg:
 		m.activeMarkdownSource = string(msg.markdownContent)
 		m.secondaryPane.GotoTop()
-		m.secondaryPane.SetContent(utils.ConverTabsToSpaces(string(msg.fileContent)))
+		m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(string(msg.fileContent)))
+		m.secondaryPaneContent = helpers.ConvertTabsToSpaces(string(msg.fileContent))
 
 		return m, cmd
 
 	// Anytime markdown is being rendered, this message is received
 	case markdownMsg:
-		m.secondaryPane.SetContent(utils.ConverTabsToSpaces(string(msg)))
+		m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(string(msg)))
+		m.secondaryPaneContent = helpers.ConvertTabsToSpaces(string(msg))
 
 		return m, cmd
 
@@ -85,13 +89,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		if !m.ready {
 			m.primaryPane.SetContent(m.dirTree.View())
+			m.dirTree.SetSize(msg.Width / 2)
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.secondaryPane.SetContent(constants.IntroText)
+			m.secondaryPane.SetContent(wrap.String(wordwrap.String(constants.IntroText, msg.Width/2), msg.Width/2))
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
 			m.ready = true
 		} else {
+			m.primaryPane.SetContent(m.dirTree.View())
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
+			m.dirTree.SetSize(msg.Width / 2)
+			m.secondaryPane.SetContent(wrap.String(wordwrap.String(m.secondaryPaneContent, msg.Width/2), msg.Width/2))
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
 		}
@@ -170,7 +178,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// set the previous directory to the current directory,
 			// and update the directory listing to go back one directory
 			if !m.showCommandBar && m.primaryPane.IsActive {
-				m.previousDirectory, _ = utils.GetWorkingDirectory()
+				m.previousDirectory, _ = helpers.GetWorkingDirectory()
 
 				return m, m.updateDirectoryListing(constants.PreviousDirectory)
 			}
@@ -238,7 +246,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				// Parse the commands from the command bar, command is the name
 				// of the command and value is if the command requires input to it
 				// get its value, for example (rename test.txt) text.txt is the value
-				command, value := utils.ParseCommand(m.textInput.Value())
+				command, value := helpers.ParseCommand(m.textInput.Value())
 
 				// Nothing was input for a command
 				if command == "" {
@@ -304,7 +312,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// command bar is not curently open
 		case "~":
 			if !m.showCommandBar {
-				homeDir, _ := utils.GetHomeDirectory()
+				homeDir, _ := helpers.GetHomeDirectory()
 				return m, m.updateDirectoryListing(homeDir)
 			}
 
@@ -333,7 +341,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.inMoveMode = true
 				m.primaryPane.SetActiveBorderColor(constants.Blue)
-				m.initialMoveDirectory, _ = utils.GetWorkingDirectory()
+				m.initialMoveDirectory, _ = helpers.GetWorkingDirectory()
 				m.itemToMove = m.dirTree.GetSelectedFile()
 			}
 
@@ -386,7 +394,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.textInput.Reset()
 			m.secondaryPane.GotoTop()
 			m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
-			m.secondaryPane.SetContent(constants.IntroText)
+			m.secondaryPaneContent = helpers.ConvertTabsToSpaces(constants.IntroText)
+			m.secondaryPane.SetContent(m.secondaryPaneContent)
 		}
 
 		// Capture the previous key so that we can capture

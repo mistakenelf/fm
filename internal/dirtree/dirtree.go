@@ -9,10 +9,12 @@ import (
 	"github.com/knipferrc/fm/pkg/icons"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/reflow/truncate"
 )
 
 type Model struct {
 	Files               []fs.FileInfo
+	Width               int
 	Cursor              int
 	ShowIcons           bool
 	ShowHidden          bool
@@ -33,6 +35,10 @@ func NewModel(showIcons bool, selectedItemColor, unselectedItemColor string) Mod
 // Update the set of files the tree is currently displaying
 func (m *Model) SetContent(files []fs.FileInfo) {
 	m.Files = files
+}
+
+func (m *Model) SetSize(width int) {
+	m.Width = width
 }
 
 // Go to the top of the tree
@@ -107,7 +113,8 @@ func (m Model) View() string {
 	curFiles := ""
 
 	for i, file := range m.Files {
-		curFiles += fmt.Sprintf("%s\n", m.dirItem(m.Cursor == i, file))
+		curFiles += truncate.StringWithTail(m.dirItem(m.Cursor == i, file), uint(m.Width-8), "...")
+		curFiles += "\n"
 	}
 
 	doc.WriteString(curFiles)

@@ -5,7 +5,7 @@ import (
 
 	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/constants"
-	"github.com/knipferrc/fm/internal/utils"
+	"github.com/knipferrc/fm/internal/helpers"
 	"github.com/knipferrc/fm/pkg/icons"
 )
 
@@ -38,7 +38,7 @@ func (m *model) scrollPrimaryPane() {
 // Get the content for the status bar
 func (m model) getStatusBarContent() (string, string, string, string) {
 	cfg := config.GetConfig()
-	currentPath, err := utils.GetWorkingDirectory()
+	currentPath, err := helpers.GetWorkingDirectory()
 	if err != nil {
 		currentPath = constants.CurrentDirectory
 	}
@@ -60,7 +60,7 @@ func (m model) getStatusBarContent() (string, string, string, string) {
 	// Display some information about the currently seleted file including
 	// its size, the mode and the current path
 	status := fmt.Sprintf("%s %s %s",
-		utils.ConvertBytesToSizeString(m.dirTree.GetSelectedFile().Size()),
+		helpers.ConvertBytesToSizeString(m.dirTree.GetSelectedFile().Size()),
 		m.dirTree.GetSelectedFile().Mode().String(),
 		currentPath,
 	)

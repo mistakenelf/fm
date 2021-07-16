@@ -1,4 +1,4 @@
-package utils
+package helpers
 
 import (
 	"fmt"
@@ -24,6 +24,6 @@ func ConvertBytesToSizeString(b int64) string {
 }
 
 // Remove tabs and convert them to spaces
-func ConverTabsToSpaces(input string) string {
+func ConvertTabsToSpaces(input string) string {
 	return strings.Replace(input, "\t", "    ", -1)
 }
