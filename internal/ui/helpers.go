@@ -11,8 +11,8 @@ import (
 
 // Handles scrolling of the primary panes dirtree
 func (m *model) scrollPrimaryPane() {
-	top := m.primaryPane.YOffset
-	bottom := m.primaryPane.Height + m.primaryPane.YOffset - 1
+	top := m.primaryPane.Viewport.YOffset
+	bottom := m.primaryPane.Viewport.Height + m.primaryPane.Viewport.YOffset - 1
 
 	// If the cursor is above the top of the viewport scroll up on the viewport
 	// else were at the bottom and need to scroll the viewport down

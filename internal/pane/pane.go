@@ -6,9 +6,6 @@ import (
 )
 
 type Model struct {
-	Width               int
-	Height              int
-	YOffset             int
 	IsActive            bool
 	Viewport            viewport.Model
 	ActiveBorderColor   string
@@ -26,9 +23,6 @@ func NewModel(isActive, rounded, isPadded bool, activeBorderColor, inactiveBorde
 		IsPadded:            isPadded,
 	}
 
-	// Set the offset of the pane to be the same as the viewport
-	m.YOffset = m.Viewport.YOffset
-
 	return m
 }
 
@@ -43,9 +37,7 @@ func (m *Model) SetSize(width, height int) {
 		border = lipgloss.RoundedBorder()
 	}
 
-	// Set widths of both the pane and viewport taking into account borders
-	m.Width = width - lipgloss.Width(border.Right+border.Top)
-	m.Height = height - lipgloss.Width(border.Bottom+border.Top)
+	// Set width of the panes viewport
 	m.Viewport.Width = width - lipgloss.Width(border.Right+border.Top)
 	m.Viewport.Height = height - lipgloss.Width(border.Bottom+border.Top)
 }
@@ -62,8 +54,8 @@ func (m *Model) SetContent(content string) {
 	// Place the pane content in a viewport
 	m.Viewport.SetContent(
 		lipgloss.NewStyle().
-			Width(m.Width).
-			Height(m.Height).
+			Width(m.Viewport.Width).
+			Height(m.Viewport.Height).
 			PaddingLeft(padding).
 			Render(content),
 	)
@@ -112,7 +104,7 @@ func (m Model) View() string {
 	return lipgloss.NewStyle().
 		BorderForeground(lipgloss.Color(borderColor)).
 		Border(border).
-		Width(m.Width).
-		Height(m.Height).
+		Width(m.Viewport.Width).
+		Height(m.Viewport.Height).
 		Render(m.Viewport.View())
 }

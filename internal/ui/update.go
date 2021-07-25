@@ -107,7 +107,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// If we have some active markdown source to render, re-render its content
 		// when the window is resized so that glamour knows how to wrap its text
 		if m.activeMarkdownSource != "" {
-			return m, renderMarkdownContent(m.secondaryPane.Width, m.activeMarkdownSource)
+			return m, renderMarkdownContent(m.secondaryPane.Viewport.Width, m.activeMarkdownSource)
 		}
 
 		return m, cmd
