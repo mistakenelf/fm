@@ -14,18 +14,15 @@ func (m model) View() string {
 		return fmt.Sprintf("%s%s", m.loader.View(), "loading...")
 	}
 
-	// Join the two panes horizontally and top aligned
-	panes := lipgloss.JoinHorizontal(
-		lipgloss.Top,
-		m.primaryPane.View(),
-		m.secondaryPane.View(),
-	)
-
 	// Return the UI with the two panes side by side and
 	// the status bar at the bottom of the screen
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
-		panes,
+		lipgloss.JoinHorizontal(
+			lipgloss.Top,
+			m.primaryPane.View(),
+			m.secondaryPane.View(),
+		),
 		m.statusBar.View(),
 	)
 }

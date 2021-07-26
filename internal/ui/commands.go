@@ -143,7 +143,7 @@ func (m model) deleteFile(name string) tea.Cmd {
 // through glamour else run the content through chroma to get syntax highlighting
 func (m model) readFileContent(file fs.FileInfo) tea.Cmd {
 	cfg := config.GetConfig()
-	width := m.secondaryPane.Viewport.Width
+	width := m.secondaryPane.GetWidth()
 
 	return func() tea.Msg {
 		content, err := helpers.ReadFileContent(file.Name())

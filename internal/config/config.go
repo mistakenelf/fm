@@ -72,7 +72,7 @@ func LoadConfig() {
 	}
 }
 
-// Get the users config and return it for use
+// Get the users config
 func GetConfig() (config Config) {
 	err := viper.Unmarshal(&config)
 

@@ -37,6 +37,7 @@ func (m *Model) SetContent(files []fs.FileInfo) {
 	m.Files = files
 }
 
+// Set size of the tree, useful when changing the terminal size
 func (m *Model) SetSize(width int) {
 	m.Width = width
 }

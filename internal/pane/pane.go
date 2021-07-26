@@ -51,7 +51,6 @@ func (m *Model) SetContent(content string) {
 		padding = 1
 	}
 
-	// Place the pane content in a viewport
 	m.Viewport.SetContent(
 		lipgloss.NewStyle().
 			Width(m.Viewport.Width).
@@ -84,6 +83,21 @@ func (m *Model) GotoBottom() {
 // Set active border color
 func (m *Model) SetActiveBorderColor(color string) {
 	m.ActiveBorderColor = color
+}
+
+// Get width of pane
+func (m Model) GetWidth() int {
+	return m.Viewport.Width
+}
+
+// Get height of pane
+func (m Model) GetHeight() int {
+	return m.Viewport.Height
+}
+
+// Get Y offset of the pane
+func (m Model) GetYOffset() int {
+	return m.Viewport.YOffset
 }
 
 // Display the pane
