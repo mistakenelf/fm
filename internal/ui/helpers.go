@@ -52,7 +52,7 @@ func (m model) getStatusBarContent() (string, string, string, string) {
 	// If icons are enabled, show the directory icon next to the logo text
 	// else just show the text of the LOGO
 	if cfg.Settings.ShowIcons {
-		logo = fmt.Sprintf("%s %s", icons.Icon_Def["dir"].GetGlyph(), "FM")
+		logo = fmt.Sprintf("%s %s", icons.IconDef["dir"].GetGlyph(), "FM")
 	} else {
 		logo = "FM"
 	}

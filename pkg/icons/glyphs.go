@@ -2,17 +2,17 @@ package icons
 
 import "fmt"
 
-type Icon_Info struct {
+type IconInfo struct {
 	icon       string
 	color      [3]uint8
 	executable bool
 }
 
-func (i *Icon_Info) GetGlyph() string {
+func (i *IconInfo) GetGlyph() string {
 	return i.icon
 }
 
-func (i *Icon_Info) GetColor(f uint8) string {
+func (i *IconInfo) GetColor(f uint8) string {
 	if i.executable {
 		return "\033[38;2;76;175;080m"
 	} else if f == 1 {
@@ -22,11 +22,11 @@ func (i *Icon_Info) GetColor(f uint8) string {
 	}
 }
 
-func (i *Icon_Info) MakeExe() {
+func (i *IconInfo) MakeExe() {
 	i.executable = true
 }
 
-var Icon_Set = map[string]*Icon_Info{
+var IconSet = map[string]*IconInfo{
 	"html":             {icon: "\uf13b", color: [3]uint8{228, 79, 57}},   // html
 	"markdown":         {icon: "\uf853", color: [3]uint8{66, 165, 245}},  // markdown
 	"css":              {icon: "\uf81b", color: [3]uint8{66, 165, 245}},  // css
@@ -348,7 +348,7 @@ var Icon_Set = map[string]*Icon_Info{
 }
 
 // default icons in case nothing can be found
-var Icon_Def = map[string]*Icon_Info{
+var IconDef = map[string]*IconInfo{
 	"dir":        {icon: "\uf74a", color: [3]uint8{224, 177, 77}},
 	"diropen":    {icon: "\ufc6e", color: [3]uint8{224, 177, 77}},
 	"hiddendir":  {icon: "\uf755", color: [3]uint8{224, 177, 77}},

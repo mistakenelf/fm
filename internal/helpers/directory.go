@@ -162,7 +162,10 @@ func CreateFile(name string) error {
 		return err
 	}
 
-	f.Close()
+	err = f.Close()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -174,13 +177,17 @@ func ZipDirectory(name string) error {
 
 	// Walk the directory to get a list of files within it and append it to
 	// the array of files to return
-	filepath.Walk(name, func(path string, f fs.FileInfo, err error) error {
+	err := filepath.Walk(name, func(path string, f fs.FileInfo, err error) error {
 		if f.Name() != "." && !f.IsDir() {
 			files = append(files, path)
 		}
 
 		return nil
 	})
+
+	if err != nil {
+		return err
+	}
 
 	// Generate output name based on the directorys current name along
 	// with a timestamp to make names unique
@@ -189,17 +196,26 @@ func ZipDirectory(name string) error {
 	if err != nil {
 		return err
 	}
-	defer newfile.Close()
+
+	defer func() {
+		newfile.Close()
+	}()
 
 	zipWriter := zip.NewWriter(newfile)
-	defer zipWriter.Close()
+
+	defer func() {
+		zipWriter.Close()
+	}()
 
 	for _, file := range files {
 		zipfile, err := os.Open(file)
 		if err != nil {
 			return err
 		}
-		defer zipfile.Close()
+
+		defer func() {
+			zipfile.Close()
+		}()
 
 		info, err := zipfile.Stat()
 		if err != nil {
@@ -233,7 +249,15 @@ func UnzipDirectory(name string) error {
 	if err != nil {
 		return err
 	}
-	defer r.Close()
+
+	defer func() error {
+		err = r.Close()
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}()
 
 	// Generate the name to unzip to based on its current name
 	// minus the extension
@@ -247,7 +271,11 @@ func UnzipDirectory(name string) error {
 		}
 
 		if f.FileInfo().IsDir() {
-			os.MkdirAll(fpath, os.ModePerm)
+			err = os.MkdirAll(fpath, os.ModePerm)
+			if err != nil {
+				return err
+			}
+
 			continue
 		}
 
@@ -266,9 +294,19 @@ func UnzipDirectory(name string) error {
 		}
 
 		_, err = io.Copy(outFile, rc)
+		if err != nil {
+			return err
+		}
 
-		outFile.Close()
-		rc.Close()
+		err = outFile.Close()
+		if err != nil {
+			return err
+		}
+
+		err = rc.Close()
+		if err != nil {
+			return err
+		}
 
 		if err != nil {
 			return err
@@ -284,7 +322,15 @@ func CopyFile(name string) error {
 	if err != nil {
 		return err
 	}
-	defer srcFile.Close()
+
+	defer func() error {
+		err = srcFile.Close()
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}()
 
 	splitName := strings.Split(name, ".")
 	output := fmt.Sprintf("%s_%d.%s", splitName[0], time.Now().Unix(), splitName[1])
