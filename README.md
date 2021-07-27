@@ -123,7 +123,7 @@ git clone https://github.com/knipferrc/fm
 2. Run
 
 ```sh
-make run
+make
 ```
 
 3. Build a binary
