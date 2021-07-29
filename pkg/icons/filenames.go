@@ -1,5 +1,6 @@
 package icons
 
+// IconFileName is used to get the icon based on its filename
 var IconFileName = map[string]*IconInfo{
 	".pug-lintrc":                         IconSet["pug"],
 	".pug-lintrc.js":                      IconSet["pug"],

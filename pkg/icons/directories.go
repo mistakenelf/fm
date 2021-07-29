@@ -1,5 +1,6 @@
 package icons
 
+// IconDir is used to get the icon based on the type of directory
 var IconDir = map[string]*IconInfo{
 	"config":         IconSet["dir-config"],
 	".config":        IconSet["dir-config"],

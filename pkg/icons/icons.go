@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// GetIndicator returns the indicator for the given file
 func GetIndicator(modebit os.FileMode) (i string) {
 	switch {
 	case modebit&os.ModeDir > 0:
@@ -18,9 +19,11 @@ func GetIndicator(modebit os.FileMode) (i string) {
 	case modebit&1000000 > 0:
 		i = "*"
 	}
+
 	return i
 }
 
+// GetIcon returns the icon based on its name, extension and indicator
 func GetIcon(name, ext, indicator string) (icon, color string) {
 	var i *IconInfo
 	var ok bool
