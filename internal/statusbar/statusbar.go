@@ -5,11 +5,13 @@ import (
 	"github.com/muesli/reflow/truncate"
 )
 
+// Color is a struct that contains the foreground and background colors of the statusbar.
 type Color struct {
 	Background string
 	Foreground string
 }
 
+// Model is a struct that contains all the properties of the statusbar.
 type Model struct {
 	Width               int
 	Height              int
@@ -23,6 +25,7 @@ type Model struct {
 	FourthColumnColors  Color
 }
 
+// NewModel creates a new Model with default values.
 func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthColumnColors Color) Model {
 	return Model{
 		FirstColumnColors:  firstColumnColors,
@@ -32,7 +35,7 @@ func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthCo
 	}
 }
 
-// Set the content of the 4 colums of the status bar
+// Set the content of the 4 colums of the status bar.
 func (m *Model) SetContent(firstColumnContent, secondColumnContent, thirdColumnContent, fourthColumnContent string) {
 	m.FirstColumnContent = firstColumnContent
 	m.SecondColumnContent = secondColumnContent
@@ -40,13 +43,13 @@ func (m *Model) SetContent(firstColumnContent, secondColumnContent, thirdColumnC
 	m.FourthColumnContent = fourthColumnContent
 }
 
-// Set the size of the status bar, useful for when screen size changes
+// Set the size of the status bar, useful for when screen size changes.
 func (m *Model) SetSize(width, height int) {
 	m.Width = width
 	m.Height = height
 }
 
-// Display the statusbar
+// Display the statusbar.
 func (m Model) View() string {
 	width := lipgloss.Width
 
@@ -72,9 +75,9 @@ func (m Model) View() string {
 		Height(m.Height).
 		Render(m.FourthColumnContent)
 
-	// Second column of the status bar displayed in the center with configurable
-	// foreground and background colors and some padding. Also calculate the
-	// width of the other three columns so that this one can take up the rest of the space
+	/* Second column of the status bar displayed in the center with configurable
+	foreground and background colors and some padding. Also calculate the
+	width of the other three columns so that this one can take up the rest of the space. */
 	secondColumn := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(m.SecondColumnColors.Foreground)).
 		Background(lipgloss.Color(m.SecondColumnColors.Background)).

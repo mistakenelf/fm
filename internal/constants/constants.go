@@ -1,18 +1,18 @@
 package constants
 
 const (
-	// Directory paths
+	// Directory paths.
 	CurrentDirectory  = "."
 	PreviousDirectory = ".."
 	HomeDirectory     = "~"
 
-	// Current app version
+	// Current app version.
 	AppVersion = "0.0.6"
 
-	// Height of the status bar
+	// Height of the statusbar.
 	StatusBarHeight = 1
 
-	// Default color palette
+	// Default color palette.
 	White       = "#FFFDF5"
 	Pink        = "#F25D94"
 	LightPurple = "#A550DF"
@@ -21,7 +21,7 @@ const (
 	Blue        = "#1D4ED8"
 	Red         = "#DC2626"
 
-	// Text displayed in the right pane when nothing else is displayed
+	// Text displayed in the right pane when nothing else is displayed.
 	IntroText = `
 ███████╗███╗   ███╗
 ██╔════╝████╗ ████║
