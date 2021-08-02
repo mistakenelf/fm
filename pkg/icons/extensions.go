@@ -1,6 +1,6 @@
 package icons
 
-// IconExt is used to represent an icon with a specific extension
+// IconExt is used to represent an icon with a specific extension.
 var IconExt = map[string]*IconInfo{
 	"htm":               IconSet["html"],
 	"html":              IconSet["html"],

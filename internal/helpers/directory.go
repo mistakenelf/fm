@@ -12,8 +12,7 @@ import (
 	"time"
 )
 
-// Rename a file or directory given a source and destination,
-// returning an error if it exists
+// RenameDirOrFile renames a directory or files given a source and destination.
 func RenameDirOrFile(src, dst string) error {
 	err := os.Rename(src, dst)
 	if err != nil {
@@ -23,12 +22,11 @@ func RenameDirOrFile(src, dst string) error {
 	return nil
 }
 
-// Create a new directory given a name,
-// returning an error if it exists
+// CreateDirectory creates a new directory given a name.
 func CreateDirectory(name string) error {
 	_, err := os.Stat(name)
 
-	// If the directory does not already exist, create it
+	// If the directory does not already exist, create it.
 	if os.IsNotExist(err) {
 		err := os.MkdirAll(name, 0755)
 		if err != nil {
@@ -40,45 +38,42 @@ func CreateDirectory(name string) error {
 	return nil
 }
 
-// Get directory listing based on the name and weather or not to show hidden files
-// and folders, returning the new file listing and an error if it exists
+// GetDirectoryListing returns a list of files and directories within a given directory.
 func GetDirectoryListing(dir string, showHidden bool) ([]fs.FileInfo, error) {
 	n := 0
 
-	// Read files from the directory
+	// Read files from the directory.
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
 
-	// Change the apps directory to the one passed in
+	// Update the apps directory to the directory currently being read.
 	err = os.Chdir(dir)
 	if err != nil {
 		return nil, err
 	}
 
-	// Dont want to show hidden files and directories
+	// Dont want to show hidden files and directories.
 	if !showHidden {
 		for _, file := range files {
 			// If the file or directory starts with a dot,
 			// we know its hidden so dont add it to the array
-			// of files to return
+			// of files to return.
 			if !strings.HasPrefix(file.Name(), ".") {
 				files[n] = file
 				n++
 			}
 		}
 
-		// Set files to the list that does not include hidden files
+		// Set files to the list that does not include hidden files.
 		files = files[:n]
 	}
 
-	// return the files and nil since no error occured
 	return files, nil
 }
 
-// Delete a directory given a name,
-// returning an error if it exists
+// DeleteDirectory deletes a directory given a name.
 func DeleteDirectory(name string) error {
 	err := os.RemoveAll(name)
 	if err != nil {
@@ -88,8 +83,7 @@ func DeleteDirectory(name string) error {
 	return nil
 }
 
-// Move a directory given a source and destination,
-// returning an error if it exists
+// MoveDirectory moves a directory from one place to another.
 func MoveDirectory(src, dst string) error {
 	err := os.Rename(src, dst)
 	if err != nil {
@@ -99,8 +93,7 @@ func MoveDirectory(src, dst string) error {
 	return nil
 }
 
-// Get the users home directoring returning an
-// error if it exists
+// GetHomeDirectory returns the users home directory.
 func GetHomeDirectory() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -110,8 +103,7 @@ func GetHomeDirectory() (string, error) {
 	return home, nil
 }
 
-// Get the users current working directory
-// returning an error if it exists
+// GetWorkingDirectory returns the current working directory.
 func GetWorkingDirectory() (string, error) {
 	directory, err := os.Getwd()
 	if err != nil {
@@ -121,8 +113,7 @@ func GetWorkingDirectory() (string, error) {
 	return directory, nil
 }
 
-// Delete a file given the name
-// returning an error if it exists
+// DeleteFile deletes a file given a name.
 func DeleteFile(name string) error {
 	err := os.Remove(name)
 	if err != nil {
@@ -132,8 +123,7 @@ func DeleteFile(name string) error {
 	return nil
 }
 
-// Move file from one place to another given a source
-// and destination, returning an error if it exists
+// MoveFile moves a file from one place to another.
 func MoveFile(src, dst string) error {
 	err := os.Rename(src, dst)
 	if err != nil {
@@ -143,8 +133,7 @@ func MoveFile(src, dst string) error {
 	return nil
 }
 
-// Read a files content given a name returning its content and
-// an error if it exists
+// ReadFileContent returns the contents of a file given a name.
 func ReadFileContent(name string) (string, error) {
 	dat, err := os.ReadFile(name)
 	if err != nil {
@@ -154,8 +143,7 @@ func ReadFileContent(name string) (string, error) {
 	return string(dat), nil
 }
 
-// Create a new file given a name and return an
-// error if it exists
+// CreateFile creates a file given a name.
 func CreateFile(name string) error {
 	f, err := os.OpenFile(name, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -170,13 +158,12 @@ func CreateFile(name string) error {
 	return nil
 }
 
-// Zip a directory given a name and return an error
-// if it exists
+// ZipDirectory zips a directory given a name.
 func ZipDirectory(name string) error {
 	var files []string
 
 	// Walk the directory to get a list of files within it and append it to
-	// the array of files to return
+	// the array of files.
 	err := filepath.Walk(name, func(path string, f fs.FileInfo, err error) error {
 		if f.Name() != "." && !f.IsDir() {
 			files = append(files, path)
@@ -190,7 +177,7 @@ func ZipDirectory(name string) error {
 	}
 
 	// Generate output name based on the directorys current name along
-	// with a timestamp to make names unique
+	// with a timestamp to make names unique.
 	output := fmt.Sprintf("%s_%d.zip", name, time.Now().Unix())
 	newfile, err := os.Create(output)
 	if err != nil {
@@ -242,8 +229,7 @@ func ZipDirectory(name string) error {
 	return nil
 }
 
-// Unzip a directory given a name returning an error
-// if it exists
+// UnzipDirectory unzips a directory given a name.
 func UnzipDirectory(name string) error {
 	r, err := zip.OpenReader(name)
 	if err != nil {
@@ -260,7 +246,7 @@ func UnzipDirectory(name string) error {
 	}()
 
 	// Generate the name to unzip to based on its current name
-	// minus the extension
+	// minus the extension.
 	output := strings.Split(name, ".")[0]
 
 	for _, f := range r.File {
@@ -316,7 +302,7 @@ func UnzipDirectory(name string) error {
 	return nil
 }
 
-// Copy a file given a name
+// CopyFile copies a file given a name.
 func CopyFile(name string) error {
 	srcFile, err := os.Open(name)
 	if err != nil {
@@ -353,9 +339,9 @@ func CopyFile(name string) error {
 	return nil
 }
 
-// Copy a directory given a name
+// CopyDirectory copies a directory given a name.
 func CopyDirectory(name string) error {
-	// Generate a unique name for the output folder
+	// Generate a unique name for the output folder.
 	output := fmt.Sprintf("%s_%d", name, time.Now().Unix())
 
 	f, err := os.Open(name)
@@ -372,21 +358,21 @@ func CopyDirectory(name string) error {
 		return fmt.Errorf("Source " + file.Name() + " is not a directory!")
 	}
 
-	// Create the output folder
+	// Create the output folder.
 	err = os.Mkdir(output, 0755)
 	if err != nil {
 		return err
 	}
 
-	// Read all files in the directory
+	// Read all files in the directory.
 	files, err := ioutil.ReadDir(name)
 	if err != nil {
 		return err
 	}
 
-	// Loop through the directory getting a list of all its files
+	// Loop through the directory getting a list of all its files.
 	for _, f := range files {
-		// If its a directory, copy it
+		// If its a directory, copy it.
 		if f.IsDir() {
 			err = CopyDirectory(name + "/" + f.Name())
 			if err != nil {
@@ -394,7 +380,7 @@ func CopyDirectory(name string) error {
 			}
 		}
 
-		// If its not a directory, read the file and write it to the new folder
+		// If its not a directory, read the file and write it to the new folder.
 		if !f.IsDir() {
 			content, err := ioutil.ReadFile(name + "/" + f.Name())
 			if err != nil {

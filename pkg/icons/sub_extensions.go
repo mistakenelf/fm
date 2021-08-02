@@ -1,6 +1,6 @@
 package icons
 
-// IconSubExt is a map to get the icon based on its subdirectory extension
+// IconSubExt is a map to get the icon based on its subdirectory extension.
 var IconSubExt = map[string]*IconInfo{
 	"routing.ts":           IconSet["routing"],
 	"routing.tsx":          IconSet["routing"],

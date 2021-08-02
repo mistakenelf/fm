@@ -2,19 +2,19 @@ package icons
 
 import "fmt"
 
-// IconInfo is a struct that holds information about an icon
+// IconInfo is a struct that holds information about an icon.
 type IconInfo struct {
 	icon       string
 	color      [3]uint8
 	executable bool
 }
 
-// Getglyph returns the glyph for the icon
+// Getglyph returns the glyph for the icon.
 func (i *IconInfo) GetGlyph() string {
 	return i.icon
 }
 
-// GetColor returns the color for the icon
+// GetColor returns the color for the icon.
 func (i *IconInfo) GetColor(f uint8) string {
 	if i.executable {
 		return "\033[38;2;76;175;080m"
@@ -25,12 +25,12 @@ func (i *IconInfo) GetColor(f uint8) string {
 	}
 }
 
-// MakeExe is a function that returns a new IconInfo struct with the executable flag set to true
+// MakeExe is a function that returns a new IconInfo struct with the executable flag set to true.
 func (i *IconInfo) MakeExe() {
 	i.executable = true
 }
 
-// IconSet is a map to represent all the icons
+// IconSet is a map to represent all the icons.
 var IconSet = map[string]*IconInfo{
 	"html":             {icon: "\uf13b", color: [3]uint8{228, 79, 57}},   // html
 	"markdown":         {icon: "\uf853", color: [3]uint8{66, 165, 245}},  // markdown
@@ -352,7 +352,7 @@ var IconSet = map[string]*IconInfo{
 	"dir-environment": {icon: "\uf74e", color: [3]uint8{102, 187, 106}}, // dir-environment
 }
 
-// IconDef is a map of default icons if none can be found
+// IconDef is a map of default icons if none can be found.
 var IconDef = map[string]*IconInfo{
 	"dir":        {icon: "\uf74a", color: [3]uint8{224, 177, 77}},
 	"diropen":    {icon: "\ufc6e", color: [3]uint8{224, 177, 77}},

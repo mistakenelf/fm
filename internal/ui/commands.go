@@ -24,8 +24,7 @@ type fileContentMsg struct {
 	fileContent     string
 }
 
-// Get an updated directory listing based on the name
-// of a directory passed in
+// updateDirectoryListing updates the directory listing based on the name of the direcoctory provided.
 func (m model) updateDirectoryListing(name string) tea.Cmd {
 	return func() tea.Msg {
 		files, err := helpers.GetDirectoryListing(name, m.dirTree.ShowHidden)
@@ -37,8 +36,7 @@ func (m model) updateDirectoryListing(name string) tea.Cmd {
 	}
 }
 
-// Rename a file or directory based on its current filename
-// and its new value, returning an updated directory listing
+// renameFileOrDir renames a file or directory based on the name and value provided.
 func (m model) renameFileOrDir(name, value string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.RenameDirOrFile(name, value)
@@ -50,8 +48,7 @@ func (m model) renameFileOrDir(name, value string) tea.Cmd {
 	}
 }
 
-// Move a directory to the current working directory
-// returning an updated directory listing
+// moveDir moves a directory to the current working directory.
 func (m model) moveDir(name string) tea.Cmd {
 	return func() tea.Msg {
 		workingDir, err := helpers.GetWorkingDirectory()
@@ -60,11 +57,11 @@ func (m model) moveDir(name string) tea.Cmd {
 		}
 
 		// Get the directory from which the move was intiated from
-		// and give it the same folder name
+		// and give it the same folder name.
 		src := fmt.Sprintf("%s/%s", m.initialMoveDirectory, name)
 
 		// Destination is the current working directory with
-		// the same folder name that it had
+		// the same folder name that it had.
 		dst := fmt.Sprintf("%s/%s", workingDir, name)
 
 		err = helpers.MoveDirectory(src, dst)
@@ -81,8 +78,7 @@ func (m model) moveDir(name string) tea.Cmd {
 	}
 }
 
-// Move a file to the current working directory
-// returning an updated directory listing
+// moveFile moves a file to the current working directory.
 func (m model) moveFile(name string) tea.Cmd {
 	return func() tea.Msg {
 		workingDir, err := helpers.GetWorkingDirectory()
@@ -91,11 +87,11 @@ func (m model) moveFile(name string) tea.Cmd {
 		}
 
 		// Get the directory from which the move was intiated from
-		// and give it the same file name
+		// and give it the same file name.
 		src := fmt.Sprintf("%s/%s", m.initialMoveDirectory, name)
 
 		// Destination is the current working directory with
-		// the same file name that it had
+		// the same file name that it had.
 		dst := fmt.Sprintf("%s/%s", workingDir, name)
 
 		err = helpers.MoveFile(src, dst)
@@ -112,8 +108,7 @@ func (m model) moveFile(name string) tea.Cmd {
 	}
 }
 
-// Delete a directory based on name and
-// return an updated directory listing
+// deleteDir deletes a directory based on the name provided.
 func (m model) deleteDir(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.DeleteDirectory(name)
@@ -125,8 +120,7 @@ func (m model) deleteDir(name string) tea.Cmd {
 	}
 }
 
-// Delete a file based on name and return an
-// updated directory listing
+// deleteFile deletes a file based on the name provided.
 func (m model) deleteFile(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.DeleteFile(name)
@@ -138,9 +132,7 @@ func (m model) deleteFile(name string) tea.Cmd {
 	}
 }
 
-// Read a files content based on its name and return its content as a string.
-// If the file is markdown and pretty markdown is enabled, run the content
-// through glamour else run the content through chroma to get syntax highlighting
+// readFileContent reads the content of a file and returns it.
 func (m model) readFileContent(file fs.FileInfo) tea.Cmd {
 	cfg := config.GetConfig()
 	width := m.secondaryPane.GetWidth()
@@ -152,7 +144,7 @@ func (m model) readFileContent(file fs.FileInfo) tea.Cmd {
 		}
 
 		// Return both the pretty markdown as well as the plain content without glamour
-		// to use later when resizing the window
+		// to use later when resizing the window.
 		if filepath.Ext(file.Name()) == ".md" && cfg.Settings.PrettyMarkdown {
 			markdownContent, err := renderMarkdown(width, content)
 			if err != nil {
@@ -170,8 +162,8 @@ func (m model) readFileContent(file fs.FileInfo) tea.Cmd {
 				return errorMsg(err.Error())
 			}
 
-			// Return the syntax highlighted content and markdown content is empty
-			// since were not dealing with markdown
+			// Return the syntax highlighted content and markdown content as empty
+			// since were not dealing with markdown.
 			return fileContentMsg{
 				fileContent:     buf.String(),
 				markdownContent: "",
@@ -180,8 +172,7 @@ func (m model) readFileContent(file fs.FileInfo) tea.Cmd {
 	}
 }
 
-// Render some markdown content. Need to specify a width for
-// when the terminal is resized
+// renderMarkdownContent renders the markdown content and returns it.
 func renderMarkdownContent(width int, content string) tea.Cmd {
 	return func() tea.Msg {
 		markdownContent, err := renderMarkdown(width, content)
@@ -193,18 +184,14 @@ func renderMarkdownContent(width int, content string) tea.Cmd {
 	}
 }
 
-// Render some markdown passing it a width and content
+// renderMarkdown renders the markdown content with glamour.
 func renderMarkdown(width int, content string) (string, error) {
 	bg := "light"
 
-	// if the terminal has a dark background, use a dark background
-	// for glamour
 	if lipgloss.HasDarkBackground() {
 		bg = "dark"
 	}
 
-	// Create a new glamour instance with word wrapping
-	// and custom background based on terminal color
 	r, _ := glamour.NewTermRenderer(
 		glamour.WithWordWrap(width),
 		glamour.WithStandardStyle(bg),
@@ -218,8 +205,7 @@ func renderMarkdown(width int, content string) (string, error) {
 	return out, nil
 }
 
-// Create a new directory given a name and return an
-// updated directory listing
+// createDir creates a directory based on the name provided.
 func (m model) createDir(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.CreateDirectory(name)
@@ -231,8 +217,7 @@ func (m model) createDir(name string) tea.Cmd {
 	}
 }
 
-// Create a new file given a name and return
-// an updated directory listing
+// createFile creates a file based on the name provided.
 func (m model) createFile(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.CreateFile(name)
@@ -244,8 +229,7 @@ func (m model) createFile(name string) tea.Cmd {
 	}
 }
 
-// Create a zipped directory given a name and return
-// an updated directory listing
+// zipDirectory zips a directory based on the name provided.
 func (m model) zipDirectory(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.ZipDirectory(name)
@@ -257,8 +241,7 @@ func (m model) zipDirectory(name string) tea.Cmd {
 	}
 }
 
-// Unzip a zipped directory given a name and
-// return an updated directory listing
+// unzipDirectory unzips a directory based on the name provided.
 func (m model) unzipDirectory(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.UnzipDirectory(name)
@@ -270,7 +253,7 @@ func (m model) unzipDirectory(name string) tea.Cmd {
 	}
 }
 
-// Copy a file given a name and return an updated directory listing
+// copyFile copies a file based on the name provided.
 func (m model) copyFile(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.CopyFile(name)
@@ -282,7 +265,7 @@ func (m model) copyFile(name string) tea.Cmd {
 	}
 }
 
-// Copy a directory given a name and return an updated directory listing
+// copyDirectory copies a directory based on the name provided.
 func (m model) copyDirectory(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.CopyDirectory(name)

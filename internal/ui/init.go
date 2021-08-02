@@ -13,6 +13,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// Init initializes the UI and sets up initial data.
 func (m model) Init() tea.Cmd {
 	var cmds []tea.Cmd
 	cfg := config.GetConfig()
