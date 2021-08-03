@@ -184,14 +184,24 @@ func ZipDirectory(name string) error {
 		return err
 	}
 
-	defer func() {
-		newfile.Close()
+	defer func() error {
+		err = newfile.Close()
+		if err != nil {
+			return err
+		}
+
+		return nil
 	}()
 
 	zipWriter := zip.NewWriter(newfile)
 
-	defer func() {
-		zipWriter.Close()
+	defer func() error {
+		err = zipWriter.Close()
+		if err != nil {
+			return err
+		}
+
+		return nil
 	}()
 
 	for _, file := range files {
@@ -200,8 +210,13 @@ func ZipDirectory(name string) error {
 			return err
 		}
 
-		defer func() {
-			zipfile.Close()
+		defer func() error {
+			err = zipfile.Close()
+			if err != nil {
+				return err
+			}
+
+			return nil
 		}()
 
 		info, err := zipfile.Stat()
@@ -324,7 +339,15 @@ func CopyFile(name string) error {
 	if err != nil {
 		return err
 	}
-	defer destFile.Close()
+
+	defer func() error {
+		err = destFile.Close()
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}()
 
 	_, err = io.Copy(destFile, srcFile)
 	if err != nil {

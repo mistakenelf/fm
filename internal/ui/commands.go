@@ -155,20 +155,21 @@ func (m model) readFileContent(file fs.FileInfo) tea.Cmd {
 				fileContent:     markdownContent,
 				markdownContent: content,
 			}
-		} else {
-			buf := new(bytes.Buffer)
-			err := quick.Highlight(buf, content, filepath.Ext(file.Name()), "terminal256", "dracula")
-			if err != nil {
-				return errorMsg(err.Error())
-			}
-
-			// Return the syntax highlighted content and markdown content as empty
-			// since were not dealing with markdown.
-			return fileContentMsg{
-				fileContent:     buf.String(),
-				markdownContent: "",
-			}
 		}
+
+		buf := new(bytes.Buffer)
+		err = quick.Highlight(buf, content, filepath.Ext(file.Name()), "terminal256", "dracula")
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		// Return the syntax highlighted content and markdown content as empty
+		// since were not dealing with markdown.
+		return fileContentMsg{
+			fileContent:     buf.String(),
+			markdownContent: "",
+		}
+
 	}
 }
 

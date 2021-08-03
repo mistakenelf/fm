@@ -67,15 +67,20 @@ func LoadConfig() {
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		viper.SetConfigFile(os.ExpandEnv("$HOME/.config/fm/config.yml"))
+
+		err = viper.SafeWriteConfigAs(os.ExpandEnv("$HOME/.config/fm/config.yml"))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = viper.ReadInConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
-	viper.SetConfigFile(os.ExpandEnv("$HOME/.config/fm/config.yml"))
-	viper.SafeWriteConfigAs(os.ExpandEnv("$HOME/.config/fm/config.yml"))
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 // GetConfig returns the users config.

@@ -1,21 +1,41 @@
 package constants
 
 const (
-	CurrentDirectory  = "."  // CurrentDirectory is the current directory.
-	PreviousDirectory = ".." // PreviousDirectory is the previous directory.
-	HomeDirectory     = "~"  // HomeDirectory is the home directory.
+	// CurrentDirectory is the current directory.
+	CurrentDirectory = "."
 
-	AppVersion = "0.0.6" // AppVersion is the version of the application.
+	// PreviousDirectory is the previous directory.
+	PreviousDirectory = ".."
 
-	StatusBarHeight = 1 // StatusBarHeight is the height of the status bar.
+	// HomeDirectory is the home directory.
+	HomeDirectory = "~"
 
-	White       = "#FFFDF5" // White is the color of the white.
-	Pink        = "#F25D94" // Pink is the color of the pink.
-	LightPurple = "#A550DF" // LightPurple is the color of the light purple.
-	DarkPurple  = "#6124DF" // DarkPurple is the color of the dark purple.
-	DarkGray    = "#353533" // DarkGray is the color of the dark gray.
-	Blue        = "#1D4ED8" // Blue is the color of the blue.
-	Red         = "#DC2626" // Red is the color of the red.
+	// AppVersion is the version of the application.
+	AppVersion = "0.0.6"
+
+	// StatusBarHeight is the height of the status bar.
+	StatusBarHeight = 1
+
+	// White is the color of the white.
+	White = "#FFFDF5"
+
+	// Pink is the color of the pink.
+	Pink = "#F25D94"
+
+	// LightPurple is the color of the light purple.
+	LightPurple = "#A550DF"
+
+	// DarkPurple is the color of the dark purple.
+	DarkPurple = "#6124DF"
+
+	// DarkGray is the color of the dark gray.
+	DarkGray = "#353533"
+
+	// Blue is the color of the blue.
+	Blue = "#1D4ED8"
+
+	// Red is the color of the red.
+	Red = "#DC2626"
 
 	// IntroText is the text displayed in the secondary pane
 	// when the application is launched.

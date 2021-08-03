@@ -213,9 +213,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				if m.dirTree.GetSelectedFile().IsDir() && !m.textInput.Focused() {
 					return m, m.updateDirectoryListing(m.dirTree.GetSelectedFile().Name())
-				} else {
-					return m, m.readFileContent(m.dirTree.GetSelectedFile())
 				}
+
+				return m, m.readFileContent(m.dirTree.GetSelectedFile())
+
 			}
 
 		case "G":
@@ -237,12 +238,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.moveDir(m.itemToMove.Name()),
 						m.updateDirectoryListing(m.initialMoveDirectory),
 					)
-				} else {
-					return m, tea.Sequentially(
-						m.moveFile(m.itemToMove.Name()),
-						m.updateDirectoryListing(m.initialMoveDirectory),
-					)
 				}
+
+				return m, tea.Sequentially(
+					m.moveFile(m.itemToMove.Name()),
+					m.updateDirectoryListing(m.initialMoveDirectory),
+				)
+
 			} else {
 				// Parse the commands from the command bar, command is the name
 				// of the command and value is if the command requires input to it
@@ -287,12 +289,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 							m.deleteDir(m.dirTree.GetSelectedFile().Name()),
 							m.updateDirectoryListing(constants.CurrentDirectory),
 						)
-					} else {
-						return m, tea.Sequentially(
-							m.deleteFile(m.dirTree.GetSelectedFile().Name()),
-							m.updateDirectoryListing(constants.CurrentDirectory),
-						)
 					}
+
+					return m, tea.Sequentially(
+						m.deleteFile(m.dirTree.GetSelectedFile().Name()),
+						m.updateDirectoryListing(constants.CurrentDirectory),
+					)
 
 				default:
 					return m, nil
@@ -372,12 +374,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.copyDirectory(m.dirTree.GetSelectedFile().Name()),
 						m.updateDirectoryListing(constants.CurrentDirectory),
 					)
-				} else {
-					return m, tea.Sequentially(
-						m.copyFile(m.dirTree.GetSelectedFile().Name()),
-						m.updateDirectoryListing(constants.CurrentDirectory),
-					)
 				}
+
+				return m, tea.Sequentially(
+					m.copyFile(m.dirTree.GetSelectedFile().Name()),
+					m.updateDirectoryListing(constants.CurrentDirectory),
+				)
 			}
 
 		// Reset FM to its initial state.

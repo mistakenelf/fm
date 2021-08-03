@@ -32,7 +32,12 @@ var rootCmd = &cobra.Command{
 				os.Exit(1)
 			}
 
-			defer f.Close()
+			defer func() {
+				if r := f.Close(); r != nil {
+					log.Fatal(err)
+					os.Exit(1)
+				}
+			}()
 		}
 
 		m := ui.NewModel()

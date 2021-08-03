@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// ConvertByesToSizeString converts a byte count to a human readable string
+// ConvertByesToSizeString converts a byte count to a human readable string.
 func ConvertBytesToSizeString(b int64) string {
 	const unit = 1000
 
@@ -23,7 +23,7 @@ func ConvertBytesToSizeString(b int64) string {
 		float64(b)/float64(div), "kMGTPE"[exp])
 }
 
-// ConvertTabsToSpaces converts tabs to spaces
+// ConvertTabsToSpaces converts tabs to spaces.
 func ConvertTabsToSpaces(input string) string {
 	return strings.Replace(input, "\t", "    ", -1)
 }
