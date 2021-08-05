@@ -12,7 +12,7 @@ import (
 )
 
 // Update handles all UI interactions and events for updating the screen.
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 

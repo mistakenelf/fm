@@ -11,7 +11,7 @@ import (
 
 // scrollPrimaryPane handles the scrolling of the primary pane which will handle
 // infinite scroll on the dirtree and the scrolling of the viewport.
-func (m *model) scrollPrimaryPane() {
+func (m *Model) scrollPrimaryPane() {
 	top := m.primaryPane.GetYOffset()
 	bottom := m.primaryPane.GetHeight() + m.primaryPane.GetYOffset() - 1
 
@@ -37,7 +37,7 @@ func (m *model) scrollPrimaryPane() {
 }
 
 // getStatusBarContent returns the content of the status bar (current file name, file info, file count, logo).
-func (m model) getStatusBarContent() (string, string, string, string) {
+func (m Model) getStatusBarContent() (string, string, string, string) {
 	cfg := config.GetConfig()
 	currentPath, err := helpers.GetWorkingDirectory()
 	if err != nil {

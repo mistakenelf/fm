@@ -121,7 +121,7 @@ var IconSet = map[string]*IconInfo{
 	"applescript":      {icon: "\uf302", color: [3]uint8{120, 144, 156}}, // applescript
 	"cake":             {icon: "\uf5ea", color: [3]uint8{250, 111, 66}},  // cake
 	"nim":              {icon: "\uf6a4", color: [3]uint8{255, 202, 61}},  // nim
-	"todo":             {icon: "\uf058", color: [3]uint8{124, 179, 66}},  // todo
+	"todo":             {icon: "\uf058", color: [3]uint8{124, 179, 66}},  // task
 	"nix":              {icon: "\uf313", color: [3]uint8{80, 117, 193}},  // nix
 	"http":             {icon: "\uf484", color: [3]uint8{66, 165, 245}},  // http
 	"webpack":          {icon: "\ufc29", color: [3]uint8{142, 214, 251}}, // webpack

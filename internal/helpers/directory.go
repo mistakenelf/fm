@@ -184,24 +184,14 @@ func ZipDirectory(name string) error {
 		return err
 	}
 
-	defer func() error {
+	defer func() {
 		err = newfile.Close()
-		if err != nil {
-			return err
-		}
-
-		return nil
 	}()
 
 	zipWriter := zip.NewWriter(newfile)
 
-	defer func() error {
+	defer func() {
 		err = zipWriter.Close()
-		if err != nil {
-			return err
-		}
-
-		return nil
 	}()
 
 	for _, file := range files {
@@ -210,13 +200,8 @@ func ZipDirectory(name string) error {
 			return err
 		}
 
-		defer func() error {
+		defer func() {
 			err = zipfile.Close()
-			if err != nil {
-				return err
-			}
-
-			return nil
 		}()
 
 		info, err := zipfile.Stat()
@@ -235,7 +220,7 @@ func ZipDirectory(name string) error {
 			return err
 		}
 
-		_, err = io.Copy(writer, zipfile)
+		_, err = io.CopyN(writer, zipfile, 1024)
 		if err != nil {
 			return err
 		}
@@ -251,13 +236,8 @@ func UnzipDirectory(name string) error {
 		return err
 	}
 
-	defer func() error {
+	defer func() {
 		err = r.Close()
-		if err != nil {
-			return err
-		}
-
-		return nil
 	}()
 
 	// Generate the name to unzip to based on its current name
@@ -294,7 +274,7 @@ func UnzipDirectory(name string) error {
 			return err
 		}
 
-		_, err = io.Copy(outFile, rc)
+		_, err = io.CopyN(outFile, rc, 1024)
 		if err != nil {
 			return err
 		}
@@ -324,13 +304,8 @@ func CopyFile(name string) error {
 		return err
 	}
 
-	defer func() error {
+	defer func() {
 		err = srcFile.Close()
-		if err != nil {
-			return err
-		}
-
-		return nil
 	}()
 
 	splitName := strings.Split(name, ".")
@@ -340,16 +315,11 @@ func CopyFile(name string) error {
 		return err
 	}
 
-	defer func() error {
+	defer func() {
 		err = destFile.Close()
-		if err != nil {
-			return err
-		}
-
-		return nil
 	}()
 
-	_, err = io.Copy(destFile, srcFile)
+	_, err = io.CopyN(destFile, srcFile, 1024)
 	if err != nil {
 		return err
 	}
@@ -410,7 +380,7 @@ func CopyDirectory(name string) error {
 				return err
 			}
 
-			err = ioutil.WriteFile(output+"/"+f.Name(), content, 0755)
+			err = ioutil.WriteFile(output+"/"+f.Name(), content, 0644)
 			if err != nil {
 				return err
 			}

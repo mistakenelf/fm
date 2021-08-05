@@ -25,7 +25,7 @@ type fileContentMsg struct {
 }
 
 // updateDirectoryListing updates the directory listing based on the name of the direcoctory provided.
-func (m model) updateDirectoryListing(name string) tea.Cmd {
+func (m Model) updateDirectoryListing(name string) tea.Cmd {
 	return func() tea.Msg {
 		files, err := helpers.GetDirectoryListing(name, m.dirTree.ShowHidden)
 		if err != nil {
@@ -37,7 +37,7 @@ func (m model) updateDirectoryListing(name string) tea.Cmd {
 }
 
 // renameFileOrDir renames a file or directory based on the name and value provided.
-func (m model) renameFileOrDir(name, value string) tea.Cmd {
+func (m Model) renameFileOrDir(name, value string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.RenameDirOrFile(name, value)
 		if err != nil {
@@ -49,7 +49,7 @@ func (m model) renameFileOrDir(name, value string) tea.Cmd {
 }
 
 // moveDir moves a directory to the current working directory.
-func (m model) moveDir(name string) tea.Cmd {
+func (m Model) moveDir(name string) tea.Cmd {
 	return func() tea.Msg {
 		workingDir, err := helpers.GetWorkingDirectory()
 		if err != nil {
@@ -79,7 +79,7 @@ func (m model) moveDir(name string) tea.Cmd {
 }
 
 // moveFile moves a file to the current working directory.
-func (m model) moveFile(name string) tea.Cmd {
+func (m Model) moveFile(name string) tea.Cmd {
 	return func() tea.Msg {
 		workingDir, err := helpers.GetWorkingDirectory()
 		if err != nil {
@@ -109,7 +109,7 @@ func (m model) moveFile(name string) tea.Cmd {
 }
 
 // deleteDir deletes a directory based on the name provided.
-func (m model) deleteDir(name string) tea.Cmd {
+func (m Model) deleteDir(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.DeleteDirectory(name)
 		if err != nil {
@@ -121,7 +121,7 @@ func (m model) deleteDir(name string) tea.Cmd {
 }
 
 // deleteFile deletes a file based on the name provided.
-func (m model) deleteFile(name string) tea.Cmd {
+func (m Model) deleteFile(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.DeleteFile(name)
 		if err != nil {
@@ -133,7 +133,7 @@ func (m model) deleteFile(name string) tea.Cmd {
 }
 
 // readFileContent reads the content of a file and returns it.
-func (m model) readFileContent(file fs.FileInfo) tea.Cmd {
+func (m Model) readFileContent(file fs.FileInfo) tea.Cmd {
 	cfg := config.GetConfig()
 	width := m.secondaryPane.GetWidth()
 
@@ -207,7 +207,7 @@ func renderMarkdown(width int, content string) (string, error) {
 }
 
 // createDir creates a directory based on the name provided.
-func (m model) createDir(name string) tea.Cmd {
+func (m Model) createDir(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.CreateDirectory(name)
 		if err != nil {
@@ -219,7 +219,7 @@ func (m model) createDir(name string) tea.Cmd {
 }
 
 // createFile creates a file based on the name provided.
-func (m model) createFile(name string) tea.Cmd {
+func (m Model) createFile(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.CreateFile(name)
 		if err != nil {
@@ -231,7 +231,7 @@ func (m model) createFile(name string) tea.Cmd {
 }
 
 // zipDirectory zips a directory based on the name provided.
-func (m model) zipDirectory(name string) tea.Cmd {
+func (m Model) zipDirectory(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.ZipDirectory(name)
 		if err != nil {
@@ -243,7 +243,7 @@ func (m model) zipDirectory(name string) tea.Cmd {
 }
 
 // unzipDirectory unzips a directory based on the name provided.
-func (m model) unzipDirectory(name string) tea.Cmd {
+func (m Model) unzipDirectory(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.UnzipDirectory(name)
 		if err != nil {
@@ -255,7 +255,7 @@ func (m model) unzipDirectory(name string) tea.Cmd {
 }
 
 // copyFile copies a file based on the name provided.
-func (m model) copyFile(name string) tea.Cmd {
+func (m Model) copyFile(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.CopyFile(name)
 		if err != nil {
@@ -267,7 +267,7 @@ func (m model) copyFile(name string) tea.Cmd {
 }
 
 // copyDirectory copies a directory based on the name provided.
-func (m model) copyDirectory(name string) tea.Cmd {
+func (m Model) copyDirectory(name string) tea.Cmd {
 	return func() tea.Msg {
 		err := helpers.CopyDirectory(name)
 		if err != nil {

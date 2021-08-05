@@ -7,7 +7,7 @@ import (
 )
 
 // View returns a string representation of the entire application UI.
-func (m model) View() string {
+func (m Model) View() string {
 	// If the viewport on the panes is not ready or we dont have any files to display
 	// show the spinner.
 	if !m.ready || m.dirTree.GetTotalFiles() <= 0 {

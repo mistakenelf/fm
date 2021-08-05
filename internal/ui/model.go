@@ -15,8 +15,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// model represents the state of the UI.
-type model struct {
+// Model represents the state of the UI.
+type Model struct {
 	primaryPane          pane.Model
 	secondaryPane        pane.Model
 	textInput            textinput.Model
@@ -35,7 +35,7 @@ type model struct {
 }
 
 // NewModel create an instance of the entire application model.
-func NewModel() model {
+func NewModel() Model {
 	cfg := config.GetConfig()
 
 	// Create a new textinput.
@@ -93,7 +93,7 @@ func NewModel() model {
 		},
 	)
 
-	return model{
+	return Model{
 		primaryPane:          primaryPane,
 		secondaryPane:        secondaryPane,
 		textInput:            input,
