@@ -32,7 +32,6 @@ func CreateDirectory(name string) error {
 		if err != nil {
 			return err
 		}
-
 	}
 
 	return nil
@@ -176,7 +175,7 @@ func ZipDirectory(name string) error {
 		return err
 	}
 
-	// Generate output name based on the directorys current name along
+	// Generate output name based on the directories current name along
 	// with a timestamp to make names unique.
 	output := fmt.Sprintf("%s_%d.zip", name, time.Now().Unix())
 	newfile, err := os.Create(output)
@@ -380,7 +379,7 @@ func CopyDirectory(name string) error {
 				return err
 			}
 
-			err = ioutil.WriteFile(output+"/"+f.Name(), content, 0644)
+			err = ioutil.WriteFile(output+"/"+f.Name(), content, 0600)
 			if err != nil {
 				return err
 			}

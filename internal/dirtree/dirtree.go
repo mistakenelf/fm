@@ -98,7 +98,6 @@ func (m Model) dirItem(selected bool, file fs.FileInfo) string {
 		return fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 			Foreground(lipgloss.Color(m.UnselectedItemColor)).
 			Render(file.Name()))
-
 	} else if !m.ShowIcons && selected {
 		return lipgloss.NewStyle().
 			Foreground(lipgloss.Color(m.SelectedItemColor)).

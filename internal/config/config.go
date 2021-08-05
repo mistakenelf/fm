@@ -80,7 +80,6 @@ func LoadConfig() {
 			log.Fatal(err)
 		}
 	}
-
 }
 
 // GetConfig returns the users config.

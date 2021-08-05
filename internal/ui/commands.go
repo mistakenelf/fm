@@ -169,7 +169,6 @@ func (m Model) readFileContent(file fs.FileInfo) tea.Cmd {
 			fileContent:     buf.String(),
 			markdownContent: "",
 		}
-
 	}
 }
 
