@@ -14,8 +14,7 @@ import (
 
 // RenameDirOrFile renames a directory or files given a source and destination.
 func RenameDirOrFile(src, dst string) error {
-	err := os.Rename(src, dst)
-	if err != nil {
+	if err := os.Rename(src, dst); err != nil {
 		return err
 	}
 
@@ -28,13 +27,12 @@ func CreateDirectory(name string) error {
 
 	// If the directory does not already exist, create it.
 	if os.IsNotExist(err) {
-		err := os.MkdirAll(name, 0755)
-		if err != nil {
+		if err := os.MkdirAll(name, 0755); err != nil {
 			return err
 		}
 	}
 
-	return nil
+	return err
 }
 
 // GetDirectoryListing returns a list of files and directories within a given directory.
@@ -74,8 +72,7 @@ func GetDirectoryListing(dir string, showHidden bool) ([]fs.FileInfo, error) {
 
 // DeleteDirectory deletes a directory given a name.
 func DeleteDirectory(name string) error {
-	err := os.RemoveAll(name)
-	if err != nil {
+	if err := os.RemoveAll(name); err != nil {
 		return err
 	}
 
@@ -84,8 +81,7 @@ func DeleteDirectory(name string) error {
 
 // MoveDirectory moves a directory from one place to another.
 func MoveDirectory(src, dst string) error {
-	err := os.Rename(src, dst)
-	if err != nil {
+	if err := os.Rename(src, dst); err != nil {
 		return err
 	}
 
@@ -114,8 +110,7 @@ func GetWorkingDirectory() (string, error) {
 
 // DeleteFile deletes a file given a name.
 func DeleteFile(name string) error {
-	err := os.Remove(name)
-	if err != nil {
+	if err := os.Remove(name); err != nil {
 		return err
 	}
 
@@ -124,8 +119,7 @@ func DeleteFile(name string) error {
 
 // MoveFile moves a file from one place to another.
 func MoveFile(src, dst string) error {
-	err := os.Rename(src, dst)
-	if err != nil {
+	if err := os.Rename(src, dst); err != nil {
 		return err
 	}
 
@@ -149,12 +143,11 @@ func CreateFile(name string) error {
 		return err
 	}
 
-	err = f.Close()
-	if err != nil {
+	if err = f.Close(); err != nil {
 		return err
 	}
 
-	return nil
+	return err
 }
 
 // ZipDirectory zips a directory given a name.
