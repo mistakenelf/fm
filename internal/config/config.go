@@ -63,20 +63,17 @@ type Config struct {
 // located at ~/.config/fm/config.yml.
 func LoadConfig() {
 	if _, err := os.Stat(os.ExpandEnv("$HOME/.config/fm")); os.IsNotExist(err) {
-		err := os.Mkdir(os.ExpandEnv("$HOME/.config/fm"), os.ModePerm)
-		if err != nil {
+		if err := os.Mkdir(os.ExpandEnv("$HOME/.config/fm"), os.ModePerm); err != nil {
 			log.Fatal(err)
 		}
 
 		viper.SetConfigFile(os.ExpandEnv("$HOME/.config/fm/config.yml"))
 
-		err = viper.SafeWriteConfigAs(os.ExpandEnv("$HOME/.config/fm/config.yml"))
-		if err != nil {
+		if err = viper.SafeWriteConfigAs(os.ExpandEnv("$HOME/.config/fm/config.yml")); err != nil {
 			log.Fatal(err)
 		}
 
-		err = viper.ReadInConfig()
-		if err != nil {
+		if err = viper.ReadInConfig(); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -84,9 +81,7 @@ func LoadConfig() {
 
 // GetConfig returns the users config.
 func GetConfig() (config Config) {
-	err := viper.Unmarshal(&config)
-
-	if err != nil {
+	if err := viper.Unmarshal(&config); err != nil {
 		log.Fatal("Error parsing config", err)
 	}
 

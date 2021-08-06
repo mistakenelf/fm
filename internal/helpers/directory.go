@@ -14,11 +14,9 @@ import (
 
 // RenameDirOrFile renames a directory or files given a source and destination.
 func RenameDirOrFile(src, dst string) error {
-	if err := os.Rename(src, dst); err != nil {
-		return err
-	}
+	err := os.Rename(src, dst)
 
-	return nil
+	return err
 }
 
 // CreateDirectory creates a new directory given a name.
@@ -72,20 +70,16 @@ func GetDirectoryListing(dir string, showHidden bool) ([]fs.FileInfo, error) {
 
 // DeleteDirectory deletes a directory given a name.
 func DeleteDirectory(name string) error {
-	if err := os.RemoveAll(name); err != nil {
-		return err
-	}
+	err := os.RemoveAll(name)
 
-	return nil
+	return err
 }
 
 // MoveDirectory moves a directory from one place to another.
 func MoveDirectory(src, dst string) error {
-	if err := os.Rename(src, dst); err != nil {
-		return err
-	}
+	err := os.Rename(src, dst)
 
-	return nil
+	return err
 }
 
 // GetHomeDirectory returns the users home directory.
@@ -110,20 +104,16 @@ func GetWorkingDirectory() (string, error) {
 
 // DeleteFile deletes a file given a name.
 func DeleteFile(name string) error {
-	if err := os.Remove(name); err != nil {
-		return err
-	}
+	err := os.Remove(name)
 
-	return nil
+	return err
 }
 
 // MoveFile moves a file from one place to another.
 func MoveFile(src, dst string) error {
-	if err := os.Rename(src, dst); err != nil {
-		return err
-	}
+	err := os.Rename(src, dst)
 
-	return nil
+	return err
 }
 
 // ReadFileContent returns the contents of a file given a name.

@@ -39,8 +39,7 @@ func (m Model) updateDirectoryListing(name string) tea.Cmd {
 // renameFileOrDir renames a file or directory based on the name and value provided.
 func (m Model) renameFileOrDir(name, value string) tea.Cmd {
 	return func() tea.Msg {
-		err := helpers.RenameDirOrFile(name, value)
-		if err != nil {
+		if err := helpers.RenameDirOrFile(name, value); err != nil {
 			return errorMsg(err.Error())
 		}
 
@@ -64,8 +63,7 @@ func (m Model) moveDir(name string) tea.Cmd {
 		// the same folder name that it had.
 		dst := fmt.Sprintf("%s/%s", workingDir, name)
 
-		err = helpers.MoveDirectory(src, dst)
-		if err != nil {
+		if err = helpers.MoveDirectory(src, dst); err != nil {
 			return errorMsg(err.Error())
 		}
 
@@ -94,8 +92,7 @@ func (m Model) moveFile(name string) tea.Cmd {
 		// the same file name that it had.
 		dst := fmt.Sprintf("%s/%s", workingDir, name)
 
-		err = helpers.MoveFile(src, dst)
-		if err != nil {
+		if err = helpers.MoveFile(src, dst); err != nil {
 			return errorMsg(err.Error())
 		}
 
@@ -111,8 +108,7 @@ func (m Model) moveFile(name string) tea.Cmd {
 // deleteDir deletes a directory based on the name provided.
 func (m Model) deleteDir(name string) tea.Cmd {
 	return func() tea.Msg {
-		err := helpers.DeleteDirectory(name)
-		if err != nil {
+		if err := helpers.DeleteDirectory(name); err != nil {
 			return errorMsg(err.Error())
 		}
 
@@ -123,8 +119,7 @@ func (m Model) deleteDir(name string) tea.Cmd {
 // deleteFile deletes a file based on the name provided.
 func (m Model) deleteFile(name string) tea.Cmd {
 	return func() tea.Msg {
-		err := helpers.DeleteFile(name)
-		if err != nil {
+		if err := helpers.DeleteFile(name); err != nil {
 			return errorMsg(err.Error())
 		}
 
@@ -158,8 +153,7 @@ func (m Model) readFileContent(file fs.FileInfo) tea.Cmd {
 		}
 
 		buf := new(bytes.Buffer)
-		err = quick.Highlight(buf, content, filepath.Ext(file.Name()), "terminal256", "dracula")
-		if err != nil {
+		if err = quick.Highlight(buf, content, filepath.Ext(file.Name()), "terminal256", "dracula"); err != nil {
 			return errorMsg(err.Error())
 		}
 
@@ -208,8 +202,7 @@ func renderMarkdown(width int, content string) (string, error) {
 // createDir creates a directory based on the name provided.
 func (m Model) createDir(name string) tea.Cmd {
 	return func() tea.Msg {
-		err := helpers.CreateDirectory(name)
-		if err != nil {
+		if err := helpers.CreateDirectory(name); err != nil {
 			return errorMsg(err.Error())
 		}
 
@@ -220,8 +213,7 @@ func (m Model) createDir(name string) tea.Cmd {
 // createFile creates a file based on the name provided.
 func (m Model) createFile(name string) tea.Cmd {
 	return func() tea.Msg {
-		err := helpers.CreateFile(name)
-		if err != nil {
+		if err := helpers.CreateFile(name); err != nil {
 			return errorMsg(err.Error())
 		}
 
@@ -232,8 +224,7 @@ func (m Model) createFile(name string) tea.Cmd {
 // zipDirectory zips a directory based on the name provided.
 func (m Model) zipDirectory(name string) tea.Cmd {
 	return func() tea.Msg {
-		err := helpers.ZipDirectory(name)
-		if err != nil {
+		if err := helpers.ZipDirectory(name); err != nil {
 			return errorMsg(err.Error())
 		}
 
@@ -244,8 +235,7 @@ func (m Model) zipDirectory(name string) tea.Cmd {
 // unzipDirectory unzips a directory based on the name provided.
 func (m Model) unzipDirectory(name string) tea.Cmd {
 	return func() tea.Msg {
-		err := helpers.UnzipDirectory(name)
-		if err != nil {
+		if err := helpers.UnzipDirectory(name); err != nil {
 			return errorMsg(err.Error())
 		}
 
@@ -256,8 +246,7 @@ func (m Model) unzipDirectory(name string) tea.Cmd {
 // copyFile copies a file based on the name provided.
 func (m Model) copyFile(name string) tea.Cmd {
 	return func() tea.Msg {
-		err := helpers.CopyFile(name)
-		if err != nil {
+		if err := helpers.CopyFile(name); err != nil {
 			return errorMsg(err.Error())
 		}
 
@@ -268,8 +257,7 @@ func (m Model) copyFile(name string) tea.Cmd {
 // copyDirectory copies a directory based on the name provided.
 func (m Model) copyDirectory(name string) tea.Cmd {
 	return func() tea.Msg {
-		err := helpers.CopyDirectory(name)
-		if err != nil {
+		if err := helpers.CopyDirectory(name); err != nil {
 			return errorMsg(err.Error())
 		}
 

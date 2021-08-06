@@ -33,8 +33,7 @@ var rootCmd = &cobra.Command{
 			}
 
 			defer func() {
-				err = f.Close()
-				if err != nil {
+				if err = f.Close(); err != nil {
 					log.Fatal(err)
 					os.Exit(1)
 				}
