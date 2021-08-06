@@ -227,7 +227,8 @@ func UnzipDirectory(name string) error {
 	output := strings.Split(name, ".")[0]
 
 	for _, f := range r.File {
-		fpath := filepath.Join(output, f.Name)
+		archiveFile := f.Name
+		fpath := filepath.Join(output, archiveFile)
 
 		if !strings.HasPrefix(fpath, filepath.Clean(output)+string(os.PathSeparator)) {
 			return fmt.Errorf("%s: illegal file path", fpath)
