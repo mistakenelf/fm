@@ -11,7 +11,8 @@ import (
 	"github.com/muesli/reflow/wrap"
 )
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+// Update handles all UI interactions and events for updating the screen.
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
@@ -19,10 +20,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// A directoryMsg returns an updated listing of files to display
 	// in the UI. Any time an action is performed, this is called
 	// for example, changing directories, or performing most
-	// file operations
+	// file operations.
 	case directoryMsg:
 		// Directory is empty so lets display a message in the pane
-		// to indicate nothing is in that directory
+		// to indicate nothing is in that directory.
 		if len(msg) == 0 {
 			m.primaryPane.SetContent("Directory is empty")
 		} else {
@@ -37,18 +38,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, cmd
 
-	// A moveMsg is received any time a file or directory has been moved
+	// A moveMsg is received any time a file or directory has been moved.
 	case moveMsg:
 		cfg := config.GetConfig()
 
-		// Set active color back to default
+		// Set active color back to default.
 		m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
 
 		m.dirTree.SetContent(msg)
 		m.primaryPane.SetContent(m.dirTree.View())
 
 		// Set move mode back to false, set the initial moving directory to empty,
-		// the item that was moving back to nil, and update the status bars content
+		// the item that was moving back to nil, and update the status bars content.
 		m.inMoveMode = false
 		m.initialMoveDirectory = ""
 		m.itemToMove = nil
@@ -56,7 +57,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 
 	// A fileContentMsg is received anytime a file is read from returning its content
-	// along with the markdown content to be rendered by glamour
+	// along with the markdown content to be rendered by glamour.
 	case fileContentMsg:
 		m.activeMarkdownSource = string(msg.markdownContent)
 		m.secondaryPane.GotoTop()
@@ -65,7 +66,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, cmd
 
-	// Anytime markdown is being rendered, this message is received
+	// Anytime markdown is being rendered, this message is received.
 	case markdownMsg:
 		m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(string(msg)))
 		m.secondaryPaneContent = helpers.ConvertTabsToSpaces(string(msg))
@@ -73,7 +74,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 
 	// An errorMsg is received any time something in a command goes wrong
-	// we receive that error and show it in the secondary pane with red text
+	// we receive that error and show it in the secondary pane with red text.
 	case errorMsg:
 		m.secondaryPane.SetContent(
 			lipgloss.NewStyle().
@@ -85,7 +86,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 
 	// Any time the window is resized this is called, including when the app
-	// is first started
+	// is first started.
 	case tea.WindowSizeMsg:
 		if !m.ready {
 			m.primaryPane.SetContent(m.dirTree.View())
@@ -105,25 +106,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		// If we have some active markdown source to render, re-render its content
-		// when the window is resized so that glamour knows how to wrap its text
+		// when the window is resized so that glamour knows how to wrap its text.
 		if m.activeMarkdownSource != "" {
 			return m, renderMarkdownContent(m.secondaryPane.GetWidth(), m.activeMarkdownSource)
 		}
 
 		return m, cmd
 
-	// Any time a mouse event is received, we get this message
+	// Any time a mouse event is received, we get this message.
 	case tea.MouseMsg:
 		switch msg.Type {
 		case tea.MouseWheelUp:
 			// The command bar is not open and the primary pane is active
-			// so scroll the dirtree up and update the primary panes content
+			// so scroll the dirtree up and update the primary panes content.
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.dirTree.GoUp()
 				m.scrollPrimaryPane()
 				m.primaryPane.SetContent(m.dirTree.View())
 			} else {
-				// Secondary pane is active so scroll its content up
+				// Secondary pane is active so scroll its content up.
 				m.secondaryPane.LineUp(3)
 			}
 
@@ -131,13 +132,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case tea.MouseWheelDown:
 			// Command bar is not shown and the primary pane is active
-			// so scroll the dirtree down and update the primary panes content
+			// so scroll the dirtree down and update the primary panes content.
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.dirTree.GoDown()
 				m.scrollPrimaryPane()
 				m.primaryPane.SetContent(m.dirTree.View())
 			} else {
-				// Secondary pane is active so scroll its content down
+				// Secondary pane is active so scroll its content down.
 				m.secondaryPane.LineDown(3)
 			}
 
@@ -145,17 +146,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case tea.KeyMsg:
-		// If gg is pressed
+		// If gg is pressed.
 		if msg.String() == "g" && m.previousKey.String() == "g" {
 			// If the command bar is not shown and the primary pane is active,
-			// reset the previous key, go to the top of the dirtree and pane
+			// reset the previous key, go to the top of the dirtree and pane.
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.previousKey = tea.KeyMsg{}
 				m.dirTree.GotoTop()
 				m.primaryPane.GotoTop()
 				m.primaryPane.SetContent(m.dirTree.View())
 			} else {
-				// Secondary pane is active so go to the top
+				// Secondary pane is active so go to the top.
 				m.secondaryPane.GotoTop()
 			}
 
@@ -163,11 +164,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		switch msg.String() {
-		// Exit FM
+		// Exit FM.
 		case "ctrl+c":
 			return m, tea.Quit
 
-		// Exit FM if the command bar is not open
+		// Exit FM if the command bar is not open.
 		case "q":
 			if !m.showCommandBar {
 				return m, tea.Quit
@@ -176,7 +177,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "left", "h":
 			// If the command bar is not shown and the primary pane is active
 			// set the previous directory to the current directory,
-			// and update the directory listing to go back one directory
+			// and update the directory listing to go back one directory.
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.previousDirectory, _ = helpers.GetWorkingDirectory()
 
@@ -184,7 +185,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "down", "j":
-			// Scroll down in pane
+			// Scroll down in pane.
 			if !m.showCommandBar {
 				if m.primaryPane.IsActive {
 					m.dirTree.GoDown()
@@ -196,7 +197,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "up", "k":
-			// Scroll up in pane
+			// Scroll up in pane.
 			if !m.showCommandBar {
 				if m.primaryPane.IsActive {
 					m.dirTree.GoUp()
@@ -208,90 +209,92 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "right", "l":
-			// Open director or read file content
+			// Open directory or read file content.
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				if m.dirTree.GetSelectedFile().IsDir() && !m.textInput.Focused() {
 					return m, m.updateDirectoryListing(m.dirTree.GetSelectedFile().Name())
-				} else {
-					return m, m.readFileContent(m.dirTree.GetSelectedFile())
 				}
+
+				return m, m.readFileContent(m.dirTree.GetSelectedFile())
+
 			}
 
 		case "G":
-			// Go to the bottom of the pane
+			// Go to the bottom of the pane.
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.dirTree.GotoBottom()
 				m.primaryPane.GotoBottom()
 				m.primaryPane.SetContent(m.dirTree.View())
 			} else {
-				// Secondary pane is active so go to the bottom of it
+				// Secondary pane is active so go to the bottom of it.
 				m.secondaryPane.GotoBottom()
 			}
 
 		case "enter":
-			// If pressing enter while in move mode
+			// If pressing enter while in move mode.
 			if m.inMoveMode {
 				if m.itemToMove.IsDir() {
 					return m, tea.Sequentially(
 						m.moveDir(m.itemToMove.Name()),
 						m.updateDirectoryListing(m.initialMoveDirectory),
 					)
-				} else {
-					return m, tea.Sequentially(
-						m.moveFile(m.itemToMove.Name()),
-						m.updateDirectoryListing(m.initialMoveDirectory),
-					)
 				}
+
+				return m, tea.Sequentially(
+					m.moveFile(m.itemToMove.Name()),
+					m.updateDirectoryListing(m.initialMoveDirectory),
+				)
+
 			} else {
 				// Parse the commands from the command bar, command is the name
 				// of the command and value is if the command requires input to it
-				// get its value, for example (rename test.txt) text.txt is the value
+				// get its value, for example (rename test.txt) text.txt is the value.
 				command, value := helpers.ParseCommand(m.textInput.Value())
 
-				// Nothing was input for a command
+				// Nothing was input for a command.
 				if command == "" {
 					return m, nil
 				}
 
 				switch command {
-				// Exit FM
+				// Exit FM.
 				case "exit", "q", "quit":
 					return m, tea.Quit
 
-				// Create a new directory based on the value passed
+				// Create a new directory based on the value passed.
 				case "mkdir":
 					return m, tea.Sequentially(
 						m.createDir(value),
 						m.updateDirectoryListing(constants.CurrentDirectory),
 					)
 
-				// Create a new file based on the value passed
+				// Create a new file based on the value passed.
 				case "touch":
 					return m, tea.Sequentially(
 						m.createFile(value),
 						m.updateDirectoryListing(constants.CurrentDirectory),
 					)
 
-				// Rename the currently selected file or folder based on the value passed
+				// Rename the currently selected file or folder based on the value passed.
 				case "mv", "rename":
 					return m, tea.Sequentially(
 						m.renameFileOrDir(m.dirTree.GetSelectedFile().Name(), value),
 						m.updateDirectoryListing(constants.CurrentDirectory),
 					)
 
-				// Delete the currently selected item
+				// Delete the currently selected item.
 				case "rm", "delete":
 					if m.dirTree.GetSelectedFile().IsDir() {
 						return m, tea.Sequentially(
 							m.deleteDir(m.dirTree.GetSelectedFile().Name()),
 							m.updateDirectoryListing(constants.CurrentDirectory),
 						)
-					} else {
-						return m, tea.Sequentially(
-							m.deleteFile(m.dirTree.GetSelectedFile().Name()),
-							m.updateDirectoryListing(constants.CurrentDirectory),
-						)
 					}
+
+					return m, tea.Sequentially(
+						m.deleteFile(m.dirTree.GetSelectedFile().Name()),
+						m.updateDirectoryListing(constants.CurrentDirectory),
+					)
 
 				default:
 					return m, nil
@@ -299,7 +302,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case ":":
-			// If move mode is not active, activate the command bar,
+			// If move mode is not active, activate the command bar.
 			if !m.inMoveMode {
 				m.showCommandBar = true
 				m.textInput.Placeholder = "enter command"
@@ -309,34 +312,34 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, cmd
 
 		// Shortcut to get back to the home directory if the
-		// command bar is not curently open
+		// command bar is not curently open.
 		case "~":
 			if !m.showCommandBar {
 				homeDir, _ := helpers.GetHomeDirectory()
 				return m, m.updateDirectoryListing(homeDir)
 			}
 
-		// Shortcut to go back to the previous directory
+		// Shortcut to go back to the previous directory.
 		case "-":
 			if !m.showCommandBar && m.previousDirectory != "" {
 				return m, m.updateDirectoryListing(m.previousDirectory)
 			}
 
-		// Toggle hidden files and folders
+		// Toggle hidden files and folders.
 		case ".":
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.dirTree.ToggleHidden()
 				return m, m.updateDirectoryListing(constants.CurrentDirectory)
 			}
 
-		// Toggle between the two panes if the command bar is not currently active
+		// Toggle between the two panes if the command bar is not currently active.
 		case "tab":
 			if !m.showCommandBar {
 				m.primaryPane.IsActive = !m.primaryPane.IsActive
 				m.secondaryPane.IsActive = !m.secondaryPane.IsActive
 			}
 
-		// Enter move mode
+		// Enter move mode.
 		case "m":
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.inMoveMode = true
@@ -345,7 +348,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.itemToMove = m.dirTree.GetSelectedFile()
 			}
 
-		// Zip up the currently selected item
+		// Zip up the currently selected item.
 		case "z":
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				return m, tea.Sequentially(
@@ -354,7 +357,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				)
 			}
 
-		// Unzip the currently selected zip file
+		// Unzip the currently selected zip file.
 		case "u":
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				return m, tea.Sequentially(
@@ -363,7 +366,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				)
 			}
 
-		// Copy the currently selected item
+		// Copy the currently selected item.
 		case "c":
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				if m.dirTree.GetSelectedFile().IsDir() {
@@ -371,15 +374,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.copyDirectory(m.dirTree.GetSelectedFile().Name()),
 						m.updateDirectoryListing(constants.CurrentDirectory),
 					)
-				} else {
-					return m, tea.Sequentially(
-						m.copyFile(m.dirTree.GetSelectedFile().Name()),
-						m.updateDirectoryListing(constants.CurrentDirectory),
-					)
 				}
+
+				return m, tea.Sequentially(
+					m.copyFile(m.dirTree.GetSelectedFile().Name()),
+					m.updateDirectoryListing(constants.CurrentDirectory),
+				)
 			}
 
-		// Reset FM to its initial state
+		// Reset FM to its initial state.
 		case "esc":
 			cfg := config.GetConfig()
 
@@ -399,11 +402,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		// Capture the previous key so that we can capture
-		// when two keys are pressed
+		// when two keys are pressed.
 		m.previousKey = msg
 	}
 
-	// Keep status bar content updated
+	// Keep status bar content updated.
 	m.statusBar.SetContent(m.getStatusBarContent())
 
 	m.textInput, cmd = m.textInput.Update(msg)

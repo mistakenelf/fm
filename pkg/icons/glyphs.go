@@ -2,17 +2,20 @@ package icons
 
 import "fmt"
 
-type Icon_Info struct {
+// IconInfo is a struct that holds information about an icon.
+type IconInfo struct {
 	icon       string
 	color      [3]uint8
 	executable bool
 }
 
-func (i *Icon_Info) GetGlyph() string {
+// Getglyph returns the glyph for the icon.
+func (i *IconInfo) GetGlyph() string {
 	return i.icon
 }
 
-func (i *Icon_Info) GetColor(f uint8) string {
+// GetColor returns the color for the icon.
+func (i *IconInfo) GetColor(f uint8) string {
 	if i.executable {
 		return "\033[38;2;76;175;080m"
 	} else if f == 1 {
@@ -22,11 +25,13 @@ func (i *Icon_Info) GetColor(f uint8) string {
 	}
 }
 
-func (i *Icon_Info) MakeExe() {
+// MakeExe is a function that returns a new IconInfo struct with the executable flag set to true.
+func (i *IconInfo) MakeExe() {
 	i.executable = true
 }
 
-var Icon_Set = map[string]*Icon_Info{
+// IconSet is a map to represent all the icons.
+var IconSet = map[string]*IconInfo{
 	"html":             {icon: "\uf13b", color: [3]uint8{228, 79, 57}},   // html
 	"markdown":         {icon: "\uf853", color: [3]uint8{66, 165, 245}},  // markdown
 	"css":              {icon: "\uf81b", color: [3]uint8{66, 165, 245}},  // css
@@ -116,7 +121,7 @@ var Icon_Set = map[string]*Icon_Info{
 	"applescript":      {icon: "\uf302", color: [3]uint8{120, 144, 156}}, // applescript
 	"cake":             {icon: "\uf5ea", color: [3]uint8{250, 111, 66}},  // cake
 	"nim":              {icon: "\uf6a4", color: [3]uint8{255, 202, 61}},  // nim
-	"todo":             {icon: "\uf058", color: [3]uint8{124, 179, 66}},  // todo
+	"todo":             {icon: "\uf058", color: [3]uint8{124, 179, 66}},  // task
 	"nix":              {icon: "\uf313", color: [3]uint8{80, 117, 193}},  // nix
 	"http":             {icon: "\uf484", color: [3]uint8{66, 165, 245}},  // http
 	"webpack":          {icon: "\ufc29", color: [3]uint8{142, 214, 251}}, // webpack
@@ -347,8 +352,8 @@ var Icon_Set = map[string]*Icon_Info{
 	"dir-environment": {icon: "\uf74e", color: [3]uint8{102, 187, 106}}, // dir-environment
 }
 
-// default icons in case nothing can be found
-var Icon_Def = map[string]*Icon_Info{
+// IconDef is a map of default icons if none can be found.
+var IconDef = map[string]*IconInfo{
 	"dir":        {icon: "\uf74a", color: [3]uint8{224, 177, 77}},
 	"diropen":    {icon: "\ufc6e", color: [3]uint8{224, 177, 77}},
 	"hiddendir":  {icon: "\uf755", color: [3]uint8{224, 177, 77}},

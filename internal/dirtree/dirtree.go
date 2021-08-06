@@ -12,6 +12,7 @@ import (
 	"github.com/muesli/reflow/truncate"
 )
 
+// Model is a struct to represent the properties on a dirtree.
 type Model struct {
 	Files               []fs.FileInfo
 	Width               int
@@ -22,6 +23,7 @@ type Model struct {
 	UnselectedItemColor string
 }
 
+// NewModel creates a new instance of a dirtree.
 func NewModel(showIcons bool, selectedItemColor, unselectedItemColor string) Model {
 	return Model{
 		Cursor:              0,
@@ -32,59 +34,59 @@ func NewModel(showIcons bool, selectedItemColor, unselectedItemColor string) Mod
 	}
 }
 
-// Update the set of files the tree is currently displaying
+// SetContent update the files currently displayed in the tree.
 func (m *Model) SetContent(files []fs.FileInfo) {
 	m.Files = files
 }
 
-// Set size of the tree, useful when changing the terminal size
+// SetSize updates the size of the dirtree, useful when resizing the terminal.
 func (m *Model) SetSize(width int) {
 	m.Width = width
 }
 
-// Go to the top of the tree
+// GotoTop goes to the top of the tree.
 func (m *Model) GotoTop() {
 	m.Cursor = 0
 }
 
-// Go to the bottom of the tree
+// GotoBottom goes to the bottom of the tree.
 func (m *Model) GotoBottom() {
 	m.Cursor = len(m.Files) - 1
 }
 
-// Get the currently selected file
+// GetSelectedFile returns the currently selected file in the tree.
 func (m Model) GetSelectedFile() fs.FileInfo {
 	return m.Files[m.Cursor]
 }
 
-// Get the current position of the cursor in the tree
+// GetCursor gets the position of the cursor in the tree.
 func (m Model) GetCursor() int {
 	return m.Cursor
 }
 
-// Move down the tree by 1
+// GoDown goes down the tree by one.
 func (m *Model) GoDown() {
 	m.Cursor++
 }
 
-// Move up the tree by one
+// GoUp goes up the tree by one.
 func (m *Model) GoUp() {
 	m.Cursor--
 }
 
-// Get the total number of files currently being displayed in the tree
+// GetTotalFiles returns the total number of files in the tree.
 func (m Model) GetTotalFiles() int {
 	return len(m.Files)
 }
 
-// Toggle whether or not to show hidden files and folders
+// ToggleHidden toggles the visibility of hidden files.
 func (m *Model) ToggleHidden() {
 	m.ShowHidden = !m.ShowHidden
 }
 
-// Individual tree items
+// dirItem returns a string representation of a directory item.
 func (m Model) dirItem(selected bool, file fs.FileInfo) string {
-	// Get the icon and color based on the current file
+	// Get the icon and color based on the current file.
 	icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))
 	fileIcon := fmt.Sprintf("%s%s", color, icon)
 
@@ -96,7 +98,6 @@ func (m Model) dirItem(selected bool, file fs.FileInfo) string {
 		return fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 			Foreground(lipgloss.Color(m.UnselectedItemColor)).
 			Render(file.Name()))
-
 	} else if !m.ShowIcons && selected {
 		return lipgloss.NewStyle().
 			Foreground(lipgloss.Color(m.SelectedItemColor)).
@@ -108,7 +109,7 @@ func (m Model) dirItem(selected bool, file fs.FileInfo) string {
 	}
 }
 
-// Display the directory tree
+// View returns a string representation of the current tree.
 func (m Model) View() string {
 	doc := strings.Builder{}
 	curFiles := ""

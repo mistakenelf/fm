@@ -15,8 +15,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Main App model
-type model struct {
+// Model represents the state of the UI.
+type Model struct {
 	primaryPane          pane.Model
 	secondaryPane        pane.Model
 	textInput            textinput.Model
@@ -34,27 +34,28 @@ type model struct {
 	ready                bool
 }
 
-func NewModel() model {
+// NewModel create an instance of the entire application model.
+func NewModel() Model {
 	cfg := config.GetConfig()
 
-	// Create a new textinput
+	// Create a new textinput.
 	input := textinput.NewModel()
 	input.Prompt = "❯ "
 	input.CharLimit = 250
 
-	// Create a new spinner with some styling based on the config
+	// Create a new spinner with some styling based on the config.
 	l := spinner.NewModel()
 	l.Spinner = spinner.Dot
 	l.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.Spinner))
 
-	// Create a new dirtree
+	// Create a new dirtree.
 	dirTree := dirtree.NewModel(
 		cfg.Settings.ShowIcons,
 		cfg.Colors.DirTree.SelectedItem,
 		cfg.Colors.DirTree.UnselectedItem,
 	)
 
-	// Initialize the primary pane as active and pass in some config values
+	// Initialize the primary pane as active and pass in some config values.
 	primaryPane := pane.NewModel(
 		true,
 		cfg.Settings.RoundedPanes,
@@ -63,7 +64,7 @@ func NewModel() model {
 		cfg.Colors.Pane.InactiveBorderColor,
 	)
 
-	// Initialize the secondary pane as inactive and pass in some config values
+	// Initialize the secondary pane as inactive and pass in some config values.
 	secondaryPane := pane.NewModel(
 		false,
 		cfg.Settings.RoundedPanes,
@@ -72,7 +73,7 @@ func NewModel() model {
 		cfg.Colors.Pane.InactiveBorderColor,
 	)
 
-	// Initialize a status bar passing in config values
+	// Initialize a status bar passing in config values.
 	statusBar := statusbar.NewModel(
 		statusbar.Color{
 			Background: cfg.Colors.StatusBar.SelectedFile.Background,
@@ -92,7 +93,7 @@ func NewModel() model {
 		},
 	)
 
-	return model{
+	return Model{
 		primaryPane:          primaryPane,
 		secondaryPane:        secondaryPane,
 		textInput:            input,

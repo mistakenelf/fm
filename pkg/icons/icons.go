@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// GetIndicator returns the indicator for the given file.
 func GetIndicator(modebit os.FileMode) (i string) {
 	switch {
 	case modebit&os.ModeDir > 0:
@@ -18,59 +19,61 @@ func GetIndicator(modebit os.FileMode) (i string) {
 	case modebit&1000000 > 0:
 		i = "*"
 	}
+
 	return i
 }
 
+// GetIcon returns the icon based on its name, extension and indicator.
 func GetIcon(name, ext, indicator string) (icon, color string) {
-	var i *Icon_Info
+	var i *IconInfo
 	var ok bool
 	const DOT = '.'
 
 	switch indicator {
 	case "/":
-		i, ok = Icon_Dir[strings.ToLower(name+ext)]
+		i, ok = IconDir[strings.ToLower(name+ext)]
 		if ok {
 			break
 		}
 		if len(name) == 0 || DOT == name[0] {
-			i = Icon_Def["hiddendir"]
+			i = IconDef["hiddendir"]
 			break
 		}
-		i = Icon_Def["dir"]
+		i = IconDef["dir"]
 	default:
-		i, ok = Icon_FileName[strings.ToLower(name+ext)]
+		i, ok = IconFileName[strings.ToLower(name+ext)]
 		if ok {
 			break
 		}
 
 		if ext == ".go" && strings.HasSuffix(name, "_test") {
-			i = Icon_Set["go-test"]
+			i = IconSet["go-test"]
 			break
 		}
 
 		t := strings.Split(name, ".")
 		if len(t) > 1 && t[0] != "" {
-			i, ok = Icon_SubExt[strings.ToLower(t[len(t)-1]+ext)]
+			i, ok = IconSubExt[strings.ToLower(t[len(t)-1]+ext)]
 			if ok {
 				break
 			}
 		}
 
-		i, ok = Icon_Ext[strings.ToLower(strings.TrimPrefix(ext, "."))]
+		i, ok = IconExt[strings.ToLower(strings.TrimPrefix(ext, "."))]
 		if ok {
 			break
 		}
 
 		if len(name) == 0 || DOT == name[0] {
-			i = Icon_Def["hiddenfile"]
+			i = IconDef["hiddenfile"]
 			break
 		}
-		i = Icon_Def["file"]
+		i = IconDef["file"]
 	}
 
 	if indicator == "*" {
 		if i.GetGlyph() == "\uf723" {
-			i = Icon_Def["exe"]
+			i = IconDef["exe"]
 		}
 
 		i.MakeExe()

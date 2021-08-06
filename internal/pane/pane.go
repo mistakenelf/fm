@@ -5,6 +5,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+// Model struct represents property of a pane.
 type Model struct {
 	IsActive            bool
 	Viewport            viewport.Model
@@ -14,39 +15,37 @@ type Model struct {
 	IsPadded            bool
 }
 
+// NewModel creates a new instance of a pane.
 func NewModel(isActive, rounded, isPadded bool, activeBorderColor, inactiveBorderColor string) Model {
-	m := Model{
+	return Model{
 		IsActive:            isActive,
 		ActiveBorderColor:   activeBorderColor,
 		InactiveBorderColor: inactiveBorderColor,
 		Rounded:             rounded,
 		IsPadded:            isPadded,
 	}
-
-	return m
 }
 
-// Set the size of the pane, useful when changing screen sizes
+// SetSize sets the size of the pane and its viewport, useful when resizing the terminal.
 func (m *Model) SetSize(width, height int) {
 	// Get the border so that when setting the width of a pane,
-	// the border is also taken into account
+	// the border is also taken into account.
 	border := lipgloss.NormalBorder()
 
-	// If borders are rounded, use the rounded border
+	// Use rounded border if enabled.
 	if m.Rounded {
 		border = lipgloss.RoundedBorder()
 	}
 
-	// Set width of the panes viewport
 	m.Viewport.Width = width - lipgloss.Width(border.Right+border.Top)
 	m.Viewport.Height = height - lipgloss.Width(border.Bottom+border.Top)
 }
 
-// Set content of the pane
+// SetContent sets the content of the pane.
 func (m *Model) SetContent(content string) {
 	padding := 0
 
-	// If the pane requires padding, add it
+	// If the pane requires padding, add it.
 	if m.IsPadded {
 		padding = 1
 	}
@@ -60,57 +59,57 @@ func (m *Model) SetContent(content string) {
 	)
 }
 
-// Scroll pane up the number of specified lines
+// LineUp scrolls the pane up the specified number of lines.
 func (m *Model) LineUp(lines int) {
 	m.Viewport.LineUp(lines)
 }
 
-// Scroll pane down the specified number of lines
+// LineDown scrolls the pane down the specified number of lines.
 func (m *Model) LineDown(lines int) {
 	m.Viewport.LineDown(lines)
 }
 
-// Go to the top of the pane
+// GotoTop goes to the top of the pane.
 func (m *Model) GotoTop() {
 	m.Viewport.GotoTop()
 }
 
-// Go to the bottom of the pane
+// GotoBottom goes to the bottom of the pane.
 func (m *Model) GotoBottom() {
 	m.Viewport.GotoBottom()
 }
 
-// Set active border color
+// SetActiveBorderColors sets the active border colors.
 func (m *Model) SetActiveBorderColor(color string) {
 	m.ActiveBorderColor = color
 }
 
-// Get width of pane
+// GetWidth returns the width of the pane.
 func (m Model) GetWidth() int {
 	return m.Viewport.Width
 }
 
-// Get height of pane
+// GetHeight returns the height of the pane.
 func (m Model) GetHeight() int {
 	return m.Viewport.Height
 }
 
-// Get Y offset of the pane
+// GetYOffset returns the y offset of the pane.
 func (m Model) GetYOffset() int {
 	return m.Viewport.YOffset
 }
 
-// Display the pane
+// View returns a string representation of the pane.
 func (m Model) View() string {
 	borderColor := m.InactiveBorderColor
 	border := lipgloss.NormalBorder()
 
-	// If rounding is enabled on borders, use the round border
+	// If rounding is enabled on borders, use the round border.
 	if m.Rounded {
 		border = lipgloss.RoundedBorder()
 	}
 
-	// If the pane is active, use the active border color
+	// If the pane is active, use the active border color.
 	if m.IsActive {
 		borderColor = m.ActiveBorderColor
 	}
