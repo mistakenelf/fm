@@ -92,18 +92,22 @@ func (m Model) dirItem(selected bool, file fs.FileInfo) string {
 
 	if m.ShowIcons && selected {
 		return fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
+			Bold(true).
 			Foreground(lipgloss.Color(m.SelectedItemColor)).
 			Render(file.Name()))
 	} else if m.ShowIcons && !selected {
 		return fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
+			Bold(true).
 			Foreground(lipgloss.Color(m.UnselectedItemColor)).
 			Render(file.Name()))
 	} else if !m.ShowIcons && selected {
 		return lipgloss.NewStyle().
+			Bold(true).
 			Foreground(lipgloss.Color(m.SelectedItemColor)).
 			Render(file.Name())
 	} else {
 		return lipgloss.NewStyle().
+			Bold(true).
 			Foreground(lipgloss.Color(m.UnselectedItemColor)).
 			Render(file.Name())
 	}
@@ -115,8 +119,19 @@ func (m Model) View() string {
 	curFiles := ""
 
 	for i, file := range m.Files {
-		curFiles += truncate.StringWithTail(m.dirItem(m.Cursor == i, file), uint(m.Width-8), "...")
-		curFiles += "\n"
+		modTime := lipgloss.NewStyle().
+			Align(lipgloss.Right).
+			Render(file.ModTime().
+				Format("2006-01-02 15:04:05"),
+			)
+
+		dirItem := lipgloss.NewStyle().Width(m.Width - lipgloss.Width(modTime) - 4).Render(
+			truncate.StringWithTail(m.dirItem(m.Cursor == i, file), uint(m.Width-lipgloss.Width(modTime)-4), "..."),
+		)
+
+		row := lipgloss.JoinHorizontal(lipgloss.Top, dirItem, modTime)
+
+		curFiles += fmt.Sprintf("%s\n", row)
 	}
 
 	doc.WriteString(curFiles)
