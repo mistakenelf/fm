@@ -11,7 +11,7 @@ const (
 	HomeDirectory = "~"
 
 	// AppVersion is the version of the application.
-	AppVersion = "0.0.6"
+	AppVersion = "0.1.0"
 
 	// StatusBarHeight is the height of the status bar.
 	StatusBarHeight = 1
