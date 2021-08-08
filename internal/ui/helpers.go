@@ -3,10 +3,10 @@ package ui
 import (
 	"fmt"
 
+	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/helpers"
-	"github.com/knipferrc/fm/pkg/icons"
 )
 
 // scrollPrimaryPane handles the scrolling of the primary pane which will handle
