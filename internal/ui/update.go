@@ -17,13 +17,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
-	// A directoryMsg returns an updated listing of files to display
+	// A directoryUpdateMsg returns an updated listing of files to display
 	// in the UI. Any time an action is performed, this is called
 	// for example, changing directories, or performing most
 	// file operations.
-	case directoryMsg:
-		// Directory is empty so lets display a message in the pane
-		// to indicate nothing is in that directory.
+	case directoryUpdateMsg:
 		if len(msg) == 0 {
 			m.primaryPane.SetContent("Directory is empty")
 		} else {
@@ -38,8 +36,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, cmd
 
-	// A moveMsg is received any time a file or directory has been moved.
-	case moveMsg:
+	// A moveDirItemMsg is received any time a file or directory has been moved.
+	case moveDirItemMsg:
 		cfg := config.GetConfig()
 
 		// Set active color back to default.
@@ -58,16 +56,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// A fileContentMsg is received anytime a file is read from returning its content
 	// along with the markdown content to be rendered by glamour.
-	case fileContentMsg:
+	case readFileContentMsg:
 		m.activeMarkdownSource = string(msg.markdownContent)
+		m.secondaryPaneContent = helpers.ConvertTabsToSpaces(string(msg.fileContent))
+		m.activeImageContent = msg.imgFile
 		m.secondaryPane.GotoTop()
 		m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(string(msg.fileContent)))
-		m.secondaryPaneContent = helpers.ConvertTabsToSpaces(string(msg.fileContent))
 
 		return m, cmd
 
 	// Anytime markdown is being rendered, this message is received.
 	case markdownMsg:
+		m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(string(msg)))
+		m.secondaryPaneContent = helpers.ConvertTabsToSpaces(string(msg))
+
+		return m, cmd
+
+	case imageMsg:
 		m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(string(msg)))
 		m.secondaryPaneContent = helpers.ConvertTabsToSpaces(string(msg))
 
@@ -109,6 +114,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// when the window is resized so that glamour knows how to wrap its text.
 		if m.activeMarkdownSource != "" {
 			return m, renderMarkdownContent(m.secondaryPane.GetWidth(), m.activeMarkdownSource)
+		}
+
+		if m.activeImageContent != nil {
+			return m, renderImageContent(m.activeImageContent, m.secondaryPane.GetWidth())
 		}
 
 		return m, cmd
@@ -215,7 +224,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, m.updateDirectoryListing(m.dirTree.GetSelectedFile().Name())
 				}
 
-				return m, m.readFileContent(m.dirTree.GetSelectedFile())
+				return m, m.readFileContent(m.dirTree.GetSelectedFile(), m.secondaryPane.GetWidth()-2)
 
 			}
 

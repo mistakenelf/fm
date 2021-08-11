@@ -3,7 +3,10 @@ package ui
 import (
 	"bytes"
 	"fmt"
+	"image"
+	"image/png"
 	"io/fs"
+	"os"
 	"path/filepath"
 
 	"github.com/knipferrc/fm/internal/config"
@@ -11,17 +14,17 @@ import (
 
 	"github.com/alecthomas/chroma/quick"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/glamour"
-	"github.com/charmbracelet/lipgloss"
 )
 
-type directoryMsg []fs.FileInfo
-type moveMsg []fs.FileInfo
+type directoryUpdateMsg []fs.FileInfo
+type moveDirItemMsg []fs.FileInfo
 type markdownMsg string
+type imageMsg string
 type errorMsg string
-type fileContentMsg struct {
+type readFileContentMsg struct {
 	markdownContent string
 	fileContent     string
+	imgFile         image.Image
 }
 
 // updateDirectoryListing updates the directory listing based on the name of the direcoctory provided.
@@ -32,7 +35,7 @@ func (m Model) updateDirectoryListing(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		return directoryMsg(files)
+		return directoryUpdateMsg(files)
 	}
 }
 
@@ -72,7 +75,7 @@ func (m Model) moveDir(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		return moveMsg(files)
+		return moveDirItemMsg(files)
 	}
 }
 
@@ -101,7 +104,7 @@ func (m Model) moveFile(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		return moveMsg(files)
+		return moveDirItemMsg(files)
 	}
 }
 
@@ -128,9 +131,8 @@ func (m Model) deleteFile(name string) tea.Cmd {
 }
 
 // readFileContent reads the content of a file and returns it.
-func (m Model) readFileContent(file fs.FileInfo) tea.Cmd {
+func (m Model) readFileContent(file fs.FileInfo, width int) tea.Cmd {
 	cfg := config.GetConfig()
-	width := m.secondaryPane.GetWidth()
 
 	return func() tea.Msg {
 		content, err := helpers.ReadFileContent(file.Name())
@@ -141,14 +143,34 @@ func (m Model) readFileContent(file fs.FileInfo) tea.Cmd {
 		// Return both the pretty markdown as well as the plain content without glamour
 		// to use later when resizing the window.
 		if filepath.Ext(file.Name()) == ".md" && cfg.Settings.PrettyMarkdown {
-			markdownContent, err := renderMarkdown(width, content)
+			markdownContent, err := helpers.RenderMarkdown(width, content)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
 
-			return fileContentMsg{
+			return readFileContentMsg{
 				fileContent:     markdownContent,
 				markdownContent: content,
+			}
+		}
+
+		if filepath.Ext(file.Name()) == ".png" {
+			imageContent, err := os.Open(file.Name())
+			if err != nil {
+				return errorMsg(err.Error())
+			}
+
+			img, err := png.Decode(imageContent)
+			if err != nil {
+				return errorMsg(err.Error())
+			}
+
+			imageString := helpers.ConvertToAscii(helpers.ScaleImage(img, width-2))
+
+			return readFileContentMsg{
+				fileContent:     imageString,
+				markdownContent: "",
+				imgFile:         img,
 			}
 		}
 
@@ -159,7 +181,7 @@ func (m Model) readFileContent(file fs.FileInfo) tea.Cmd {
 
 		// Return the syntax highlighted content and markdown content as empty
 		// since were not dealing with markdown.
-		return fileContentMsg{
+		return readFileContentMsg{
 			fileContent:     buf.String(),
 			markdownContent: "",
 		}
@@ -169,7 +191,7 @@ func (m Model) readFileContent(file fs.FileInfo) tea.Cmd {
 // renderMarkdownContent renders the markdown content and returns it.
 func renderMarkdownContent(width int, content string) tea.Cmd {
 	return func() tea.Msg {
-		markdownContent, err := renderMarkdown(width, content)
+		markdownContent, err := helpers.RenderMarkdown(width, content)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
@@ -178,25 +200,13 @@ func renderMarkdownContent(width int, content string) tea.Cmd {
 	}
 }
 
-// renderMarkdown renders the markdown content with glamour.
-func renderMarkdown(width int, content string) (string, error) {
-	bg := "light"
+// renderMarkdownContent renders the markdown content and returns it.
+func renderImageContent(img image.Image, width int) tea.Cmd {
+	return func() tea.Msg {
+		imageString := helpers.ConvertToAscii(helpers.ScaleImage(img, width-2))
 
-	if lipgloss.HasDarkBackground() {
-		bg = "dark"
+		return imageMsg(imageString)
 	}
-
-	r, _ := glamour.NewTermRenderer(
-		glamour.WithWordWrap(width),
-		glamour.WithStandardStyle(bg),
-	)
-
-	out, err := r.Render(content)
-	if err != nil {
-		return "", err
-	}
-
-	return out, nil
 }
 
 // createDir creates a directory based on the name provided.
