@@ -43,6 +43,7 @@ go install github.com/knipferrc/fm@latest
 - Syntax highlighting for source code
 - Mouse support
 - Customizable colors
+- Render PNG, JPG and JPEG as ASCII
 
 ## Usage
 
