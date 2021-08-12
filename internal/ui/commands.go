@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"image/jpeg"
 	"image/png"
 	"io/fs"
 	"os"
@@ -131,7 +132,7 @@ func (m Model) deleteFile(name string) tea.Cmd {
 }
 
 // readFileContent reads the content of a file and returns it.
-func (m Model) readFileContent(file fs.FileInfo, width int) tea.Cmd {
+func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 	cfg := config.GetConfig()
 
 	return func() tea.Msg {
@@ -165,7 +166,27 @@ func (m Model) readFileContent(file fs.FileInfo, width int) tea.Cmd {
 				return errorMsg(err.Error())
 			}
 
-			imageString := helpers.ConvertToAscii(helpers.ScaleImage(img, width-2))
+			imageString := helpers.ConvertToAscii(helpers.ScaleImage(img, width, height))
+
+			return readFileContentMsg{
+				fileContent:     imageString,
+				markdownContent: "",
+				imgFile:         img,
+			}
+		}
+
+		if filepath.Ext(file.Name()) == ".jpg" || filepath.Ext(file.Name()) == ".jpeg" {
+			imageContent, err := os.Open(file.Name())
+			if err != nil {
+				return errorMsg(err.Error())
+			}
+
+			img, err := jpeg.Decode(imageContent)
+			if err != nil {
+				return errorMsg(err.Error())
+			}
+
+			imageString := helpers.ConvertToAscii(helpers.ScaleImage(img, width, height))
 
 			return readFileContentMsg{
 				fileContent:     imageString,
@@ -201,9 +222,9 @@ func renderMarkdownContent(width int, content string) tea.Cmd {
 }
 
 // renderMarkdownContent renders the markdown content and returns it.
-func renderImageContent(img image.Image, width int) tea.Cmd {
+func renderImageContent(img image.Image, width, height int) tea.Cmd {
 	return func() tea.Msg {
-		imageString := helpers.ConvertToAscii(helpers.ScaleImage(img, width-2))
+		imageString := helpers.ConvertToAscii(helpers.ScaleImage(img, width-2, height))
 
 		return imageMsg(imageString)
 	}

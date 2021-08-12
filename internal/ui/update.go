@@ -117,7 +117,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if m.activeImageContent != nil {
-			return m, renderImageContent(m.activeImageContent, m.secondaryPane.GetWidth())
+			return m, renderImageContent(m.activeImageContent, m.secondaryPane.GetWidth(), m.secondaryPane.GetHeight())
 		}
 
 		return m, cmd
@@ -224,7 +224,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, m.updateDirectoryListing(m.dirTree.GetSelectedFile().Name())
 				}
 
-				return m, m.readFileContent(m.dirTree.GetSelectedFile(), m.secondaryPane.GetWidth()-2)
+				return m, m.readFileContent(m.dirTree.GetSelectedFile(), m.secondaryPane.GetWidth()-2, m.secondaryPane.GetHeight())
 
 			}
 

@@ -9,15 +9,13 @@ import (
 	"github.com/nfnt/resize"
 )
 
-var ASCIISTR = "MND8OZ$7I?+=~:,.."
+var ASCIISTR = "IMND8OZ$7I?+=~:,.."
 
 // ScaleImage resizes an image to the given width and height.
-func ScaleImage(img image.Image, w int) (image.Image, int, int) {
-	sz := img.Bounds()
-	h := (sz.Max.Y * w * 10) / (sz.Max.X * 16)
-	img = resize.Resize(uint(w), uint(h), img, resize.Lanczos3)
+func ScaleImage(img image.Image, w, height int) (image.Image, int, int) {
+	img = resize.Resize(uint(w), uint(height), img, resize.Lanczos3)
 
-	return img, w, h
+	return img, w, height
 }
 
 // ConvertToAscii converts an image to ASCII.
@@ -35,5 +33,5 @@ func ConvertToAscii(img image.Image, w, h int) string {
 		_ = buf.WriteByte('\n')
 	}
 
-	return string(buf.Bytes())
+	return buf.String()
 }
