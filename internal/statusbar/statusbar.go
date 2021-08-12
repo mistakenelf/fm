@@ -84,7 +84,7 @@ func (m Model) View() string {
 		Padding(0, 1).
 		Height(m.Height).
 		Width(m.Width - width(firstColumn) - width(thirdColumn) - width(fourthColumn)).
-		Render(m.SecondColumnContent)
+		Render(truncate.StringWithTail(m.SecondColumnContent, uint(m.Width-width(firstColumn)-width(thirdColumn)-width(fourthColumn)-3), "..."))
 
 	return lipgloss.JoinHorizontal(lipgloss.Top,
 		firstColumn,
