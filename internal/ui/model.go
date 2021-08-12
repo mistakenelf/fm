@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"image"
 	"io/fs"
 
 	"github.com/knipferrc/fm/internal/config"
@@ -29,6 +30,7 @@ type Model struct {
 	previousDirectory    string
 	initialMoveDirectory string
 	secondaryPaneContent string
+	activeImageContent   image.Image
 	showCommandBar       bool
 	inMoveMode           bool
 	ready                bool
@@ -106,6 +108,7 @@ func NewModel() Model {
 		previousDirectory:    "",
 		initialMoveDirectory: "",
 		secondaryPaneContent: constants.IntroText,
+		activeImageContent:   nil,
 		showCommandBar:       false,
 		inMoveMode:           false,
 		ready:                false,

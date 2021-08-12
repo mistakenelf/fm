@@ -126,7 +126,9 @@ func (m Model) View() string {
 			)
 
 		dirItem := lipgloss.NewStyle().Width(m.Width - lipgloss.Width(modTime) - 4).Render(
-			truncate.StringWithTail(m.dirItem(m.Cursor == i, file), uint(m.Width-lipgloss.Width(modTime)-4), "..."),
+			truncate.StringWithTail(
+				m.dirItem(m.Cursor == i, file), uint(m.Width-lipgloss.Width(modTime)-4), "...",
+			),
 		)
 
 		row := lipgloss.JoinHorizontal(lipgloss.Top, dirItem, modTime)
