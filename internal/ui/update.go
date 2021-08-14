@@ -57,24 +57,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// A fileContentMsg is received anytime a file is read from returning its content
 	// along with the markdown content to be rendered by glamour.
 	case readFileContentMsg:
-		m.activeMarkdownSource = string(msg.markdownContent)
-		m.secondaryPaneContent = helpers.ConvertTabsToSpaces(string(msg.fileContent))
-		m.activeImageContent = msg.imgFile
 		m.secondaryPane.GotoTop()
-		m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(string(msg.fileContent)))
-
-		return m, cmd
-
-	// Anytime markdown is being rendered, this message is received.
-	case markdownMsg:
-		m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(string(msg)))
-		m.secondaryPaneContent = helpers.ConvertTabsToSpaces(string(msg))
-
-		return m, cmd
-
-	case imageMsg:
-		m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(string(msg)))
-		m.secondaryPaneContent = helpers.ConvertTabsToSpaces(string(msg))
+		m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(string(msg.code)))
 
 		return m, cmd
 
@@ -102,22 +86,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
 			m.ready = true
 		} else {
-			m.primaryPane.SetContent(m.dirTree.View())
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.dirTree.SetSize(msg.Width / 2)
-			m.secondaryPane.SetContent(wrap.String(wordwrap.String(m.secondaryPaneContent, msg.Width/2), msg.Width/2))
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
-		}
-
-		// If we have some active markdown source to render, re-render its content
-		// when the window is resized so that glamour knows how to wrap its text.
-		if m.activeMarkdownSource != "" {
-			return m, renderMarkdownContent(m.secondaryPane.GetWidth(), m.activeMarkdownSource)
-		}
-
-		if m.activeImageContent != nil {
-			return m, renderImageContent(m.activeImageContent, m.secondaryPane.GetWidth(), m.secondaryPane.GetHeight())
 		}
 
 		return m, cmd
@@ -401,13 +373,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.initialMoveDirectory = ""
 			m.primaryPane.IsActive = true
 			m.secondaryPane.IsActive = false
-			m.activeMarkdownSource = ""
 			m.textInput.Blur()
 			m.textInput.Reset()
 			m.secondaryPane.GotoTop()
 			m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
-			m.secondaryPaneContent = helpers.ConvertTabsToSpaces(constants.IntroText)
-			m.secondaryPane.SetContent(m.secondaryPaneContent)
+			m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(constants.IntroText))
 		}
 
 		// Capture the previous key so that we can capture
