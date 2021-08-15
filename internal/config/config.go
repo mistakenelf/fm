@@ -94,7 +94,7 @@ func SetDefaults() {
 	viper.SetDefault("settings.start_dir", ".")
 	viper.SetDefault("settings.show_icons", true)
 	viper.SetDefault("settings.rounded_panes", false)
-	viper.SetDefault("settings.enable_logging", false)
+	viper.SetDefault("settings.enable_logging", true)
 	viper.SetDefault("settings.enable_mousewheel", true)
 	viper.SetDefault("settings.pretty_markdown", true)
 

@@ -25,8 +25,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if len(msg) == 0 {
 			m.primaryPane.SetContent("Directory is empty")
 		} else {
-			m.dirTree.SetContent(msg)
 			m.dirTree.GotoTop()
+			m.dirTree.SetContent(msg)
 			m.primaryPane.SetContent(m.dirTree.View())
 		}
 
@@ -57,8 +57,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// A fileContentMsg is received anytime a file is read from returning its content
 	// along with the markdown content to be rendered by glamour.
 	case readFileContentMsg:
-		m.secondaryPane.GotoTop()
-		m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(string(msg.code)))
+		if msg.code != "" {
+			m.secondaryPane.GotoTop()
+			m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(msg.code))
+		} else if msg.markdown != "" {
+			m.secondaryPane.GotoTop()
+			m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(msg.markdown))
+		} else if msg.image != nil {
+			m.secondaryPane.GotoTop()
+			m.asciiImage.SetContent(msg.image)
+			m.secondaryPane.SetContent(m.asciiImage.View())
+		} else {
+			m.secondaryPane.GotoTop()
+			m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(msg.rawContent))
+		}
 
 		return m, cmd
 
@@ -78,18 +90,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// is first started.
 	case tea.WindowSizeMsg:
 		if !m.ready {
+			m.secondaryPane.SetContent(wrap.String(wordwrap.String(constants.IntroText, msg.Width/2), msg.Width/2))
 			m.primaryPane.SetContent(m.dirTree.View())
+
 			m.dirTree.SetSize(msg.Width / 2)
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.secondaryPane.SetContent(wrap.String(wordwrap.String(constants.IntroText, msg.Width/2), msg.Width/2))
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
+			m.asciiImage.SetSize(m.secondaryPane.GetWidth()-2, m.secondaryPane.GetHeight())
 			m.ready = true
 		} else {
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.dirTree.SetSize(msg.Width / 2)
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
+			m.asciiImage.SetSize(m.secondaryPane.GetWidth()-2, m.secondaryPane.GetHeight())
 		}
 
 		return m, cmd

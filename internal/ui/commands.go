@@ -21,9 +21,10 @@ type directoryUpdateMsg []fs.FileInfo
 type moveDirItemMsg []fs.FileInfo
 type errorMsg string
 type readFileContentMsg struct {
-	markdown string
-	code     string
-	image    image.Image
+	rawContent string
+	markdown   string
+	code       string
+	image      image.Image
 }
 
 // updateDirectoryListing updates the directory listing based on the name of the direcoctory provided.
@@ -148,9 +149,10 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 			}
 
 			return readFileContentMsg{
-				markdown: markdownContent,
-				code:     content,
-				image:    nil,
+				rawContent: content,
+				markdown:   markdownContent,
+				code:       "",
+				image:      nil,
 			}
 		}
 
@@ -166,9 +168,10 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 			}
 
 			return readFileContentMsg{
-				code:     "",
-				markdown: "",
-				image:    img,
+				rawContent: content,
+				code:       "",
+				markdown:   "",
+				image:      img,
 			}
 		}
 
@@ -180,9 +183,10 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 		// Return the syntax highlighted content and markdown content as empty
 		// since were not dealing with markdown.
 		return readFileContentMsg{
-			code:     buf.String(),
-			markdown: "",
-			image:    nil,
+			rawContent: content,
+			code:       buf.String(),
+			markdown:   "",
+			image:      nil,
 		}
 	}
 }
