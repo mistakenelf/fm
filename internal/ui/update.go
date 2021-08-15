@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/helpers"
 
@@ -28,6 +27,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.dirTree.GotoTop()
 			m.dirTree.SetContent(msg)
 			m.primaryPane.SetContent(m.dirTree.View())
+			m.primaryPane.GotoTop()
 		}
 
 		m.showCommandBar = false
@@ -38,10 +38,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// A moveDirItemMsg is received any time a file or directory has been moved.
 	case moveDirItemMsg:
-		cfg := config.GetConfig()
-
 		// Set active color back to default.
-		m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
+		m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
 
 		m.dirTree.SetContent(msg)
 		m.primaryPane.SetContent(m.dirTree.View())
@@ -380,8 +378,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Reset FM to its initial state.
 		case "esc":
-			cfg := config.GetConfig()
-
 			m.showCommandBar = false
 			m.inMoveMode = false
 			m.itemToMove = nil
@@ -391,7 +387,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.textInput.Blur()
 			m.textInput.Reset()
 			m.secondaryPane.GotoTop()
-			m.primaryPane.SetActiveBorderColor(cfg.Colors.Pane.ActiveBorderColor)
+			m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
 			m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(constants.IntroText))
 		}
 

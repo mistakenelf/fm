@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/helpers"
 
 	"github.com/alecthomas/chroma/quick"
@@ -132,8 +131,6 @@ func (m Model) deleteFile(name string) tea.Cmd {
 
 // readFileContent reads the content of a file and returns it.
 func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
-	cfg := config.GetConfig()
-
 	return func() tea.Msg {
 		content, err := helpers.ReadFileContent(file.Name())
 		if err != nil {
@@ -142,7 +139,7 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 
 		// Return both the pretty markdown as well as the plain content without glamour
 		// to use later when resizing the window.
-		if filepath.Ext(file.Name()) == ".md" && cfg.Settings.PrettyMarkdown {
+		if filepath.Ext(file.Name()) == ".md" && m.appConfig.Settings.PrettyMarkdown {
 			markdownContent, err := helpers.RenderMarkdown(width, content)
 			if err != nil {
 				return errorMsg(err.Error())

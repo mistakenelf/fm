@@ -26,6 +26,7 @@ type Model struct {
 	asciiImage           ascii_image.Model
 	previousKey          tea.KeyMsg
 	itemToMove           fs.FileInfo
+	appConfig            config.Config
 	previousDirectory    string
 	initialMoveDirectory string
 	showCommandBar       bool
@@ -102,6 +103,7 @@ func NewModel() Model {
 		asciiImage:           ascii_image.Model{},
 		previousKey:          tea.KeyMsg{},
 		itemToMove:           nil,
+		appConfig:            cfg,
 		previousDirectory:    "",
 		initialMoveDirectory: "",
 		showCommandBar:       false,
