@@ -26,6 +26,7 @@ type Model struct {
 	statusBar            statusbar.Model
 	previousKey          tea.KeyMsg
 	itemToMove           fs.FileInfo
+	appConfig            config.Config
 	activeMarkdownSource string
 	previousDirectory    string
 	initialMoveDirectory string
@@ -104,6 +105,7 @@ func NewModel() Model {
 		statusBar:            statusBar,
 		previousKey:          tea.KeyMsg{},
 		itemToMove:           nil,
+		appConfig:            cfg,
 		activeMarkdownSource: "",
 		previousDirectory:    "",
 		initialMoveDirectory: "",

@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/helpers"
 
@@ -16,7 +15,6 @@ import (
 // Init initializes the UI and sets up initial data.
 func (m Model) Init() tea.Cmd {
 	var cmds []tea.Cmd
-	cfg := config.GetConfig()
 	startDir := ""
 
 	if len(os.Args) > 1 {
@@ -26,17 +24,17 @@ func (m Model) Init() tea.Cmd {
 	// Get the initial directory listing to be displayed
 	if _, err := os.Stat(startDir); err == nil {
 		cmds = append(cmds, m.updateDirectoryListing(startDir))
-	} else if cfg.Settings.StartDir == constants.HomeDirectory {
+	} else if m.appConfig.Settings.StartDir == constants.HomeDirectory {
 		homeDir, err := helpers.GetHomeDirectory()
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		cmds = append(cmds, m.updateDirectoryListing(homeDir))
-	} else if _, err := os.Stat(cfg.Settings.StartDir); err == nil {
-		cmds = append(cmds, m.updateDirectoryListing(cfg.Settings.StartDir))
+	} else if _, err := os.Stat(m.appConfig.Settings.StartDir); err == nil {
+		cmds = append(cmds, m.updateDirectoryListing(m.appConfig.Settings.StartDir))
 	} else {
-		cmds = append(cmds, m.updateDirectoryListing(cfg.Settings.StartDir))
+		cmds = append(cmds, m.updateDirectoryListing(m.appConfig.Settings.StartDir))
 	}
 
 	cmds = append(cmds, textinput.Blink)

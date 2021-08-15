@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/knipferrc/fm/icons"
-	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/helpers"
 )
@@ -38,7 +37,6 @@ func (m *Model) scrollPrimaryPane() {
 
 // getStatusBarContent returns the content of the status bar (current file name, file info, file count, logo).
 func (m Model) getStatusBarContent() (string, string, string, string) {
-	cfg := config.GetConfig()
 	currentPath, err := helpers.GetWorkingDirectory()
 	if err != nil {
 		currentPath = constants.CurrentDirectory
@@ -52,7 +50,7 @@ func (m Model) getStatusBarContent() (string, string, string, string) {
 
 	// If icons are enabled, show the directory icon next to the logo text
 	// else just show the text of the logo.
-	if cfg.Settings.ShowIcons {
+	if m.appConfig.Settings.ShowIcons {
 		logo = fmt.Sprintf("%s %s", icons.IconDef["dir"].GetGlyph(), "FM")
 	} else {
 		logo = "FM"
