@@ -60,11 +60,11 @@ type Config struct {
 }
 
 // LoadConfig loads a users config and creates the config if it does not exist
-// located at ~/.config/fm/config.yml.
+// located at ~/fm.yml.
 func LoadConfig() {
-	viper.AddConfigPath("$HOME/.config/fm")
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
+	viper.AddConfigPath("$HOME")
+	viper.SetConfigName("fm")
+	viper.SetConfigType("yml")
 
 	if err := viper.SafeWriteConfig(); err != nil {
 		if os.IsNotExist(err) {
@@ -99,7 +99,7 @@ func SetDefaults() {
 	viper.SetDefault("settings.start_dir", ".")
 	viper.SetDefault("settings.show_icons", true)
 	viper.SetDefault("settings.rounded_panes", false)
-	viper.SetDefault("settings.enable_logging", true)
+	viper.SetDefault("settings.enable_logging", false)
 	viper.SetDefault("settings.enable_mousewheel", true)
 	viper.SetDefault("settings.pretty_markdown", true)
 
