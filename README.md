@@ -78,7 +78,7 @@ go install github.com/knipferrc/fm@latest
 
 ## Configuration
 
-- A config file will be generated at `.config/fm/config.yml` when you first run `fm`
+- A config file will be generated at `~/.fm.yml` when you first run `fm`
 
 ```yml
 colors:
