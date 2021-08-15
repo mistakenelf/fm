@@ -62,7 +62,6 @@ type Config struct {
 // LoadConfig loads a users config and creates the config if it does not exist
 // located at ~/.config/fm/config.yml.
 func LoadConfig() {
-
 	viper.AddConfigPath("$HOME/.config/fm")
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
@@ -70,6 +69,9 @@ func LoadConfig() {
 	if err := viper.SafeWriteConfig(); err != nil {
 		if os.IsNotExist(err) {
 			err = viper.WriteConfig()
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 
@@ -80,12 +82,10 @@ func LoadConfig() {
 			log.Fatal(err)
 		}
 	}
-
 }
 
 // GetConfig returns the users config.
 func GetConfig() (config Config) {
-	log.Output(2, "here")
 	if err := viper.Unmarshal(&config); err != nil {
 		log.Fatal("Error parsing config", err)
 	}
