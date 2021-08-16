@@ -95,14 +95,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
-			m.asciiImage.SetSize(m.secondaryPane.GetWidth()-2, m.secondaryPane.GetHeight())
+			m.asciiImage.SetSize(m.secondaryPane.GetWidth()-4, m.secondaryPane.GetHeight())
 			m.ready = true
 		} else {
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.dirTree.SetSize(msg.Width / 2)
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
-			m.asciiImage.SetSize(m.secondaryPane.GetWidth()-2, m.secondaryPane.GetHeight())
+			m.asciiImage.SetSize(msg.Width/2-4, m.secondaryPane.GetHeight())
 		}
 
 		return m, cmd

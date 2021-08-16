@@ -2,7 +2,6 @@ package ascii_image
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"image/color"
 	"log"
@@ -22,9 +21,7 @@ var ASCIISTR = "IMND8OZ$7I?+=~:,.."
 
 // scaleImage resizes an image to the given width and height.
 func (m *Model) scaleImage() {
-	img := resize.Resize(uint(m.Width), uint(m.Height), m.Image, resize.Lanczos3)
-
-	m.Image = img
+	m.Image = resize.Resize(uint(m.Width), uint(m.Height), m.Image, resize.Lanczos3)
 }
 
 // convertToAscii converts an image to ASCII.
@@ -41,12 +38,14 @@ func (m *Model) convertToAscii() {
 		}
 		_ = buf.WriteByte('\n')
 	}
-
+	log.Output(2, "here")
 	m.Content = buf.String()
 }
 
 func (m *Model) SetContent(img image.Image) {
 	m.Image = img
+	m.scaleImage()
+	m.convertToAscii()
 }
 
 func (m *Model) SetSize(width, height int) {
@@ -60,7 +59,5 @@ func (m *Model) SetSize(width, height int) {
 }
 
 func (m Model) View() string {
-	log.Output(2, fmt.Sprintf("%d", m.Width))
-
 	return m.Content
 }
