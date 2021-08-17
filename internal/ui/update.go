@@ -20,7 +20,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// in the UI. Any time an action is performed, this is called
 	// for example, changing directories, or performing most
 	// file operations.
-	case directoryUpdateMsg:
+	case updateDirectoryListingMsg:
 		if len(msg) == 0 {
 			m.primaryPane.SetContent("Directory is empty")
 		} else {
@@ -34,7 +34,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.textInput.Blur()
 		m.textInput.Reset()
 
-		return m, cmd
+		return m, nil
 
 	// A moveDirItemMsg is received any time a file or directory has been moved.
 	case moveDirItemMsg:
@@ -50,31 +50,35 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.initialMoveDirectory = ""
 		m.itemToMove = nil
 
-		return m, cmd
+		return m, nil
 
 	// A fileContentMsg is received anytime a file is read from returning its content
 	// along with the markdown content to be rendered by glamour.
 	case readFileContentMsg:
-		m.activeMarkdownSource = string(msg.markdownContent)
-		m.secondaryPaneContent = helpers.ConvertTabsToSpaces(string(msg.fileContent))
-		m.activeImageContent = msg.imgFile
-		m.secondaryPane.GotoTop()
-		m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(string(msg.fileContent)))
+		if msg.code != "" {
+			m.secondaryPane.GotoTop()
+			m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(msg.code))
+		} else if msg.markdown != "" {
+			m.secondaryPane.GotoTop()
+			m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(msg.markdown))
+		} else if msg.image != nil {
+			m.secondaryPane.GotoTop()
+			m.asciiImage.SetImage(msg.image)
+			m.asciiImage.SetContent(msg.asciiImage)
+			m.secondaryPane.SetContent(m.asciiImage.View())
+		} else {
+			m.secondaryPane.GotoTop()
+			m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(msg.rawContent))
+		}
 
-		return m, cmd
+		return m, nil
 
-	// Anytime markdown is being rendered, this message is received.
-	case markdownMsg:
-		m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(string(msg)))
-		m.secondaryPaneContent = helpers.ConvertTabsToSpaces(string(msg))
+	// convertImageMsg is received when an image is to be converted to ASCII.
+	case convertImageToASCIIMsg:
+		m.asciiImage.SetContent(string(msg))
+		m.secondaryPane.SetContent(m.asciiImage.View())
 
-		return m, cmd
-
-	case imageMsg:
-		m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(string(msg)))
-		m.secondaryPaneContent = helpers.ConvertTabsToSpaces(string(msg))
-
-		return m, cmd
+		return m, nil
 
 	// An errorMsg is received any time something in a command goes wrong
 	// we receive that error and show it in the secondary pane with red text.
@@ -86,39 +90,31 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				Render(string(msg)),
 		)
 
-		return m, cmd
+		return m, nil
 
 	// Any time the window is resized this is called, including when the app
 	// is first started.
 	case tea.WindowSizeMsg:
 		if !m.ready {
-			m.primaryPane.SetContent(m.dirTree.View())
+			m.secondaryPane.SetContent(wrap.String(wordwrap.String(constants.IntroText, msg.Width/2), msg.Width/2))
 			m.dirTree.SetSize(msg.Width / 2)
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.secondaryPane.SetContent(wrap.String(wordwrap.String(constants.IntroText, msg.Width/2), msg.Width/2))
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
 			m.ready = true
 		} else {
-			m.primaryPane.SetContent(m.dirTree.View())
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.dirTree.SetSize(msg.Width / 2)
-			m.secondaryPane.SetContent(wrap.String(wordwrap.String(m.secondaryPaneContent, msg.Width/2), msg.Width/2))
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
 		}
 
-		// If we have some active markdown source to render, re-render its content
-		// when the window is resized so that glamour knows how to wrap its text.
-		if m.activeMarkdownSource != "" {
-			return m, renderMarkdownContent(m.secondaryPane.GetWidth(), m.activeMarkdownSource)
+		if m.asciiImage.Image != nil {
+			resizeImageCmd := m.redrawImage(m.secondaryPane.GetWidth()-2, m.secondaryPane.GetHeight())
+			cmds = append(cmds, resizeImageCmd)
 		}
 
-		if m.activeImageContent != nil {
-			return m, renderImageContent(m.activeImageContent, m.secondaryPane.GetWidth(), m.secondaryPane.GetHeight())
-		}
-
-		return m, cmd
+		return m, tea.Batch(cmds...)
 
 	// Any time a mouse event is received, we get this message.
 	case tea.MouseMsg:
@@ -135,7 +131,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.secondaryPane.LineUp(3)
 			}
 
-			return m, cmd
+			return m, nil
 
 		case tea.MouseWheelDown:
 			// Command bar is not shown and the primary pane is active
@@ -149,7 +145,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.secondaryPane.LineDown(3)
 			}
 
-			return m, cmd
+			return m, nil
 		}
 
 	case tea.KeyMsg:
@@ -167,7 +163,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.secondaryPane.GotoTop()
 			}
 
-			return m, cmd
+			return m, nil
 		}
 
 		switch msg.String() {
@@ -223,7 +219,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 
 				return m, m.readFileContent(m.dirTree.GetSelectedFile(), m.secondaryPane.GetWidth()-2, m.secondaryPane.GetHeight())
-
 			}
 
 		case "G":
@@ -251,61 +246,60 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.moveFile(m.itemToMove.Name()),
 					m.updateDirectoryListing(m.initialMoveDirectory),
 				)
+			}
 
-			} else {
-				// Parse the commands from the command bar, command is the name
-				// of the command and value is if the command requires input to it
-				// get its value, for example (rename test.txt) text.txt is the value.
-				command, value := helpers.ParseCommand(m.textInput.Value())
+			// Parse the commands from the command bar, command is the name
+			// of the command and value is if the command requires input to it
+			// get its value, for example (rename test.txt) text.txt is the value.
+			command, value := helpers.ParseCommand(m.textInput.Value())
 
-				// Nothing was input for a command.
-				if command == "" {
-					return m, nil
+			// Nothing was input for a command.
+			if command == "" {
+				return m, nil
+			}
+
+			switch command {
+			// Exit FM.
+			case "exit", "q", "quit":
+				return m, tea.Quit
+
+			// Create a new directory based on the value passed.
+			case "mkdir":
+				return m, tea.Sequentially(
+					m.createDir(value),
+					m.updateDirectoryListing(constants.CurrentDirectory),
+				)
+
+			// Create a new file based on the value passed.
+			case "touch":
+				return m, tea.Sequentially(
+					m.createFile(value),
+					m.updateDirectoryListing(constants.CurrentDirectory),
+				)
+
+			// Rename the currently selected file or folder based on the value passed.
+			case "mv", "rename":
+				return m, tea.Sequentially(
+					m.renameFileOrDir(m.dirTree.GetSelectedFile().Name(), value),
+					m.updateDirectoryListing(constants.CurrentDirectory),
+				)
+
+			// Delete the currently selected item.
+			case "rm", "delete":
+				if m.dirTree.GetSelectedFile().IsDir() {
+					return m, tea.Sequentially(
+						m.deleteDir(m.dirTree.GetSelectedFile().Name()),
+						m.updateDirectoryListing(constants.CurrentDirectory),
+					)
 				}
 
-				switch command {
-				// Exit FM.
-				case "exit", "q", "quit":
-					return m, tea.Quit
+				return m, tea.Sequentially(
+					m.deleteFile(m.dirTree.GetSelectedFile().Name()),
+					m.updateDirectoryListing(constants.CurrentDirectory),
+				)
 
-				// Create a new directory based on the value passed.
-				case "mkdir":
-					return m, tea.Sequentially(
-						m.createDir(value),
-						m.updateDirectoryListing(constants.CurrentDirectory),
-					)
-
-				// Create a new file based on the value passed.
-				case "touch":
-					return m, tea.Sequentially(
-						m.createFile(value),
-						m.updateDirectoryListing(constants.CurrentDirectory),
-					)
-
-				// Rename the currently selected file or folder based on the value passed.
-				case "mv", "rename":
-					return m, tea.Sequentially(
-						m.renameFileOrDir(m.dirTree.GetSelectedFile().Name(), value),
-						m.updateDirectoryListing(constants.CurrentDirectory),
-					)
-
-				// Delete the currently selected item.
-				case "rm", "delete":
-					if m.dirTree.GetSelectedFile().IsDir() {
-						return m, tea.Sequentially(
-							m.deleteDir(m.dirTree.GetSelectedFile().Name()),
-							m.updateDirectoryListing(constants.CurrentDirectory),
-						)
-					}
-
-					return m, tea.Sequentially(
-						m.deleteFile(m.dirTree.GetSelectedFile().Name()),
-						m.updateDirectoryListing(constants.CurrentDirectory),
-					)
-
-				default:
-					return m, nil
-				}
+			default:
+				return m, nil
 			}
 
 		case ":":
@@ -397,13 +391,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.initialMoveDirectory = ""
 			m.primaryPane.IsActive = true
 			m.secondaryPane.IsActive = false
-			m.activeMarkdownSource = ""
 			m.textInput.Blur()
 			m.textInput.Reset()
 			m.secondaryPane.GotoTop()
 			m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
-			m.secondaryPaneContent = helpers.ConvertTabsToSpaces(constants.IntroText)
-			m.secondaryPane.SetContent(m.secondaryPaneContent)
+			m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(constants.IntroText))
+			m.asciiImage.SetImage(nil)
 		}
 
 		// Capture the previous key so that we can capture

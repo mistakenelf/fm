@@ -1,11 +1,10 @@
 package ui
 
 import (
-	"image"
 	"io/fs"
 
+	"github.com/knipferrc/fm/internal/asciiImage"
 	"github.com/knipferrc/fm/internal/config"
-	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/dirtree"
 	"github.com/knipferrc/fm/internal/pane"
 	"github.com/knipferrc/fm/internal/statusbar"
@@ -24,14 +23,12 @@ type Model struct {
 	loader               spinner.Model
 	dirTree              dirtree.Model
 	statusBar            statusbar.Model
+	asciiImage           asciiImage.Model
 	previousKey          tea.KeyMsg
 	itemToMove           fs.FileInfo
 	appConfig            config.Config
-	activeMarkdownSource string
 	previousDirectory    string
 	initialMoveDirectory string
-	secondaryPaneContent string
-	activeImageContent   image.Image
 	showCommandBar       bool
 	inMoveMode           bool
 	ready                bool
@@ -103,14 +100,12 @@ func NewModel() Model {
 		loader:               l,
 		dirTree:              dirTree,
 		statusBar:            statusBar,
+		asciiImage:           asciiImage.Model{},
 		previousKey:          tea.KeyMsg{},
 		itemToMove:           nil,
 		appConfig:            cfg,
-		activeMarkdownSource: "",
 		previousDirectory:    "",
 		initialMoveDirectory: "",
-		secondaryPaneContent: constants.IntroText,
-		activeImageContent:   nil,
 		showCommandBar:       false,
 		inMoveMode:           false,
 		ready:                false,

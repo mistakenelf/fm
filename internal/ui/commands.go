@@ -4,27 +4,32 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	"image/jpeg"
-	"image/png"
 	"io/fs"
 	"os"
 	"path/filepath"
 
+	// "image/jpeg" is needed for the image.Decode function.
+	_ "image/jpeg"
+	// "image/png" is needed for the image.Decode function.
+	_ "image/png"
+
+	"github.com/knipferrc/fm/internal/asciiImage"
 	"github.com/knipferrc/fm/internal/helpers"
 
 	"github.com/alecthomas/chroma/quick"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type directoryUpdateMsg []fs.FileInfo
+type updateDirectoryListingMsg []fs.FileInfo
 type moveDirItemMsg []fs.FileInfo
-type markdownMsg string
-type imageMsg string
 type errorMsg string
+type convertImageToASCIIMsg string
 type readFileContentMsg struct {
-	markdownContent string
-	fileContent     string
-	imgFile         image.Image
+	rawContent string
+	markdown   string
+	code       string
+	image      image.Image
+	asciiImage string
 }
 
 // updateDirectoryListing updates the directory listing based on the name of the direcoctory provided.
@@ -35,7 +40,7 @@ func (m Model) updateDirectoryListing(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		return directoryUpdateMsg(files)
+		return updateDirectoryListingMsg(files)
 	}
 }
 
@@ -147,83 +152,57 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 			}
 
 			return readFileContentMsg{
-				fileContent:     markdownContent,
-				markdownContent: content,
+				rawContent: content,
+				markdown:   markdownContent,
+				code:       "",
+				image:      nil,
+				asciiImage: "",
 			}
-		}
-
-		if filepath.Ext(file.Name()) == ".png" {
+		} else if filepath.Ext(file.Name()) == ".png" || filepath.Ext(file.Name()) == ".jpg" || filepath.Ext(file.Name()) == ".jpeg" {
 			imageContent, err := os.Open(file.Name())
 			if err != nil {
 				return errorMsg(err.Error())
 			}
 
-			img, err := png.Decode(imageContent)
+			img, _, err := image.Decode(imageContent)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
 
-			imageString := helpers.ConvertToAscii(helpers.ScaleImage(img, width, height))
+			imageString := asciiImage.ConvertToASCII(asciiImage.ScaleImage(img, width, height))
 
 			return readFileContentMsg{
-				fileContent:     imageString,
-				markdownContent: "",
-				imgFile:         img,
+				rawContent: content,
+				code:       "",
+				markdown:   "",
+				image:      img,
+				asciiImage: imageString,
 			}
-		}
-
-		if filepath.Ext(file.Name()) == ".jpg" || filepath.Ext(file.Name()) == ".jpeg" {
-			imageContent, err := os.Open(file.Name())
-			if err != nil {
+		} else {
+			buf := new(bytes.Buffer)
+			if err = quick.Highlight(buf, content, filepath.Ext(file.Name()), "terminal256", "dracula"); err != nil {
 				return errorMsg(err.Error())
 			}
 
-			img, err := jpeg.Decode(imageContent)
-			if err != nil {
-				return errorMsg(err.Error())
-			}
-
-			imageString := helpers.ConvertToAscii(helpers.ScaleImage(img, width, height))
-
+			// Return the syntax highlighted content and markdown content as empty
+			// since were not dealing with markdown.
 			return readFileContentMsg{
-				fileContent:     imageString,
-				markdownContent: "",
-				imgFile:         img,
+				rawContent: content,
+				code:       buf.String(),
+				markdown:   "",
+				image:      nil,
+				asciiImage: "",
 			}
-		}
-
-		buf := new(bytes.Buffer)
-		if err = quick.Highlight(buf, content, filepath.Ext(file.Name()), "terminal256", "dracula"); err != nil {
-			return errorMsg(err.Error())
-		}
-
-		// Return the syntax highlighted content and markdown content as empty
-		// since were not dealing with markdown.
-		return readFileContentMsg{
-			fileContent:     buf.String(),
-			markdownContent: "",
 		}
 	}
 }
 
-// renderMarkdownContent renders the markdown content and returns it.
-func renderMarkdownContent(width int, content string) tea.Cmd {
+// deleteFile deletes a file based on the name provided.
+func (m Model) redrawImage(width, height int) tea.Cmd {
 	return func() tea.Msg {
-		markdownContent, err := helpers.RenderMarkdown(width, content)
-		if err != nil {
-			return errorMsg(err.Error())
-		}
+		imageString := asciiImage.ConvertToASCII(asciiImage.ScaleImage(m.asciiImage.Image, width, height))
 
-		return markdownMsg(markdownContent)
-	}
-}
-
-// renderMarkdownContent renders the markdown content and returns it.
-func renderImageContent(img image.Image, width, height int) tea.Cmd {
-	return func() tea.Msg {
-		imageString := helpers.ConvertToAscii(helpers.ScaleImage(img, width-2, height))
-
-		return imageMsg(imageString)
+		return convertImageToASCIIMsg(imageString)
 	}
 }
 
