@@ -1,9 +1,13 @@
-package helpers
+package markdown
 
 import (
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 )
+
+type Model struct {
+	Content string
+}
 
 // RenderMarkdown renders the markdown content with glamour.
 func RenderMarkdown(width int, content string) (string, error) {
@@ -24,4 +28,12 @@ func RenderMarkdown(width int, content string) (string, error) {
 	}
 
 	return out, nil
+}
+
+func (m *Model) SetContent(content string) {
+	m.Content = content
+}
+
+func (m Model) View() string {
+	return m.Content
 }

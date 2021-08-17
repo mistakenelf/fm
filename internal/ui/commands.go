@@ -15,6 +15,7 @@ import (
 
 	"github.com/knipferrc/fm/internal/asciiImage"
 	"github.com/knipferrc/fm/internal/helpers"
+	"github.com/knipferrc/fm/internal/markdown"
 
 	"github.com/alecthomas/chroma/quick"
 	tea "github.com/charmbracelet/bubbletea"
@@ -24,6 +25,7 @@ type updateDirectoryListingMsg []fs.FileInfo
 type moveDirItemMsg []fs.FileInfo
 type errorMsg string
 type convertImageToASCIIMsg string
+type markdownMsg string
 type readFileContentMsg struct {
 	rawContent string
 	markdown   string
@@ -146,7 +148,7 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 		// Return both the pretty markdown as well as the plain content without glamour
 		// to use later when resizing the window.
 		if filepath.Ext(file.Name()) == ".md" && m.appConfig.Settings.PrettyMarkdown {
-			markdownContent, err := helpers.RenderMarkdown(width, content)
+			markdownContent, err := markdown.RenderMarkdown(width, content)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
@@ -197,12 +199,24 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 	}
 }
 
-// deleteFile deletes a file based on the name provided.
+// redrawImage redraws the image based on the width and height provided.
 func (m Model) redrawImage(width, height int) tea.Cmd {
 	return func() tea.Msg {
 		imageString := asciiImage.ConvertToASCII(asciiImage.ScaleImage(m.asciiImage.Image, width, height))
 
 		return convertImageToASCIIMsg(imageString)
+	}
+}
+
+// redrawMarkdown redraws the markdown based on the width and content provided.
+func (m Model) redrawMarkdown(width int, content string) tea.Cmd {
+	return func() tea.Msg {
+		markdownContent, err := markdown.RenderMarkdown(width, content)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		return markdownMsg(markdownContent)
 	}
 }
 

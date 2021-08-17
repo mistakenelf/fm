@@ -6,6 +6,7 @@ import (
 	"github.com/knipferrc/fm/internal/asciiImage"
 	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/dirtree"
+	"github.com/knipferrc/fm/internal/markdown"
 	"github.com/knipferrc/fm/internal/pane"
 	"github.com/knipferrc/fm/internal/statusbar"
 
@@ -24,6 +25,7 @@ type Model struct {
 	dirTree              dirtree.Model
 	statusBar            statusbar.Model
 	asciiImage           asciiImage.Model
+	markdown             markdown.Model
 	previousKey          tea.KeyMsg
 	itemToMove           fs.FileInfo
 	appConfig            config.Config
@@ -101,6 +103,7 @@ func NewModel() Model {
 		dirTree:              dirTree,
 		statusBar:            statusBar,
 		asciiImage:           asciiImage.Model{},
+		markdown:             markdown.Model{},
 		previousKey:          tea.KeyMsg{},
 		itemToMove:           nil,
 		appConfig:            cfg,
