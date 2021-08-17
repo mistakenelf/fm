@@ -20,7 +20,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// in the UI. Any time an action is performed, this is called
 	// for example, changing directories, or performing most
 	// file operations.
-	case directoryUpdateMsg:
+	case updateDirectoryListingMsg:
 		if len(msg) == 0 {
 			m.primaryPane.SetContent("Directory is empty")
 		} else {
@@ -34,7 +34,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.textInput.Blur()
 		m.textInput.Reset()
 
-		return m, cmd
+		return m, nil
 
 	// A moveDirItemMsg is received any time a file or directory has been moved.
 	case moveDirItemMsg:
@@ -50,7 +50,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.initialMoveDirectory = ""
 		m.itemToMove = nil
 
-		return m, cmd
+		return m, nil
 
 	// A fileContentMsg is received anytime a file is read from returning its content
 	// along with the markdown content to be rendered by glamour.
@@ -63,14 +63,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(msg.markdown))
 		} else if msg.image != nil {
 			m.secondaryPane.GotoTop()
-			m.asciiImage.SetContent(msg.image)
+			m.asciiImage.SetImage(msg.image)
+			m.asciiImage.SetContent(msg.asciiImage)
 			m.secondaryPane.SetContent(m.asciiImage.View())
 		} else {
 			m.secondaryPane.GotoTop()
 			m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(msg.rawContent))
 		}
 
-		return m, cmd
+		return m, nil
+
+	// convertImageMsg is received when an image is to be converted to ASCII.
+	case convertImageToAsciiMsg:
+		m.asciiImage.SetContent(string(msg))
+		m.secondaryPane.SetContent(m.asciiImage.View())
+
+		return m, nil
 
 	// An errorMsg is received any time something in a command goes wrong
 	// we receive that error and show it in the secondary pane with red text.
@@ -82,30 +90,31 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				Render(string(msg)),
 		)
 
-		return m, cmd
+		return m, nil
 
 	// Any time the window is resized this is called, including when the app
 	// is first started.
 	case tea.WindowSizeMsg:
 		if !m.ready {
 			m.secondaryPane.SetContent(wrap.String(wordwrap.String(constants.IntroText, msg.Width/2), msg.Width/2))
-			m.primaryPane.SetContent(m.dirTree.View())
-
 			m.dirTree.SetSize(msg.Width / 2)
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
-			m.asciiImage.SetSize(m.secondaryPane.GetWidth()-4, m.secondaryPane.GetHeight())
 			m.ready = true
 		} else {
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.dirTree.SetSize(msg.Width / 2)
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
-			m.asciiImage.SetSize(msg.Width/2-4, m.secondaryPane.GetHeight())
 		}
 
-		return m, cmd
+		if m.asciiImage.Image != nil {
+			resizeImageCmd := m.redrawImage(m.secondaryPane.GetWidth()-2, m.secondaryPane.GetHeight())
+			cmds = append(cmds, resizeImageCmd)
+		}
+
+		return m, tea.Batch(cmds...)
 
 	// Any time a mouse event is received, we get this message.
 	case tea.MouseMsg:
@@ -122,7 +131,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.secondaryPane.LineUp(3)
 			}
 
-			return m, cmd
+			return m, nil
 
 		case tea.MouseWheelDown:
 			// Command bar is not shown and the primary pane is active
@@ -136,7 +145,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.secondaryPane.LineDown(3)
 			}
 
-			return m, cmd
+			return m, nil
 		}
 
 	case tea.KeyMsg:
@@ -154,7 +163,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.secondaryPane.GotoTop()
 			}
 
-			return m, cmd
+			return m, nil
 		}
 
 		switch msg.String() {
