@@ -4,13 +4,16 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	_ "image/jpeg"
-	_ "image/png"
 	"io/fs"
 	"os"
 	"path/filepath"
 
-	"github.com/knipferrc/fm/internal/ascii_image"
+	// "image/jpeg" is needed for the image.Decode function.
+	_ "image/jpeg"
+	// "image/png" is needed for the image.Decode function.
+	_ "image/png"
+
+	"github.com/knipferrc/fm/internal/asciiImage"
 	"github.com/knipferrc/fm/internal/helpers"
 
 	"github.com/alecthomas/chroma/quick"
@@ -20,7 +23,7 @@ import (
 type updateDirectoryListingMsg []fs.FileInfo
 type moveDirItemMsg []fs.FileInfo
 type errorMsg string
-type convertImageToAsciiMsg string
+type convertImageToASCIIMsg string
 type readFileContentMsg struct {
 	rawContent string
 	markdown   string
@@ -166,7 +169,7 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 				return errorMsg(err.Error())
 			}
 
-			imageString := ascii_image.ConvertToAscii(ascii_image.ScaleImage(img, width, height))
+			imageString := asciiImage.ConvertToAscii(asciiImage.ScaleImage(img, width, height))
 
 			return readFileContentMsg{
 				rawContent: content,
@@ -197,9 +200,9 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 // deleteFile deletes a file based on the name provided.
 func (m Model) redrawImage(width, height int) tea.Cmd {
 	return func() tea.Msg {
-		imageString := ascii_image.ConvertToAscii(ascii_image.ScaleImage(m.asciiImage.Image, width, height))
+		imageString := asciiImage.ConvertToAscii(asciiImage.ScaleImage(m.asciiImage.Image, width, height))
 
-		return convertImageToAsciiMsg(imageString)
+		return convertImageToASCIIMsg(imageString)
 	}
 }
 

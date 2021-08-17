@@ -74,7 +74,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	// convertImageMsg is received when an image is to be converted to ASCII.
-	case convertImageToAsciiMsg:
+	case convertImageToASCIIMsg:
 		m.asciiImage.SetContent(string(msg))
 		m.secondaryPane.SetContent(m.asciiImage.View())
 
@@ -219,7 +219,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 
 				return m, m.readFileContent(m.dirTree.GetSelectedFile(), m.secondaryPane.GetWidth()-2, m.secondaryPane.GetHeight())
-
 			}
 
 		case "G":
@@ -247,61 +246,60 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.moveFile(m.itemToMove.Name()),
 					m.updateDirectoryListing(m.initialMoveDirectory),
 				)
+			}
 
-			} else {
-				// Parse the commands from the command bar, command is the name
-				// of the command and value is if the command requires input to it
-				// get its value, for example (rename test.txt) text.txt is the value.
-				command, value := helpers.ParseCommand(m.textInput.Value())
+			// Parse the commands from the command bar, command is the name
+			// of the command and value is if the command requires input to it
+			// get its value, for example (rename test.txt) text.txt is the value.
+			command, value := helpers.ParseCommand(m.textInput.Value())
 
-				// Nothing was input for a command.
-				if command == "" {
-					return m, nil
+			// Nothing was input for a command.
+			if command == "" {
+				return m, nil
+			}
+
+			switch command {
+			// Exit FM.
+			case "exit", "q", "quit":
+				return m, tea.Quit
+
+			// Create a new directory based on the value passed.
+			case "mkdir":
+				return m, tea.Sequentially(
+					m.createDir(value),
+					m.updateDirectoryListing(constants.CurrentDirectory),
+				)
+
+			// Create a new file based on the value passed.
+			case "touch":
+				return m, tea.Sequentially(
+					m.createFile(value),
+					m.updateDirectoryListing(constants.CurrentDirectory),
+				)
+
+			// Rename the currently selected file or folder based on the value passed.
+			case "mv", "rename":
+				return m, tea.Sequentially(
+					m.renameFileOrDir(m.dirTree.GetSelectedFile().Name(), value),
+					m.updateDirectoryListing(constants.CurrentDirectory),
+				)
+
+			// Delete the currently selected item.
+			case "rm", "delete":
+				if m.dirTree.GetSelectedFile().IsDir() {
+					return m, tea.Sequentially(
+						m.deleteDir(m.dirTree.GetSelectedFile().Name()),
+						m.updateDirectoryListing(constants.CurrentDirectory),
+					)
 				}
 
-				switch command {
-				// Exit FM.
-				case "exit", "q", "quit":
-					return m, tea.Quit
+				return m, tea.Sequentially(
+					m.deleteFile(m.dirTree.GetSelectedFile().Name()),
+					m.updateDirectoryListing(constants.CurrentDirectory),
+				)
 
-				// Create a new directory based on the value passed.
-				case "mkdir":
-					return m, tea.Sequentially(
-						m.createDir(value),
-						m.updateDirectoryListing(constants.CurrentDirectory),
-					)
-
-				// Create a new file based on the value passed.
-				case "touch":
-					return m, tea.Sequentially(
-						m.createFile(value),
-						m.updateDirectoryListing(constants.CurrentDirectory),
-					)
-
-				// Rename the currently selected file or folder based on the value passed.
-				case "mv", "rename":
-					return m, tea.Sequentially(
-						m.renameFileOrDir(m.dirTree.GetSelectedFile().Name(), value),
-						m.updateDirectoryListing(constants.CurrentDirectory),
-					)
-
-				// Delete the currently selected item.
-				case "rm", "delete":
-					if m.dirTree.GetSelectedFile().IsDir() {
-						return m, tea.Sequentially(
-							m.deleteDir(m.dirTree.GetSelectedFile().Name()),
-							m.updateDirectoryListing(constants.CurrentDirectory),
-						)
-					}
-
-					return m, tea.Sequentially(
-						m.deleteFile(m.dirTree.GetSelectedFile().Name()),
-						m.updateDirectoryListing(constants.CurrentDirectory),
-					)
-
-				default:
-					return m, nil
-				}
+			default:
+				return m, nil
 			}
 
 		case ":":

@@ -1,4 +1,4 @@
-package ascii_image
+package asciiImage
 
 import (
 	"bytes"
@@ -17,7 +17,8 @@ type Model struct {
 	Width   int
 }
 
-var ASCIISTR = "IMND8OZ$7I?+=~:,.."
+// asciiString is the ascii string that will be used to represent the image.
+var asciiString = "IMND8OZ$7I?+=~:,.."
 
 // ScaleImage resizes an image to the given width and height.
 func ScaleImage(img image.Image, w, height int) (image.Image, int, int) {
@@ -28,7 +29,7 @@ func ScaleImage(img image.Image, w, height int) (image.Image, int, int) {
 
 // ConvertToAscii converts an image to ASCII.
 func ConvertToAscii(img image.Image, w, h int) string {
-	table := []byte(ASCIISTR)
+	table := []byte(asciiString)
 	buf := new(bytes.Buffer)
 
 	for i := 0; i < h; i++ {

@@ -3,7 +3,7 @@ package ui
 import (
 	"io/fs"
 
-	"github.com/knipferrc/fm/internal/ascii_image"
+	"github.com/knipferrc/fm/internal/asciiImage"
 	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/dirtree"
 	"github.com/knipferrc/fm/internal/pane"
@@ -23,7 +23,7 @@ type Model struct {
 	loader               spinner.Model
 	dirTree              dirtree.Model
 	statusBar            statusbar.Model
-	asciiImage           ascii_image.Model
+	asciiImage           asciiImage.Model
 	previousKey          tea.KeyMsg
 	itemToMove           fs.FileInfo
 	appConfig            config.Config
@@ -100,7 +100,7 @@ func NewModel() Model {
 		loader:               l,
 		dirTree:              dirTree,
 		statusBar:            statusBar,
-		asciiImage:           ascii_image.Model{},
+		asciiImage:           asciiImage.Model{},
 		previousKey:          tea.KeyMsg{},
 		itemToMove:           nil,
 		appConfig:            cfg,
