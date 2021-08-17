@@ -57,10 +57,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case readFileContentMsg:
 		if msg.code != "" {
 			m.secondaryPane.GotoTop()
-			m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(msg.code))
+			m.secondaryPane.SetContent(msg.code)
 		} else if msg.markdown != "" {
 			m.secondaryPane.GotoTop()
-			m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(msg.markdown))
+			m.secondaryPane.SetContent(msg.markdown)
 		} else if msg.image != nil {
 			m.secondaryPane.GotoTop()
 			m.asciiImage.SetImage(msg.image)
@@ -68,7 +68,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.SetContent(m.asciiImage.View())
 		} else {
 			m.secondaryPane.GotoTop()
-			m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(msg.rawContent))
+			m.secondaryPane.SetContent(msg.rawContent)
 		}
 
 		return m, nil
@@ -395,7 +395,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.textInput.Reset()
 			m.secondaryPane.GotoTop()
 			m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
-			m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(constants.IntroText))
+			m.secondaryPane.SetContent(constants.IntroText)
 			m.asciiImage.SetImage(nil)
 		}
 

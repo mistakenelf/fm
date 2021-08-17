@@ -3,6 +3,7 @@ package pane
 import (
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/knipferrc/fm/internal/helpers"
 )
 
 // Model struct represents property of a pane.
@@ -55,7 +56,7 @@ func (m *Model) SetContent(content string) {
 			Width(m.Viewport.Width).
 			Height(m.Viewport.Height).
 			PaddingLeft(padding).
-			Render(content),
+			Render(helpers.ConvertTabsToSpaces(content)),
 	)
 }
 
