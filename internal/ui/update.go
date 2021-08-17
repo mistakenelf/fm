@@ -396,6 +396,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.GotoTop()
 			m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
 			m.secondaryPane.SetContent(helpers.ConvertTabsToSpaces(constants.IntroText))
+			m.asciiImage.SetImage(nil)
 		}
 
 		// Capture the previous key so that we can capture
