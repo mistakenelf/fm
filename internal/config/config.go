@@ -60,10 +60,10 @@ type Config struct {
 }
 
 // LoadConfig loads a users config and creates the config if it does not exist
-// located at ~/fm.yml.
+// located at ~/.fm.yml.
 func LoadConfig() {
 	viper.AddConfigPath("$HOME")
-	viper.SetConfigName("fm")
+	viper.SetConfigName(".fm")
 	viper.SetConfigType("yml")
 
 	if err := viper.SafeWriteConfig(); err != nil {
