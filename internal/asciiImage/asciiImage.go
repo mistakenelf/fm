@@ -27,8 +27,8 @@ func ScaleImage(img image.Image, w, height int) (image.Image, int, int) {
 	return img, w, height
 }
 
-// ConvertToAscii converts an image to ASCII.
-func ConvertToAscii(img image.Image, w, h int) string {
+// ConvertToASCII converts an image to ASCII.
+func ConvertToASCII(img image.Image, w, h int) string {
 	table := []byte(asciiString)
 	buf := new(bytes.Buffer)
 

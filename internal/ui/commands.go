@@ -169,7 +169,7 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 				return errorMsg(err.Error())
 			}
 
-			imageString := asciiImage.ConvertToAscii(asciiImage.ScaleImage(img, width, height))
+			imageString := asciiImage.ConvertToASCII(asciiImage.ScaleImage(img, width, height))
 
 			return readFileContentMsg{
 				rawContent: content,
@@ -200,7 +200,7 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 // deleteFile deletes a file based on the name provided.
 func (m Model) redrawImage(width, height int) tea.Cmd {
 	return func() tea.Msg {
-		imageString := asciiImage.ConvertToAscii(asciiImage.ScaleImage(m.asciiImage.Image, width, height))
+		imageString := asciiImage.ConvertToASCII(asciiImage.ScaleImage(m.asciiImage.Image, width, height))
 
 		return convertImageToASCIIMsg(imageString)
 	}
