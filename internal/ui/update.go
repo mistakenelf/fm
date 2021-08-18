@@ -6,8 +6,6 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/reflow/wordwrap"
-	"github.com/muesli/reflow/wrap"
 )
 
 // Update handles all UI interactions and events for updating the screen.
@@ -97,7 +95,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// is first started.
 	case tea.WindowSizeMsg:
 		if !m.ready {
-			m.secondaryPane.SetContent(wrap.String(wordwrap.String(constants.IntroText, msg.Width/2), msg.Width/2))
+			m.secondaryPane.SetContent(constants.IntroText)
 			m.dirTree.SetSize(msg.Width / 2)
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
