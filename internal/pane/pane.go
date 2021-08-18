@@ -1,9 +1,12 @@
 package pane
 
 import (
+	"github.com/knipferrc/fm/internal/helpers"
+
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/knipferrc/fm/internal/helpers"
+	"github.com/muesli/reflow/wordwrap"
+	"github.com/muesli/reflow/wrap"
 )
 
 // Model struct represents property of a pane.
@@ -120,5 +123,7 @@ func (m Model) View() string {
 		Border(border).
 		Width(m.Viewport.Width).
 		Height(m.Viewport.Height).
-		Render(m.Viewport.View())
+		Render(wrap.String(
+			wordwrap.String(m.Viewport.View(), m.Viewport.Width), m.Viewport.Width),
+		)
 }
