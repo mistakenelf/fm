@@ -6,8 +6,6 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/reflow/wordwrap"
-	"github.com/muesli/reflow/wrap"
 )
 
 // Update handles all UI interactions and events for updating the screen.
@@ -60,7 +58,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.SetContent(msg.code)
 		} else if msg.markdown != "" {
 			m.secondaryPane.GotoTop()
-			m.secondaryPane.SetContent(msg.markdown)
+			m.markdown.SetContent(msg.markdown)
+			m.secondaryPane.SetContent(m.markdown.View())
 		} else if msg.image != nil {
 			m.secondaryPane.GotoTop()
 			m.asciiImage.SetImage(msg.image)
@@ -96,7 +95,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// is first started.
 	case tea.WindowSizeMsg:
 		if !m.ready {
-			m.secondaryPane.SetContent(wrap.String(wordwrap.String(constants.IntroText, msg.Width/2), msg.Width/2))
+			m.secondaryPane.SetContent(constants.IntroText)
 			m.dirTree.SetSize(msg.Width / 2)
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
@@ -112,6 +111,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.asciiImage.Image != nil {
 			resizeImageCmd := m.redrawImage(m.secondaryPane.GetWidth()-2, m.secondaryPane.GetHeight())
 			cmds = append(cmds, resizeImageCmd)
+		}
+
+		if m.markdown.Content != "" {
+			resizeMarkdownCmd := m.redrawMarkdown(m.secondaryPane.GetWidth()-2, m.markdown.Content)
+			cmds = append(cmds, resizeMarkdownCmd)
 		}
 
 		return m, tea.Batch(cmds...)
@@ -397,6 +401,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
 			m.secondaryPane.SetContent(constants.IntroText)
 			m.asciiImage.SetImage(nil)
+			m.markdown.SetContent("")
 		}
 
 		// Capture the previous key so that we can capture
