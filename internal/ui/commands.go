@@ -13,7 +13,7 @@ import (
 	// "image/png" is needed for the image.Decode function.
 	_ "image/png"
 
-	"github.com/knipferrc/fm/internal/asciiImage"
+	"github.com/knipferrc/fm/internal/asciimage"
 	"github.com/knipferrc/fm/internal/helpers"
 	"github.com/knipferrc/fm/internal/markdown"
 
@@ -171,7 +171,7 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 				return errorMsg(err.Error())
 			}
 
-			imageString := asciiImage.ConvertToASCII(asciiImage.ScaleImage(img, width, height))
+			imageString := asciimage.ConvertToASCII(asciimage.ScaleImage(img, width, height))
 
 			return readFileContentMsg{
 				rawContent: content,
@@ -202,7 +202,7 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 // redrawImage redraws the image based on the width and height provided.
 func (m Model) redrawImage(width, height int) tea.Cmd {
 	return func() tea.Msg {
-		imageString := asciiImage.ConvertToASCII(asciiImage.ScaleImage(m.asciiImage.Image, width, height))
+		imageString := asciimage.ConvertToASCII(asciimage.ScaleImage(m.asciiImage.Image, width, height))
 
 		return convertImageToASCIIMsg(imageString)
 	}

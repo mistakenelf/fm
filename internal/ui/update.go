@@ -96,15 +96,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		if !m.ready {
 			m.secondaryPane.SetContent(constants.IntroText)
-			m.dirTree.SetSize(msg.Width / 2)
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
+			m.dirTree.SetSize(m.primaryPane.GetWidth(), m.primaryPane.GetHeight())
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
+
 			m.ready = true
 		} else {
 			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.dirTree.SetSize(msg.Width / 2)
 			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
+			m.dirTree.SetSize(m.primaryPane.GetWidth(), m.primaryPane.GetHeight())
 			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
 		}
 

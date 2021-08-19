@@ -1,4 +1,4 @@
-package asciiImage
+package asciimage
 
 import (
 	"bytes"

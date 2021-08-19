@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/fs"
 	"path/filepath"
-	"strings"
 
 	"github.com/knipferrc/fm/icons"
 
@@ -16,6 +15,7 @@ import (
 type Model struct {
 	Files               []fs.FileInfo
 	Width               int
+	Height              int
 	Cursor              int
 	ShowIcons           bool
 	ShowHidden          bool
@@ -40,8 +40,9 @@ func (m *Model) SetContent(files []fs.FileInfo) {
 }
 
 // SetSize updates the size of the dirtree, useful when resizing the terminal.
-func (m *Model) SetSize(width int) {
+func (m *Model) SetSize(width, height int) {
 	m.Width = width
+	m.Height = height
 }
 
 // GotoTop goes to the top of the tree.
@@ -115,7 +116,6 @@ func (m Model) dirItem(selected bool, file fs.FileInfo) string {
 
 // View returns a string representation of the current tree.
 func (m Model) View() string {
-	doc := strings.Builder{}
 	curFiles := ""
 
 	for i, file := range m.Files {
@@ -136,7 +136,5 @@ func (m Model) View() string {
 		curFiles += fmt.Sprintf("%s\n", row)
 	}
 
-	doc.WriteString(curFiles)
-
-	return doc.String()
+	return lipgloss.NewStyle().Height(m.Height).Render(curFiles)
 }
