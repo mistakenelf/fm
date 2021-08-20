@@ -55,7 +55,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case readFileContentMsg:
 		if msg.code != "" {
 			m.secondaryPane.GotoTop()
-			m.secondaryPane.SetContent(msg.code)
+			m.text.SetContent(msg.code)
+			m.secondaryPane.SetContent(m.text.View())
 		} else if msg.markdown != "" {
 			m.secondaryPane.GotoTop()
 			m.markdown.SetContent(msg.markdown)

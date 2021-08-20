@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"bytes"
 	"fmt"
 	"image"
 	"io/fs"
@@ -16,8 +15,8 @@ import (
 	"github.com/knipferrc/fm/internal/asciimage"
 	"github.com/knipferrc/fm/internal/helpers"
 	"github.com/knipferrc/fm/internal/markdown"
+	"github.com/knipferrc/fm/internal/text"
 
-	"github.com/alecthomas/chroma/quick"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -181,8 +180,8 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 				asciiImage: imageString,
 			}
 		} else {
-			buf := new(bytes.Buffer)
-			if err = quick.Highlight(buf, content, filepath.Ext(file.Name()), "terminal256", "dracula"); err != nil {
+			code, err := text.Highlight(content, filepath.Ext(file.Name()))
+			if err != nil {
 				return errorMsg(err.Error())
 			}
 
@@ -190,7 +189,7 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 			// since were not dealing with markdown.
 			return readFileContentMsg{
 				rawContent: content,
-				code:       buf.String(),
+				code:       code,
 				markdown:   "",
 				image:      nil,
 				asciiImage: "",

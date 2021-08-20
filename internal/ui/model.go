@@ -9,6 +9,7 @@ import (
 	"github.com/knipferrc/fm/internal/markdown"
 	"github.com/knipferrc/fm/internal/pane"
 	"github.com/knipferrc/fm/internal/statusbar"
+	"github.com/knipferrc/fm/internal/text"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -26,6 +27,7 @@ type Model struct {
 	statusBar            statusbar.Model
 	asciiImage           asciimage.Model
 	markdown             markdown.Model
+	text                 text.Model
 	previousKey          tea.KeyMsg
 	itemToMove           fs.FileInfo
 	appConfig            config.Config
@@ -104,6 +106,7 @@ func NewModel() Model {
 		statusBar:            statusBar,
 		asciiImage:           asciimage.Model{},
 		markdown:             markdown.Model{},
+		text:                 text.Model{},
 		previousKey:          tea.KeyMsg{},
 		itemToMove:           nil,
 		appConfig:            cfg,
