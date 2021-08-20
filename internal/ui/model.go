@@ -5,6 +5,7 @@ import (
 
 	"github.com/knipferrc/fm/internal/asciimage"
 	"github.com/knipferrc/fm/internal/config"
+	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/dirtree"
 	"github.com/knipferrc/fm/internal/markdown"
 	"github.com/knipferrc/fm/internal/pane"
@@ -76,6 +77,8 @@ func NewModel() Model {
 		cfg.Colors.Pane.ActiveBorderColor,
 		cfg.Colors.Pane.InactiveBorderColor,
 	)
+
+	secondaryPane.SetContent(constants.IntroText)
 
 	// Initialize a status bar passing in config values.
 	statusBar := statusbar.NewModel(

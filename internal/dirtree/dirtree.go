@@ -125,9 +125,9 @@ func (m Model) View() string {
 				Format("2006-01-02 15:04:05"),
 			)
 
-		dirItem := lipgloss.NewStyle().Width(m.Width - lipgloss.Width(modTime) - 4).Render(
+		dirItem := lipgloss.NewStyle().Width(m.Width - lipgloss.Width(modTime) - 2).Render(
 			truncate.StringWithTail(
-				m.dirItem(m.Cursor == i, file), uint(m.Width-lipgloss.Width(modTime)-4), "...",
+				m.dirItem(m.Cursor == i, file), uint(m.Width-lipgloss.Width(modTime)-2), "...",
 			),
 		)
 
