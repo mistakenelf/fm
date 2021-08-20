@@ -95,19 +95,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Any time the window is resized this is called, including when the app
 	// is first started.
 	case tea.WindowSizeMsg:
-		if !m.ready {
-			m.secondaryPane.SetContent(constants.IntroText)
-			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.dirTree.SetSize(m.primaryPane.GetWidth(), m.primaryPane.GetHeight())
-			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
+		m.secondaryPane.SetContent(constants.IntroText)
+		m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
+		m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
+		m.dirTree.SetSize(m.primaryPane.GetWidth(), m.primaryPane.GetHeight())
+		m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
 
+		if !m.ready {
 			m.ready = true
-		} else {
-			m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-			m.dirTree.SetSize(m.primaryPane.GetWidth(), m.primaryPane.GetHeight())
-			m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
 		}
 
 		if m.asciiImage.Image != nil {
