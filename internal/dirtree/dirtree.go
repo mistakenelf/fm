@@ -3,6 +3,7 @@ package dirtree
 import (
 	"fmt"
 	"io/fs"
+	"log"
 	"path/filepath"
 
 	"github.com/knipferrc/fm/icons"
@@ -15,7 +16,6 @@ import (
 type Model struct {
 	Files               []fs.FileInfo
 	Width               int
-	Height              int
 	Cursor              int
 	ShowIcons           bool
 	ShowHidden          bool
@@ -40,9 +40,9 @@ func (m *Model) SetContent(files []fs.FileInfo) {
 }
 
 // SetSize updates the size of the dirtree, useful when resizing the terminal.
-func (m *Model) SetSize(width, height int) {
+func (m *Model) SetSize(width int) {
 	m.Width = width
-	m.Height = height
+	log.Output(2, "resizd")
 }
 
 // GotoTop goes to the top of the tree.
@@ -119,8 +119,17 @@ func (m Model) View() string {
 	curFiles := ""
 
 	for i, file := range m.Files {
+		modTimeColor := ""
+
+		if m.Cursor == i {
+			modTimeColor = m.SelectedItemColor
+		} else {
+			modTimeColor = m.UnselectedItemColor
+		}
+
 		modTime := lipgloss.NewStyle().
 			Align(lipgloss.Right).
+			Foreground(lipgloss.Color(modTimeColor)).
 			Render(file.ModTime().
 				Format("2006-01-02 15:04:05"),
 			)
@@ -136,5 +145,5 @@ func (m Model) View() string {
 		curFiles += fmt.Sprintf("%s\n", row)
 	}
 
-	return lipgloss.NewStyle().Height(m.Height).Render(curFiles)
+	return curFiles
 }
