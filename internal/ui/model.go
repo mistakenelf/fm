@@ -78,6 +78,7 @@ func NewModel() Model {
 		cfg.Colors.Pane.InactiveBorderColor,
 	)
 
+	// Set secondary panes initial content to the introText.
 	secondaryPane.SetContent(constants.IntroText)
 
 	// Initialize a status bar passing in config values.
