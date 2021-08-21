@@ -3,7 +3,6 @@ package dirtree
 import (
 	"fmt"
 	"io/fs"
-	"log"
 	"path/filepath"
 
 	"github.com/knipferrc/fm/icons"
@@ -42,7 +41,6 @@ func (m *Model) SetContent(files []fs.FileInfo) {
 // SetSize updates the size of the dirtree, useful when resizing the terminal.
 func (m *Model) SetSize(width int) {
 	m.Width = width
-	log.Output(2, "resizd")
 }
 
 // GotoTop goes to the top of the tree.
