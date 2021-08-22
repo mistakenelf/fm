@@ -104,23 +104,23 @@ func SetDefaults() {
 	viper.SetDefault("settings.pretty_markdown", true)
 
 	// DirTree colors.
-	viper.SetDefault("colors.dir_tree.selected_item", constants.Pink)
-	viper.SetDefault("colors.dir_tree.unselected_item", constants.White)
+	viper.SetDefault("colors.dir_tree.selected_item", constants.Colors.Pink)
+	viper.SetDefault("colors.dir_tree.unselected_item", constants.Colors.White)
 
 	// Pane colors.
-	viper.SetDefault("colors.pane.active_border_color", constants.Pink)
-	viper.SetDefault("colors.pane.inactive_border_color", constants.White)
+	viper.SetDefault("colors.pane.active_border_color", constants.Colors.Pink)
+	viper.SetDefault("colors.pane.inactive_border_color", constants.Colors.White)
 
 	// Spinner colors.
-	viper.SetDefault("colors.spinner", constants.Pink)
+	viper.SetDefault("colors.spinner", constants.Colors.Pink)
 
 	// StatusBar colors.
-	viper.SetDefault("colors.status_bar.selected_file.foreground", constants.White)
-	viper.SetDefault("colors.status_bar.selected_file.background", constants.Pink)
-	viper.SetDefault("colors.status_bar.bar.foreground", constants.White)
-	viper.SetDefault("colors.status_bar.bar.background", constants.DarkGray)
-	viper.SetDefault("colors.status_bar.total_files.foreground", constants.White)
-	viper.SetDefault("colors.status_bar.total_files.background", constants.LightPurple)
-	viper.SetDefault("colors.status_bar.logo.foreground", constants.White)
-	viper.SetDefault("colors.status_bar.logo.background", constants.DarkPurple)
+	viper.SetDefault("colors.status_bar.selected_file.foreground", constants.Colors.White)
+	viper.SetDefault("colors.status_bar.selected_file.background", constants.Colors.Pink)
+	viper.SetDefault("colors.status_bar.bar.foreground", constants.Colors.White)
+	viper.SetDefault("colors.status_bar.bar.background", constants.Colors.DarkGray)
+	viper.SetDefault("colors.status_bar.total_files.foreground", constants.Colors.White)
+	viper.SetDefault("colors.status_bar.total_files.background", constants.Colors.LightPurple)
+	viper.SetDefault("colors.status_bar.logo.foreground", constants.Colors.White)
+	viper.SetDefault("colors.status_bar.logo.background", constants.Colors.DarkPurple)
 }

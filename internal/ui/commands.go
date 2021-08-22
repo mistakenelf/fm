@@ -185,8 +185,6 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 				return errorMsg(err.Error())
 			}
 
-			// Return the syntax highlighted content and markdown content as empty
-			// since were not dealing with markdown.
 			return readFileContentMsg{
 				rawContent: content,
 				code:       code,

@@ -1,42 +1,62 @@
 package constants
 
+// DirectoryTypes contains the different types of directories.
+type DirectoryTypes struct {
+	CurrentDirectory  string
+	PreviousDirectory string
+	HomeDirectory     string
+}
+
+// Directories contains the different kinds of directories and their values.
+var Directories = DirectoryTypes{
+	CurrentDirectory:  ".",
+	PreviousDirectory: "..",
+	HomeDirectory:     "~",
+}
+
+// VersionTypes contains the different types of versions.
+type VersionTypes struct {
+	AppVersion string
+}
+
+// Versions contains the different kinds of versions and their values.
+var Versions = VersionTypes{
+	AppVersion: "0.1.1",
+}
+
+// DimensionTypes contains the different types of dimensions.
+type DimensionTypes struct {
+	StatusBarHeight int
+}
+
+// Dimensions contains the different kinds of dimensions and their values.
+var Dimensions = DimensionTypes{
+	StatusBarHeight: 1,
+}
+
+// ColorTypes contains the different types of colors.
+type ColorTypes struct {
+	White       string
+	Pink        string
+	LightPurple string
+	DarkPurple  string
+	DarkGray    string
+	Blue        string
+	Red         string
+}
+
+// Colors contains the different kinds of colors and their values.
+var Colors = ColorTypes{
+	White:       "#FFFDF5",
+	Pink:        "#F25D94",
+	LightPurple: "#A550DF",
+	DarkPurple:  "#6124DF",
+	DarkGray:    "#353533",
+	Blue:        "#1D4ED8",
+	Red:         "#DC2626",
+}
+
 const (
-	// CurrentDirectory is the current directory.
-	CurrentDirectory = "."
-
-	// PreviousDirectory is the previous directory.
-	PreviousDirectory = ".."
-
-	// HomeDirectory is the home directory.
-	HomeDirectory = "~"
-
-	// AppVersion is the version of the application.
-	AppVersion = "0.1.1"
-
-	// StatusBarHeight is the height of the status bar.
-	StatusBarHeight = 1
-
-	// White is the color of the white.
-	White = "#FFFDF5"
-
-	// Pink is the color of the pink.
-	Pink = "#F25D94"
-
-	// LightPurple is the color of the light purple.
-	LightPurple = "#A550DF"
-
-	// DarkPurple is the color of the dark purple.
-	DarkPurple = "#6124DF"
-
-	// DarkGray is the color of the dark gray.
-	DarkGray = "#353533"
-
-	// Blue is the color of the blue.
-	Blue = "#1D4ED8"
-
-	// Red is the color of the red.
-	Red = "#DC2626"
-
 	// IntroText is the text displayed in the secondary pane
 	// when the application is launched.
 	IntroText = `

@@ -39,7 +39,7 @@ func (m *Model) scrollPrimaryPane() {
 func (m Model) getStatusBarContent() (string, string, string, string) {
 	currentPath, err := helpers.GetWorkingDirectory()
 	if err != nil {
-		currentPath = constants.CurrentDirectory
+		currentPath = constants.Directories.CurrentDirectory
 	}
 
 	if m.dirTree.GetTotalFiles() == 0 {

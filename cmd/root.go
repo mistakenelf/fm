@@ -16,7 +16,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:     "fm",
 	Short:   "FM is a simple, configurable and fun to use file manager",
-	Version: constants.AppVersion,
+	Version: constants.Versions.AppVersion,
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		config.SetDefaults()

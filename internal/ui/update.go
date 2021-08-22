@@ -55,14 +55,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case readFileContentMsg:
 		if msg.code != "" {
 			m.secondaryPane.GotoTop()
+			m.asciiImage.SetImage(nil)
+			m.markdown.SetContent("")
 			m.text.SetContent(msg.code)
 			m.secondaryPane.SetContent(m.text.View())
 		} else if msg.markdown != "" {
 			m.secondaryPane.GotoTop()
+			m.asciiImage.SetImage(nil)
+			m.text.SetContent("")
 			m.markdown.SetContent(msg.markdown)
 			m.secondaryPane.SetContent(m.markdown.View())
 		} else if msg.image != nil {
 			m.secondaryPane.GotoTop()
+			m.markdown.SetContent("")
+			m.text.SetContent("")
 			m.asciiImage.SetImage(msg.image)
 			m.asciiImage.SetContent(msg.asciiImage)
 			m.secondaryPane.SetContent(m.asciiImage.View())
@@ -86,7 +92,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.secondaryPane.SetContent(
 			lipgloss.NewStyle().
 				Bold(true).
-				Foreground(lipgloss.Color(constants.Red)).
+				Foreground(lipgloss.Color(constants.Colors.Red)).
 				Render(string(msg)),
 		)
 
@@ -95,11 +101,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Any time the window is resized this is called, including when the app
 	// is first started.
 	case tea.WindowSizeMsg:
-		m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
-		m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.StatusBarHeight)
+		m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.Dimensions.StatusBarHeight)
+		m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.Dimensions.StatusBarHeight)
 		m.dirTree.SetSize(m.primaryPane.GetWidth())
 		m.primaryPane.SetContent(m.dirTree.View())
-		m.statusBar.SetSize(msg.Width, constants.StatusBarHeight)
+		m.statusBar.SetSize(msg.Width, constants.Dimensions.StatusBarHeight)
 
 		if !m.ready {
 			m.ready = true
@@ -185,7 +191,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.previousDirectory, _ = helpers.GetWorkingDirectory()
 
-				return m, m.updateDirectoryListing(constants.PreviousDirectory)
+				return m, m.updateDirectoryListing(constants.Directories.PreviousDirectory)
 			}
 
 		case "down", "j":
@@ -268,21 +274,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "mkdir":
 				return m, tea.Sequentially(
 					m.createDir(value),
-					m.updateDirectoryListing(constants.CurrentDirectory),
+					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
 				)
 
 			// Create a new file based on the value passed.
 			case "touch":
 				return m, tea.Sequentially(
 					m.createFile(value),
-					m.updateDirectoryListing(constants.CurrentDirectory),
+					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
 				)
 
 			// Rename the currently selected file or folder based on the value passed.
 			case "mv", "rename":
 				return m, tea.Sequentially(
 					m.renameFileOrDir(m.dirTree.GetSelectedFile().Name(), value),
-					m.updateDirectoryListing(constants.CurrentDirectory),
+					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
 				)
 
 			// Delete the currently selected item.
@@ -290,13 +296,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
 						m.deleteDir(m.dirTree.GetSelectedFile().Name()),
-						m.updateDirectoryListing(constants.CurrentDirectory),
+						m.updateDirectoryListing(constants.Directories.CurrentDirectory),
 					)
 				}
 
 				return m, tea.Sequentially(
 					m.deleteFile(m.dirTree.GetSelectedFile().Name()),
-					m.updateDirectoryListing(constants.CurrentDirectory),
+					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
 				)
 
 			default:
@@ -331,7 +337,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ".":
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.dirTree.ToggleHidden()
-				return m, m.updateDirectoryListing(constants.CurrentDirectory)
+				return m, m.updateDirectoryListing(constants.Directories.CurrentDirectory)
 			}
 
 		// Toggle between the two panes if the command bar is not currently active.
@@ -345,7 +351,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "m":
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.inMoveMode = true
-				m.primaryPane.SetActiveBorderColor(constants.Blue)
+				m.primaryPane.SetActiveBorderColor(constants.Colors.Blue)
 				m.initialMoveDirectory, _ = helpers.GetWorkingDirectory()
 				m.itemToMove = m.dirTree.GetSelectedFile()
 			}
@@ -355,7 +361,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				return m, tea.Sequentially(
 					m.zipDirectory(m.dirTree.GetSelectedFile().Name()),
-					m.updateDirectoryListing(constants.CurrentDirectory),
+					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
 				)
 			}
 
@@ -364,7 +370,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				return m, tea.Sequentially(
 					m.unzipDirectory(m.dirTree.GetSelectedFile().Name()),
-					m.updateDirectoryListing(constants.CurrentDirectory),
+					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
 				)
 			}
 
@@ -374,13 +380,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
 						m.copyDirectory(m.dirTree.GetSelectedFile().Name()),
-						m.updateDirectoryListing(constants.CurrentDirectory),
+						m.updateDirectoryListing(constants.Directories.CurrentDirectory),
 					)
 				}
 
 				return m, tea.Sequentially(
 					m.copyFile(m.dirTree.GetSelectedFile().Name()),
-					m.updateDirectoryListing(constants.CurrentDirectory),
+					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
 				)
 			}
 

@@ -24,7 +24,7 @@ func (m Model) Init() tea.Cmd {
 	// Get the initial directory listing to be displayed
 	if _, err := os.Stat(startDir); err == nil {
 		cmds = append(cmds, m.updateDirectoryListing(startDir))
-	} else if m.appConfig.Settings.StartDir == constants.HomeDirectory {
+	} else if m.appConfig.Settings.StartDir == constants.Directories.HomeDirectory {
 		homeDir, err := helpers.GetHomeDirectory()
 		if err != nil {
 			log.Fatal(err)
