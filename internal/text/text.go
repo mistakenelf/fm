@@ -4,11 +4,13 @@ import (
 	"bytes"
 
 	"github.com/alecthomas/chroma/quick"
+	"github.com/charmbracelet/lipgloss"
 )
 
 // Model represents the properties of text.
 type Model struct {
 	Content string
+	Width   int
 }
 
 // Highlight returns a highlighted string of text.
@@ -21,6 +23,11 @@ func Highlight(content, extension string) (string, error) {
 	return buf.String(), nil
 }
 
+// SetSize sets the size of the text.
+func (m *Model) SetSize(width int) {
+	m.Width = width
+}
+
 // SetContent sets the content of the text.
 func (m *Model) SetContent(content string) {
 	m.Content = content
@@ -28,5 +35,5 @@ func (m *Model) SetContent(content string) {
 
 // View returns a string representation of text.
 func (m *Model) View() string {
-	return m.Content
+	return lipgloss.NewStyle().Width(m.Width).Render(m.Content)
 }

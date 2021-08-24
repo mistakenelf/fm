@@ -106,18 +106,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.dirTree.SetSize(m.primaryPane.GetWidth())
 		m.primaryPane.SetContent(m.dirTree.View())
 		m.statusBar.SetSize(msg.Width, constants.Dimensions.StatusBarHeight)
+		m.text.SetSize(m.secondaryPane.GetWidth() - constants.Dimensions.PanePadding)
 
 		if !m.ready {
 			m.ready = true
 		}
 
 		if m.asciiImage.Image != nil {
-			resizeImageCmd := m.redrawImage(m.secondaryPane.GetWidth()-2, m.secondaryPane.GetHeight())
+			resizeImageCmd := m.redrawImage(m.secondaryPane.GetWidth()-constants.Dimensions.PanePadding, m.secondaryPane.GetHeight())
 			cmds = append(cmds, resizeImageCmd)
 		}
 
 		if m.markdown.Content != "" {
-			resizeMarkdownCmd := m.redrawMarkdown(m.secondaryPane.GetWidth()-2, m.markdown.Content)
+			resizeMarkdownCmd := m.redrawMarkdown(m.secondaryPane.GetWidth()-constants.Dimensions.PanePadding, m.markdown.Content)
 			cmds = append(cmds, resizeMarkdownCmd)
 		}
 
@@ -225,7 +226,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, m.updateDirectoryListing(m.dirTree.GetSelectedFile().Name())
 				}
 
-				return m, m.readFileContent(m.dirTree.GetSelectedFile(), m.secondaryPane.GetWidth()-2, m.secondaryPane.GetHeight())
+				return m, m.readFileContent(m.dirTree.GetSelectedFile(), m.secondaryPane.GetWidth()-constants.Dimensions.PanePadding, m.secondaryPane.GetHeight())
 			}
 
 		case "G":
