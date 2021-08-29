@@ -107,6 +107,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.primaryPane.SetContent(m.dirTree.View())
 		m.statusBar.SetSize(msg.Width, constants.Dimensions.StatusBarHeight)
 		m.text.SetSize(m.secondaryPane.GetWidth() - constants.Dimensions.PanePadding)
+		m.markdown.SetSize(m.secondaryPane.GetWidth() - constants.Dimensions.PanePadding)
 
 		if !m.ready {
 			m.ready = true

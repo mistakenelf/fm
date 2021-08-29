@@ -47,20 +47,7 @@ func (m *Model) SetSize(width, height int) {
 
 // SetContent sets the content of the pane.
 func (m *Model) SetContent(content string) {
-	padding := 0
-
-	// If the pane requires padding, add it.
-	if m.IsPadded {
-		padding = 1
-	}
-
-	m.Viewport.SetContent(
-		lipgloss.NewStyle().
-			Width(m.Viewport.Width).
-			Height(m.Viewport.Height).
-			PaddingLeft(padding).
-			Render(helpers.ConvertTabsToSpaces(content)),
-	)
+	m.Viewport.SetContent(content)
 }
 
 // LineUp scrolls the pane up the specified number of lines.
@@ -107,6 +94,12 @@ func (m Model) GetYOffset() int {
 func (m Model) View() string {
 	borderColor := m.InactiveBorderColor
 	border := lipgloss.NormalBorder()
+	padding := 0
+
+	// If the pane requires padding, add it.
+	if m.IsPadded {
+		padding = 1
+	}
 
 	// If rounding is enabled on borders, use the round border.
 	if m.Rounded {
@@ -122,8 +115,8 @@ func (m Model) View() string {
 		BorderForeground(lipgloss.Color(borderColor)).
 		Border(border).
 		Width(m.Viewport.Width).
-		Height(m.Viewport.Height).
-		Render(wrap.String(
-			wordwrap.String(m.Viewport.View(), m.Viewport.Width), m.Viewport.Width),
+		PaddingLeft(padding).
+		Render(helpers.ConvertTabsToSpaces(wrap.String(
+			wordwrap.String(m.Viewport.View(), m.Viewport.Width), m.Viewport.Width)),
 		)
 }

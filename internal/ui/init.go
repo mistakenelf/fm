@@ -17,6 +17,7 @@ func (m Model) Init() tea.Cmd {
 	var cmds []tea.Cmd
 	startDir := ""
 
+	// If a starting directory was specified, use it.
 	if len(os.Args) > 1 {
 		startDir = os.Args[1]
 	}

@@ -1,13 +1,18 @@
 package markdown
 
 import (
+	"github.com/knipferrc/fm/internal/helpers"
+
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/reflow/wordwrap"
+	"github.com/muesli/reflow/wrap"
 )
 
 // Model contains the properties of markdown.
 type Model struct {
 	Content string
+	Width   int
 }
 
 // RenderMarkdown renders the markdown content with glamour.
@@ -36,7 +41,14 @@ func (m *Model) SetContent(content string) {
 	m.Content = content
 }
 
+// SetSize sets the width of the markdown.
+func (m *Model) SetSize(width int) {
+	m.Width = width
+}
+
 // View returns a string representation of the markdown.
 func (m Model) View() string {
-	return m.Content
+	return lipgloss.NewStyle().Width(m.Width).Render(
+		helpers.ConvertTabsToSpaces(wrap.String(wordwrap.String(m.Content, m.Width), m.Width)),
+	)
 }

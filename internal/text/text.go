@@ -3,8 +3,12 @@ package text
 import (
 	"bytes"
 
+	"github.com/knipferrc/fm/internal/helpers"
+
 	"github.com/alecthomas/chroma/quick"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/reflow/wordwrap"
+	"github.com/muesli/reflow/wrap"
 )
 
 // Model represents the properties of text.
@@ -35,5 +39,7 @@ func (m *Model) SetContent(content string) {
 
 // View returns a string representation of text.
 func (m *Model) View() string {
-	return lipgloss.NewStyle().Width(m.Width).Render(m.Content)
+	return lipgloss.NewStyle().Width(m.Width).Render(helpers.ConvertTabsToSpaces(wrap.String(
+		wordwrap.String(m.Content, m.Width), m.Width)),
+	)
 }
