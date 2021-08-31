@@ -8,7 +8,9 @@ require (
 	github.com/charmbracelet/bubbletea v0.14.1
 	github.com/charmbracelet/glamour v0.3.0
 	github.com/charmbracelet/lipgloss v0.3.0
+	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/muesli/reflow v0.3.0
+	github.com/muesli/termenv v0.9.0
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.8.1
@@ -24,13 +26,11 @@ require (
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.15 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
-	github.com/muesli/termenv v0.9.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pelletier/go-toml v1.9.3 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
