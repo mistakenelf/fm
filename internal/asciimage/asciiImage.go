@@ -1,11 +1,11 @@
 package asciimage
 
 import (
-	"bytes"
 	"image"
-	"image/color"
-	"reflect"
+	"strings"
 
+	"github.com/lucasb-eyer/go-colorful"
+	"github.com/muesli/termenv"
 	"github.com/nfnt/resize"
 )
 
@@ -17,32 +17,31 @@ type Model struct {
 	Width   int
 }
 
-// asciiString is the ascii string that will be used to represent the image.
-var asciiString = "IMND8OZ$7I?+=~:,.."
-
-// ScaleImage resizes an image to the given width and height.
-func ScaleImage(img image.Image, w, height int) (image.Image, int, int) {
-	img = resize.Resize(uint(w), uint(height), img, resize.Lanczos3)
-
-	return img, w, height
-}
-
-// ConvertToASCII converts an image to ASCII.
-func ConvertToASCII(img image.Image, w, h int) string {
-	table := []byte(asciiString)
-	buf := new(bytes.Buffer)
-
-	for i := 0; i < h; i++ {
-		for j := 0; j < w; j++ {
-			g := color.GrayModel.Convert(img.At(j, i))
-			y := reflect.ValueOf(g).FieldByName("Y").Uint()
-			pos := int(y * 16 / 255)
-			_ = buf.WriteByte(table[pos])
+// ImageToString converts an image to a string representation of an image.
+func ImageToString(width, height uint, img image.Image) (string, error) {
+	img = resize.Thumbnail(width, height*2-4, img, resize.Lanczos3)
+	b := img.Bounds()
+	w := b.Max.X
+	h := b.Max.Y
+	p := termenv.ColorProfile()
+	str := strings.Builder{}
+	for y := 0; y < h; y += 2 {
+		for x := w; x < int(width); x = x + 2 {
+			str.WriteString(" ")
 		}
-		_ = buf.WriteByte('\n')
+		for x := 0; x < w; x++ {
+			c1, _ := colorful.MakeColor(img.At(x, y))
+			color1 := p.Color(c1.Hex())
+			c2, _ := colorful.MakeColor(img.At(x, y+1))
+			color2 := p.Color(c2.Hex())
+			str.WriteString(termenv.String("▀").
+				Foreground(color1).
+				Background(color2).
+				String())
+		}
+		str.WriteString("\n")
 	}
-
-	return buf.String()
+	return str.String(), nil
 }
 
 // SetContent sets the content of the ascii image.

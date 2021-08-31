@@ -170,7 +170,10 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 				return errorMsg(err.Error())
 			}
 
-			imageString := asciimage.ConvertToASCII(asciimage.ScaleImage(img, width, height))
+			imageString, err := asciimage.ImageToString(uint(width), uint(height), img)
+			if err != nil {
+				return errorMsg(err.Error())
+			}
 
 			return readFileContentMsg{
 				rawContent: content,
@@ -199,7 +202,10 @@ func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
 // redrawImage redraws the image based on the width and height provided.
 func (m Model) redrawImage(width, height int) tea.Cmd {
 	return func() tea.Msg {
-		imageString := asciimage.ConvertToASCII(asciimage.ScaleImage(m.asciiImage.Image, width, height))
+		imageString, err := asciimage.ImageToString(uint(width), uint(height), m.asciiImage.Image)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
 
 		return convertImageToASCIIMsg(imageString)
 	}
