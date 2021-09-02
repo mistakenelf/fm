@@ -4,8 +4,8 @@ import (
 	"image"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/lucasb-eyer/go-colorful"
-	"github.com/muesli/termenv"
 	"github.com/nfnt/resize"
 )
 
@@ -23,7 +23,6 @@ func ImageToString(width, height uint, img image.Image) (string, error) {
 	b := img.Bounds()
 	w := b.Max.X
 	h := b.Max.Y
-	p := termenv.ColorProfile()
 	str := strings.Builder{}
 	for y := 0; y < h; y += 2 {
 		for x := w; x < int(width); x = x + 2 {
@@ -31,16 +30,15 @@ func ImageToString(width, height uint, img image.Image) (string, error) {
 		}
 		for x := 0; x < w; x++ {
 			c1, _ := colorful.MakeColor(img.At(x, y))
-			color1 := p.Color(c1.Hex())
+			color1 := lipgloss.Color(c1.Hex())
 			c2, _ := colorful.MakeColor(img.At(x, y+1))
-			color2 := p.Color(c2.Hex())
-			str.WriteString(termenv.String("▀").
-				Foreground(color1).
-				Background(color2).
-				String())
+			color2 := lipgloss.Color(c2.Hex())
+			str.WriteString(lipgloss.NewStyle().Foreground(color1).
+				Background(color2).Render("▀"))
 		}
 		str.WriteString("\n")
 	}
+
 	return str.String(), nil
 }
 
