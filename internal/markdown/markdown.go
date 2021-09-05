@@ -5,8 +5,6 @@ import (
 
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/reflow/wordwrap"
-	"github.com/muesli/reflow/wrap"
 )
 
 // Model contains the properties of markdown.
@@ -49,6 +47,6 @@ func (m *Model) SetSize(width int) {
 // View returns a string representation of the markdown.
 func (m Model) View() string {
 	return lipgloss.NewStyle().Width(m.Width).Render(
-		helpers.ConvertTabsToSpaces(wrap.String(wordwrap.String(m.Content, m.Width), m.Width)),
+		helpers.ConvertTabsToSpaces(m.Content),
 	)
 }

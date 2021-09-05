@@ -5,8 +5,6 @@ import (
 
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/reflow/wordwrap"
-	"github.com/muesli/reflow/wrap"
 )
 
 // Model struct represents property of a pane.
@@ -116,7 +114,5 @@ func (m Model) View() string {
 		Border(border).
 		Width(m.Viewport.Width).
 		PaddingLeft(padding).
-		Render(helpers.ConvertTabsToSpaces(wrap.String(
-			wordwrap.String(m.Viewport.View(), m.Viewport.Width), m.Viewport.Width)),
-		)
+		Render(helpers.ConvertTabsToSpaces(m.Viewport.View()))
 }

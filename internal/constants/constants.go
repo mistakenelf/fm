@@ -57,18 +57,3 @@ var Colors = ColorTypes{
 	Blue:        "#1D4ED8",
 	Red:         "#DC2626",
 }
-
-const (
-	// IntroText is the text displayed in the secondary pane
-	// when the application is launched.
-	IntroText = `
-███████╗███╗   ███╗
-██╔════╝████╗ ████║
-█████╗  ██╔████╔██║
-██╔══╝  ██║╚██╔╝██║
-██║     ██║ ╚═╝ ██║
-╚═╝     ╚═╝     ╚═╝   
-
-A simple, configurable, and fun to use file manager 
-`
-)

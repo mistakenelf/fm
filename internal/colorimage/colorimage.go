@@ -57,5 +57,5 @@ func (m *Model) SetImage(img image.Image) {
 
 // View returns a string representation of the ascii image.
 func (m Model) View() string {
-	return m.Content
+	return lipgloss.NewStyle().Width(m.Width).Render(m.Content)
 }

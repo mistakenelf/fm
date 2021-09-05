@@ -23,7 +23,7 @@ import (
 type updateDirectoryListingMsg []fs.FileInfo
 type moveDirItemMsg []fs.FileInfo
 type errorMsg string
-type convertImageToASCIIMsg string
+type convertImageToString string
 type markdownMsg string
 type readFileContentMsg struct {
 	rawContent string
@@ -207,7 +207,7 @@ func (m Model) redrawImage(width, height int) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		return convertImageToASCIIMsg(imageString)
+		return convertImageToString(imageString)
 	}
 }
 

@@ -4,6 +4,7 @@ import (
 	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/helpers"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -80,7 +81,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	// convertImageMsg is received when an image is to be converted to ASCII.
-	case convertImageToASCIIMsg:
+	case convertImageToString:
 		m.colorimage.SetContent(string(msg))
 		m.secondaryPane.SetContent(m.colorimage.View())
 
@@ -108,9 +109,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.statusBar.SetSize(msg.Width, constants.Dimensions.StatusBarHeight)
 		m.text.SetSize(m.secondaryPane.GetWidth() - constants.Dimensions.PanePadding)
 		m.markdown.SetSize(m.secondaryPane.GetWidth() - constants.Dimensions.PanePadding)
+		m.help.Width = msg.Width
 
 		if !m.ready {
 			m.ready = true
+			m.secondaryPane.SetContent(m.help.View(m.keys))
 		}
 
 		if m.colorimage.Image != nil {
@@ -175,18 +178,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
-		switch msg.String() {
+		switch {
 		// Exit FM.
-		case "ctrl+c":
+		case key.Matches(msg, m.keys.Exit):
 			return m, tea.Quit
 
 		// Exit FM if the command bar is not open.
-		case "q":
+		case key.Matches(msg, m.keys.Quit):
 			if !m.showCommandBar {
 				return m, tea.Quit
 			}
 
-		case "left", "h":
+		case key.Matches(msg, m.keys.Left):
 			// If the command bar is not shown and the primary pane is active
 			// set the previous directory to the current directory,
 			// and update the directory listing to go back one directory.
@@ -196,7 +199,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, m.updateDirectoryListing(constants.Directories.PreviousDirectory)
 			}
 
-		case "down", "j":
+		case key.Matches(msg, m.keys.Down):
 			// Scroll down in pane.
 			if !m.showCommandBar {
 				if m.primaryPane.IsActive {
@@ -208,7 +211,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
-		case "up", "k":
+		case key.Matches(msg, m.keys.Up):
 			// Scroll up in pane.
 			if !m.showCommandBar {
 				if m.primaryPane.IsActive {
@@ -220,7 +223,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
-		case "right", "l":
+		case key.Matches(msg, m.keys.Right):
 			// Open directory or read file content.
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				if m.dirTree.GetSelectedFile().IsDir() && !m.textInput.Focused() {
@@ -230,7 +233,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, m.readFileContent(m.dirTree.GetSelectedFile(), m.secondaryPane.GetWidth()-constants.Dimensions.PanePadding, m.secondaryPane.GetHeight())
 			}
 
-		case "G":
+		case key.Matches(msg, m.keys.GotoBottom):
 			// Go to the bottom of the pane.
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.dirTree.GotoBottom()
@@ -241,7 +244,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.secondaryPane.GotoBottom()
 			}
 
-		case "enter":
+		case key.Matches(msg, m.keys.Enter):
 			// If pressing enter while in move mode.
 			if m.inMoveMode {
 				if m.itemToMove.IsDir() {
@@ -311,7 +314,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-		case ":":
+		case key.Matches(msg, m.keys.OpenCommandBar):
 			// If move mode is not active, activate the command bar.
 			if !m.inMoveMode {
 				m.showCommandBar = true
@@ -323,34 +326,34 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Shortcut to get back to the home directory if the
 		// command bar is not curently open.
-		case "~":
+		case key.Matches(msg, m.keys.OpenCommandBar):
 			if !m.showCommandBar {
 				homeDir, _ := helpers.GetHomeDirectory()
 				return m, m.updateDirectoryListing(homeDir)
 			}
 
 		// Shortcut to go back to the previous directory.
-		case "-":
+		case key.Matches(msg, m.keys.OpenPreviousDirectory):
 			if !m.showCommandBar && m.previousDirectory != "" {
 				return m, m.updateDirectoryListing(m.previousDirectory)
 			}
 
 		// Toggle hidden files and folders.
-		case ".":
+		case key.Matches(msg, m.keys.ToggleHidden):
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.dirTree.ToggleHidden()
 				return m, m.updateDirectoryListing(constants.Directories.CurrentDirectory)
 			}
 
 		// Toggle between the two panes if the command bar is not currently active.
-		case "tab":
+		case key.Matches(msg, m.keys.Tab):
 			if !m.showCommandBar {
 				m.primaryPane.IsActive = !m.primaryPane.IsActive
 				m.secondaryPane.IsActive = !m.secondaryPane.IsActive
 			}
 
 		// Enter move mode.
-		case "m":
+		case key.Matches(msg, m.keys.EnterMoveMode):
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.inMoveMode = true
 				m.primaryPane.SetActiveBorderColor(constants.Colors.Blue)
@@ -359,7 +362,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		// Zip up the currently selected item.
-		case "z":
+		case key.Matches(msg, m.keys.Zip):
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				return m, tea.Sequentially(
 					m.zipDirectory(m.dirTree.GetSelectedFile().Name()),
@@ -368,7 +371,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		// Unzip the currently selected zip file.
-		case "u":
+		case key.Matches(msg, m.keys.Unzip):
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				return m, tea.Sequentially(
 					m.unzipDirectory(m.dirTree.GetSelectedFile().Name()),
@@ -377,7 +380,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		// Copy the currently selected item.
-		case "c":
+		case key.Matches(msg, m.keys.Copy):
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
@@ -393,18 +396,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		// Reset FM to its initial state.
-		case "esc":
+		case key.Matches(msg, m.keys.Escape):
 			m.showCommandBar = false
 			m.inMoveMode = false
 			m.itemToMove = nil
 			m.initialMoveDirectory = ""
 			m.primaryPane.IsActive = true
 			m.secondaryPane.IsActive = false
+			m.help.ShowAll = true
 			m.textInput.Blur()
 			m.textInput.Reset()
 			m.secondaryPane.GotoTop()
 			m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
-			m.secondaryPane.SetContent(constants.IntroText)
+			m.secondaryPane.SetContent(m.help.View(m.keys))
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
 		}
