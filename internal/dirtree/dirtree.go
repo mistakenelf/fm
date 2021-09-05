@@ -14,7 +14,7 @@ import (
 
 // Model is a struct to represent the properties on a dirtree.
 type Model struct {
-	Files               []fs.FileInfo
+	Files               []fs.DirEntry
 	Width               int
 	Cursor              int
 	ShowIcons           bool
@@ -35,7 +35,7 @@ func NewModel(showIcons bool, selectedItemColor, unselectedItemColor string) Mod
 }
 
 // SetContent update the files currently displayed in the tree.
-func (m *Model) SetContent(files []fs.FileInfo) {
+func (m *Model) SetContent(files []fs.DirEntry) {
 	m.Files = files
 }
 
@@ -55,7 +55,7 @@ func (m *Model) GotoBottom() {
 }
 
 // GetSelectedFile returns the currently selected file in the tree.
-func (m Model) GetSelectedFile() fs.FileInfo {
+func (m Model) GetSelectedFile() fs.DirEntry {
 	return m.Files[m.Cursor]
 }
 
@@ -85,9 +85,14 @@ func (m *Model) ToggleHidden() {
 }
 
 // dirItem returns a string representation of a directory item.
-func (m Model) dirItem(selected bool, file fs.FileInfo) string {
+func (m Model) dirItem(selected bool, file fs.DirEntry) string {
+	fileInfo, err := file.Info()
+	if err != nil {
+		return err.Error()
+	}
+
 	// Get the icon and color based on the current file.
-	icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(file.Mode()))
+	icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(fileInfo.Mode()))
 	fileIcon := fmt.Sprintf("%s%s", color, icon)
 
 	if m.ShowIcons && selected {
@@ -126,10 +131,15 @@ func (m Model) View() string {
 			modTimeColor = m.UnselectedItemColor
 		}
 
+		fileInfo, err := file.Info()
+		if err != nil {
+			return err.Error()
+		}
+
 		modTime := lipgloss.NewStyle().
 			Align(lipgloss.Right).
 			Foreground(lipgloss.Color(modTimeColor)).
-			Render(file.ModTime().
+			Render(fileInfo.ModTime().
 				Format("2006-01-02 15:04:05"),
 			)
 

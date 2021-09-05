@@ -20,8 +20,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type updateDirectoryListingMsg []fs.FileInfo
-type moveDirItemMsg []fs.FileInfo
+type updateDirectoryListingMsg []fs.DirEntry
+type moveDirItemMsg []fs.DirEntry
 type errorMsg string
 type convertImageToString string
 type markdownMsg string
@@ -137,7 +137,7 @@ func (m Model) deleteFile(name string) tea.Cmd {
 }
 
 // readFileContent reads the content of a file and returns it.
-func (m Model) readFileContent(file fs.FileInfo, width, height int) tea.Cmd {
+func (m Model) readFileContent(file fs.DirEntry, width, height int) tea.Cmd {
 	return func() tea.Msg {
 		content, err := helpers.ReadFileContent(file.Name())
 		if err != nil {

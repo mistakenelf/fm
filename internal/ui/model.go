@@ -108,7 +108,7 @@ type Model struct {
 	markdown             markdown.Model
 	text                 text.Model
 	previousKey          tea.KeyMsg
-	itemToMove           fs.FileInfo
+	itemToMove           fs.DirEntry
 	appConfig            config.Config
 	previousDirectory    string
 	initialMoveDirectory string

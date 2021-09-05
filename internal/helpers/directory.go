@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -34,11 +33,11 @@ func CreateDirectory(name string) error {
 }
 
 // GetDirectoryListing returns a list of files and directories within a given directory.
-func GetDirectoryListing(dir string, showHidden bool) ([]fs.FileInfo, error) {
+func GetDirectoryListing(dir string, showHidden bool) ([]fs.DirEntry, error) {
 	n := 0
 
 	// Read files from the directory.
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
@@ -341,7 +340,7 @@ func CopyDirectory(name string) error {
 	}
 
 	// Read all files in the directory.
-	files, err := ioutil.ReadDir(name)
+	files, err := os.ReadDir(name)
 	if err != nil {
 		return err
 	}
@@ -358,12 +357,12 @@ func CopyDirectory(name string) error {
 
 		// If its not a directory, read the file and write it to the new folder.
 		if !f.IsDir() {
-			content, err := ioutil.ReadFile(name + "/" + f.Name())
+			content, err := os.ReadFile(name + "/" + f.Name())
 			if err != nil {
 				return err
 			}
 
-			err = ioutil.WriteFile(output+"/"+f.Name(), content, 0600)
+			err = os.WriteFile(output+"/"+f.Name(), content, 0600)
 			if err != nil {
 				return err
 			}
@@ -371,4 +370,34 @@ func CopyDirectory(name string) error {
 	}
 
 	return nil
+}
+
+// GetTreeSize calculates the size of a directory recursively.
+func GetTreeSize(path string) (int64, error) {
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return 0, err
+	}
+
+	var total int64
+	for _, entry := range entries {
+		if entry.IsDir() {
+			size, err := GetTreeSize(filepath.Join(path, entry.Name()))
+			if err != nil {
+				return 0, err
+			}
+
+			total += size
+		} else {
+			info, err := entry.Info()
+
+			if err != nil {
+				return 0, err
+			}
+
+			total += info.Size()
+		}
+	}
+
+	return total, nil
 }

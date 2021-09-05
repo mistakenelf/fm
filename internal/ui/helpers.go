@@ -59,9 +59,14 @@ func (m Model) getStatusBarContent() (string, string, string, string) {
 
 	// Display some information about the currently seleted file including
 	// its size, the mode and the current path.
+	fileInfo, err := m.dirTree.GetSelectedFile().Info()
+	if err != nil {
+		return "", "", "", ""
+	}
+
 	status := fmt.Sprintf("%s %s %s",
-		helpers.ConvertBytesToSizeString(m.dirTree.GetSelectedFile().Size()),
-		m.dirTree.GetSelectedFile().Mode().String(),
+		helpers.ConvertBytesToSizeString(fileInfo.Size()),
+		fileInfo.Mode().String(),
 		currentPath,
 	)
 
