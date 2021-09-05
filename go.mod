@@ -4,10 +4,10 @@ go 1.17
 
 require (
 	github.com/alecthomas/chroma v0.9.2
-	github.com/charmbracelet/bubbles v0.8.0
+	github.com/charmbracelet/bubbles v0.8.1-0.20210902203917-0f290114f523
 	github.com/charmbracelet/bubbletea v0.14.1
 	github.com/charmbracelet/glamour v0.3.0
-	github.com/charmbracelet/lipgloss v0.3.0
+	github.com/charmbracelet/lipgloss v0.4.0
 	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/muesli/reflow v0.3.0
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
@@ -41,10 +41,10 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/yuin/goldmark v1.4.0 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
-	golang.org/x/net v0.0.0-20210825183410-e898025ed96a // indirect
-	golang.org/x/sys v0.0.0-20210831042530-f4d43177bf5e // indirect
+	golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f // indirect
+	golang.org/x/sys v0.0.0-20210903071746-97244b99971b // indirect
 	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b // indirect
 	golang.org/x/text v0.3.7 // indirect
-	gopkg.in/ini.v1 v1.62.0 // indirect
+	gopkg.in/ini.v1 v1.62.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
