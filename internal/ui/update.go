@@ -260,7 +260,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Parse the commands from the command bar, command is the name
 			// of the command and value is if the command requires input to it
 			// get its value, for example (rename test.txt) text.txt is the value.
-			command, value := helpers.ParseCommand(m.textInput.Value())
+			command, value := parseCommand(m.textInput.Value())
 
 			// Nothing was input for a command.
 			if command == "" {
