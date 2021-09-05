@@ -1,4 +1,4 @@
-package asciimage
+package colorimage
 
 import (
 	"image"
@@ -24,10 +24,12 @@ func ImageToString(width, height uint, img image.Image) (string, error) {
 	w := b.Max.X
 	h := b.Max.Y
 	str := strings.Builder{}
+
 	for y := 0; y < h; y += 2 {
 		for x := w; x < int(width); x = x + 2 {
 			str.WriteString(" ")
 		}
+
 		for x := 0; x < w; x++ {
 			c1, _ := colorful.MakeColor(img.At(x, y))
 			color1 := lipgloss.Color(c1.Hex())
@@ -36,6 +38,7 @@ func ImageToString(width, height uint, img image.Image) (string, error) {
 			str.WriteString(lipgloss.NewStyle().Foreground(color1).
 				Background(color2).Render("▀"))
 		}
+
 		str.WriteString("\n")
 	}
 

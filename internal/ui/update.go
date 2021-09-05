@@ -55,13 +55,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case readFileContentMsg:
 		if msg.code != "" {
 			m.secondaryPane.GotoTop()
-			m.asciiImage.SetImage(nil)
+			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
 			m.text.SetContent(msg.code)
 			m.secondaryPane.SetContent(m.text.View())
 		} else if msg.markdown != "" {
 			m.secondaryPane.GotoTop()
-			m.asciiImage.SetImage(nil)
+			m.colorimage.SetImage(nil)
 			m.text.SetContent("")
 			m.markdown.SetContent(msg.markdown)
 			m.secondaryPane.SetContent(m.markdown.View())
@@ -69,9 +69,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.GotoTop()
 			m.markdown.SetContent("")
 			m.text.SetContent("")
-			m.asciiImage.SetImage(msg.image)
-			m.asciiImage.SetContent(msg.asciiImage)
-			m.secondaryPane.SetContent(m.asciiImage.View())
+			m.colorimage.SetImage(msg.image)
+			m.colorimage.SetContent(msg.asciiImage)
+			m.secondaryPane.SetContent(m.colorimage.View())
 		} else {
 			m.secondaryPane.GotoTop()
 			m.secondaryPane.SetContent(msg.rawContent)
@@ -81,8 +81,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// convertImageMsg is received when an image is to be converted to ASCII.
 	case convertImageToASCIIMsg:
-		m.asciiImage.SetContent(string(msg))
-		m.secondaryPane.SetContent(m.asciiImage.View())
+		m.colorimage.SetContent(string(msg))
+		m.secondaryPane.SetContent(m.colorimage.View())
 
 		return m, nil
 
@@ -113,7 +113,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.ready = true
 		}
 
-		if m.asciiImage.Image != nil {
+		if m.colorimage.Image != nil {
 			resizeImageCmd := m.redrawImage(m.secondaryPane.GetWidth()-constants.Dimensions.PanePadding, m.secondaryPane.GetHeight())
 			cmds = append(cmds, resizeImageCmd)
 		}
@@ -405,7 +405,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.GotoTop()
 			m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
 			m.secondaryPane.SetContent(constants.IntroText)
-			m.asciiImage.SetImage(nil)
+			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
 		}
 
