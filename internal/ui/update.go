@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"fmt"
+
 	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/helpers"
 
@@ -196,7 +198,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.previousDirectory, _ = helpers.GetWorkingDirectory()
 
-				return m, m.updateDirectoryListing(constants.Directories.PreviousDirectory)
+				return m, m.updateDirectoryListing(fmt.Sprintf("%s/%s", m.previousDirectory, constants.Directories.PreviousDirectory))
 			}
 
 		case key.Matches(msg, m.keys.Down):
@@ -227,7 +229,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Open directory or read file content.
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				if m.dirTree.GetSelectedFile().IsDir() && !m.textInput.Focused() {
-					return m, m.updateDirectoryListing(m.dirTree.GetSelectedFile().Name())
+					currentDir, _ := helpers.GetWorkingDirectory()
+					return m, m.updateDirectoryListing(fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()))
 				}
 
 				return m, m.readFileContent(m.dirTree.GetSelectedFile(), m.secondaryPane.GetWidth()-constants.Dimensions.PanePadding, m.secondaryPane.GetHeight())
@@ -326,7 +329,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Shortcut to get back to the home directory if the
 		// command bar is not curently open.
-		case key.Matches(msg, m.keys.OpenCommandBar):
+		case key.Matches(msg, m.keys.OpenHomeDirectory):
 			if !m.showCommandBar {
 				homeDir, _ := helpers.GetHomeDirectory()
 				return m, m.updateDirectoryListing(homeDir)
