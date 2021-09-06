@@ -19,7 +19,7 @@ type Model struct {
 
 // ImageToString converts an image to a string representation of an image.
 func ImageToString(width, height uint, img image.Image) (string, error) {
-	img = resize.Thumbnail(width, height*2-4, img, resize.Lanczos3)
+	img = resize.Resize(width, height*2-4, img, resize.Lanczos3)
 	b := img.Bounds()
 	w := b.Max.X
 	h := b.Max.Y

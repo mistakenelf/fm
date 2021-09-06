@@ -111,11 +111,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.markdown.SetSize(m.secondaryPane.GetWidth() - constants.Dimensions.PanePadding)
 		m.help.Width = msg.Width
 
-		if !m.ready {
-			m.ready = true
-			m.secondaryPane.SetContent(m.help.View(m.keys))
-		}
-
 		if m.colorimage.Image != nil {
 			resizeImageCmd := m.redrawImage(m.secondaryPane.GetWidth()-constants.Dimensions.PanePadding, m.secondaryPane.GetHeight())
 			cmds = append(cmds, resizeImageCmd)
@@ -124,6 +119,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.markdown.Content != "" {
 			resizeMarkdownCmd := m.redrawMarkdown(m.secondaryPane.GetWidth()-constants.Dimensions.PanePadding, m.markdown.Content)
 			cmds = append(cmds, resizeMarkdownCmd)
+		}
+
+		if !m.ready {
+			m.ready = true
+			m.secondaryPane.SetContent(m.help.View(m.keys))
 		}
 
 		return m, tea.Batch(cmds...)
