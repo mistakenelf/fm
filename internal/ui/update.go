@@ -123,6 +123,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, resizeMarkdownCmd)
 		}
 
+		if m.text.Content != "" {
+			m.secondaryPane.SetContent(m.text.View())
+		}
+
 		if !m.ready {
 			m.ready = true
 			m.secondaryPane.SetContent(m.help.View(m.keys))
