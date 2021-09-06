@@ -85,36 +85,31 @@ func (m *Model) ToggleHidden() {
 }
 
 // dirItem returns a string representation of a directory item.
-func (m Model) dirItem(selected bool, file fs.DirEntry) string {
-	fileInfo, err := file.Info()
-	if err != nil {
-		return err.Error()
-	}
-
+func (m Model) dirItem(selected bool, fileInfo fs.FileInfo) string {
 	// Get the icon and color based on the current file.
-	icon, color := icons.GetIcon(file.Name(), filepath.Ext(file.Name()), icons.GetIndicator(fileInfo.Mode()))
+	icon, color := icons.GetIcon(fileInfo.Name(), filepath.Ext(fileInfo.Name()), icons.GetIndicator(fileInfo.Mode()))
 	fileIcon := fmt.Sprintf("%s%s", color, icon)
 
 	if m.ShowIcons && selected {
 		return fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 			Bold(true).
 			Foreground(lipgloss.Color(m.SelectedItemColor)).
-			Render(file.Name()))
+			Render(fileInfo.Name()))
 	} else if m.ShowIcons && !selected {
 		return fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 			Bold(true).
 			Foreground(lipgloss.Color(m.UnselectedItemColor)).
-			Render(file.Name()))
+			Render(fileInfo.Name()))
 	} else if !m.ShowIcons && selected {
 		return lipgloss.NewStyle().
 			Bold(true).
 			Foreground(lipgloss.Color(m.SelectedItemColor)).
-			Render(file.Name())
+			Render(fileInfo.Name())
 	} else {
 		return lipgloss.NewStyle().
 			Bold(true).
 			Foreground(lipgloss.Color(m.UnselectedItemColor)).
-			Render(file.Name())
+			Render(fileInfo.Name())
 	}
 }
 
@@ -145,7 +140,7 @@ func (m Model) View() string {
 
 		dirItem := lipgloss.NewStyle().Width(m.Width - lipgloss.Width(modTime) - 2).Render(
 			truncate.StringWithTail(
-				m.dirItem(m.Cursor == i, file), uint(m.Width-lipgloss.Width(modTime)-constants.Dimensions.PanePadding), "...",
+				m.dirItem(m.Cursor == i, fileInfo), uint(m.Width-lipgloss.Width(modTime)-constants.Dimensions.PanePadding), "...",
 			),
 		)
 
