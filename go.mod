@@ -26,13 +26,13 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
-	github.com/mattn/go-isatty v0.0.13 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.15 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/muesli/termenv v0.9.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
-	github.com/pelletier/go-toml v1.9.3 // indirect
+	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/spf13/afero v1.6.0 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
@@ -42,9 +42,9 @@ require (
 	github.com/yuin/goldmark v1.4.0 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
 	golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f // indirect
-	golang.org/x/sys v0.0.0-20210903071746-97244b99971b // indirect
+	golang.org/x/sys v0.0.0-20210906170528-6f6e22806c34 // indirect
 	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b // indirect
 	golang.org/x/text v0.3.7 // indirect
-	gopkg.in/ini.v1 v1.62.1 // indirect
+	gopkg.in/ini.v1 v1.63.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
