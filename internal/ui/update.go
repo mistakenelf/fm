@@ -5,11 +5,39 @@ import (
 
 	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/helpers"
+	"github.com/knipferrc/fm/internal/statusbar"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
+
+// scrollPrimaryPane handles the scrolling of the primary pane which will handle
+// infinite scroll on the dirtree and the scrolling of the viewport.
+func (m *Model) scrollPrimaryPane() {
+	top := m.primaryPane.GetYOffset()
+	bottom := m.primaryPane.GetHeight() + m.primaryPane.GetYOffset() - 1
+
+	// If the cursor is above the top of the viewport scroll up on the viewport
+	// else were at the bottom and need to scroll the viewport down.
+	if m.dirTree.GetCursor() < top {
+		m.primaryPane.LineUp(1)
+	} else if m.dirTree.GetCursor() > bottom {
+		m.primaryPane.LineDown(1)
+	}
+
+	// If the cursor of the dirtree is at the bottom of the files
+	// set the cursor to 0 to go to the top of the dirtree and
+	// scroll the pane to the top else, were at the top of the dirtree and pane so
+	// scroll the pane to the bottom and set the cursor to the bottom.
+	if m.dirTree.GetCursor() > m.dirTree.GetTotalFiles()-1 {
+		m.dirTree.GotoTop()
+		m.primaryPane.GotoTop()
+	} else if m.dirTree.GetCursor() < top {
+		m.dirTree.GotoBottom()
+		m.primaryPane.GotoBottom()
+	}
+}
 
 // Update handles all UI interactions and events for updating the screen.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -82,8 +110,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, nil
 
-	// convertImageMsg is received when an image is to be converted to ASCII.
-	case convertImageToString:
+	// convertImageToStringMsg is received when an image is to be converted to a string.
+	case convertImageToStringMsg:
 		m.colorimage.SetContent(string(msg))
 		m.secondaryPane.SetContent(m.colorimage.View())
 
@@ -119,8 +147,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if m.markdown.Content != "" {
-			resizeMarkdownCmd := m.redrawMarkdown(m.secondaryPane.GetWidth()-constants.Dimensions.PanePadding, m.markdown.Content)
-			cmds = append(cmds, resizeMarkdownCmd)
+			m.secondaryPane.SetContent(m.markdown.View())
 		}
 
 		if m.text.Content != "" {
@@ -270,7 +297,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Parse the commands from the command bar, command is the name
 			// of the command and value is if the command requires input to it
 			// get its value, for example (rename test.txt) text.txt is the value.
-			command, value := parseCommand(m.textInput.Value())
+			command, value := statusbar.ParseCommand(m.textInput.Value())
 
 			// Nothing was input for a command.
 			if command == "" {
@@ -425,8 +452,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.previousKey = msg
 	}
 
-	// Keep status bar content updated.
-	m.statusBar.SetContent(m.getStatusBarContent())
+	if m.ready && m.dirTree.GetTotalFiles() > 0 {
+		m.statusBar.SetContent(
+			m.dirTree.GetTotalFiles(),
+			m.dirTree.GetCursor(),
+			m.textInput.View(),
+			m.appConfig.Settings.ShowIcons,
+			m.showCommandBar,
+			m.inMoveMode,
+			m.dirTree.GetSelectedFile(),
+			m.itemToMove,
+		)
+	}
 
 	m.textInput, cmd = m.textInput.Update(msg)
 	cmds = append(cmds, cmd)

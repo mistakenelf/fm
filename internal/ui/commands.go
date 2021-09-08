@@ -23,8 +23,7 @@ import (
 type updateDirectoryListingMsg []fs.DirEntry
 type moveDirItemMsg []fs.DirEntry
 type errorMsg string
-type convertImageToString string
-type markdownMsg string
+type convertImageToStringMsg string
 type readFileContentMsg struct {
 	rawContent string
 	markdown   string
@@ -207,19 +206,7 @@ func (m Model) redrawImage(width, height int) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		return convertImageToString(imageString)
-	}
-}
-
-// redrawMarkdown redraws the markdown based on the width and content provided.
-func (m Model) redrawMarkdown(width int, content string) tea.Cmd {
-	return func() tea.Msg {
-		markdownContent, err := markdown.RenderMarkdown(width, content)
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return markdownMsg(markdownContent)
+		return convertImageToStringMsg(imageString)
 	}
 }
 
