@@ -3,7 +3,7 @@ package text
 import (
 	"bytes"
 
-	"github.com/knipferrc/fm/internal/helpers"
+	"github.com/knipferrc/fm/formatter"
 
 	"github.com/alecthomas/chroma/quick"
 	"github.com/charmbracelet/lipgloss"
@@ -39,5 +39,5 @@ func (m *Model) SetContent(content string) {
 func (m *Model) View() string {
 	return lipgloss.NewStyle().
 		Width(m.Width).
-		Render(helpers.ConvertTabsToSpaces(m.Content))
+		Render(formatter.ConvertTabsToSpaces(m.Content))
 }

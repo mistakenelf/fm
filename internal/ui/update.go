@@ -3,8 +3,8 @@ package ui
 import (
 	"fmt"
 
+	"github.com/knipferrc/fm/directory"
 	"github.com/knipferrc/fm/internal/constants"
-	"github.com/knipferrc/fm/internal/helpers"
 	"github.com/knipferrc/fm/internal/statusbar"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -227,7 +227,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// set the previous directory to the current directory,
 			// and update the directory listing to go back one directory.
 			if !m.showCommandBar && m.primaryPane.IsActive {
-				m.previousDirectory, _ = helpers.GetWorkingDirectory()
+				m.previousDirectory, _ = directory.GetWorkingDirectory()
 
 				return m, m.updateDirectoryListing(fmt.Sprintf("%s/%s", m.previousDirectory, constants.Directories.PreviousDirectory))
 			}
@@ -260,7 +260,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Open directory or read file content.
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				if m.dirTree.GetSelectedFile().IsDir() && !m.textInput.Focused() {
-					currentDir, _ := helpers.GetWorkingDirectory()
+					currentDir, _ := directory.GetWorkingDirectory()
 					return m, m.updateDirectoryListing(fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()))
 				}
 
@@ -362,7 +362,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// command bar is not curently open.
 		case key.Matches(msg, m.keys.OpenHomeDirectory):
 			if !m.showCommandBar {
-				homeDir, _ := helpers.GetHomeDirectory()
+				homeDir, _ := directory.GetHomeDirectory()
 				return m, m.updateDirectoryListing(homeDir)
 			}
 
@@ -391,7 +391,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandBar && m.primaryPane.IsActive {
 				m.inMoveMode = true
 				m.primaryPane.SetActiveBorderColor(constants.Colors.Blue)
-				m.initialMoveDirectory, _ = helpers.GetWorkingDirectory()
+				m.initialMoveDirectory, _ = directory.GetWorkingDirectory()
 				m.itemToMove = m.dirTree.GetSelectedFile()
 			}
 

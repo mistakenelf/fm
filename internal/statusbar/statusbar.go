@@ -5,9 +5,10 @@ import (
 	"io/fs"
 	"strings"
 
+	"github.com/knipferrc/fm/directory"
+	"github.com/knipferrc/fm/formatter"
 	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/internal/constants"
-	"github.com/knipferrc/fm/internal/helpers"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/truncate"
@@ -59,24 +60,6 @@ func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthCo
 	}
 }
 
-// convertByesToSizeString converts a byte count to a human readable string.
-func convertBytesToSizeString(b int64) string {
-	const unit = 1000
-
-	if b < unit {
-		return fmt.Sprintf("%d B", b)
-	}
-
-	div, exp := int64(unit), 0
-	for n := b / unit; n >= unit; n /= unit {
-		div *= unit
-		exp++
-	}
-
-	return fmt.Sprintf("%.1f %cB",
-		float64(b)/float64(div), "kMGTPE"[exp])
-}
-
 // ParseCommand parses the command and returns the command name and the arguments.
 func ParseCommand(command string) (string, string) {
 	// Split the command string into an array.
@@ -104,7 +87,7 @@ func ParseCommand(command string) (string, string) {
 }
 
 func (m Model) getStatusbarContent() (string, string, string, string) {
-	currentPath, err := helpers.GetWorkingDirectory()
+	currentPath, err := directory.GetWorkingDirectory()
 	if err != nil {
 		currentPath = constants.Directories.CurrentDirectory
 	}
@@ -131,7 +114,7 @@ func (m Model) getStatusbarContent() (string, string, string, string) {
 	}
 
 	status := fmt.Sprintf("%s %s %s",
-		convertBytesToSizeString(fileInfo.Size()),
+		formatter.ConvertBytesToSizeString(fileInfo.Size()),
 		fileInfo.Mode().String(),
 		currentPath,
 	)

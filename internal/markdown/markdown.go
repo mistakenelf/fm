@@ -1,7 +1,7 @@
 package markdown
 
 import (
-	"github.com/knipferrc/fm/internal/helpers"
+	"github.com/knipferrc/fm/formatter"
 
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
@@ -47,6 +47,6 @@ func (m *Model) SetSize(width int) {
 // View returns a string representation of the markdown.
 func (m Model) View() string {
 	return lipgloss.NewStyle().Width(m.Width).Render(
-		helpers.ConvertTabsToSpaces(m.Content),
+		formatter.ConvertTabsToSpaces(m.Content),
 	)
 }

@@ -1,4 +1,4 @@
-package helpers
+package directory
 
 import (
 	"archive/zip"
