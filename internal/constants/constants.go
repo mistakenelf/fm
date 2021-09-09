@@ -21,7 +21,7 @@ type VersionTypes struct {
 
 // Versions contains the different kinds of versions and their values.
 var Versions = VersionTypes{
-	AppVersion: "0.1.2",
+	AppVersion: "0.2.0",
 }
 
 // DimensionTypes contains the different types of dimensions.
