@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/knipferrc/fm/icons"
-	"github.com/knipferrc/fm/internal/constants"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/truncate"
@@ -140,7 +139,7 @@ func (m Model) View() string {
 
 		dirItem := lipgloss.NewStyle().Width(m.Width - lipgloss.Width(modTime) - 2).Render(
 			truncate.StringWithTail(
-				m.dirItem(m.Cursor == i, fileInfo), uint(m.Width-lipgloss.Width(modTime)-constants.Dimensions.PanePadding), "...",
+				m.dirItem(m.Cursor == i, fileInfo), uint(m.Width-lipgloss.Width(modTime)), "...",
 			),
 		)
 

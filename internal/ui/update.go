@@ -135,14 +135,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.Dimensions.StatusBarHeight)
 		m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.Dimensions.StatusBarHeight)
 		m.dirTree.SetSize(m.primaryPane.GetWidth())
-		m.primaryPane.SetContent(m.dirTree.View())
 		m.statusBar.SetSize(msg.Width, constants.Dimensions.StatusBarHeight)
-		m.text.SetSize(m.secondaryPane.GetWidth() - constants.Dimensions.PanePadding)
-		m.markdown.SetSize(m.secondaryPane.GetWidth() - constants.Dimensions.PanePadding)
+		m.text.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize())
+		m.markdown.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize())
+		m.primaryPane.SetContent(m.dirTree.View())
 		m.help.Width = msg.Width
 
 		if m.colorimage.Image != nil {
-			resizeImageCmd := m.redrawImage(m.secondaryPane.GetWidth()-constants.Dimensions.PanePadding, m.secondaryPane.GetHeight())
+			resizeImageCmd := m.redrawImage(m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(), m.secondaryPane.GetHeight())
 			cmds = append(cmds, resizeImageCmd)
 		}
 
@@ -152,6 +152,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if m.text.Content != "" {
 			m.secondaryPane.SetContent(m.text.View())
+		}
+
+		if m.text.Content == "" && m.markdown.Content == "" && m.colorimage.Image == nil {
+			m.secondaryPane.SetContent(lipgloss.NewStyle().Width(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize()).Render(m.help.View(m.keys)))
 		}
 
 		if !m.ready {
@@ -264,7 +268,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, m.updateDirectoryListing(fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()))
 				}
 
-				return m, m.readFileContent(m.dirTree.GetSelectedFile(), m.secondaryPane.GetWidth()-constants.Dimensions.PanePadding, m.secondaryPane.GetHeight())
+				return m, m.readFileContent(m.dirTree.GetSelectedFile(), m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(), m.secondaryPane.GetHeight())
 			}
 
 		case key.Matches(msg, m.keys.GotoBottom):

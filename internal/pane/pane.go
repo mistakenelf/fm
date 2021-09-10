@@ -9,9 +9,10 @@ import (
 
 // Model struct represents property of a pane.
 type Model struct {
+	Viewport            viewport.Model
+	Style               lipgloss.Style
 	IsActive            bool
 	Borderless          bool
-	Viewport            viewport.Model
 	ActiveBorderColor   string
 	InactiveBorderColor string
 }
@@ -38,6 +39,27 @@ func (m *Model) SetSize(width, height int) {
 
 // SetContent sets the content of the pane.
 func (m *Model) SetContent(content string) {
+	borderColor := m.InactiveBorderColor
+	border := lipgloss.ThickBorder()
+	padding := 1
+
+	if m.Borderless {
+		border = lipgloss.HiddenBorder()
+	}
+
+	// If the pane is active, use the active border color.
+	if m.IsActive {
+		borderColor = m.ActiveBorderColor
+	}
+
+	// Set the style so that the frame size is able to be determined from other components.
+	m.Style = lipgloss.NewStyle().
+		BorderForeground(lipgloss.Color(borderColor)).
+		PaddingLeft(padding).
+		PaddingRight(padding).
+		Border(border).
+		Width(m.Viewport.Width)
+
 	m.Viewport.SetContent(content)
 }
 
@@ -84,7 +106,7 @@ func (m Model) GetYOffset() int {
 // View returns a string representation of the pane.
 func (m Model) View() string {
 	borderColor := m.InactiveBorderColor
-	border := lipgloss.ThickBorder()
+	border := lipgloss.NormalBorder()
 	padding := 1
 
 	if m.Borderless {
@@ -96,7 +118,7 @@ func (m Model) View() string {
 		borderColor = m.ActiveBorderColor
 	}
 
-	return lipgloss.NewStyle().
+	return m.Style.Copy().
 		BorderForeground(lipgloss.Color(borderColor)).
 		PaddingLeft(padding).
 		PaddingRight(padding).

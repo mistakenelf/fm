@@ -27,13 +27,11 @@ var Versions = VersionTypes{
 // DimensionTypes contains the different types of dimensions.
 type DimensionTypes struct {
 	StatusBarHeight int
-	PanePadding     int
 }
 
 // Dimensions contains the different kinds of dimensions and their values.
 var Dimensions = DimensionTypes{
 	StatusBarHeight: 1,
-	PanePadding:     2,
 }
 
 // ColorTypes contains the different types of colors.
