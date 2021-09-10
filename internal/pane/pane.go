@@ -10,21 +10,19 @@ import (
 // Model struct represents property of a pane.
 type Model struct {
 	IsActive            bool
+	Borderless          bool
 	Viewport            viewport.Model
 	ActiveBorderColor   string
 	InactiveBorderColor string
-	Rounded             bool
-	IsPadded            bool
 }
 
 // NewModel creates a new instance of a pane.
-func NewModel(isActive, rounded, isPadded bool, activeBorderColor, inactiveBorderColor string) Model {
+func NewModel(isActive, borderless bool, activeBorderColor, inactiveBorderColor string) Model {
 	return Model{
 		IsActive:            isActive,
+		Borderless:          borderless,
 		ActiveBorderColor:   activeBorderColor,
 		InactiveBorderColor: inactiveBorderColor,
-		Rounded:             rounded,
-		IsPadded:            isPadded,
 	}
 }
 
@@ -33,11 +31,6 @@ func (m *Model) SetSize(width, height int) {
 	// Get the border so that when setting the width of a pane,
 	// the border is also taken into account.
 	border := lipgloss.NormalBorder()
-
-	// Use rounded border if enabled.
-	if m.Rounded {
-		border = lipgloss.RoundedBorder()
-	}
 
 	m.Viewport.Width = width - lipgloss.Width(border.Right+border.Top)
 	m.Viewport.Height = height - lipgloss.Width(border.Bottom+border.Top)
@@ -91,17 +84,11 @@ func (m Model) GetYOffset() int {
 // View returns a string representation of the pane.
 func (m Model) View() string {
 	borderColor := m.InactiveBorderColor
-	border := lipgloss.NormalBorder()
-	padding := 0
+	border := lipgloss.ThickBorder()
+	padding := 1
 
-	// If the pane requires padding, add it.
-	if m.IsPadded {
-		padding = 1
-	}
-
-	// If rounding is enabled on borders, use the round border.
-	if m.Rounded {
-		border = lipgloss.RoundedBorder()
+	if m.Borderless {
+		border = lipgloss.HiddenBorder()
 	}
 
 	// If the pane is active, use the active border color.
@@ -111,8 +98,9 @@ func (m Model) View() string {
 
 	return lipgloss.NewStyle().
 		BorderForeground(lipgloss.Color(borderColor)).
+		PaddingLeft(padding).
+		PaddingRight(padding).
 		Border(border).
 		Width(m.Viewport.Width).
-		PaddingLeft(padding).
 		Render(formatter.ConvertTabsToSpaces(m.Viewport.View()))
 }

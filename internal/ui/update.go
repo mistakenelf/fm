@@ -445,6 +445,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.SetContent(m.help.View(m.keys))
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
+			m.text.SetContent("")
 		}
 
 		// Capture the previous key so that we can capture

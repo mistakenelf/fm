@@ -223,8 +223,7 @@ func NewModel() Model {
 	// Initialize the primary pane as active and pass in some config values.
 	primaryPane := pane.NewModel(
 		true,
-		cfg.Settings.RoundedPanes,
-		true,
+		cfg.Settings.Borderless,
 		cfg.Colors.Pane.ActiveBorderColor,
 		cfg.Colors.Pane.InactiveBorderColor,
 	)
@@ -232,8 +231,7 @@ func NewModel() Model {
 	// Initialize the secondary pane as inactive and pass in some config values.
 	secondaryPane := pane.NewModel(
 		false,
-		cfg.Settings.RoundedPanes,
-		true,
+		cfg.Settings.Borderless,
 		cfg.Colors.Pane.ActiveBorderColor,
 		cfg.Colors.Pane.InactiveBorderColor,
 	)

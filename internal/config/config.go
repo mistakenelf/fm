@@ -13,10 +13,10 @@ import (
 type SettingsConfig struct {
 	StartDir         string `mapstructure:"start_dir"`
 	ShowIcons        bool   `mapstructure:"show_icons"`
-	RoundedPanes     bool   `mapstructure:"rounded_panes"`
 	EnableLogging    bool   `mapstructure:"enable_logging"`
 	EnableMouseWheel bool   `mapstructure:"enable_mousewheel"`
 	PrettyMarkdown   bool   `mapstructure:"pretty_markdown"`
+	Borderless       bool   `mapstructure:"borderless"`
 }
 
 //DirTreeColors struct represents the colors for the dirtree.
@@ -98,10 +98,10 @@ func SetDefaults() {
 	// App Settings.
 	viper.SetDefault("settings.start_dir", ".")
 	viper.SetDefault("settings.show_icons", true)
-	viper.SetDefault("settings.rounded_panes", false)
 	viper.SetDefault("settings.enable_logging", false)
 	viper.SetDefault("settings.enable_mousewheel", true)
 	viper.SetDefault("settings.pretty_markdown", true)
+	viper.SetDefault("settings.borderless", false)
 
 	// DirTree colors.
 	viper.SetDefault("colors.dir_tree.selected_item", constants.Colors.Pink)
