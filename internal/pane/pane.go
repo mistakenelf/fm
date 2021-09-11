@@ -37,6 +37,21 @@ func (m *Model) SetSize(width, height int) {
 	m.Viewport.Height = height - lipgloss.Width(border.Bottom+border.Top)
 }
 
+// GetHorizontalFrameSize returns the horizontal frame size of the pane.
+func (m Model) GetHorizontalFrameSize() int {
+	return m.Style.GetHorizontalFrameSize()
+}
+
+// GetIsActive returns the active state of the pane.
+func (m Model) GetIsActive() bool {
+	return m.IsActive
+}
+
+// SetActive sets the active state of the pane.
+func (m *Model) SetActive(isActive bool) {
+	m.IsActive = isActive
+}
+
 // SetContent sets the content of the pane.
 func (m *Model) SetContent(content string) {
 	borderColor := m.InactiveBorderColor

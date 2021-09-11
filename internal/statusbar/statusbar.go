@@ -136,6 +136,11 @@ func (m Model) getStatusbarContent() (string, string, string, string) {
 		logo
 }
 
+// GetHeight returns the height of the statusbar.
+func (m Model) GetHeight() int {
+	return m.Height
+}
+
 // SetContent sets the content of the statusbar.
 func (m *Model) SetContent(totalFiles, cursor int, textInput string, showIcons, showCommandBar, inMoveMode bool, selectedFile, itemToMove fs.DirEntry) {
 	m.TotalFiles = totalFiles

@@ -24,16 +24,6 @@ var Versions = VersionTypes{
 	AppVersion: "0.3.0",
 }
 
-// DimensionTypes contains the different types of dimensions.
-type DimensionTypes struct {
-	StatusBarHeight int
-}
-
-// Dimensions contains the different kinds of dimensions and their values.
-var Dimensions = DimensionTypes{
-	StatusBarHeight: 1,
-}
-
 // ColorTypes contains the different types of colors.
 type ColorTypes struct {
 	White       string
