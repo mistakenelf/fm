@@ -13,7 +13,6 @@ import (
 type Model struct {
 	Image   image.Image
 	Content string
-	Height  int
 	Width   int
 }
 
