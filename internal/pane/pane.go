@@ -29,37 +29,25 @@ func NewModel(isActive, borderless bool, activeBorderColor, inactiveBorderColor 
 
 // SetSize sets the size of the pane and its viewport, useful when resizing the terminal.
 func (m *Model) SetSize(width, height int) {
-	// Get the border so that when setting the width of a pane,
-	// the border is also taken into account.
 	border := lipgloss.NormalBorder()
-
-	m.Viewport.Width = width - lipgloss.Width(border.Right+border.Top)
-	m.Viewport.Height = height - lipgloss.Width(border.Bottom+border.Top)
-}
-
-// SetContent sets the content of the pane.
-func (m *Model) SetContent(content string) {
-	borderColor := m.InactiveBorderColor
-	border := lipgloss.ThickBorder()
 	padding := 1
 
 	if m.Borderless {
 		border = lipgloss.HiddenBorder()
 	}
 
-	// If the pane is active, use the active border color.
-	if m.IsActive {
-		borderColor = m.ActiveBorderColor
-	}
-
 	// Set the style so that the frame size is able to be determined from other components.
 	m.Style = lipgloss.NewStyle().
-		BorderForeground(lipgloss.Color(borderColor)).
 		PaddingLeft(padding).
 		PaddingRight(padding).
-		Border(border).
-		Width(m.Viewport.Width)
+		Border(border)
 
+	m.Viewport.Width = width - m.Style.GetHorizontalBorderSize()
+	m.Viewport.Height = height - m.Style.GetVerticalBorderSize()
+}
+
+// SetContent sets the content of the pane.
+func (m *Model) SetContent(content string) {
 	m.Viewport.SetContent(content)
 }
 
