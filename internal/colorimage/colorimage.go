@@ -13,7 +13,6 @@ import (
 type Model struct {
 	Image   image.Image
 	Content string
-	Height  int
 	Width   int
 }
 
@@ -43,6 +42,11 @@ func ImageToString(width, height uint, img image.Image) (string, error) {
 	}
 
 	return str.String(), nil
+}
+
+// GetImage returns the currently set image.
+func (m Model) GetImage() image.Image {
+	return m.Image
 }
 
 // SetContent sets the content of the ascii image.

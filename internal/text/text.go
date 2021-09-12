@@ -35,6 +35,11 @@ func (m *Model) SetContent(content string) {
 	m.Content = content
 }
 
+// GetContent returns the content of the text.
+func (m Model) GetContent() string {
+	return m.Content
+}
+
 // View returns a string representation of text.
 func (m *Model) View() string {
 	return lipgloss.NewStyle().

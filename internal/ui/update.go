@@ -64,7 +64,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case moveDirItemMsg:
 		// Set active color back to default.
 		m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
-
 		m.dirTree.SetContent(msg)
 		m.primaryPane.SetContent(m.dirTree.View())
 
@@ -127,35 +126,44 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Any time the window is resized this is called, including when the app
 	// is first started.
 	case tea.WindowSizeMsg:
-		m.primaryPane.SetSize(msg.Width/2, msg.Height-constants.Dimensions.StatusBarHeight)
-		m.secondaryPane.SetSize(msg.Width/2, msg.Height-constants.Dimensions.StatusBarHeight)
+		m.primaryPane.SetSize(msg.Width/2, msg.Height-m.statusBar.GetHeight())
+		m.secondaryPane.SetSize(msg.Width/2, msg.Height-m.statusBar.GetHeight())
 		m.dirTree.SetSize(m.primaryPane.GetWidth())
-		m.statusBar.SetSize(msg.Width, constants.Dimensions.StatusBarHeight)
-		m.text.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize())
-		m.markdown.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize())
+		m.statusBar.SetSize(msg.Width)
+		m.text.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
+		m.markdown.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.primaryPane.SetContent(m.dirTree.View())
 		m.help.Width = msg.Width
 
-		if m.colorimage.Image != nil {
-			resizeImageCmd := m.redrawImage(m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(), m.secondaryPane.GetHeight())
+		if m.colorimage.GetImage() != nil {
+			resizeImageCmd := m.redrawImage(
+				m.secondaryPane.GetWidth()-m.secondaryPane.GetHorizontalFrameSize(),
+				m.secondaryPane.GetHeight(),
+			)
 			cmds = append(cmds, resizeImageCmd)
 		}
 
-		if m.markdown.Content != "" {
+		if m.markdown.GetContent() != "" {
 			m.secondaryPane.SetContent(m.markdown.View())
 		}
 
-		if m.text.Content != "" {
+		if m.text.GetContent() != "" {
 			m.secondaryPane.SetContent(m.text.View())
 		}
 
-		if m.text.Content == "" && m.markdown.Content == "" && m.colorimage.Image == nil {
-			m.secondaryPane.SetContent(lipgloss.NewStyle().Width(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize()).Render(m.help.View(m.keys)))
+		if m.text.GetContent() == "" && m.markdown.GetContent() == "" && m.colorimage.GetImage() == nil {
+			m.secondaryPane.SetContent(lipgloss.NewStyle().
+				Width(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize()).
+				Render(m.help.View(m.keys)),
+			)
 		}
 
 		if !m.ready {
 			m.ready = true
-			m.secondaryPane.SetContent(lipgloss.NewStyle().Width(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize()).Render(m.help.View(m.keys)))
+			m.secondaryPane.SetContent(lipgloss.NewStyle().
+				Width(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize()).
+				Render(m.help.View(m.keys)),
+			)
 		}
 
 		return m, tea.Batch(cmds...)
@@ -166,7 +174,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.MouseWheelUp:
 			// The command bar is not open and the primary pane is active
 			// so scroll the dirtree up and update the primary panes content.
-			if !m.showCommandBar && m.primaryPane.IsActive {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.dirTree.GoUp()
 				m.scrollPrimaryPane()
 				m.primaryPane.SetContent(m.dirTree.View())
@@ -180,7 +188,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.MouseWheelDown:
 			// Command bar is not shown and the primary pane is active
 			// so scroll the dirtree down and update the primary panes content.
-			if !m.showCommandBar && m.primaryPane.IsActive {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.dirTree.GoDown()
 				m.scrollPrimaryPane()
 				m.primaryPane.SetContent(m.dirTree.View())
@@ -197,7 +205,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.String() == "g" && m.previousKey.String() == "g" {
 			// If the command bar is not shown and the primary pane is active,
 			// reset the previous key, go to the top of the dirtree and pane.
-			if !m.showCommandBar && m.primaryPane.IsActive {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.previousKey = tea.KeyMsg{}
 				m.dirTree.GotoTop()
 				m.primaryPane.GotoTop()
@@ -225,16 +233,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// If the command bar is not shown and the primary pane is active
 			// set the previous directory to the current directory,
 			// and update the directory listing to go back one directory.
-			if !m.showCommandBar && m.primaryPane.IsActive {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.previousDirectory, _ = directory.GetWorkingDirectory()
-
-				return m, m.updateDirectoryListing(fmt.Sprintf("%s/%s", m.previousDirectory, constants.Directories.PreviousDirectory))
+				return m, m.updateDirectoryListing(
+					fmt.Sprintf("%s/%s", m.previousDirectory, constants.Directories.PreviousDirectory),
+				)
 			}
 
 		case key.Matches(msg, m.keys.Down):
 			// Scroll down in pane.
 			if !m.showCommandBar {
-				if m.primaryPane.IsActive {
+				if m.primaryPane.GetIsActive() {
 					m.dirTree.GoDown()
 					m.scrollPrimaryPane()
 					m.primaryPane.SetContent(m.dirTree.View())
@@ -246,7 +255,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.Up):
 			// Scroll up in pane.
 			if !m.showCommandBar {
-				if m.primaryPane.IsActive {
+				if m.primaryPane.GetIsActive() {
 					m.dirTree.GoUp()
 					m.scrollPrimaryPane()
 					m.primaryPane.SetContent(m.dirTree.View())
@@ -257,18 +266,24 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, m.keys.Right):
 			// Open directory or read file content.
-			if !m.showCommandBar && m.primaryPane.IsActive {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				if m.dirTree.GetSelectedFile().IsDir() && !m.textInput.Focused() {
 					currentDir, _ := directory.GetWorkingDirectory()
-					return m, m.updateDirectoryListing(fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()))
+					return m, m.updateDirectoryListing(
+						fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()),
+					)
 				}
 
-				return m, m.readFileContent(m.dirTree.GetSelectedFile(), m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(), m.secondaryPane.GetHeight())
+				return m, m.readFileContent(
+					m.dirTree.GetSelectedFile(),
+					m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
+					m.secondaryPane.GetHeight(),
+				)
 			}
 
 		case key.Matches(msg, m.keys.GotoBottom):
 			// Go to the bottom of the pane.
-			if !m.showCommandBar && m.primaryPane.IsActive {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.dirTree.GotoBottom()
 				m.primaryPane.GotoBottom()
 				m.primaryPane.SetContent(m.dirTree.View())
@@ -373,7 +388,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Toggle hidden files and folders.
 		case key.Matches(msg, m.keys.ToggleHidden):
-			if !m.showCommandBar && m.primaryPane.IsActive {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.dirTree.ToggleHidden()
 				return m, m.updateDirectoryListing(constants.Directories.CurrentDirectory)
 			}
@@ -381,13 +396,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Toggle between the two panes if the command bar is not currently active.
 		case key.Matches(msg, m.keys.Tab):
 			if !m.showCommandBar {
-				m.primaryPane.IsActive = !m.primaryPane.IsActive
-				m.secondaryPane.IsActive = !m.secondaryPane.IsActive
+				m.primaryPane.SetActive(!m.primaryPane.GetIsActive())
+				m.secondaryPane.SetActive(!m.secondaryPane.GetIsActive())
 			}
 
 		// Enter move mode.
 		case key.Matches(msg, m.keys.EnterMoveMode):
-			if !m.showCommandBar && m.primaryPane.IsActive {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.inMoveMode = true
 				m.primaryPane.SetActiveBorderColor(constants.Colors.Blue)
 				m.initialMoveDirectory, _ = directory.GetWorkingDirectory()
@@ -396,7 +411,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Zip up the currently selected item.
 		case key.Matches(msg, m.keys.Zip):
-			if !m.showCommandBar && m.primaryPane.IsActive {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				return m, tea.Sequentially(
 					m.zipDirectory(m.dirTree.GetSelectedFile().Name()),
 					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
@@ -405,7 +420,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Unzip the currently selected zip file.
 		case key.Matches(msg, m.keys.Unzip):
-			if !m.showCommandBar && m.primaryPane.IsActive {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				return m, tea.Sequentially(
 					m.unzipDirectory(m.dirTree.GetSelectedFile().Name()),
 					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
@@ -414,7 +429,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Copy the currently selected item.
 		case key.Matches(msg, m.keys.Copy):
-			if !m.showCommandBar && m.primaryPane.IsActive {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
 						m.copyDirectory(m.dirTree.GetSelectedFile().Name()),
@@ -434,14 +449,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.inMoveMode = false
 			m.itemToMove = nil
 			m.initialMoveDirectory = ""
-			m.primaryPane.IsActive = true
-			m.secondaryPane.IsActive = false
 			m.help.ShowAll = true
+			m.primaryPane.SetActive(true)
+			m.secondaryPane.SetActive(false)
 			m.textInput.Blur()
 			m.textInput.Reset()
 			m.secondaryPane.GotoTop()
 			m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
-			m.secondaryPane.SetContent(lipgloss.NewStyle().Width(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize()).Render(m.help.View(m.keys)))
+			m.secondaryPane.SetContent(lipgloss.NewStyle().
+				Width(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize()).
+				Render(m.help.View(m.keys)),
+			)
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
 			m.text.SetContent("")

@@ -39,6 +39,11 @@ func (m *Model) SetContent(content string) {
 	m.Content = content
 }
 
+// GetContent returns the markdown content.
+func (m Model) GetContent() string {
+	return m.Content
+}
+
 // SetSize sets the width of the markdown.
 func (m *Model) SetSize(width int) {
 	m.Width = width
