@@ -47,7 +47,6 @@ func GetDirectoryListing(dir string, showHidden bool) ([]fs.DirEntry, error) {
 		return nil, err
 	}
 
-	// Dont want to show hidden files and directories.
 	if !showHidden {
 		for _, file := range files {
 			// If the file or directory starts with a dot,

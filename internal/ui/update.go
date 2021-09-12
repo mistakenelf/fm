@@ -37,6 +37,17 @@ func (m *Model) scrollPrimaryPane() {
 		m.dirTree.GotoBottom()
 		m.primaryPane.GotoBottom()
 	}
+
+	m.statusBar.SetContent(
+		m.dirTree.GetTotalFiles(),
+		m.dirTree.GetCursor(),
+		m.textInput.View(),
+		m.appConfig.Settings.ShowIcons,
+		m.showCommandBar,
+		m.inMoveMode,
+		m.dirTree.GetSelectedFile(),
+		m.itemToMove,
+	)
 }
 
 // Update handles all UI interactions and events for updating the screen.
@@ -50,13 +61,37 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// for example, changing directories, or performing most
 	// file operations.
 	case updateDirectoryListingMsg:
-		m.dirTree.GotoTop()
 		m.dirTree.SetContent(msg)
+		m.dirTree.GotoTop()
 		m.primaryPane.SetContent(m.dirTree.View())
 		m.primaryPane.GotoTop()
 		m.showCommandBar = false
 		m.textInput.Blur()
 		m.textInput.Reset()
+
+		if len(msg) > 0 {
+			m.statusBar.SetContent(
+				m.dirTree.GetTotalFiles(),
+				m.dirTree.GetCursor(),
+				m.textInput.View(),
+				m.appConfig.Settings.ShowIcons,
+				m.showCommandBar,
+				m.inMoveMode,
+				m.dirTree.GetSelectedFile(),
+				m.itemToMove,
+			)
+		} else {
+			m.statusBar.SetContent(
+				m.dirTree.GetTotalFiles(),
+				m.dirTree.GetCursor(),
+				m.textInput.View(),
+				m.appConfig.Settings.ShowIcons,
+				m.showCommandBar,
+				m.inMoveMode,
+				nil,
+				m.itemToMove,
+			)
+		}
 
 		return m, nil
 
@@ -66,6 +101,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
 		m.dirTree.SetContent(msg)
 		m.primaryPane.SetContent(m.dirTree.View())
+		m.statusBar.SetContent(
+			m.dirTree.GetTotalFiles(),
+			m.dirTree.GetCursor(),
+			m.textInput.View(),
+			m.appConfig.Settings.ShowIcons,
+			m.showCommandBar,
+			m.inMoveMode,
+			m.dirTree.GetSelectedFile(),
+			m.itemToMove,
+		)
 
 		// Set move mode back to false, set the initial moving directory to empty,
 		// the item that was moving back to nil, and update the status bars content.
@@ -366,8 +411,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// If move mode is not active, activate the command bar.
 			if !m.inMoveMode {
 				m.showCommandBar = true
-				m.textInput.Placeholder = "enter command"
+				m.textInput.Placeholder = "Enter a command (mkdir, touch, rm)"
 				m.textInput.Focus()
+				m.statusBar.SetContent(
+					m.dirTree.GetTotalFiles(),
+					m.dirTree.GetCursor(),
+					m.textInput.View(),
+					m.appConfig.Settings.ShowIcons,
+					m.showCommandBar,
+					m.inMoveMode,
+					m.dirTree.GetSelectedFile(),
+					m.itemToMove,
+				)
 			}
 
 			return m, cmd
@@ -463,28 +518,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
 			m.text.SetContent("")
+			m.statusBar.SetContent(
+				m.dirTree.GetTotalFiles(),
+				m.dirTree.GetCursor(),
+				m.textInput.View(),
+				m.appConfig.Settings.ShowIcons,
+				m.showCommandBar,
+				m.inMoveMode,
+				m.dirTree.GetSelectedFile(),
+				m.itemToMove,
+			)
 		}
 
 		// Capture the previous key so that we can capture
 		// when two keys are pressed.
 		m.previousKey = msg
 	}
-
-	if m.ready && m.dirTree.GetTotalFiles() > 0 {
-		m.statusBar.SetContent(
-			m.dirTree.GetTotalFiles(),
-			m.dirTree.GetCursor(),
-			m.textInput.View(),
-			m.appConfig.Settings.ShowIcons,
-			m.showCommandBar,
-			m.inMoveMode,
-			m.dirTree.GetSelectedFile(),
-			m.itemToMove,
-		)
-	}
-
-	m.textInput, cmd = m.textInput.Update(msg)
-	cmds = append(cmds, cmd)
 
 	m.loader, cmd = m.loader.Update(msg)
 	cmds = append(cmds, cmd)

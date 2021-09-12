@@ -10,6 +10,7 @@ import (
 	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/internal/constants"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/truncate"
 )
@@ -83,56 +84,6 @@ func ParseCommand(command string) (string, string) {
 	return "", ""
 }
 
-func (m Model) getStatusbarContent() (string, string, string, string) {
-	currentPath, err := directory.GetWorkingDirectory()
-	if err != nil {
-		currentPath = constants.Directories.CurrentDirectory
-	}
-
-	if m.TotalFiles == 0 {
-		return "", "", "", ""
-	}
-
-	logo := ""
-
-	// If icons are enabled, show the directory icon next to the logo text
-	// else just show the text of the logo.
-	if m.ShowIcons {
-		logo = fmt.Sprintf("%s %s", icons.IconDef["dir"].GetGlyph(), "FM")
-	} else {
-		logo = "FM"
-	}
-
-	// Display some information about the currently seleted file including
-	// its size, the mode and the current path.
-	fileInfo, err := m.SelectedFile.Info()
-	if err != nil {
-		return "", "", "", ""
-	}
-
-	status := fmt.Sprintf("%s %s %s",
-		formatter.ConvertBytesToSizeString(fileInfo.Size()),
-		fileInfo.Mode().String(),
-		currentPath,
-	)
-
-	// If the command bar is shown, show the text input.
-	if m.ShowCommandBar {
-		status = m.TextInput
-	}
-
-	// If in move mode, update the status text to indicate move mode is enabled
-	// and the name of the file or directory being moved.
-	if m.InMoveMode {
-		status = fmt.Sprintf("Currently moving %s", m.ItemToMove.Name())
-	}
-
-	return m.SelectedFile.Name(),
-		status,
-		fmt.Sprintf("%d/%d", m.Cursor+1, m.TotalFiles),
-		logo
-}
-
 // GetHeight returns the height of the statusbar.
 func (m Model) GetHeight() int {
 	return m.Height
@@ -155,49 +106,90 @@ func (m *Model) SetSize(width int) {
 	m.Width = width
 }
 
+// Update updates the statusbar.
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	var cmds []tea.Cmd
+
+}
+
 // View returns a string representation of the statusbar.
 func (m Model) View() string {
 	width := lipgloss.Width
+	logo := ""
+	status := ""
+	selectedFile := "N/A"
+	fileCount := "0/0"
 
-	firstColumnContent, secondColumnContent, thirdColumnContent, fourthColumnContent := m.getStatusbarContent()
+	if m.TotalFiles > 0 {
+		if m.SelectedFile != nil {
+			selectedFile = m.SelectedFile.Name()
+			fileCount = fmt.Sprintf("%d/%d", m.Cursor+1, m.TotalFiles)
 
-	firstColumn := lipgloss.NewStyle().
+			currentPath, err := directory.GetWorkingDirectory()
+			if err != nil {
+				currentPath = constants.Directories.CurrentDirectory
+			}
+
+			fileInfo, err := m.SelectedFile.Info()
+			if err != nil {
+				return err.Error()
+			}
+
+			// Display some information about the currently seleted file including
+			// its size, the mode and the current path.
+			status = fmt.Sprintf("%s %s %s",
+				formatter.ConvertBytesToSizeString(fileInfo.Size()),
+				fileInfo.Mode().String(),
+				currentPath,
+			)
+		}
+	}
+
+	if m.ShowCommandBar {
+		status = m.TextInput
+	}
+
+	if m.ShowIcons {
+		logo = fmt.Sprintf("%s %s", icons.IconDef["dir"].GetGlyph(), "FM")
+	} else {
+		logo = "FM"
+	}
+
+	selectedFileColumn := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(m.FirstColumnColors.Foreground)).
 		Background(lipgloss.Color(m.FirstColumnColors.Background)).
 		Padding(0, 1).
 		Height(m.Height).
-		Render(truncate.StringWithTail(firstColumnContent, 30, "..."))
+		Render(truncate.StringWithTail(selectedFile, 30, "..."))
 
-	thirdColumn := lipgloss.NewStyle().
+	fileCountColumn := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(m.ThirdColumnColors.Foreground)).
 		Background(lipgloss.Color(m.ThirdColumnColors.Background)).
 		Align(lipgloss.Right).
 		Padding(0, 1).
 		Height(m.Height).
-		Render(thirdColumnContent)
+		Render(fileCount)
 
-	fourthColumn := lipgloss.NewStyle().
+	logoColumn := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(m.FourthColumnColors.Foreground)).
 		Background(lipgloss.Color(m.FourthColumnColors.Background)).
 		Padding(0, 1).
 		Height(m.Height).
-		Render(fourthColumnContent)
+		Render(logo)
 
-	// Second column of the status bar displayed in the center with configurable
-	// foreground and background colors and some padding. Also calculate the
-	// width of the other three columns so that this one can take up the rest of the space.
-	secondColumn := lipgloss.NewStyle().
+	statusColumn := lipgloss.NewStyle().
 		Foreground(lipgloss.Color(m.SecondColumnColors.Foreground)).
 		Background(lipgloss.Color(m.SecondColumnColors.Background)).
 		Padding(0, 1).
 		Height(m.Height).
-		Width(m.Width - width(firstColumn) - width(thirdColumn) - width(fourthColumn)).
-		Render(truncate.StringWithTail(secondColumnContent, uint(m.Width-width(firstColumn)-width(thirdColumn)-width(fourthColumn)-3), "..."))
+		Width(m.Width - width(selectedFileColumn) - width(fileCountColumn) - width(logoColumn)).
+		Render(truncate.StringWithTail(status, uint(m.Width-width(selectedFileColumn)-width(fileCountColumn)-width(logoColumn)-3), "..."))
 
 	return lipgloss.JoinHorizontal(lipgloss.Top,
-		firstColumn,
-		secondColumn,
-		thirdColumn,
-		fourthColumn,
+		selectedFileColumn,
+		statusColumn,
+		fileCountColumn,
+		logoColumn,
 	)
 }
