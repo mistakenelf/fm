@@ -41,6 +41,7 @@ type Model struct {
 // NewModel creates an instance of a statusbar.
 func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthColumnColors Color) Model {
 	return Model{
+		Height:             1,
 		TotalFiles:         0,
 		Cursor:             0,
 		TextInput:          "",
@@ -150,9 +151,8 @@ func (m *Model) SetContent(totalFiles, cursor int, textInput string, showIcons, 
 }
 
 // SetSize sets the size of the statusbar, useful when the terminal is resized.
-func (m *Model) SetSize(width, height int) {
+func (m *Model) SetSize(width int) {
 	m.Width = width
-	m.Height = height
 }
 
 // View returns a string representation of the statusbar.
