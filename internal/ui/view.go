@@ -10,7 +10,7 @@ import (
 func (m Model) View() string {
 	// If the viewport on the panes is not ready or we dont have any files to display
 	// show the spinner.
-	if !m.ready || m.dirTree.GetTotalFiles() <= 0 {
+	if !m.ready {
 		return fmt.Sprintf("%s%s", m.loader.View(), "loading...")
 	}
 

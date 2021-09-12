@@ -50,15 +50,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// for example, changing directories, or performing most
 	// file operations.
 	case updateDirectoryListingMsg:
-		if len(msg) == 0 {
-			m.primaryPane.SetContent("Directory is empty")
-		} else {
-			m.dirTree.GotoTop()
-			m.dirTree.SetContent(msg)
-			m.primaryPane.SetContent(m.dirTree.View())
-			m.primaryPane.GotoTop()
-		}
-
+		m.dirTree.GotoTop()
+		m.dirTree.SetContent(msg)
+		m.primaryPane.SetContent(m.dirTree.View())
+		m.primaryPane.GotoTop()
 		m.showCommandBar = false
 		m.textInput.Blur()
 		m.textInput.Reset()
@@ -166,7 +161,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if !m.ready {
 			m.ready = true
-			m.secondaryPane.SetContent(m.help.View(m.keys))
+			m.secondaryPane.SetContent(lipgloss.NewStyle().Width(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize()).Render(m.help.View(m.keys)))
 		}
 
 		return m, tea.Batch(cmds...)
@@ -459,7 +454,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.textInput.Reset()
 			m.secondaryPane.GotoTop()
 			m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
-			m.secondaryPane.SetContent(m.help.View(m.keys))
+			m.secondaryPane.SetContent(lipgloss.NewStyle().Width(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize()).Render(m.help.View(m.keys)))
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
 			m.text.SetContent("")
