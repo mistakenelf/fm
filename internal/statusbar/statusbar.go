@@ -22,24 +22,20 @@ type Color struct {
 
 // Model is a struct that contains all the properties of the statusbar.
 type Model struct {
-	Width               int
-	Height              int
-	TotalFiles          int
-	Cursor              int
-	FirstColumnContent  string
-	SecondColumnContent string
-	ThirdColumnContent  string
-	FourthColumnContent string
-	TextInput           string
-	ShowIcons           bool
-	ShowCommandBar      bool
-	InMoveMode          bool
-	SelectedFile        fs.DirEntry
-	ItemToMove          fs.DirEntry
-	FirstColumnColors   Color
-	SecondColumnColors  Color
-	ThirdColumnColors   Color
-	FourthColumnColors  Color
+	Width              int
+	Height             int
+	TotalFiles         int
+	Cursor             int
+	TextInput          string
+	ShowIcons          bool
+	ShowCommandBar     bool
+	InMoveMode         bool
+	SelectedFile       fs.DirEntry
+	ItemToMove         fs.DirEntry
+	FirstColumnColors  Color
+	SecondColumnColors Color
+	ThirdColumnColors  Color
+	FourthColumnColors Color
 }
 
 // NewModel creates an instance of a statusbar.
