@@ -116,6 +116,10 @@ func (m Model) dirItem(selected bool, fileInfo fs.FileInfo) string {
 func (m Model) View() string {
 	curFiles := ""
 
+	if len(m.Files) == 0 {
+		return "Directory is empty"
+	}
+
 	for i, file := range m.Files {
 		modTimeColor := ""
 

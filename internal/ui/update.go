@@ -50,15 +50,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// for example, changing directories, or performing most
 	// file operations.
 	case updateDirectoryListingMsg:
-		if len(msg) == 0 {
-			m.primaryPane.SetContent("Directory is empty")
-		} else {
-			m.dirTree.GotoTop()
-			m.dirTree.SetContent(msg)
-			m.primaryPane.SetContent(m.dirTree.View())
-			m.primaryPane.GotoTop()
-		}
-
+		m.dirTree.GotoTop()
+		m.dirTree.SetContent(msg)
+		m.primaryPane.SetContent(m.dirTree.View())
+		m.primaryPane.GotoTop()
 		m.showCommandBar = false
 		m.textInput.Blur()
 		m.textInput.Reset()
