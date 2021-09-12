@@ -160,7 +160,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if !m.ready {
 			m.ready = true
-			m.secondaryPane.SetContent(m.help.View(m.keys))
+			m.secondaryPane.SetContent(lipgloss.NewStyle().Width(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize()).Render(m.help.View(m.keys)))
 		}
 
 		return m, tea.Batch(cmds...)
@@ -446,7 +446,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.textInput.Reset()
 			m.secondaryPane.GotoTop()
 			m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
-			m.secondaryPane.SetContent(m.help.View(m.keys))
+			m.secondaryPane.SetContent(lipgloss.NewStyle().Width(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize()).Render(m.help.View(m.keys)))
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
 			m.text.SetContent("")
