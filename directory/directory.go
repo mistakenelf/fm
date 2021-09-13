@@ -228,7 +228,7 @@ func UnzipDirectory(name string) error {
 		fpath := filepath.Join(output, archiveFile)
 
 		if !strings.HasPrefix(fpath, filepath.Clean(output)+string(os.PathSeparator)) {
-			return fmt.Errorf("%s: illegal file path", fpath)
+			return err
 		}
 
 		if f.FileInfo().IsDir() {

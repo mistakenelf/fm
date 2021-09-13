@@ -41,7 +41,6 @@ func (m *Model) scrollPrimaryPane() {
 	m.statusBar.SetContent(
 		m.dirTree.GetTotalFiles(),
 		m.dirTree.GetCursor(),
-		m.textInput.View(),
 		m.appConfig.Settings.ShowIcons,
 		m.showCommandBar,
 		m.inMoveMode,
@@ -61,37 +60,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// for example, changing directories, or performing most
 	// file operations.
 	case updateDirectoryListingMsg:
-		m.dirTree.SetContent(msg)
 		m.dirTree.GotoTop()
+		m.dirTree.SetContent(msg)
 		m.primaryPane.SetContent(m.dirTree.View())
 		m.primaryPane.GotoTop()
 		m.showCommandBar = false
-		m.textInput.Blur()
-		m.textInput.Reset()
-
-		if len(msg) > 0 {
-			m.statusBar.SetContent(
-				m.dirTree.GetTotalFiles(),
-				m.dirTree.GetCursor(),
-				m.textInput.View(),
-				m.appConfig.Settings.ShowIcons,
-				m.showCommandBar,
-				m.inMoveMode,
-				m.dirTree.GetSelectedFile(),
-				m.itemToMove,
-			)
-		} else {
-			m.statusBar.SetContent(
-				m.dirTree.GetTotalFiles(),
-				m.dirTree.GetCursor(),
-				m.textInput.View(),
-				m.appConfig.Settings.ShowIcons,
-				m.showCommandBar,
-				m.inMoveMode,
-				nil,
-				m.itemToMove,
-			)
-		}
+		m.statusBar.BlurCommandBar()
+		m.statusBar.ResetCommandBar()
+		m.statusBar.SetContent(
+			m.dirTree.GetTotalFiles(),
+			m.dirTree.GetCursor(),
+			m.appConfig.Settings.ShowIcons,
+			m.showCommandBar,
+			m.inMoveMode,
+			m.dirTree.GetSelectedFile(),
+			m.itemToMove,
+		)
 
 		return m, nil
 
@@ -104,7 +88,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.statusBar.SetContent(
 			m.dirTree.GetTotalFiles(),
 			m.dirTree.GetCursor(),
-			m.textInput.View(),
 			m.appConfig.Settings.ShowIcons,
 			m.showCommandBar,
 			m.inMoveMode,
@@ -311,8 +294,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, m.keys.Right):
 			// Open directory or read file content.
-			if !m.showCommandBar && m.primaryPane.GetIsActive() {
-				if m.dirTree.GetSelectedFile().IsDir() && !m.textInput.Focused() {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+				if m.dirTree.GetSelectedFile().IsDir() && !m.statusBar.CommandBarFocused() {
 					currentDir, _ := directory.GetWorkingDirectory()
 					return m, m.updateDirectoryListing(
 						fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()),
@@ -356,7 +339,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Parse the commands from the command bar, command is the name
 			// of the command and value is if the command requires input to it
 			// get its value, for example (rename test.txt) text.txt is the value.
-			command, value := statusbar.ParseCommand(m.textInput.Value())
+			command, value := statusbar.ParseCommand(m.statusBar.CommandBarValue())
 
 			// Nothing was input for a command.
 			if command == "" {
@@ -411,12 +394,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// If move mode is not active, activate the command bar.
 			if !m.inMoveMode {
 				m.showCommandBar = true
-				m.textInput.Placeholder = "Enter a command (mkdir, touch, rm)"
-				m.textInput.Focus()
+				m.statusBar.FocusCommandBar()
 				m.statusBar.SetContent(
 					m.dirTree.GetTotalFiles(),
 					m.dirTree.GetCursor(),
-					m.textInput.View(),
 					m.appConfig.Settings.ShowIcons,
 					m.showCommandBar,
 					m.inMoveMode,
@@ -457,7 +438,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Enter move mode.
 		case key.Matches(msg, m.keys.EnterMoveMode):
-			if !m.showCommandBar && m.primaryPane.GetIsActive() {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				m.inMoveMode = true
 				m.primaryPane.SetActiveBorderColor(constants.Colors.Blue)
 				m.initialMoveDirectory, _ = directory.GetWorkingDirectory()
@@ -466,7 +447,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Zip up the currently selected item.
 		case key.Matches(msg, m.keys.Zip):
-			if !m.showCommandBar && m.primaryPane.GetIsActive() {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				return m, tea.Sequentially(
 					m.zipDirectory(m.dirTree.GetSelectedFile().Name()),
 					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
@@ -475,7 +456,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Unzip the currently selected zip file.
 		case key.Matches(msg, m.keys.Unzip):
-			if !m.showCommandBar && m.primaryPane.GetIsActive() {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				return m, tea.Sequentially(
 					m.unzipDirectory(m.dirTree.GetSelectedFile().Name()),
 					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
@@ -484,7 +465,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Copy the currently selected item.
 		case key.Matches(msg, m.keys.Copy):
-			if !m.showCommandBar && m.primaryPane.GetIsActive() {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
 						m.copyDirectory(m.dirTree.GetSelectedFile().Name()),
@@ -507,8 +488,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.help.ShowAll = true
 			m.primaryPane.SetActive(true)
 			m.secondaryPane.SetActive(false)
-			m.textInput.Blur()
-			m.textInput.Reset()
+			m.statusBar.BlurCommandBar()
+			m.statusBar.ResetCommandBar()
 			m.secondaryPane.GotoTop()
 			m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
 			m.secondaryPane.SetContent(lipgloss.NewStyle().
@@ -521,7 +502,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.statusBar.SetContent(
 				m.dirTree.GetTotalFiles(),
 				m.dirTree.GetCursor(),
-				m.textInput.View(),
 				m.appConfig.Settings.ShowIcons,
 				m.showCommandBar,
 				m.inMoveMode,
@@ -534,6 +514,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// when two keys are pressed.
 		m.previousKey = msg
 	}
+
+	m.statusBar, cmd = m.statusBar.Update(msg)
+	cmds = append(cmds, cmd)
 
 	m.loader, cmd = m.loader.Update(msg)
 	cmds = append(cmds, cmd)

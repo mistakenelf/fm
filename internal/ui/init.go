@@ -8,7 +8,6 @@ import (
 	"github.com/knipferrc/fm/internal/constants"
 
 	"github.com/charmbracelet/bubbles/spinner"
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -38,7 +37,6 @@ func (m Model) Init() tea.Cmd {
 		cmds = append(cmds, m.updateDirectoryListing(m.appConfig.Settings.StartDir))
 	}
 
-	cmds = append(cmds, textinput.Blink)
 	cmds = append(cmds, spinner.Tick)
 
 	return tea.Batch(cmds...)

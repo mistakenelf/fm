@@ -10,6 +10,7 @@ import (
 	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/internal/constants"
 
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/truncate"
@@ -27,7 +28,6 @@ type Model struct {
 	Height             int
 	TotalFiles         int
 	Cursor             int
-	TextInput          string
 	ShowIcons          bool
 	ShowCommandBar     bool
 	InMoveMode         bool
@@ -37,15 +37,20 @@ type Model struct {
 	SecondColumnColors Color
 	ThirdColumnColors  Color
 	FourthColumnColors Color
+	Textinput          textinput.Model
 }
 
 // NewModel creates an instance of a statusbar.
 func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthColumnColors Color) Model {
+	input := textinput.NewModel()
+	input.Prompt = "❯ "
+	input.CharLimit = 250
+	input.Placeholder = "Enter a command"
+
 	return Model{
 		Height:             1,
 		TotalFiles:         0,
 		Cursor:             0,
-		TextInput:          "",
 		ShowIcons:          true,
 		ShowCommandBar:     false,
 		InMoveMode:         false,
@@ -55,7 +60,13 @@ func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthCo
 		SecondColumnColors: secondColumnColors,
 		ThirdColumnColors:  thirdColumnColors,
 		FourthColumnColors: fourthColumnColors,
+		Textinput:          input,
 	}
+}
+
+// Init initializes the statusbar.
+func (m Model) Init() tea.Cmd {
+	return textinput.Blink
 }
 
 // ParseCommand parses the command and returns the command name and the arguments.
@@ -89,11 +100,35 @@ func (m Model) GetHeight() int {
 	return m.Height
 }
 
+// BlurCommandBar blurs the textinput used for the command bar.
+func (m *Model) BlurCommandBar() {
+	m.Textinput.Blur()
+}
+
+// ResetCommandBar resets the textinput used for the command bar.
+func (m *Model) ResetCommandBar() {
+	m.Textinput.Reset()
+}
+
+// CommandBarValue returns the value of the command bar.
+func (m Model) CommandBarValue() string {
+	return m.Textinput.Value()
+}
+
+// CommandBarFocused returns true if the command bar is focused.
+func (m Model) CommandBarFocused() bool {
+	return m.Textinput.Focused()
+}
+
+// FocusCommandBar focuses the command bar.
+func (m *Model) FocusCommandBar() {
+	m.Textinput.Focus()
+}
+
 // SetContent sets the content of the statusbar.
-func (m *Model) SetContent(totalFiles, cursor int, textInput string, showIcons, showCommandBar, inMoveMode bool, selectedFile, itemToMove fs.DirEntry) {
+func (m *Model) SetContent(totalFiles, cursor int, showIcons, showCommandBar, inMoveMode bool, selectedFile, itemToMove fs.DirEntry) {
 	m.TotalFiles = totalFiles
 	m.Cursor = cursor
-	m.TextInput = textInput
 	m.ShowIcons = showIcons
 	m.ShowCommandBar = showCommandBar
 	m.InMoveMode = inMoveMode
@@ -107,10 +142,14 @@ func (m *Model) SetSize(width int) {
 }
 
 // Update updates the statusbar.
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
+	m.Textinput, cmd = m.Textinput.Update(msg)
+	cmds = append(cmds, cmd)
+
+	return m, tea.Batch(cmds...)
 }
 
 // View returns a string representation of the statusbar.
@@ -147,7 +186,7 @@ func (m Model) View() string {
 	}
 
 	if m.ShowCommandBar {
-		status = m.TextInput
+		status = m.Textinput.View()
 	}
 
 	if m.ShowIcons {
