@@ -47,7 +47,6 @@ func GetDirectoryListing(dir string, showHidden bool) ([]fs.DirEntry, error) {
 		return nil, err
 	}
 
-	// Dont want to show hidden files and directories.
 	if !showHidden {
 		for _, file := range files {
 			// If the file or directory starts with a dot,
@@ -229,7 +228,7 @@ func UnzipDirectory(name string) error {
 		fpath := filepath.Join(output, archiveFile)
 
 		if !strings.HasPrefix(fpath, filepath.Clean(output)+string(os.PathSeparator)) {
-			return fmt.Errorf("%s: illegal file path", fpath)
+			return err
 		}
 
 		if f.FileInfo().IsDir() {

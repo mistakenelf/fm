@@ -55,7 +55,11 @@ func (m *Model) GotoBottom() {
 
 // GetSelectedFile returns the currently selected file in the tree.
 func (m Model) GetSelectedFile() fs.DirEntry {
-	return m.Files[m.Cursor]
+	if len(m.Files) > 0 {
+		return m.Files[m.Cursor]
+	}
+
+	return nil
 }
 
 // GetCursor gets the position of the cursor in the tree.

@@ -15,7 +15,6 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -100,7 +99,6 @@ type Model struct {
 	help                 help.Model
 	primaryPane          pane.Model
 	secondaryPane        pane.Model
-	textInput            textinput.Model
 	loader               spinner.Model
 	dirTree              dirtree.Model
 	statusBar            statusbar.Model
@@ -120,11 +118,6 @@ type Model struct {
 // NewModel create an instance of the entire application model.
 func NewModel() Model {
 	cfg := config.GetConfig()
-
-	// Create a new textinput.
-	input := textinput.NewModel()
-	input.Prompt = "❯ "
-	input.CharLimit = 250
 
 	// Create a new spinner with some styling based on the config.
 	l := spinner.NewModel()
@@ -264,7 +257,6 @@ func NewModel() Model {
 		help:                 h,
 		primaryPane:          primaryPane,
 		secondaryPane:        secondaryPane,
-		textInput:            input,
 		loader:               l,
 		dirTree:              dirTree,
 		statusBar:            statusBar,

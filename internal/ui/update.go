@@ -37,6 +37,16 @@ func (m *Model) scrollPrimaryPane() {
 		m.dirTree.GotoBottom()
 		m.primaryPane.GotoBottom()
 	}
+
+	m.statusBar.SetContent(
+		m.dirTree.GetTotalFiles(),
+		m.dirTree.GetCursor(),
+		m.appConfig.Settings.ShowIcons,
+		m.showCommandBar,
+		m.inMoveMode,
+		m.dirTree.GetSelectedFile(),
+		m.itemToMove,
+	)
 }
 
 // Update handles all UI interactions and events for updating the screen.
@@ -55,8 +65,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.primaryPane.SetContent(m.dirTree.View())
 		m.primaryPane.GotoTop()
 		m.showCommandBar = false
-		m.textInput.Blur()
-		m.textInput.Reset()
+		m.statusBar.BlurCommandBar()
+		m.statusBar.ResetCommandBar()
+		m.statusBar.SetContent(
+			m.dirTree.GetTotalFiles(),
+			m.dirTree.GetCursor(),
+			m.appConfig.Settings.ShowIcons,
+			m.showCommandBar,
+			m.inMoveMode,
+			m.dirTree.GetSelectedFile(),
+			m.itemToMove,
+		)
 
 		return m, nil
 
@@ -66,6 +85,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
 		m.dirTree.SetContent(msg)
 		m.primaryPane.SetContent(m.dirTree.View())
+		m.statusBar.SetContent(
+			m.dirTree.GetTotalFiles(),
+			m.dirTree.GetCursor(),
+			m.appConfig.Settings.ShowIcons,
+			m.showCommandBar,
+			m.inMoveMode,
+			m.dirTree.GetSelectedFile(),
+			m.itemToMove,
+		)
 
 		// Set move mode back to false, set the initial moving directory to empty,
 		// the item that was moving back to nil, and update the status bars content.
@@ -266,8 +294,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, m.keys.Right):
 			// Open directory or read file content.
-			if !m.showCommandBar && m.primaryPane.GetIsActive() {
-				if m.dirTree.GetSelectedFile().IsDir() && !m.textInput.Focused() {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+				if m.dirTree.GetSelectedFile().IsDir() && !m.statusBar.CommandBarFocused() {
 					currentDir, _ := directory.GetWorkingDirectory()
 					return m, m.updateDirectoryListing(
 						fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()),
@@ -311,7 +339,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Parse the commands from the command bar, command is the name
 			// of the command and value is if the command requires input to it
 			// get its value, for example (rename test.txt) text.txt is the value.
-			command, value := statusbar.ParseCommand(m.textInput.Value())
+			command, value := statusbar.ParseCommand(m.statusBar.CommandBarValue())
 
 			// Nothing was input for a command.
 			if command == "" {
@@ -366,8 +394,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// If move mode is not active, activate the command bar.
 			if !m.inMoveMode {
 				m.showCommandBar = true
-				m.textInput.Placeholder = "enter command"
-				m.textInput.Focus()
+				m.statusBar.FocusCommandBar()
+				m.statusBar.SetContent(
+					m.dirTree.GetTotalFiles(),
+					m.dirTree.GetCursor(),
+					m.appConfig.Settings.ShowIcons,
+					m.showCommandBar,
+					m.inMoveMode,
+					m.dirTree.GetSelectedFile(),
+					m.itemToMove,
+				)
 			}
 
 			return m, cmd
@@ -402,7 +438,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Enter move mode.
 		case key.Matches(msg, m.keys.EnterMoveMode):
-			if !m.showCommandBar && m.primaryPane.GetIsActive() {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				m.inMoveMode = true
 				m.primaryPane.SetActiveBorderColor(constants.Colors.Blue)
 				m.initialMoveDirectory, _ = directory.GetWorkingDirectory()
@@ -411,7 +447,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Zip up the currently selected item.
 		case key.Matches(msg, m.keys.Zip):
-			if !m.showCommandBar && m.primaryPane.GetIsActive() {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				return m, tea.Sequentially(
 					m.zipDirectory(m.dirTree.GetSelectedFile().Name()),
 					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
@@ -420,7 +456,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Unzip the currently selected zip file.
 		case key.Matches(msg, m.keys.Unzip):
-			if !m.showCommandBar && m.primaryPane.GetIsActive() {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				return m, tea.Sequentially(
 					m.unzipDirectory(m.dirTree.GetSelectedFile().Name()),
 					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
@@ -429,7 +465,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Copy the currently selected item.
 		case key.Matches(msg, m.keys.Copy):
-			if !m.showCommandBar && m.primaryPane.GetIsActive() {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
 						m.copyDirectory(m.dirTree.GetSelectedFile().Name()),
@@ -452,8 +488,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.help.ShowAll = true
 			m.primaryPane.SetActive(true)
 			m.secondaryPane.SetActive(false)
-			m.textInput.Blur()
-			m.textInput.Reset()
+			m.statusBar.BlurCommandBar()
+			m.statusBar.ResetCommandBar()
 			m.secondaryPane.GotoTop()
 			m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
 			m.secondaryPane.SetContent(lipgloss.NewStyle().
@@ -463,6 +499,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
 			m.text.SetContent("")
+			m.statusBar.SetContent(
+				m.dirTree.GetTotalFiles(),
+				m.dirTree.GetCursor(),
+				m.appConfig.Settings.ShowIcons,
+				m.showCommandBar,
+				m.inMoveMode,
+				m.dirTree.GetSelectedFile(),
+				m.itemToMove,
+			)
 		}
 
 		// Capture the previous key so that we can capture
@@ -470,20 +515,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.previousKey = msg
 	}
 
-	if m.ready && m.dirTree.GetTotalFiles() > 0 {
-		m.statusBar.SetContent(
-			m.dirTree.GetTotalFiles(),
-			m.dirTree.GetCursor(),
-			m.textInput.View(),
-			m.appConfig.Settings.ShowIcons,
-			m.showCommandBar,
-			m.inMoveMode,
-			m.dirTree.GetSelectedFile(),
-			m.itemToMove,
-		)
-	}
-
-	m.textInput, cmd = m.textInput.Update(msg)
+	m.statusBar, cmd = m.statusBar.Update(msg)
 	cmds = append(cmds, cmd)
 
 	m.loader, cmd = m.loader.Update(msg)
