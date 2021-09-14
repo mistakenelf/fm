@@ -448,8 +448,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Zip up the currently selected item.
 		case key.Matches(msg, m.keys.Zip):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+				currentDir, _ := directory.GetWorkingDirectory()
+
 				return m, tea.Sequentially(
-					m.zipDirectory(m.dirTree.GetSelectedFile().Name()),
+					m.zipDirectory(fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name())),
 					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
 				)
 			}
@@ -457,8 +459,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Unzip the currently selected zip file.
 		case key.Matches(msg, m.keys.Unzip):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+				currentDir, _ := directory.GetWorkingDirectory()
+
 				return m, tea.Sequentially(
-					m.unzipDirectory(m.dirTree.GetSelectedFile().Name()),
+					m.unzipDirectory(fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name())),
 					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
 				)
 			}

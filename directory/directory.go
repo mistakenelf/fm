@@ -157,7 +157,7 @@ func ZipDirectory(name string) error {
 
 	// Generate output name based on the directories current name along
 	// with a timestamp to make names unique.
-	output := fmt.Sprintf("%s_%d.zip", name, time.Now().Unix())
+	output := fmt.Sprintf("%s_%d.zip", strings.Split(name, ".")[0], time.Now().Unix())
 	newfile, err := os.Create(output)
 	if err != nil {
 		return err
@@ -199,7 +199,7 @@ func ZipDirectory(name string) error {
 			return err
 		}
 
-		_, err = io.CopyN(writer, zipfile, 1024)
+		_, err = io.Copy(writer, zipfile)
 		if err != nil {
 			return err
 		}
@@ -254,7 +254,7 @@ func UnzipDirectory(name string) error {
 			return err
 		}
 
-		_, err = io.CopyN(outFile, rc, 1024)
+		_, err = io.Copy(outFile, rc)
 		if err != nil {
 			return err
 		}
@@ -299,7 +299,7 @@ func CopyFile(name string) error {
 		err = destFile.Close()
 	}()
 
-	_, err = io.CopyN(destFile, srcFile, 1024)
+	_, err = io.Copy(destFile, srcFile)
 	if err != nil {
 		return err
 	}
@@ -317,57 +317,21 @@ func CopyDirectory(name string) error {
 	// Generate a unique name for the output folder.
 	output := fmt.Sprintf("%s_%d", name, time.Now().Unix())
 
-	f, err := os.Open(name)
-	if err != nil {
-		return err
-	}
+	var err error = filepath.Walk(name, func(path string, info os.FileInfo, err error) error {
+		var relPath string = strings.Replace(path, name, "", 1)
 
-	file, err := f.Stat()
-	if err != nil {
-		return err
-	}
-
-	if !file.IsDir() {
-		return fmt.Errorf("Source " + file.Name() + " is not a directory!")
-	}
-
-	// Create the output folder.
-	err = os.Mkdir(output, 0755)
-	if err != nil {
-		return err
-	}
-
-	// Read all files in the directory.
-	files, err := os.ReadDir(name)
-	if err != nil {
-		return err
-	}
-
-	// Loop through the directory getting a list of all its files.
-	for _, f := range files {
-		// If its a directory, copy it.
-		if f.IsDir() {
-			err = CopyDirectory(name + "/" + f.Name())
-			if err != nil {
-				return err
+		if info.IsDir() {
+			return os.Mkdir(filepath.Join(output, relPath), os.ModePerm)
+		} else {
+			var data, err1 = os.ReadFile(filepath.Join(name, relPath))
+			if err1 != nil {
+				return err1
 			}
+			return os.WriteFile(filepath.Join(output, relPath), data, os.ModePerm)
 		}
+	})
 
-		// If its not a directory, read the file and write it to the new folder.
-		if !f.IsDir() {
-			content, err := os.ReadFile(name + "/" + f.Name())
-			if err != nil {
-				return err
-			}
-
-			err = os.WriteFile(output+"/"+f.Name(), content, 0600)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
+	return err
 }
 
 // GetTreeSize calculates the size of a directory recursively.
