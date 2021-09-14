@@ -21,7 +21,7 @@ type VersionTypes struct {
 
 // Versions contains the different kinds of versions and their values.
 var Versions = VersionTypes{
-	AppVersion: "0.3.0",
+	AppVersion: "0.3.1",
 }
 
 // ColorTypes contains the different types of colors.
