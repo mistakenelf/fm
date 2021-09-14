@@ -235,7 +235,7 @@ func (m Model) createFile(name string) tea.Cmd {
 // zipDirectory zips a directory based on the name provided.
 func (m Model) zipDirectory(name string) tea.Cmd {
 	return func() tea.Msg {
-		if err := directory.ZipDirectory(name); err != nil {
+		if err := directory.Zip(name); err != nil {
 			return errorMsg(err.Error())
 		}
 
@@ -246,7 +246,7 @@ func (m Model) zipDirectory(name string) tea.Cmd {
 // unzipDirectory unzips a directory based on the name provided.
 func (m Model) unzipDirectory(name string) tea.Cmd {
 	return func() tea.Msg {
-		if err := directory.UnzipDirectory(name); err != nil {
+		if err := directory.Unzip(name); err != nil {
 			return errorMsg(err.Error())
 		}
 

@@ -137,24 +137,8 @@ func CreateFile(name string) error {
 	return err
 }
 
-// ZipDirectory zips a directory given a name.
-func ZipDirectory(name string) error {
-	var files []string
-
-	// Walk the directory to get a list of files within it and append it to
-	// the array of files.
-	err := filepath.Walk(name, func(path string, f fs.FileInfo, err error) error {
-		if f.Name() != "." && !f.IsDir() {
-			files = append(files, path)
-		}
-
-		return nil
-	})
-
-	if err != nil {
-		return err
-	}
-
+// Zip zips a directory given a name.
+func Zip(name string) error {
 	// Generate output name based on the directories current name along
 	// with a timestamp to make names unique.
 	output := fmt.Sprintf("%s_%d.zip", strings.Split(name, ".")[0], time.Now().Unix())
@@ -173,43 +157,103 @@ func ZipDirectory(name string) error {
 		err = zipWriter.Close()
 	}()
 
-	for _, file := range files {
-		zipfile, err := os.Open(file)
+	info, err := os.Stat(name)
+	if err != nil {
+		return nil
+	}
+
+	if info.IsDir() {
+		err = filepath.Walk(name, func(filePath string, info os.FileInfo, err error) error {
+			if info.IsDir() {
+				return nil
+			}
+
+			if err != nil {
+				return err
+			}
+
+			relPath := strings.TrimPrefix(filePath, name)
+			zipFile, err := zipWriter.Create(relPath)
+			if err != nil {
+				return err
+			}
+
+			fsFile, err := os.Open(filePath)
+			if err != nil {
+				return err
+			}
+
+			_, err = io.Copy(zipFile, fsFile)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		})
+	} else {
+		var files []string
+
+		// Walk the directory to get a list of files within it and append it to
+		// the array of files.
+		err := filepath.Walk(name, func(path string, f fs.FileInfo, err error) error {
+			if f.Name() != "." && !f.IsDir() {
+				files = append(files, path)
+			}
+
+			return nil
+		})
+
 		if err != nil {
 			return err
 		}
 
-		defer func() {
-			err = zipfile.Close()
-		}()
+		for _, file := range files {
+			zipfile, err := os.Open(file)
+			if err != nil {
+				return err
+			}
 
-		info, err := zipfile.Stat()
-		if err != nil {
-			return err
-		}
+			defer func() {
+				err = zipfile.Close()
+			}()
 
-		header, err := zip.FileInfoHeader(info)
-		if err != nil {
-			return err
-		}
+			info, err := zipfile.Stat()
+			if err != nil {
+				return err
+			}
 
-		header.Method = zip.Deflate
-		writer, err := zipWriter.CreateHeader(header)
-		if err != nil {
-			return err
-		}
+			header, err := zip.FileInfoHeader(info)
+			if err != nil {
+				return err
+			}
 
-		_, err = io.Copy(writer, zipfile)
-		if err != nil {
-			return err
+			header.Method = zip.Deflate
+			writer, err := zipWriter.CreateHeader(header)
+			if err != nil {
+				return err
+			}
+
+			_, err = io.Copy(writer, zipfile)
+			if err != nil {
+				return err
+			}
 		}
+	}
+
+	if err != nil {
+		return err
+	}
+
+	err = zipWriter.Close()
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-// UnzipDirectory unzips a directory given a name.
-func UnzipDirectory(name string) error {
+// Unzip unzips a directory given a name.
+func Unzip(name string) error {
 	r, err := zip.OpenReader(name)
 	if err != nil {
 		return err
