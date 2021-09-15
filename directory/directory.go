@@ -91,12 +91,12 @@ func GetHomeDirectory() (string, error) {
 
 // GetWorkingDirectory returns the current working directory.
 func GetWorkingDirectory() (string, error) {
-	directory, err := os.Getwd()
+	workingDir, err := os.Getwd()
 	if err != nil {
 		return "", err
 	}
 
-	return directory, nil
+	return workingDir, nil
 }
 
 // DeleteFile deletes a file given a name.
@@ -115,12 +115,12 @@ func MoveFile(src, dst string) error {
 
 // ReadFileContent returns the contents of a file given a name.
 func ReadFileContent(name string) (string, error) {
-	dat, err := os.ReadFile(name)
+	fileContent, err := os.ReadFile(name)
 	if err != nil {
 		return "", err
 	}
 
-	return string(dat), nil
+	return string(fileContent), nil
 }
 
 // CreateFile creates a file given a name.
@@ -152,7 +152,6 @@ func Zip(name string) error {
 	}()
 
 	zipWriter := zip.NewWriter(newfile)
-
 	defer func() {
 		err = zipWriter.Close()
 	}()
