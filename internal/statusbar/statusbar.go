@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/knipferrc/fm/directory"
-	"github.com/knipferrc/fm/formatter"
 	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/internal/constants"
+	"github.com/knipferrc/fm/strfmt"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -178,7 +178,7 @@ func (m Model) View() string {
 			// Display some information about the currently seleted file including
 			// its size, the mode and the current path.
 			status = fmt.Sprintf("%s %s %s",
-				formatter.ConvertBytesToSizeString(fileInfo.Size()),
+				strfmt.ConvertBytesToSizeString(fileInfo.Size()),
 				fileInfo.Mode().String(),
 				currentPath,
 			)
@@ -223,7 +223,11 @@ func (m Model) View() string {
 		Padding(0, 1).
 		Height(m.Height).
 		Width(m.Width - width(selectedFileColumn) - width(fileCountColumn) - width(logoColumn)).
-		Render(truncate.StringWithTail(status, uint(m.Width-width(selectedFileColumn)-width(fileCountColumn)-width(logoColumn)-3), "..."))
+		Render(truncate.StringWithTail(
+			status,
+			uint(m.Width-width(selectedFileColumn)-width(fileCountColumn)-width(logoColumn)-3),
+			"..."),
+		)
 
 	return lipgloss.JoinHorizontal(lipgloss.Top,
 		selectedFileColumn,

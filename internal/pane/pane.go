@@ -1,7 +1,7 @@
 package pane
 
 import (
-	"github.com/knipferrc/fm/formatter"
+	"github.com/knipferrc/fm/strfmt"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
@@ -127,5 +127,5 @@ func (m Model) View() string {
 		PaddingRight(padding).
 		Border(border).
 		Width(m.Viewport.Width).
-		Render(formatter.ConvertTabsToSpaces(m.Viewport.View()))
+		Render(strfmt.ConvertTabsToSpaces(m.Viewport.View()))
 }
