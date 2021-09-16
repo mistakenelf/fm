@@ -82,7 +82,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// A moveDirItemMsg is received any time a file or directory has been moved.
 	case moveDirItemMsg:
 		// Set active color back to default.
-		m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
+		m.primaryPane.ShowAlternateBorder(false)
 		m.dirTree.SetContent(msg)
 		m.primaryPane.SetContent(m.dirTree.View())
 		m.statusBar.SetContent(
@@ -440,9 +440,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.EnterMoveMode):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				m.inMoveMode = true
-				m.primaryPane.SetActiveBorderColor(constants.Colors.Blue)
+				m.primaryPane.ShowAlternateBorder(true)
 				m.initialMoveDirectory, _ = directory.GetWorkingDirectory()
 				m.itemToMove = m.dirTree.GetSelectedFile()
+				m.statusBar.SetContent(
+					m.dirTree.GetTotalFiles(),
+					m.dirTree.GetCursor(),
+					m.appConfig.Settings.ShowIcons,
+					m.showCommandBar,
+					m.inMoveMode,
+					m.dirTree.GetSelectedFile(),
+					m.itemToMove,
+				)
 			}
 
 		// Zip up the currently selected item.
@@ -495,7 +504,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.statusBar.BlurCommandBar()
 			m.statusBar.ResetCommandBar()
 			m.secondaryPane.GotoTop()
-			m.primaryPane.SetActiveBorderColor(m.appConfig.Colors.Pane.ActiveBorderColor)
+			m.primaryPane.ShowAlternateBorder(false)
 			m.secondaryPane.SetContent(lipgloss.NewStyle().
 				Width(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize()).
 				Render(m.help.View(m.keys)),

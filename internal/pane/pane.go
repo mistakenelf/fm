@@ -13,6 +13,7 @@ type Model struct {
 	Style               lipgloss.Style
 	IsActive            bool
 	Borderless          bool
+	AlternateBorder     bool
 	ActiveBorderColor   string
 	InactiveBorderColor string
 }
@@ -87,8 +88,8 @@ func (m *Model) GotoBottom() {
 }
 
 // SetActiveBorderColors sets the active border colors.
-func (m *Model) SetActiveBorderColor(color string) {
-	m.ActiveBorderColor = color
+func (m *Model) ShowAlternateBorder(show bool) {
+	m.AlternateBorder = show
 }
 
 // GetWidth returns the width of the pane.
@@ -111,12 +112,25 @@ func (m Model) View() string {
 	borderColor := m.InactiveBorderColor
 	border := lipgloss.NormalBorder()
 	padding := 1
+	alternateBorder := lipgloss.Border{
+		Top:         "-",
+		Bottom:      "-",
+		Left:        "|",
+		Right:       "|",
+		TopLeft:     "*",
+		TopRight:    "*",
+		BottomLeft:  "*",
+		BottomRight: "*",
+	}
 
 	if m.Borderless {
 		border = lipgloss.HiddenBorder()
 	}
 
-	// If the pane is active, use the active border color.
+	if m.AlternateBorder {
+		border = alternateBorder
+	}
+
 	if m.IsActive {
 		borderColor = m.ActiveBorderColor
 	}
