@@ -31,7 +31,6 @@ type ColorTypes struct {
 	LightPurple string
 	DarkPurple  string
 	DarkGray    string
-	Blue        string
 	Red         string
 }
 
@@ -42,6 +41,5 @@ var Colors = ColorTypes{
 	LightPurple: "#A550DF",
 	DarkPurple:  "#6124DF",
 	DarkGray:    "#353533",
-	Blue:        "#1D4ED8",
 	Red:         "#DC2626",
 }
