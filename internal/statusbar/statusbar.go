@@ -189,6 +189,10 @@ func (m Model) View() string {
 		status = m.Textinput.View()
 	}
 
+	if m.InMoveMode {
+		status = fmt.Sprintf("%s %s", "Currently moving:", m.ItemToMove.Name())
+	}
+
 	if m.ShowIcons {
 		logo = fmt.Sprintf("%s %s", icons.IconDef["dir"].GetGlyph(), "FM")
 	} else {
