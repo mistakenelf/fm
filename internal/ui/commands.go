@@ -16,6 +16,7 @@ import (
 	"github.com/knipferrc/fm/internal/colorimage"
 	"github.com/knipferrc/fm/internal/markdown"
 	"github.com/knipferrc/fm/internal/text"
+	"github.com/knipferrc/fm/strfmt"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -24,12 +25,13 @@ type updateDirectoryListingMsg []fs.DirEntry
 type moveDirItemMsg []fs.DirEntry
 type errorMsg string
 type convertImageToStringMsg string
+type directoryItemSizeMsg string
 type readFileContentMsg struct {
-	rawContent string
-	markdown   string
-	code       string
-	image      image.Image
-	asciiImage string
+	rawContent  string
+	markdown    string
+	code        string
+	imageString string
+	image       image.Image
 }
 
 // updateDirectoryListing updates the directory listing based on the name of the direcoctory provided.
@@ -152,11 +154,11 @@ func (m Model) readFileContent(file fs.DirEntry, width, height int) tea.Cmd {
 			}
 
 			return readFileContentMsg{
-				rawContent: content,
-				markdown:   markdownContent,
-				code:       "",
-				image:      nil,
-				asciiImage: "",
+				rawContent:  content,
+				markdown:    markdownContent,
+				code:        "",
+				imageString: "",
+				image:       nil,
 			}
 		} else if filepath.Ext(file.Name()) == ".png" || filepath.Ext(file.Name()) == ".jpg" || filepath.Ext(file.Name()) == ".jpeg" {
 			imageContent, err := os.Open(file.Name())
@@ -175,11 +177,11 @@ func (m Model) readFileContent(file fs.DirEntry, width, height int) tea.Cmd {
 			}
 
 			return readFileContentMsg{
-				rawContent: content,
-				code:       "",
-				markdown:   "",
-				image:      img,
-				asciiImage: imageString,
+				rawContent:  content,
+				code:        "",
+				markdown:    "",
+				imageString: imageString,
+				image:       img,
 			}
 		} else {
 			code, err := text.Highlight(content, filepath.Ext(file.Name()))
@@ -188,11 +190,11 @@ func (m Model) readFileContent(file fs.DirEntry, width, height int) tea.Cmd {
 			}
 
 			return readFileContentMsg{
-				rawContent: content,
-				code:       code,
-				markdown:   "",
-				image:      nil,
-				asciiImage: "",
+				rawContent:  content,
+				code:        code,
+				markdown:    "",
+				imageString: "",
+				image:       nil,
 			}
 		}
 	}
@@ -273,5 +275,19 @@ func (m Model) copyDirectory(name string) tea.Cmd {
 		}
 
 		return nil
+	}
+}
+
+// getDirectoryItemSize calculates the size of a directory or file.
+func (m Model) getDirectoryItemSize(name string) tea.Cmd {
+	return func() tea.Msg {
+		size, err := directory.GetDirectoryItemSize(name)
+		if err != nil {
+			return directoryItemSizeMsg("N/A")
+		}
+
+		sizeString := strfmt.ConvertBytesToSizeString(size)
+
+		return directoryItemSizeMsg(sizeString)
 	}
 }
