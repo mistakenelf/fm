@@ -123,7 +123,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.markdown.SetContent("")
 			m.text.SetContent("")
 			m.colorimage.SetImage(msg.image)
-			m.colorimage.SetContent(msg.asciiImage)
+			m.colorimage.SetContent(msg.imageString)
 			m.secondaryPane.SetContent(m.colorimage.View())
 		} else {
 			m.secondaryPane.GotoTop()
