@@ -9,7 +9,7 @@ import (
 	"github.com/nfnt/resize"
 )
 
-// Model is a struct that contains all the properties of the ascii image.
+// Model is a struct that contains all the properties of the image.
 type Model struct {
 	Image   image.Image
 	Content string
@@ -49,17 +49,17 @@ func (m Model) GetImage() image.Image {
 	return m.Image
 }
 
-// SetContent sets the content of the ascii image.
+// SetContent sets the content of the image.
 func (m *Model) SetContent(content string) {
 	m.Content = content
 }
 
-// SetImage sets the image of the ascii image.
+// SetImage sets the image of the image.
 func (m *Model) SetImage(img image.Image) {
 	m.Image = img
 }
 
-// View returns a string representation of the ascii image.
+// View returns a string representation of the image.
 func (m Model) View() string {
 	return lipgloss.NewStyle().Width(m.Width).Render(m.Content)
 }
