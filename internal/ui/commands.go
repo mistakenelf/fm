@@ -1,11 +1,14 @@
 package ui
 
 import (
+	"context"
 	"fmt"
 	"image"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	// "image/jpeg" is needed for the image.Decode function.
 	_ "image/jpeg"
@@ -280,14 +283,28 @@ func (m Model) copyDirectory(name string) tea.Cmd {
 
 // getDirectoryItemSize calculates the size of a directory or file.
 func (m Model) getDirectoryItemSize(name string) tea.Cmd {
+	if m.directoryItemSizeCtx != nil && m.directoryItemSizeCtx.cancel != nil {
+		m.directoryItemSizeCtx.cancel()
+	}
+
+	ctx, cancel := context.WithTimeout(m.directoryItemSizeCtx.ctx, 300*time.Millisecond)
+	m.directoryItemSizeCtx.cancel = cancel
+
 	return func() tea.Msg {
-		size, err := directory.GetDirectoryItemSize(name)
-		if err != nil {
-			return directoryItemSizeMsg("N/A")
+		defer cancel()
+		<-ctx.Done()
+		if ctx.Err() == context.DeadlineExceeded {
+			log.Output(2, "here in the command")
+			size, err := directory.GetDirectoryItemSize(name)
+			if err != nil {
+				return directoryItemSizeMsg("N/A")
+			}
+
+			sizeString := strfmt.ConvertBytesToSizeString(size)
+
+			return directoryItemSizeMsg(sizeString)
 		}
 
-		sizeString := strfmt.ConvertBytesToSizeString(size)
-
-		return directoryItemSizeMsg(sizeString)
+		return nil
 	}
 }

@@ -8,8 +8,7 @@ import (
 
 // View returns a string representation of the entire application UI.
 func (m Model) View() string {
-	// If the viewport on the panes is not ready or we dont have any files to display
-	// show the spinner.
+	// If the viewport on the panes is not ready display the spinner.
 	if !m.ready {
 		return fmt.Sprintf("%s%s", m.loader.View(), "loading...")
 	}

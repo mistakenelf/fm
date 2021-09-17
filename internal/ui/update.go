@@ -60,11 +60,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// for example, changing directories, or performing most
 	// file operations.
 	case updateDirectoryListingMsg:
+		m.showCommandBar = false
+
 		m.dirTree.GotoTop()
 		m.dirTree.SetContent(msg)
 		m.primaryPane.SetContent(m.dirTree.View())
 		m.primaryPane.GotoTop()
-		m.showCommandBar = false
 		m.statusBar.BlurCommandBar()
 		m.statusBar.ResetCommandBar()
 		m.statusBar.SetContent(
@@ -81,7 +82,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// A moveDirItemMsg is received any time a file or directory has been moved.
 	case moveDirItemMsg:
-		// Set active color back to default.
+		m.inMoveMode = false
+		m.initialMoveDirectory = ""
+		m.itemToMove = nil
+
 		m.primaryPane.ShowAlternateBorder(false)
 		m.dirTree.SetContent(msg)
 		m.primaryPane.SetContent(m.dirTree.View())
@@ -94,12 +98,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.dirTree.GetSelectedFile(),
 			m.itemToMove,
 		)
-
-		// Set move mode back to false, set the initial moving directory to empty,
-		// the item that was moving back to nil, and update the status bars content.
-		m.inMoveMode = false
-		m.initialMoveDirectory = ""
-		m.itemToMove = nil
 
 		return m, nil
 

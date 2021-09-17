@@ -9,6 +9,7 @@ import (
 	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/internal/constants"
 
+	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -38,6 +39,7 @@ type Model struct {
 	ThirdColumnColors  Color
 	FourthColumnColors Color
 	Textinput          textinput.Model
+	Spinner            spinner.Model
 }
 
 // NewModel creates an instance of a statusbar.
@@ -46,6 +48,9 @@ func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthCo
 	input.Prompt = "❯ "
 	input.CharLimit = 250
 	input.Placeholder = "Enter a command"
+
+	s := spinner.NewModel()
+	s.Spinner = spinner.Dot
 
 	return Model{
 		Height:             1,
@@ -62,16 +67,8 @@ func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthCo
 		ThirdColumnColors:  thirdColumnColors,
 		FourthColumnColors: fourthColumnColors,
 		Textinput:          input,
+		Spinner:            s,
 	}
-}
-
-// Init initializes the statusbar.
-func (m Model) Init() tea.Cmd {
-	var cmds []tea.Cmd
-
-	cmds = append(cmds, textinput.Blink)
-
-	return tea.Batch(cmds...)
 }
 
 // ParseCommand parses the command and returns the command name and the arguments.
@@ -155,6 +152,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
+	switch msg := msg.(type) {
+	case spinner.TickMsg:
+		m.Spinner, cmd = m.Spinner.Update(msg)
+		cmds = append(cmds, cmd)
+	}
+
 	m.Textinput, cmd = m.Textinput.Update(msg)
 	cmds = append(cmds, cmd)
 
@@ -168,6 +171,7 @@ func (m Model) View() string {
 	status := ""
 	selectedFile := "N/A"
 	fileCount := "0/0"
+	fileSize := m.Spinner.View()
 
 	if m.TotalFiles > 0 && m.SelectedFile != nil {
 		selectedFile = m.SelectedFile.Name()
@@ -183,10 +187,14 @@ func (m Model) View() string {
 			return err.Error()
 		}
 
+		if m.ItemSize != "" {
+			fileSize = m.ItemSize
+		}
+
 		// Display some information about the currently seleted file including
 		// its size, the mode and the current path.
 		status = fmt.Sprintf("%s %s %s",
-			m.ItemSize,
+			fileSize,
 			fileInfo.Mode().String(),
 			currentPath,
 		)
