@@ -377,8 +377,17 @@ func CopyDirectory(name string) error {
 	return err
 }
 
-// GetTreeSize calculates the size of a directory recursively.
-func GetTreeSize(path string) (int64, error) {
+// GetDirectoryItemSize calculates the size of a directory or file.
+func GetDirectoryItemSize(path string) (int64, error) {
+	curFile, err := os.Stat(path)
+	if err != nil {
+		return 0, err
+	}
+
+	if !curFile.IsDir() {
+		return curFile.Size(), nil
+	}
+
 	entries, err := os.ReadDir(path)
 	if err != nil {
 		return 0, err
@@ -387,7 +396,7 @@ func GetTreeSize(path string) (int64, error) {
 	var total int64
 	for _, entry := range entries {
 		if entry.IsDir() {
-			size, err := GetTreeSize(filepath.Join(path, entry.Name()))
+			size, err := GetDirectoryItemSize(filepath.Join(path, entry.Name()))
 			if err != nil {
 				return 0, err
 			}
