@@ -77,7 +77,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.itemToMove,
 		)
 
-		return m, nil
+		return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
 
 	// A moveDirItemMsg is received any time a file or directory has been moved.
 	case moveDirItemMsg:
@@ -123,7 +123,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.markdown.SetContent("")
 			m.text.SetContent("")
 			m.colorimage.SetImage(msg.image)
-			m.colorimage.SetContent(msg.asciiImage)
+			m.colorimage.SetContent(msg.imageString)
 			m.secondaryPane.SetContent(m.colorimage.View())
 		} else {
 			m.secondaryPane.GotoTop()
@@ -146,8 +146,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			lipgloss.NewStyle().
 				Bold(true).
 				Foreground(lipgloss.Color(constants.Colors.Red)).
+				Width(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize()).
 				Render(string(msg)),
 		)
+
+		return m, nil
+
+	case directoryItemSizeMsg:
+		m.statusBar.SetItemSize(string(msg))
 
 		return m, nil
 
@@ -275,6 +281,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.dirTree.GoDown()
 					m.scrollPrimaryPane()
 					m.primaryPane.SetContent(m.dirTree.View())
+					m.statusBar.SetItemSize("")
+
+					return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
 				} else {
 					m.secondaryPane.LineDown(1)
 				}
@@ -287,6 +296,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.dirTree.GoUp()
 					m.scrollPrimaryPane()
 					m.primaryPane.SetContent(m.dirTree.View())
+					m.statusBar.SetItemSize("")
+
+					return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
 				} else {
 					m.secondaryPane.LineUp(1)
 				}
