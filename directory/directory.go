@@ -360,18 +360,19 @@ func CopyDirectory(name string) error {
 	// Generate a unique name for the output folder.
 	output := fmt.Sprintf("%s_%d", name, time.Now().Unix())
 
-	var err error = filepath.Walk(name, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(name, func(path string, info os.FileInfo, err error) error {
 		var relPath string = strings.Replace(path, name, "", 1)
 
 		if info.IsDir() {
 			return os.Mkdir(filepath.Join(output, relPath), os.ModePerm)
-		} else {
-			var data, err1 = os.ReadFile(filepath.Join(name, relPath))
-			if err1 != nil {
-				return err1
-			}
-			return os.WriteFile(filepath.Join(output, relPath), data, os.ModePerm)
 		}
+
+		var data, err1 = os.ReadFile(filepath.Join(name, relPath))
+		if err1 != nil {
+			return err1
+		}
+
+		return os.WriteFile(filepath.Join(output, relPath), data, os.ModePerm)
 	})
 
 	return err

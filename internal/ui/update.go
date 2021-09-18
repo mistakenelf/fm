@@ -282,9 +282,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.statusBar.SetItemSize("")
 
 					return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
-				} else {
-					m.secondaryPane.LineDown(1)
 				}
+
+				m.secondaryPane.LineDown(1)
 			}
 
 		case key.Matches(msg, m.keys.Up):
@@ -297,9 +297,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.statusBar.SetItemSize("")
 
 					return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
-				} else {
-					m.secondaryPane.LineUp(1)
 				}
+
+				m.secondaryPane.LineUp(1)
 			}
 
 		case key.Matches(msg, m.keys.Right):

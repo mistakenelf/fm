@@ -138,6 +138,7 @@ func (m *Model) SetContent(totalFiles, cursor int, showIcons, showCommandBar, in
 	m.ItemToMove = itemToMove
 }
 
+// SetItemSize sets the size of the currently selected directory item as a formatted size string.
 func (m *Model) SetItemSize(itemSize string) {
 	m.ItemSize = itemSize
 }
