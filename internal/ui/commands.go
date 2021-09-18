@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"image"
 	"io/fs"
-	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -294,7 +293,6 @@ func (m Model) getDirectoryItemSize(name string) tea.Cmd {
 		defer cancel()
 		<-ctx.Done()
 		if ctx.Err() == context.DeadlineExceeded {
-			log.Output(2, "here in the command")
 			size, err := directory.GetDirectoryItemSize(name)
 			if err != nil {
 				return directoryItemSizeMsg("N/A")
