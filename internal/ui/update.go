@@ -266,6 +266,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// set the previous directory to the current directory,
 			// and update the directory listing to go back one directory.
 			if !m.showCommandBar && m.primaryPane.GetIsActive() {
+				m.statusBar.SetItemSize("")
 				m.previousDirectory, _ = directory.GetWorkingDirectory()
 				return m, m.updateDirectoryListing(
 					fmt.Sprintf("%s/%s", m.previousDirectory, constants.Directories.PreviousDirectory),
@@ -306,6 +307,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Open directory or read file content.
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				if m.dirTree.GetSelectedFile().IsDir() && !m.statusBar.CommandBarFocused() {
+					m.statusBar.SetItemSize("")
 					currentDir, _ := directory.GetWorkingDirectory()
 					return m, m.updateDirectoryListing(
 						fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()),
