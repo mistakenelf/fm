@@ -8,8 +8,8 @@ import (
 	"github.com/knipferrc/fm/directory"
 	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/internal/constants"
-	"github.com/knipferrc/fm/strfmt"
 
+	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -31,6 +31,7 @@ type Model struct {
 	ShowIcons          bool
 	ShowCommandBar     bool
 	InMoveMode         bool
+	ItemSize           string
 	SelectedFile       fs.DirEntry
 	ItemToMove         fs.DirEntry
 	FirstColumnColors  Color
@@ -38,6 +39,7 @@ type Model struct {
 	ThirdColumnColors  Color
 	FourthColumnColors Color
 	Textinput          textinput.Model
+	Spinner            spinner.Model
 }
 
 // NewModel creates an instance of a statusbar.
@@ -47,6 +49,9 @@ func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthCo
 	input.CharLimit = 250
 	input.Placeholder = "Enter a command"
 
+	s := spinner.NewModel()
+	s.Spinner = spinner.Dot
+
 	return Model{
 		Height:             1,
 		TotalFiles:         0,
@@ -54,6 +59,7 @@ func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthCo
 		ShowIcons:          true,
 		ShowCommandBar:     false,
 		InMoveMode:         false,
+		ItemSize:           "",
 		SelectedFile:       nil,
 		ItemToMove:         nil,
 		FirstColumnColors:  firstColumnColors,
@@ -61,12 +67,8 @@ func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthCo
 		ThirdColumnColors:  thirdColumnColors,
 		FourthColumnColors: fourthColumnColors,
 		Textinput:          input,
+		Spinner:            s,
 	}
-}
-
-// Init initializes the statusbar.
-func (m Model) Init() tea.Cmd {
-	return textinput.Blink
 }
 
 // ParseCommand parses the command and returns the command name and the arguments.
@@ -136,6 +138,11 @@ func (m *Model) SetContent(totalFiles, cursor int, showIcons, showCommandBar, in
 	m.ItemToMove = itemToMove
 }
 
+// SetItemSize sets the size of the currently selected directory item as a formatted size string.
+func (m *Model) SetItemSize(itemSize string) {
+	m.ItemSize = itemSize
+}
+
 // SetSize sets the size of the statusbar, useful when the terminal is resized.
 func (m *Model) SetSize(width int) {
 	m.Width = width
@@ -145,6 +152,12 @@ func (m *Model) SetSize(width int) {
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
+
+	switch msg := msg.(type) {
+	case spinner.TickMsg:
+		m.Spinner, cmd = m.Spinner.Update(msg)
+		cmds = append(cmds, cmd)
+	}
 
 	m.Textinput, cmd = m.Textinput.Update(msg)
 	cmds = append(cmds, cmd)
@@ -159,30 +172,33 @@ func (m Model) View() string {
 	status := ""
 	selectedFile := "N/A"
 	fileCount := "0/0"
+	fileSize := m.Spinner.View()
 
-	if m.TotalFiles > 0 {
-		if m.SelectedFile != nil {
-			selectedFile = m.SelectedFile.Name()
-			fileCount = fmt.Sprintf("%d/%d", m.Cursor+1, m.TotalFiles)
+	if m.TotalFiles > 0 && m.SelectedFile != nil {
+		selectedFile = m.SelectedFile.Name()
+		fileCount = fmt.Sprintf("%d/%d", m.Cursor+1, m.TotalFiles)
 
-			currentPath, err := directory.GetWorkingDirectory()
-			if err != nil {
-				currentPath = constants.Directories.CurrentDirectory
-			}
-
-			fileInfo, err := m.SelectedFile.Info()
-			if err != nil {
-				return err.Error()
-			}
-
-			// Display some information about the currently seleted file including
-			// its size, the mode and the current path.
-			status = fmt.Sprintf("%s %s %s",
-				strfmt.ConvertBytesToSizeString(fileInfo.Size()),
-				fileInfo.Mode().String(),
-				currentPath,
-			)
+		currentPath, err := directory.GetWorkingDirectory()
+		if err != nil {
+			currentPath = constants.Directories.CurrentDirectory
 		}
+
+		fileInfo, err := m.SelectedFile.Info()
+		if err != nil {
+			return err.Error()
+		}
+
+		if m.ItemSize != "" {
+			fileSize = m.ItemSize
+		}
+
+		// Display some information about the currently seleted file including
+		// its size, the mode and the current path.
+		status = fmt.Sprintf("%s %s %s",
+			fileSize,
+			fileInfo.Mode().String(),
+			currentPath,
+		)
 	}
 
 	if m.ShowCommandBar {

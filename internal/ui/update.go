@@ -60,11 +60,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// for example, changing directories, or performing most
 	// file operations.
 	case updateDirectoryListingMsg:
+		m.showCommandBar = false
+
 		m.dirTree.GotoTop()
 		m.dirTree.SetContent(msg)
 		m.primaryPane.SetContent(m.dirTree.View())
 		m.primaryPane.GotoTop()
-		m.showCommandBar = false
 		m.statusBar.BlurCommandBar()
 		m.statusBar.ResetCommandBar()
 		m.statusBar.SetContent(
@@ -77,11 +78,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.itemToMove,
 		)
 
-		return m, nil
+		return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
 
 	// A moveDirItemMsg is received any time a file or directory has been moved.
 	case moveDirItemMsg:
-		// Set active color back to default.
+		m.inMoveMode = false
+		m.initialMoveDirectory = ""
+		m.itemToMove = nil
+
 		m.primaryPane.ShowAlternateBorder(false)
 		m.dirTree.SetContent(msg)
 		m.primaryPane.SetContent(m.dirTree.View())
@@ -94,12 +98,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.dirTree.GetSelectedFile(),
 			m.itemToMove,
 		)
-
-		// Set move mode back to false, set the initial moving directory to empty,
-		// the item that was moving back to nil, and update the status bars content.
-		m.inMoveMode = false
-		m.initialMoveDirectory = ""
-		m.itemToMove = nil
 
 		return m, nil
 
@@ -146,8 +144,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			lipgloss.NewStyle().
 				Bold(true).
 				Foreground(lipgloss.Color(constants.Colors.Red)).
+				Width(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize()).
 				Render(string(msg)),
 		)
+
+		return m, nil
+
+	case directoryItemSizeMsg:
+		m.statusBar.SetItemSize(string(msg))
 
 		return m, nil
 
@@ -262,6 +266,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// set the previous directory to the current directory,
 			// and update the directory listing to go back one directory.
 			if !m.showCommandBar && m.primaryPane.GetIsActive() {
+				m.statusBar.SetItemSize("")
 				m.previousDirectory, _ = directory.GetWorkingDirectory()
 				return m, m.updateDirectoryListing(
 					fmt.Sprintf("%s/%s", m.previousDirectory, constants.Directories.PreviousDirectory),
@@ -275,9 +280,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.dirTree.GoDown()
 					m.scrollPrimaryPane()
 					m.primaryPane.SetContent(m.dirTree.View())
-				} else {
-					m.secondaryPane.LineDown(1)
+					m.statusBar.SetItemSize("")
+
+					return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
 				}
+
+				m.secondaryPane.LineDown(1)
 			}
 
 		case key.Matches(msg, m.keys.Up):
@@ -287,15 +295,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.dirTree.GoUp()
 					m.scrollPrimaryPane()
 					m.primaryPane.SetContent(m.dirTree.View())
-				} else {
-					m.secondaryPane.LineUp(1)
+					m.statusBar.SetItemSize("")
+
+					return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
 				}
+
+				m.secondaryPane.LineUp(1)
 			}
 
 		case key.Matches(msg, m.keys.Right):
 			// Open directory or read file content.
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				if m.dirTree.GetSelectedFile().IsDir() && !m.statusBar.CommandBarFocused() {
+					m.statusBar.SetItemSize("")
 					currentDir, _ := directory.GetWorkingDirectory()
 					return m, m.updateDirectoryListing(
 						fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()),

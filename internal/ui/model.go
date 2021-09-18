@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"context"
 	"io/fs"
 
 	"github.com/knipferrc/fm/internal/colorimage"
@@ -93,6 +94,11 @@ func (k keyMap) FullHelp() [][]key.Binding {
 	}
 }
 
+type directoryItemSizeCtx struct {
+	ctx    context.Context
+	cancel context.CancelFunc
+}
+
 // Model represents the state of the UI.
 type Model struct {
 	keys                 keyMap
@@ -113,6 +119,7 @@ type Model struct {
 	showCommandBar       bool
 	inMoveMode           bool
 	ready                bool
+	directoryItemSizeCtx *directoryItemSizeCtx
 }
 
 // NewModel create an instance of the entire application model.
@@ -157,8 +164,8 @@ func NewModel() Model {
 			key.WithHelp("→/l", "move right"),
 		),
 		GotoBottom: key.NewBinding(
-			key.WithKeys("g"),
-			key.WithHelp("g", "go to bottom of active pane"),
+			key.WithKeys("G"),
+			key.WithHelp("G", "go to bottom of active pane"),
 		),
 		Enter: key.NewBinding(
 			key.WithKeys("enter"),
@@ -271,5 +278,8 @@ func NewModel() Model {
 		showCommandBar:       false,
 		inMoveMode:           false,
 		ready:                false,
+		directoryItemSizeCtx: &directoryItemSizeCtx{
+			ctx: context.Background(),
+		},
 	}
 }
