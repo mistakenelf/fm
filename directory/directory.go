@@ -361,7 +361,7 @@ func CopyDirectory(name string) error {
 	output := fmt.Sprintf("%s_%d", name, time.Now().Unix())
 
 	err := filepath.Walk(name, func(path string, info os.FileInfo, err error) error {
-		var relPath string = strings.Replace(path, name, "", 1)
+		relPath := strings.Replace(path, name, "", 1)
 
 		if info.IsDir() {
 			return os.Mkdir(filepath.Join(output, relPath), os.ModePerm)
