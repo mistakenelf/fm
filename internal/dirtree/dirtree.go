@@ -126,7 +126,7 @@ func (m Model) View() string {
 	}
 
 	for i, file := range m.Files {
-		modTimeColor := ""
+		var modTimeColor string
 
 		if m.Cursor == i {
 			modTimeColor = m.SelectedItemColor

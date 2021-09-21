@@ -158,7 +158,7 @@ func Zip(name string) error {
 
 	info, err := os.Stat(name)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	if info.IsDir() {

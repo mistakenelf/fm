@@ -104,26 +104,27 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// A fileContentMsg is received anytime a file is read from returning its content
 	// along with the markdown content to be rendered by glamour.
 	case readFileContentMsg:
-		if msg.code != "" {
+		switch {
+		case msg.code != "":
 			m.secondaryPane.GotoTop()
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
 			m.text.SetContent(msg.code)
 			m.secondaryPane.SetContent(m.text.View())
-		} else if msg.markdown != "" {
+		case msg.markdown != "":
 			m.secondaryPane.GotoTop()
 			m.colorimage.SetImage(nil)
 			m.text.SetContent("")
 			m.markdown.SetContent(msg.markdown)
 			m.secondaryPane.SetContent(m.markdown.View())
-		} else if msg.image != nil {
+		case msg.image != nil:
 			m.secondaryPane.GotoTop()
 			m.markdown.SetContent("")
 			m.text.SetContent("")
 			m.colorimage.SetImage(msg.image)
 			m.colorimage.SetContent(msg.imageString)
 			m.secondaryPane.SetContent(m.colorimage.View())
-		} else {
+		default:
 			m.secondaryPane.GotoTop()
 			m.secondaryPane.SetContent(msg.rawContent)
 		}

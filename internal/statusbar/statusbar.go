@@ -168,8 +168,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 // View returns a string representation of the statusbar.
 func (m Model) View() string {
 	width := lipgloss.Width
-	logo := ""
-	status := ""
+	var logo string
+	var status string
 	selectedFile := "N/A"
 	fileCount := "0/0"
 	fileSize := m.Spinner.View()
