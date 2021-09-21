@@ -25,7 +25,7 @@ func ImageToString(width, height uint, img image.Image) (string, error) {
 	str := strings.Builder{}
 
 	for y := 0; y < h; y += 2 {
-		for x := w; x < int(width); x = x + 2 {
+		for x := w; x < int(width); x += 2 {
 			str.WriteString(" ")
 		}
 

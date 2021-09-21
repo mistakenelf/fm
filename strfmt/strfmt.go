@@ -7,7 +7,7 @@ import (
 
 // ConvertTabsToSpaces converts tabs to spaces.
 func ConvertTabsToSpaces(input string) string {
-	return strings.Replace(input, "\t", "    ", -1)
+	return strings.ReplaceAll(input, "\t", "    ")
 }
 
 // ConvertByesToSizeString converts a byte count to a human readable string.

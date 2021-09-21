@@ -19,7 +19,7 @@ type SettingsConfig struct {
 	Borderless       bool   `mapstructure:"borderless"`
 }
 
-//DirTreeColors struct represents the colors for the dirtree.
+// DirTreeColors struct represents the colors for the dirtree.
 type DirTreeColors struct {
 	SelectedItem   string `mapstructure:"selected_item"`
 	UnselectedItem string `mapstructure:"unselected_item"`
@@ -77,8 +77,6 @@ func LoadConfig() {
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			log.Fatal(err)
-		} else {
 			log.Fatal(err)
 		}
 	}

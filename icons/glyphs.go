@@ -16,11 +16,10 @@ func (i *IconInfo) GetGlyph() string {
 
 // GetColor returns the color for the icon.
 func (i *IconInfo) GetColor(f uint8) string {
-	if i.executable {
+	switch {
+	case i.executable:
 		return "\033[38;2;76;175;080m"
-	} else if f == 1 {
-		return fmt.Sprintf("\033[38;2;%d;%d;%dm", i.color[0], i.color[1], i.color[2])
-	} else {
+	default:
 		return fmt.Sprintf("\033[38;2;%d;%d;%dm", i.color[0], i.color[1], i.color[2])
 	}
 }

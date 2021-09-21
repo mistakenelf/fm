@@ -93,22 +93,23 @@ func (m Model) dirItem(selected bool, fileInfo fs.FileInfo) string {
 	icon, color := icons.GetIcon(fileInfo.Name(), filepath.Ext(fileInfo.Name()), icons.GetIndicator(fileInfo.Mode()))
 	fileIcon := fmt.Sprintf("%s%s", color, icon)
 
-	if m.ShowIcons && selected {
+	switch {
+	case m.ShowIcons && selected:
 		return fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 			Bold(true).
 			Foreground(lipgloss.Color(m.SelectedItemColor)).
 			Render(fileInfo.Name()))
-	} else if m.ShowIcons && !selected {
+	case m.ShowIcons && !selected:
 		return fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 			Bold(true).
 			Foreground(lipgloss.Color(m.UnselectedItemColor)).
 			Render(fileInfo.Name()))
-	} else if !m.ShowIcons && selected {
+	case !m.ShowIcons && selected:
 		return lipgloss.NewStyle().
 			Bold(true).
 			Foreground(lipgloss.Color(m.SelectedItemColor)).
 			Render(fileInfo.Name())
-	} else {
+	default:
 		return lipgloss.NewStyle().
 			Bold(true).
 			Foreground(lipgloss.Color(m.UnselectedItemColor)).

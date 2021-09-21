@@ -147,9 +147,8 @@ func (m Model) readFileContent(file fs.DirEntry, width, height int) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		// Return both the pretty markdown as well as the plain content without glamour
-		// to use later when resizing the window.
-		if filepath.Ext(file.Name()) == ".md" && m.appConfig.Settings.PrettyMarkdown {
+		switch {
+		case filepath.Ext(file.Name()) == ".md" && m.appConfig.Settings.PrettyMarkdown:
 			markdownContent, err := markdown.RenderMarkdown(width, content)
 			if err != nil {
 				return errorMsg(err.Error())
@@ -162,7 +161,7 @@ func (m Model) readFileContent(file fs.DirEntry, width, height int) tea.Cmd {
 				imageString: "",
 				image:       nil,
 			}
-		} else if filepath.Ext(file.Name()) == ".png" || filepath.Ext(file.Name()) == ".jpg" || filepath.Ext(file.Name()) == ".jpeg" {
+		case filepath.Ext(file.Name()) == ".png" || filepath.Ext(file.Name()) == ".jpg" || filepath.Ext(file.Name()) == ".jpeg":
 			imageContent, err := os.Open(file.Name())
 			if err != nil {
 				return errorMsg(err.Error())
@@ -185,7 +184,7 @@ func (m Model) readFileContent(file fs.DirEntry, width, height int) tea.Cmd {
 				imageString: imageString,
 				image:       img,
 			}
-		} else {
+		default:
 			code, err := text.Highlight(content, filepath.Ext(file.Name()))
 			if err != nil {
 				return errorMsg(err.Error())

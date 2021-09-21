@@ -31,8 +31,6 @@ func (m Model) Init() tea.Cmd {
 		}
 
 		cmds = append(cmds, m.updateDirectoryListing(homeDir))
-	} else if _, err := os.Stat(m.appConfig.Settings.StartDir); err == nil {
-		cmds = append(cmds, m.updateDirectoryListing(m.appConfig.Settings.StartDir))
 	} else {
 		cmds = append(cmds, m.updateDirectoryListing(m.appConfig.Settings.StartDir))
 	}
