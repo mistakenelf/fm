@@ -12,7 +12,6 @@ linters:
     - errcheck
     - exportloopref
     - exhaustive
-    - funlen
     - gochecknoinits
     - goconst
     - gocritic
@@ -38,3 +37,6 @@ linters:
     - whitespace
     - wastedassign
     - nilerr
+    - godot
+    - godox
+    - goimports
