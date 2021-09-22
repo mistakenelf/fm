@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/knipferrc/fm/directory"
-	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/statusbar"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -41,7 +40,6 @@ func (m *Model) scrollPrimaryPane() {
 	m.statusBar.SetContent(
 		m.dirTree.GetTotalFiles(),
 		m.dirTree.GetCursor(),
-		m.appConfig.Settings.ShowIcons,
 		m.showCommandBar,
 		m.inMoveMode,
 		m.dirTree.GetSelectedFile(),
@@ -71,7 +69,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.statusBar.SetContent(
 			m.dirTree.GetTotalFiles(),
 			m.dirTree.GetCursor(),
-			m.appConfig.Settings.ShowIcons,
 			m.showCommandBar,
 			m.inMoveMode,
 			m.dirTree.GetSelectedFile(),
@@ -92,7 +89,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.statusBar.SetContent(
 			m.dirTree.GetTotalFiles(),
 			m.dirTree.GetCursor(),
-			m.appConfig.Settings.ShowIcons,
 			m.showCommandBar,
 			m.inMoveMode,
 			m.dirTree.GetSelectedFile(),
@@ -144,7 +140,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.secondaryPane.SetContent(
 			lipgloss.NewStyle().
 				Bold(true).
-				Foreground(lipgloss.Color(constants.Colors.Red)).
+				Foreground(lipgloss.Color(m.theme.ErrorColor)).
 				Width(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize()).
 				Render(string(msg)),
 		)
@@ -270,7 +266,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.statusBar.SetItemSize("")
 				m.previousDirectory, _ = directory.GetWorkingDirectory()
 				return m, m.updateDirectoryListing(
-					fmt.Sprintf("%s/%s", m.previousDirectory, constants.Directories.PreviousDirectory),
+					fmt.Sprintf("%s/%s", m.previousDirectory, directory.PreviousDirectory),
 				)
 			}
 
@@ -368,21 +364,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "mkdir":
 				return m, tea.Sequentially(
 					m.createDir(value),
-					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+					m.updateDirectoryListing(directory.CurrentDirectory),
 				)
 
 			// Create a new file based on the value passed.
 			case "touch":
 				return m, tea.Sequentially(
 					m.createFile(value),
-					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+					m.updateDirectoryListing(directory.CurrentDirectory),
 				)
 
 			// Rename the currently selected file or folder based on the value passed.
 			case "mv", "rename":
 				return m, tea.Sequentially(
 					m.renameFileOrDir(m.dirTree.GetSelectedFile().Name(), value),
-					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+					m.updateDirectoryListing(directory.CurrentDirectory),
 				)
 
 			// Delete the currently selected item.
@@ -390,13 +386,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
 						m.deleteDir(m.dirTree.GetSelectedFile().Name()),
-						m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+						m.updateDirectoryListing(directory.CurrentDirectory),
 					)
 				}
 
 				return m, tea.Sequentially(
 					m.deleteFile(m.dirTree.GetSelectedFile().Name()),
-					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+					m.updateDirectoryListing(directory.CurrentDirectory),
 				)
 
 			default:
@@ -411,7 +407,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.statusBar.SetContent(
 					m.dirTree.GetTotalFiles(),
 					m.dirTree.GetCursor(),
-					m.appConfig.Settings.ShowIcons,
 					m.showCommandBar,
 					m.inMoveMode,
 					m.dirTree.GetSelectedFile(),
@@ -439,7 +434,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.ToggleHidden):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.dirTree.ToggleHidden()
-				return m, m.updateDirectoryListing(constants.Directories.CurrentDirectory)
+				return m, m.updateDirectoryListing(directory.CurrentDirectory)
 			}
 
 		// Toggle between the two panes if the command bar is not currently active.
@@ -459,7 +454,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.statusBar.SetContent(
 					m.dirTree.GetTotalFiles(),
 					m.dirTree.GetCursor(),
-					m.appConfig.Settings.ShowIcons,
 					m.showCommandBar,
 					m.inMoveMode,
 					m.dirTree.GetSelectedFile(),
@@ -474,7 +468,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				return m, tea.Sequentially(
 					m.zipDirectory(fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name())),
-					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+					m.updateDirectoryListing(directory.CurrentDirectory),
 				)
 			}
 
@@ -485,7 +479,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				return m, tea.Sequentially(
 					m.unzipDirectory(fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name())),
-					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+					m.updateDirectoryListing(directory.CurrentDirectory),
 				)
 			}
 
@@ -495,13 +489,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
 						m.copyDirectory(m.dirTree.GetSelectedFile().Name()),
-						m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+						m.updateDirectoryListing(directory.CurrentDirectory),
 					)
 				}
 
 				return m, tea.Sequentially(
 					m.copyFile(m.dirTree.GetSelectedFile().Name()),
-					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+					m.updateDirectoryListing(directory.CurrentDirectory),
 				)
 			}
 
@@ -528,7 +522,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.statusBar.SetContent(
 				m.dirTree.GetTotalFiles(),
 				m.dirTree.GetCursor(),
-				m.appConfig.Settings.ShowIcons,
 				m.showCommandBar,
 				m.inMoveMode,
 				m.dirTree.GetSelectedFile(),

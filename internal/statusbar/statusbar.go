@@ -7,7 +7,6 @@ import (
 
 	"github.com/knipferrc/fm/directory"
 	"github.com/knipferrc/fm/icons"
-	"github.com/knipferrc/fm/internal/constants"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -43,7 +42,7 @@ type Model struct {
 }
 
 // NewModel creates an instance of a statusbar.
-func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthColumnColors Color) Model {
+func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthColumnColors Color, showIcons bool) Model {
 	input := textinput.NewModel()
 	input.Prompt = "❯ "
 	input.CharLimit = 250
@@ -56,7 +55,7 @@ func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthCo
 		Height:             1,
 		TotalFiles:         0,
 		Cursor:             0,
-		ShowIcons:          true,
+		ShowIcons:          showIcons,
 		ShowCommandBar:     false,
 		InMoveMode:         false,
 		ItemSize:           "",
@@ -128,10 +127,9 @@ func (m *Model) FocusCommandBar() {
 }
 
 // SetContent sets the content of the statusbar.
-func (m *Model) SetContent(totalFiles, cursor int, showIcons, showCommandBar, inMoveMode bool, selectedFile, itemToMove fs.DirEntry) {
+func (m *Model) SetContent(totalFiles, cursor int, showCommandBar, inMoveMode bool, selectedFile, itemToMove fs.DirEntry) {
 	m.TotalFiles = totalFiles
 	m.Cursor = cursor
-	m.ShowIcons = showIcons
 	m.ShowCommandBar = showCommandBar
 	m.InMoveMode = inMoveMode
 	m.SelectedFile = selectedFile
@@ -180,7 +178,7 @@ func (m Model) View() string {
 
 		currentPath, err := directory.GetWorkingDirectory()
 		if err != nil {
-			currentPath = constants.Directories.CurrentDirectory
+			currentPath = directory.CurrentDirectory
 		}
 
 		fileInfo, err := m.SelectedFile.Info()

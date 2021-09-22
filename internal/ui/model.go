@@ -6,7 +6,6 @@ import (
 
 	"github.com/knipferrc/fm/internal/colorimage"
 	"github.com/knipferrc/fm/internal/config"
-	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/dirtree"
 	"github.com/knipferrc/fm/internal/markdown"
 	"github.com/knipferrc/fm/internal/pane"
@@ -53,7 +52,6 @@ type Model struct {
 func NewModel() Model {
 	cfg := config.GetConfig()
 	keys := getDefaultKeyMap()
-
 	theme := theme.GetCurrentTheme(cfg.Settings.Theme)
 
 	// Create a new spinner with some styling based on the config.
@@ -63,8 +61,8 @@ func NewModel() Model {
 
 	// Create a new help view.
 	h := help.NewModel()
-	h.Styles.FullKey.Foreground(lipgloss.Color(constants.Colors.White))
-	h.Styles.FullDesc.Foreground(lipgloss.Color(constants.Colors.White))
+	h.Styles.FullKey.Foreground(lipgloss.Color(theme.DefaultTextColor))
+	h.Styles.FullDesc.Foreground(lipgloss.Color(theme.DefaultTextColor))
 	h.ShowAll = true
 
 	// Create a new dirtree.
@@ -111,6 +109,7 @@ func NewModel() Model {
 			Background: theme.StatusBarLogoBackgroundColor,
 			Foreground: theme.StatusBarLogoForegroundColor,
 		},
+		cfg.Settings.ShowIcons,
 	)
 
 	return Model{

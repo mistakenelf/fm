@@ -1,7 +1,5 @@
 package theme
 
-import "github.com/knipferrc/fm/internal/constants"
-
 type Theme struct {
 	SelectedTreeItemColor                string
 	UnselectedTreeItemColor              string
@@ -16,57 +14,81 @@ type Theme struct {
 	StatusBarTotalFilesBackgroundColor   string
 	StatusBarLogoForegroundColor         string
 	StatusBarLogoBackgroundColor         string
+	ErrorColor                           string
+	DefaultTextColor                     string
+}
+
+// appColors contains the different types of colors.
+type appColors struct {
+	White       string
+	Pink        string
+	LightPurple string
+	DarkPurple  string
+	DarkGray    string
+	Red         string
+	Green       string
+	Blue        string
+	Yellow      string
+	Orange      string
+}
+
+// Colors contains the different kinds of colors and their values.
+var colors = appColors{
+	White:       "#FFFDF5",
+	Pink:        "#F25D94",
+	LightPurple: "#A550DF",
+	DarkPurple:  "#6124DF",
+	DarkGray:    "#3c3836",
+	Red:         "#cc241d",
+	Green:       "#b8bb26",
+	Blue:        "#458588",
+	Yellow:      "#d79921",
+	Orange:      "#d65d0e",
+}
+
+var defaultTheme = Theme{
+	SelectedTreeItemColor:                colors.Pink,
+	UnselectedTreeItemColor:              colors.White,
+	ActivePaneBorderColor:                colors.Pink,
+	InactivePaneBorderColor:              colors.White,
+	SpinnerColor:                         colors.Pink,
+	StatusBarSelectedFileForegroundColor: colors.White,
+	StatusBarSelectedFileBackgroundColor: colors.Pink,
+	StatusBarBarForegroundColor:          colors.White,
+	StatusBarBarBackgroundColor:          colors.DarkGray,
+	StatusBarTotalFilesForegroundColor:   colors.White,
+	StatusBarTotalFilesBackgroundColor:   colors.LightPurple,
+	StatusBarLogoForegroundColor:         colors.White,
+	StatusBarLogoBackgroundColor:         colors.DarkPurple,
+	ErrorColor:                           colors.Red,
+	DefaultTextColor:                     colors.White,
+}
+
+var gruvboxTheme = Theme{
+	SelectedTreeItemColor:                colors.Orange,
+	UnselectedTreeItemColor:              colors.White,
+	ActivePaneBorderColor:                colors.Green,
+	InactivePaneBorderColor:              colors.White,
+	SpinnerColor:                         colors.Red,
+	StatusBarSelectedFileForegroundColor: colors.White,
+	StatusBarSelectedFileBackgroundColor: colors.Red,
+	StatusBarBarForegroundColor:          colors.White,
+	StatusBarBarBackgroundColor:          colors.DarkGray,
+	StatusBarTotalFilesForegroundColor:   colors.White,
+	StatusBarTotalFilesBackgroundColor:   colors.Yellow,
+	StatusBarLogoForegroundColor:         colors.White,
+	StatusBarLogoBackgroundColor:         colors.Blue,
+	ErrorColor:                           colors.Red,
+	DefaultTextColor:                     colors.White,
 }
 
 func GetCurrentTheme(theme string) Theme {
 	switch theme {
 	case "default":
-		return Theme{
-			SelectedTreeItemColor:                constants.Colors.Pink,
-			UnselectedTreeItemColor:              constants.Colors.White,
-			ActivePaneBorderColor:                constants.Colors.Pink,
-			InactivePaneBorderColor:              constants.Colors.White,
-			SpinnerColor:                         constants.Colors.Pink,
-			StatusBarSelectedFileForegroundColor: constants.Colors.White,
-			StatusBarSelectedFileBackgroundColor: constants.Colors.Pink,
-			StatusBarBarForegroundColor:          constants.Colors.White,
-			StatusBarBarBackgroundColor:          constants.Colors.DarkGray,
-			StatusBarTotalFilesForegroundColor:   constants.Colors.White,
-			StatusBarTotalFilesBackgroundColor:   constants.Colors.LightPurple,
-			StatusBarLogoForegroundColor:         constants.Colors.White,
-			StatusBarLogoBackgroundColor:         constants.Colors.DarkPurple,
-		}
+		return defaultTheme
 	case "gruvbox":
-		return Theme{
-			SelectedTreeItemColor:                constants.Colors.Orange,
-			UnselectedTreeItemColor:              constants.Colors.White,
-			ActivePaneBorderColor:                constants.Colors.Green,
-			InactivePaneBorderColor:              constants.Colors.White,
-			SpinnerColor:                         constants.Colors.Red,
-			StatusBarSelectedFileForegroundColor: constants.Colors.White,
-			StatusBarSelectedFileBackgroundColor: constants.Colors.Red,
-			StatusBarBarForegroundColor:          constants.Colors.White,
-			StatusBarBarBackgroundColor:          constants.Colors.DarkGray,
-			StatusBarTotalFilesForegroundColor:   constants.Colors.White,
-			StatusBarTotalFilesBackgroundColor:   constants.Colors.Yellow,
-			StatusBarLogoForegroundColor:         constants.Colors.White,
-			StatusBarLogoBackgroundColor:         constants.Colors.Blue,
-		}
+		return gruvboxTheme
 	default:
-		return Theme{
-			SelectedTreeItemColor:                constants.Colors.Pink,
-			UnselectedTreeItemColor:              constants.Colors.White,
-			ActivePaneBorderColor:                constants.Colors.Pink,
-			InactivePaneBorderColor:              constants.Colors.White,
-			SpinnerColor:                         constants.Colors.Pink,
-			StatusBarSelectedFileForegroundColor: constants.Colors.White,
-			StatusBarSelectedFileBackgroundColor: constants.Colors.Pink,
-			StatusBarBarForegroundColor:          constants.Colors.White,
-			StatusBarBarBackgroundColor:          constants.Colors.DarkGray,
-			StatusBarTotalFilesForegroundColor:   constants.Colors.White,
-			StatusBarTotalFilesBackgroundColor:   constants.Colors.LightPurple,
-			StatusBarLogoForegroundColor:         constants.Colors.White,
-			StatusBarLogoBackgroundColor:         constants.Colors.DarkPurple,
-		}
+		return defaultTheme
 	}
 }
