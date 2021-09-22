@@ -32,6 +32,10 @@ type ColorTypes struct {
 	DarkPurple  string
 	DarkGray    string
 	Red         string
+	Green       string
+	Blue        string
+	Yellow      string
+	Orange      string
 }
 
 // Colors contains the different kinds of colors and their values.
@@ -41,5 +45,9 @@ var Colors = ColorTypes{
 	LightPurple: "#A550DF",
 	DarkPurple:  "#6124DF",
 	DarkGray:    "#353533",
-	Red:         "#DC2626",
+	Red:         "#cc241d",
+	Green:       "#b8bb26",
+	Blue:        "#458588",
+	Yellow:      "#d79921",
+	Orange:      "#d65d0e",
 }

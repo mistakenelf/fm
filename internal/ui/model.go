@@ -12,6 +12,7 @@ import (
 	"github.com/knipferrc/fm/internal/pane"
 	"github.com/knipferrc/fm/internal/statusbar"
 	"github.com/knipferrc/fm/internal/text"
+	"github.com/knipferrc/fm/internal/theme"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/spinner"
@@ -39,12 +40,13 @@ type Model struct {
 	previousKey          tea.KeyMsg
 	itemToMove           fs.DirEntry
 	appConfig            config.Config
+	directoryItemSizeCtx *directoryItemSizeCtx
+	theme                theme.Theme
 	previousDirectory    string
 	initialMoveDirectory string
 	showCommandBar       bool
 	inMoveMode           bool
 	ready                bool
-	directoryItemSizeCtx *directoryItemSizeCtx
 }
 
 // NewModel create an instance of the entire application model.
@@ -52,10 +54,12 @@ func NewModel() Model {
 	cfg := config.GetConfig()
 	keys := getDefaultKeyMap()
 
+	theme := theme.GetCurrentTheme(cfg.Settings.Theme)
+
 	// Create a new spinner with some styling based on the config.
 	l := spinner.NewModel()
 	l.Spinner = spinner.Dot
-	l.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(cfg.Colors.Spinner))
+	l.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.SpinnerColor))
 
 	// Create a new help view.
 	h := help.NewModel()
@@ -66,24 +70,24 @@ func NewModel() Model {
 	// Create a new dirtree.
 	dirTree := dirtree.NewModel(
 		cfg.Settings.ShowIcons,
-		cfg.Colors.DirTree.SelectedItem,
-		cfg.Colors.DirTree.UnselectedItem,
+		theme.SelectedTreeItemColor,
+		theme.UnselectedTreeItemColor,
 	)
 
 	// Initialize the primary pane as active and pass in some config values.
 	primaryPane := pane.NewModel(
 		true,
 		cfg.Settings.Borderless,
-		cfg.Colors.Pane.ActiveBorderColor,
-		cfg.Colors.Pane.InactiveBorderColor,
+		theme.ActivePaneBorderColor,
+		theme.InactivePaneBorderColor,
 	)
 
 	// Initialize the secondary pane as inactive and pass in some config values.
 	secondaryPane := pane.NewModel(
 		false,
 		cfg.Settings.Borderless,
-		cfg.Colors.Pane.ActiveBorderColor,
-		cfg.Colors.Pane.InactiveBorderColor,
+		theme.ActivePaneBorderColor,
+		theme.InactivePaneBorderColor,
 	)
 
 	// Set secondary panes initial content to the introText.
@@ -92,44 +96,45 @@ func NewModel() Model {
 	// Initialize a status bar passing in config values.
 	statusBar := statusbar.NewModel(
 		statusbar.Color{
-			Background: cfg.Colors.StatusBar.SelectedFile.Background,
-			Foreground: cfg.Colors.StatusBar.SelectedFile.Foreground,
+			Background: theme.StatusBarSelectedFileBackgroundColor,
+			Foreground: theme.StatusBarSelectedFileForegroundColor,
 		},
 		statusbar.Color{
-			Background: cfg.Colors.StatusBar.Bar.Background,
-			Foreground: cfg.Colors.StatusBar.Bar.Foreground,
+			Background: theme.StatusBarBarBackgroundColor,
+			Foreground: theme.StatusBarBarForegroundColor,
 		},
 		statusbar.Color{
-			Background: cfg.Colors.StatusBar.TotalFiles.Background,
-			Foreground: cfg.Colors.StatusBar.TotalFiles.Foreground,
+			Background: theme.StatusBarTotalFilesBackgroundColor,
+			Foreground: theme.StatusBarTotalFilesForegroundColor,
 		},
 		statusbar.Color{
-			Background: cfg.Colors.StatusBar.Logo.Background,
-			Foreground: cfg.Colors.StatusBar.Logo.Foreground,
+			Background: theme.StatusBarLogoBackgroundColor,
+			Foreground: theme.StatusBarLogoForegroundColor,
 		},
 	)
 
 	return Model{
-		keys:                 keys,
-		help:                 h,
-		primaryPane:          primaryPane,
-		secondaryPane:        secondaryPane,
-		loader:               l,
-		dirTree:              dirTree,
-		statusBar:            statusBar,
-		colorimage:           colorimage.Model{},
-		markdown:             markdown.Model{},
-		text:                 text.Model{},
-		previousKey:          tea.KeyMsg{},
-		itemToMove:           nil,
-		appConfig:            cfg,
+		keys:          keys,
+		help:          h,
+		primaryPane:   primaryPane,
+		secondaryPane: secondaryPane,
+		loader:        l,
+		dirTree:       dirTree,
+		statusBar:     statusBar,
+		colorimage:    colorimage.Model{},
+		markdown:      markdown.Model{},
+		text:          text.Model{},
+		previousKey:   tea.KeyMsg{},
+		itemToMove:    nil,
+		appConfig:     cfg,
+		directoryItemSizeCtx: &directoryItemSizeCtx{
+			ctx: context.Background(),
+		},
+		theme:                theme,
 		previousDirectory:    "",
 		initialMoveDirectory: "",
 		showCommandBar:       false,
 		inMoveMode:           false,
 		ready:                false,
-		directoryItemSizeCtx: &directoryItemSizeCtx{
-			ctx: context.Background(),
-		},
 	}
 }
