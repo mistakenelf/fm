@@ -3,6 +3,8 @@ package ui
 import (
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/knipferrc/fm/directory"
 	"github.com/knipferrc/fm/internal/constants"
@@ -21,17 +23,33 @@ func (m Model) Init() tea.Cmd {
 		startDir = os.Args[1]
 	}
 
-	// Get the initial directory listing to be displayed
-	if _, err := os.Stat(startDir); err == nil {
-		cmds = append(cmds, m.updateDirectoryListing(startDir))
-	} else if m.appConfig.Settings.StartDir == constants.Directories.HomeDirectory {
+	switch {
+	case startDir != "":
+		_, err := os.Stat(startDir)
+		if err != nil {
+			return nil
+		}
+
+		if strings.HasPrefix(startDir, "/") {
+			cmds = append(cmds, m.updateDirectoryListing(startDir))
+		} else {
+			path, err := os.Getwd()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			filePath := filepath.Join(path, startDir)
+
+			cmds = append(cmds, m.updateDirectoryListing(filePath))
+		}
+	case m.appConfig.Settings.StartDir == constants.Directories.HomeDirectory:
 		homeDir, err := directory.GetHomeDirectory()
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		cmds = append(cmds, m.updateDirectoryListing(homeDir))
-	} else {
+	default:
 		cmds = append(cmds, m.updateDirectoryListing(m.appConfig.Settings.StartDir))
 	}
 
