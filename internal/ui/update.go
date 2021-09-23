@@ -105,18 +105,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.GotoTop()
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
-			m.text.SetContent(msg.code)
-			m.secondaryPane.SetContent(m.text.View())
+			m.sourcecode.SetContent(msg.code)
+			m.secondaryPane.SetContent(m.sourcecode.View())
 		case msg.markdown != "":
 			m.secondaryPane.GotoTop()
 			m.colorimage.SetImage(nil)
-			m.text.SetContent("")
+			m.sourcecode.SetContent("")
 			m.markdown.SetContent(msg.markdown)
 			m.secondaryPane.SetContent(m.markdown.View())
 		case msg.image != nil:
 			m.secondaryPane.GotoTop()
 			m.markdown.SetContent("")
-			m.text.SetContent("")
+			m.sourcecode.SetContent("")
 			m.colorimage.SetImage(msg.image)
 			m.colorimage.SetContent(msg.imageString)
 			m.secondaryPane.SetContent(m.colorimage.View())
@@ -159,7 +159,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.secondaryPane.SetSize(msg.Width/2, msg.Height-m.statusBar.GetHeight())
 		m.dirTree.SetSize(m.primaryPane.GetWidth())
 		m.statusBar.SetSize(msg.Width)
-		m.text.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
+		m.sourcecode.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.markdown.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.primaryPane.SetContent(m.dirTree.View())
 		m.help.Width = msg.Width
@@ -176,11 +176,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.SetContent(m.markdown.View())
 		}
 
-		if m.text.GetContent() != "" {
-			m.secondaryPane.SetContent(m.text.View())
+		if m.sourcecode.GetContent() != "" {
+			m.secondaryPane.SetContent(m.sourcecode.View())
 		}
 
-		if m.text.GetContent() == "" && m.markdown.GetContent() == "" && m.colorimage.GetImage() == nil {
+		if m.sourcecode.GetContent() == "" && m.markdown.GetContent() == "" && m.colorimage.GetImage() == nil {
 			m.secondaryPane.SetContent(lipgloss.NewStyle().
 				Width(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize()).
 				Render(m.help.View(m.keys)),
@@ -518,7 +518,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			)
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
-			m.text.SetContent("")
+			m.sourcecode.SetContent("")
 			m.statusBar.SetContent(
 				m.dirTree.GetTotalFiles(),
 				m.dirTree.GetCursor(),
