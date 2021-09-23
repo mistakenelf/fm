@@ -59,37 +59,8 @@ func (m Model) renameFileOrDir(name, value string) tea.Cmd {
 	}
 }
 
-// moveDir moves a directory to the current working directory.
-func (m Model) moveDir(name string) tea.Cmd {
-	return func() tea.Msg {
-		workingDir, err := directory.GetWorkingDirectory()
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		// Get the directory from which the move was intiated from
-		// and give it the same folder name.
-		src := fmt.Sprintf("%s/%s", m.initialMoveDirectory, name)
-
-		// Destination is the current working directory with
-		// the same folder name that it had.
-		dst := fmt.Sprintf("%s/%s", workingDir, name)
-
-		if err = directory.MoveDirectory(src, dst); err != nil {
-			return errorMsg(err.Error())
-		}
-
-		files, err := directory.GetDirectoryListing(m.initialMoveDirectory, m.dirTree.ShowHidden)
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return moveDirItemMsg(files)
-	}
-}
-
-// moveFile moves a file to the current working directory.
-func (m Model) moveFile(name string) tea.Cmd {
+// moveDirectoryItem moves a file to the current working directory.
+func (m Model) moveDirectoryItem(name string) tea.Cmd {
 	return func() tea.Msg {
 		workingDir, err := directory.GetWorkingDirectory()
 		if err != nil {
@@ -104,7 +75,7 @@ func (m Model) moveFile(name string) tea.Cmd {
 		// the same file name that it had.
 		dst := fmt.Sprintf("%s/%s", workingDir, name)
 
-		if err = directory.MoveFile(src, dst); err != nil {
+		if err = directory.MoveDirectoryItem(src, dst); err != nil {
 			return errorMsg(err.Error())
 		}
 
