@@ -20,54 +20,62 @@ type Theme struct {
 
 // appColors contains the different types of colors.
 type appColors struct {
-	White       string
-	Pink        string
-	LightPurple string
-	DarkPurple  string
-	DarkGray    string
-	Red         string
-	Green       string
-	Blue        string
-	Yellow      string
-	Orange      string
+	White              string
+	DarkGray           string
+	Red                string
+	Black              string
+	DefaultPink        string
+	DefaultLightPurple string
+	DefaultDarkPurple  string
+	GruvGreen          string
+	GruvBlue           string
+	GruvYellow         string
+	GruvOrange         string
+	SpookyPurple       string
+	SpookyOrange       string
+	SpookyYellow       string
 }
 
 // Colors contains the different kinds of colors and their values.
 var colors = appColors{
-	White:       "#FFFDF5",
-	Pink:        "#F25D94",
-	LightPurple: "#A550DF",
-	DarkPurple:  "#6124DF",
-	DarkGray:    "#3c3836",
-	Red:         "#cc241d",
-	Green:       "#b8bb26",
-	Blue:        "#458588",
-	Yellow:      "#d79921",
-	Orange:      "#d65d0e",
+	White:              "#FFFDF5",
+	DarkGray:           "#3c3836",
+	Red:                "#cc241d",
+	Black:              "#000000",
+	DefaultPink:        "#F25D94",
+	DefaultLightPurple: "#A550DF",
+	DefaultDarkPurple:  "#6124DF",
+	GruvGreen:          "#b8bb26",
+	GruvBlue:           "#458588",
+	GruvYellow:         "#d79921",
+	GruvOrange:         "#d65d0e",
+	SpookyPurple:       "#881EE4 ",
+	SpookyOrange:       "#F75F1C ",
+	SpookyYellow:       "#FF9A00 ",
 }
 
 var defaultTheme = Theme{
-	SelectedTreeItemColor:                colors.Pink,
+	SelectedTreeItemColor:                colors.DefaultPink,
 	UnselectedTreeItemColor:              colors.White,
-	ActivePaneBorderColor:                colors.Pink,
+	ActivePaneBorderColor:                colors.DefaultPink,
 	InactivePaneBorderColor:              colors.White,
-	SpinnerColor:                         colors.Pink,
+	SpinnerColor:                         colors.DefaultPink,
 	StatusBarSelectedFileForegroundColor: colors.White,
-	StatusBarSelectedFileBackgroundColor: colors.Pink,
+	StatusBarSelectedFileBackgroundColor: colors.DefaultPink,
 	StatusBarBarForegroundColor:          colors.White,
 	StatusBarBarBackgroundColor:          colors.DarkGray,
 	StatusBarTotalFilesForegroundColor:   colors.White,
-	StatusBarTotalFilesBackgroundColor:   colors.LightPurple,
+	StatusBarTotalFilesBackgroundColor:   colors.DefaultLightPurple,
 	StatusBarLogoForegroundColor:         colors.White,
-	StatusBarLogoBackgroundColor:         colors.DarkPurple,
+	StatusBarLogoBackgroundColor:         colors.DefaultDarkPurple,
 	ErrorColor:                           colors.Red,
 	DefaultTextColor:                     colors.White,
 }
 
 var gruvboxTheme = Theme{
-	SelectedTreeItemColor:                colors.Orange,
+	SelectedTreeItemColor:                colors.GruvOrange,
 	UnselectedTreeItemColor:              colors.White,
-	ActivePaneBorderColor:                colors.Green,
+	ActivePaneBorderColor:                colors.GruvGreen,
 	InactivePaneBorderColor:              colors.White,
 	SpinnerColor:                         colors.Red,
 	StatusBarSelectedFileForegroundColor: colors.White,
@@ -75,9 +83,27 @@ var gruvboxTheme = Theme{
 	StatusBarBarForegroundColor:          colors.White,
 	StatusBarBarBackgroundColor:          colors.DarkGray,
 	StatusBarTotalFilesForegroundColor:   colors.White,
-	StatusBarTotalFilesBackgroundColor:   colors.Yellow,
+	StatusBarTotalFilesBackgroundColor:   colors.GruvYellow,
 	StatusBarLogoForegroundColor:         colors.White,
-	StatusBarLogoBackgroundColor:         colors.Blue,
+	StatusBarLogoBackgroundColor:         colors.GruvBlue,
+	ErrorColor:                           colors.Red,
+	DefaultTextColor:                     colors.White,
+}
+
+var spookyTheme = Theme{
+	SelectedTreeItemColor:                colors.SpookyOrange,
+	UnselectedTreeItemColor:              colors.White,
+	ActivePaneBorderColor:                colors.SpookyOrange,
+	InactivePaneBorderColor:              colors.White,
+	SpinnerColor:                         colors.Red,
+	StatusBarSelectedFileForegroundColor: colors.White,
+	StatusBarSelectedFileBackgroundColor: colors.SpookyPurple,
+	StatusBarBarForegroundColor:          colors.White,
+	StatusBarBarBackgroundColor:          colors.Black,
+	StatusBarTotalFilesForegroundColor:   colors.White,
+	StatusBarTotalFilesBackgroundColor:   colors.SpookyYellow,
+	StatusBarLogoForegroundColor:         colors.White,
+	StatusBarLogoBackgroundColor:         colors.SpookyOrange,
 	ErrorColor:                           colors.Red,
 	DefaultTextColor:                     colors.White,
 }
@@ -88,6 +114,8 @@ func GetCurrentTheme(theme string) Theme {
 		return defaultTheme
 	case "gruvbox":
 		return gruvboxTheme
+	case "spooky":
+		return spookyTheme
 	default:
 		return defaultTheme
 	}

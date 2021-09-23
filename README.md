@@ -51,7 +51,7 @@ go install github.com/knipferrc/fm@latest
 - Syntax highlighting for source code
 - Render pretty markdown
 - Mouse support
-- Themes
+- Themes (default, gruvbox, spooky)
 - Render PNG, JPG and JPEG as strings
 
 ## Usage
