@@ -88,9 +88,6 @@ func NewModel() Model {
 		theme.InactivePaneBorderColor,
 	)
 
-	// Set secondary panes initial content to the introText.
-	secondaryPane.SetContent(h.View(keys))
-
 	// Initialize a status bar passing in config values.
 	statusBar := statusbar.NewModel(
 		statusbar.Color{
