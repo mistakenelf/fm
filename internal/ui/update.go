@@ -37,6 +37,7 @@ func (m *Model) scrollPrimaryPane() {
 		m.primaryPane.GotoBottom()
 	}
 
+	// Update the statusbar content.
 	m.statusBar.SetContent(
 		m.dirTree.GetTotalFiles(),
 		m.dirTree.GetCursor(),
@@ -147,6 +148,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, nil
 
+	// A directoryItemSizeMsg is received anytime a new file is selected
+	// in the dirtree returning the file size as a string.
 	case directoryItemSizeMsg:
 		m.statusBar.SetItemSize(string(msg))
 
@@ -207,10 +210,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.dirTree.GoUp()
 				m.scrollPrimaryPane()
 				m.primaryPane.SetContent(m.dirTree.View())
-			} else {
-				// Secondary pane is active so scroll its content up.
-				m.secondaryPane.LineUp(3)
+				m.statusBar.SetItemSize("")
+
+				return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
 			}
+
+			m.secondaryPane.LineUp(3)
 
 			return m, nil
 
@@ -221,10 +226,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.dirTree.GoDown()
 				m.scrollPrimaryPane()
 				m.primaryPane.SetContent(m.dirTree.View())
-			} else {
-				// Secondary pane is active so scroll its content down.
-				m.secondaryPane.LineDown(3)
+				m.statusBar.SetItemSize("")
+
+				return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
 			}
+
+			m.secondaryPane.LineDown(3)
 
 			return m, nil
 		}
@@ -239,10 +246,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.dirTree.GotoTop()
 				m.primaryPane.GotoTop()
 				m.primaryPane.SetContent(m.dirTree.View())
-			} else {
-				// Secondary pane is active so go to the top.
-				m.secondaryPane.GotoTop()
+				m.statusBar.SetItemSize("")
+
+				return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
 			}
+
+			m.secondaryPane.GotoTop()
 
 			return m, nil
 		}
@@ -258,20 +267,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 
+		// If the command bar is not shown and the primary pane is active
+		// set the previous directory to the current directory,
+		// and update the directory listing to go back one directory.
 		case key.Matches(msg, m.keys.Left):
-			// If the command bar is not shown and the primary pane is active
-			// set the previous directory to the current directory,
-			// and update the directory listing to go back one directory.
 			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.statusBar.SetItemSize("")
 				m.previousDirectory, _ = directory.GetWorkingDirectory()
+
 				return m, m.updateDirectoryListing(
 					fmt.Sprintf("%s/%s", m.previousDirectory, directory.PreviousDirectory),
 				)
 			}
 
+			// Scroll pane down.
 		case key.Matches(msg, m.keys.Down):
-			// Scroll down in pane.
 			if !m.showCommandBar {
 				if m.primaryPane.GetIsActive() {
 					m.dirTree.GoDown()
@@ -285,8 +295,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.secondaryPane.LineDown(1)
 			}
 
+		// Scroll pane up.
 		case key.Matches(msg, m.keys.Up):
-			// Scroll up in pane.
 			if !m.showCommandBar {
 				if m.primaryPane.GetIsActive() {
 					m.dirTree.GoUp()
@@ -300,12 +310,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.secondaryPane.LineUp(1)
 			}
 
+		// Open directory or read file content and display in secondary pane.
 		case key.Matches(msg, m.keys.Right):
-			// Open directory or read file content.
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				if m.dirTree.GetSelectedFile().IsDir() && !m.statusBar.CommandBarFocused() {
 					m.statusBar.SetItemSize("")
 					currentDir, _ := directory.GetWorkingDirectory()
+
 					return m, m.updateDirectoryListing(
 						fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()),
 					)
@@ -318,31 +329,24 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				)
 			}
 
+		// Jump to the bottom of a pane.
 		case key.Matches(msg, m.keys.GotoBottom):
-			// Go to the bottom of the pane.
 			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.dirTree.GotoBottom()
 				m.primaryPane.GotoBottom()
 				m.primaryPane.SetContent(m.dirTree.View())
-			} else {
-				// Secondary pane is active so go to the bottom of it.
-				m.secondaryPane.GotoBottom()
+				m.statusBar.SetItemSize("")
+
+				return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
 			}
 
-		case key.Matches(msg, m.keys.Enter):
-			// If pressing enter while in move mode.
-			if m.inMoveMode {
-				if m.itemToMove.IsDir() {
-					return m, tea.Sequentially(
-						m.moveDir(m.itemToMove.Name()),
-						m.updateDirectoryListing(m.initialMoveDirectory),
-					)
-				}
+			m.secondaryPane.GotoBottom()
 
-				return m, tea.Sequentially(
-					m.moveFile(m.itemToMove.Name()),
-					m.updateDirectoryListing(m.initialMoveDirectory),
-				)
+		// If in move mode, pressing enter will place the selected item to move into
+		// the current directory. If the command bar is open, commands will be processed.
+		case key.Matches(msg, m.keys.Enter):
+			if m.inMoveMode {
+				return m, m.moveDirectoryItem(m.itemToMove.Name())
 			}
 
 			// Parse the commands from the command bar, command is the name
@@ -399,8 +403,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
+		// Activate command bar if not in move mode.
 		case key.Matches(msg, m.keys.OpenCommandBar):
-			// If move mode is not active, activate the command bar.
 			if !m.inMoveMode {
 				m.showCommandBar = true
 				m.statusBar.FocusCommandBar()

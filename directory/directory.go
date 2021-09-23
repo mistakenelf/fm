@@ -81,13 +81,6 @@ func DeleteDirectory(name string) error {
 	return err
 }
 
-// MoveDirectory moves a directory from one place to another.
-func MoveDirectory(src, dst string) error {
-	err := os.Rename(src, dst)
-
-	return err
-}
-
 // GetHomeDirectory returns the users home directory.
 func GetHomeDirectory() (string, error) {
 	home, err := os.UserHomeDir()
@@ -115,8 +108,8 @@ func DeleteFile(name string) error {
 	return err
 }
 
-// MoveFile moves a file from one place to another.
-func MoveFile(src, dst string) error {
+// MoveDirectoryItem moves a file from one place to another.
+func MoveDirectoryItem(src, dst string) error {
 	err := os.Rename(src, dst)
 
 	return err
