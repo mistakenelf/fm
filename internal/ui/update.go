@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/knipferrc/fm/directory"
-	"github.com/knipferrc/fm/internal/constants"
 	"github.com/knipferrc/fm/internal/statusbar"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -41,7 +40,6 @@ func (m *Model) scrollPrimaryPane() {
 	m.statusBar.SetContent(
 		m.dirTree.GetTotalFiles(),
 		m.dirTree.GetCursor(),
-		m.appConfig.Settings.ShowIcons,
 		m.showCommandBar,
 		m.inMoveMode,
 		m.dirTree.GetSelectedFile(),
@@ -71,7 +69,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.statusBar.SetContent(
 			m.dirTree.GetTotalFiles(),
 			m.dirTree.GetCursor(),
-			m.appConfig.Settings.ShowIcons,
 			m.showCommandBar,
 			m.inMoveMode,
 			m.dirTree.GetSelectedFile(),
@@ -92,7 +89,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.statusBar.SetContent(
 			m.dirTree.GetTotalFiles(),
 			m.dirTree.GetCursor(),
-			m.appConfig.Settings.ShowIcons,
 			m.showCommandBar,
 			m.inMoveMode,
 			m.dirTree.GetSelectedFile(),
@@ -109,18 +105,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.GotoTop()
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
-			m.text.SetContent(msg.code)
-			m.secondaryPane.SetContent(m.text.View())
+			m.sourcecode.SetContent(msg.code)
+			m.secondaryPane.SetContent(m.sourcecode.View())
 		case msg.markdown != "":
 			m.secondaryPane.GotoTop()
 			m.colorimage.SetImage(nil)
-			m.text.SetContent("")
+			m.sourcecode.SetContent("")
 			m.markdown.SetContent(msg.markdown)
 			m.secondaryPane.SetContent(m.markdown.View())
 		case msg.image != nil:
 			m.secondaryPane.GotoTop()
 			m.markdown.SetContent("")
-			m.text.SetContent("")
+			m.sourcecode.SetContent("")
 			m.colorimage.SetImage(msg.image)
 			m.colorimage.SetContent(msg.imageString)
 			m.secondaryPane.SetContent(m.colorimage.View())
@@ -144,7 +140,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.secondaryPane.SetContent(
 			lipgloss.NewStyle().
 				Bold(true).
-				Foreground(lipgloss.Color(constants.Colors.Red)).
+				Foreground(lipgloss.Color(m.theme.ErrorColor)).
 				Width(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize()).
 				Render(string(msg)),
 		)
@@ -163,7 +159,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.secondaryPane.SetSize(msg.Width/2, msg.Height-m.statusBar.GetHeight())
 		m.dirTree.SetSize(m.primaryPane.GetWidth())
 		m.statusBar.SetSize(msg.Width)
-		m.text.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
+		m.sourcecode.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.markdown.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.primaryPane.SetContent(m.dirTree.View())
 		m.help.Width = msg.Width
@@ -180,11 +176,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.SetContent(m.markdown.View())
 		}
 
-		if m.text.GetContent() != "" {
-			m.secondaryPane.SetContent(m.text.View())
+		if m.sourcecode.GetContent() != "" {
+			m.secondaryPane.SetContent(m.sourcecode.View())
 		}
 
-		if m.text.GetContent() == "" && m.markdown.GetContent() == "" && m.colorimage.GetImage() == nil {
+		if m.sourcecode.GetContent() == "" && m.markdown.GetContent() == "" && m.colorimage.GetImage() == nil {
 			m.secondaryPane.SetContent(lipgloss.NewStyle().
 				Width(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize()).
 				Render(m.help.View(m.keys)),
@@ -270,7 +266,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.statusBar.SetItemSize("")
 				m.previousDirectory, _ = directory.GetWorkingDirectory()
 				return m, m.updateDirectoryListing(
-					fmt.Sprintf("%s/%s", m.previousDirectory, constants.Directories.PreviousDirectory),
+					fmt.Sprintf("%s/%s", m.previousDirectory, directory.PreviousDirectory),
 				)
 			}
 
@@ -368,21 +364,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "mkdir":
 				return m, tea.Sequentially(
 					m.createDir(value),
-					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+					m.updateDirectoryListing(directory.CurrentDirectory),
 				)
 
 			// Create a new file based on the value passed.
 			case "touch":
 				return m, tea.Sequentially(
 					m.createFile(value),
-					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+					m.updateDirectoryListing(directory.CurrentDirectory),
 				)
 
 			// Rename the currently selected file or folder based on the value passed.
 			case "mv", "rename":
 				return m, tea.Sequentially(
 					m.renameFileOrDir(m.dirTree.GetSelectedFile().Name(), value),
-					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+					m.updateDirectoryListing(directory.CurrentDirectory),
 				)
 
 			// Delete the currently selected item.
@@ -390,13 +386,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
 						m.deleteDir(m.dirTree.GetSelectedFile().Name()),
-						m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+						m.updateDirectoryListing(directory.CurrentDirectory),
 					)
 				}
 
 				return m, tea.Sequentially(
 					m.deleteFile(m.dirTree.GetSelectedFile().Name()),
-					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+					m.updateDirectoryListing(directory.CurrentDirectory),
 				)
 
 			default:
@@ -411,7 +407,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.statusBar.SetContent(
 					m.dirTree.GetTotalFiles(),
 					m.dirTree.GetCursor(),
-					m.appConfig.Settings.ShowIcons,
 					m.showCommandBar,
 					m.inMoveMode,
 					m.dirTree.GetSelectedFile(),
@@ -439,7 +434,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.ToggleHidden):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.dirTree.ToggleHidden()
-				return m, m.updateDirectoryListing(constants.Directories.CurrentDirectory)
+				return m, m.updateDirectoryListing(directory.CurrentDirectory)
 			}
 
 		// Toggle between the two panes if the command bar is not currently active.
@@ -459,7 +454,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.statusBar.SetContent(
 					m.dirTree.GetTotalFiles(),
 					m.dirTree.GetCursor(),
-					m.appConfig.Settings.ShowIcons,
 					m.showCommandBar,
 					m.inMoveMode,
 					m.dirTree.GetSelectedFile(),
@@ -474,7 +468,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				return m, tea.Sequentially(
 					m.zipDirectory(fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name())),
-					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+					m.updateDirectoryListing(directory.CurrentDirectory),
 				)
 			}
 
@@ -485,7 +479,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				return m, tea.Sequentially(
 					m.unzipDirectory(fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name())),
-					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+					m.updateDirectoryListing(directory.CurrentDirectory),
 				)
 			}
 
@@ -495,13 +489,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
 						m.copyDirectory(m.dirTree.GetSelectedFile().Name()),
-						m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+						m.updateDirectoryListing(directory.CurrentDirectory),
 					)
 				}
 
 				return m, tea.Sequentially(
 					m.copyFile(m.dirTree.GetSelectedFile().Name()),
-					m.updateDirectoryListing(constants.Directories.CurrentDirectory),
+					m.updateDirectoryListing(directory.CurrentDirectory),
 				)
 			}
 
@@ -524,11 +518,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			)
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
-			m.text.SetContent("")
+			m.sourcecode.SetContent("")
 			m.statusBar.SetContent(
 				m.dirTree.GetTotalFiles(),
 				m.dirTree.GetCursor(),
-				m.appConfig.Settings.ShowIcons,
 				m.showCommandBar,
 				m.inMoveMode,
 				m.dirTree.GetSelectedFile(),

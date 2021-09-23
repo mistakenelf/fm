@@ -4,8 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/knipferrc/fm/internal/constants"
-
 	"github.com/spf13/viper"
 )
 
@@ -17,46 +15,12 @@ type SettingsConfig struct {
 	EnableMouseWheel bool   `mapstructure:"enable_mousewheel"`
 	PrettyMarkdown   bool   `mapstructure:"pretty_markdown"`
 	Borderless       bool   `mapstructure:"borderless"`
-}
-
-// DirTreeColors struct represents the colors for the dirtree.
-type DirTreeColors struct {
-	SelectedItem   string `mapstructure:"selected_item"`
-	UnselectedItem string `mapstructure:"unselected_item"`
-}
-
-// PaneColors represents the colors for a pane.
-type PaneColors struct {
-	ActiveBorderColor   string `mapstructure:"active_border_color"`
-	InactiveBorderColor string `mapstructure:"inactive_border_color"`
-}
-
-// ColorVariant struct represents a color.
-type ColorVariant struct {
-	Foreground string `mapstructure:"foreground"`
-	Background string `mapstructure:"background"`
-}
-
-// StatusBarColors represents the colors for the status bar.
-type StatusBarColors struct {
-	SelectedFile ColorVariant `mapstructure:"selected_file"`
-	Bar          ColorVariant `mapstructure:"bar"`
-	TotalFiles   ColorVariant `mapstructure:"total_files"`
-	Logo         ColorVariant `mapstructure:"logo"`
-}
-
-// ColorsConfig struct represets the colors of the UI.
-type ColorsConfig struct {
-	DirTree   DirTreeColors   `mapstructure:"dir_tree"`
-	Pane      PaneColors      `mapstructure:"pane"`
-	Spinner   string          `mapstructure:"spinner"`
-	StatusBar StatusBarColors `mapstructure:"status_bar"`
+	Theme            string `mapstructure:"theme"`
 }
 
 // Config represents the main config for the application.
 type Config struct {
 	Settings SettingsConfig `mapstructure:"settings"`
-	Colors   ColorsConfig   `mapstructure:"colors"`
 }
 
 // LoadConfig loads a users config and creates the config if it does not exist
@@ -100,25 +64,5 @@ func SetDefaults() {
 	viper.SetDefault("settings.enable_mousewheel", true)
 	viper.SetDefault("settings.pretty_markdown", true)
 	viper.SetDefault("settings.borderless", false)
-
-	// DirTree colors.
-	viper.SetDefault("colors.dir_tree.selected_item", constants.Colors.Pink)
-	viper.SetDefault("colors.dir_tree.unselected_item", constants.Colors.White)
-
-	// Pane colors.
-	viper.SetDefault("colors.pane.active_border_color", constants.Colors.Pink)
-	viper.SetDefault("colors.pane.inactive_border_color", constants.Colors.White)
-
-	// Spinner colors.
-	viper.SetDefault("colors.spinner", constants.Colors.Pink)
-
-	// StatusBar colors.
-	viper.SetDefault("colors.status_bar.selected_file.foreground", constants.Colors.White)
-	viper.SetDefault("colors.status_bar.selected_file.background", constants.Colors.Pink)
-	viper.SetDefault("colors.status_bar.bar.foreground", constants.Colors.White)
-	viper.SetDefault("colors.status_bar.bar.background", constants.Colors.DarkGray)
-	viper.SetDefault("colors.status_bar.total_files.foreground", constants.Colors.White)
-	viper.SetDefault("colors.status_bar.total_files.background", constants.Colors.LightPurple)
-	viper.SetDefault("colors.status_bar.logo.foreground", constants.Colors.White)
-	viper.SetDefault("colors.status_bar.logo.background", constants.Colors.DarkPurple)
+	viper.SetDefault("settings.theme", "default")
 }

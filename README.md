@@ -49,8 +49,9 @@ go install github.com/knipferrc/fm@latest
 - File icons
 - Layout adjusts to terminal resize
 - Syntax highlighting for source code
+- Render pretty markdown
 - Mouse support
-- Customizable colors
+- Themes
 - Render PNG, JPG and JPEG as strings
 
 ## Usage
@@ -89,27 +90,6 @@ go install github.com/knipferrc/fm@latest
 - A config file will be generated at `~/.fm.yml` when you first run `fm`
 
 ```yml
-colors:
-  dir_tree:
-    selected_item: "#F25D94"
-    unselected_item: "#FFFDF5"
-  pane:
-    active_border_color: "#F25D94"
-    inactive_border_color: "#FFFDF5"
-  spinner: "#F25D94"
-  status_bar:
-    bar:
-      background: "#353533"
-      foreground: "#FFFDF5"
-    logo:
-      background: "#6124DF"
-      foreground: "#FFFDF5"
-    selected_file:
-      background: "#F25D94"
-      foreground: "#FFFDF5"
-    total_files:
-      background: "#A550DF"
-      foreground: "#FFFDF5"
 settings:
   borderless: false
   enable_logging: false
@@ -117,6 +97,7 @@ settings:
   pretty_markdown: true
   show_icons: true
   start_dir: .
+  theme: default
 ```
 
 ## Local Development

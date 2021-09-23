@@ -17,7 +17,7 @@ import (
 	"github.com/knipferrc/fm/directory"
 	"github.com/knipferrc/fm/internal/colorimage"
 	"github.com/knipferrc/fm/internal/markdown"
-	"github.com/knipferrc/fm/internal/text"
+	"github.com/knipferrc/fm/internal/sourcecode"
 	"github.com/knipferrc/fm/strfmt"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -185,7 +185,7 @@ func (m Model) readFileContent(file fs.DirEntry, width, height int) tea.Cmd {
 				image:       img,
 			}
 		default:
-			code, err := text.Highlight(content, filepath.Ext(file.Name()))
+			code, err := sourcecode.Highlight(content, filepath.Ext(file.Name()))
 			if err != nil {
 				return errorMsg(err.Error())
 			}
