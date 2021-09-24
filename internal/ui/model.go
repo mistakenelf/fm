@@ -61,8 +61,8 @@ func NewModel() Model {
 
 	// Create a new help view.
 	h := help.NewModel()
-	h.Styles.FullKey.Foreground(lipgloss.Color(theme.DefaultTextColor))
-	h.Styles.FullDesc.Foreground(lipgloss.Color(theme.DefaultTextColor))
+	h.Styles.FullKey.Foreground(lipgloss.AdaptiveColor{Dark: theme.DefaultTextColorDark, Light: theme.DefaultTextColorLight})
+	h.Styles.FullDesc.Foreground(lipgloss.AdaptiveColor{Dark: theme.DefaultTextColorDark, Light: theme.DefaultTextColorLight})
 	h.ShowAll = true
 
 	// Create a new dirtree.

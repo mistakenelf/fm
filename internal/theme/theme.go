@@ -15,7 +15,8 @@ type Theme struct {
 	StatusBarLogoForegroundColor         string
 	StatusBarLogoBackgroundColor         string
 	ErrorColor                           string
-	DefaultTextColor                     string
+	DefaultTextColorDark                 string
+	DefaultTextColorLight                string
 }
 
 // appColors contains the different types of colors.
@@ -69,7 +70,8 @@ var defaultTheme = Theme{
 	StatusBarLogoForegroundColor:         colors.White,
 	StatusBarLogoBackgroundColor:         colors.DefaultDarkPurple,
 	ErrorColor:                           colors.Red,
-	DefaultTextColor:                     colors.White,
+	DefaultTextColorDark:                 colors.White,
+	DefaultTextColorLight:                colors.Black,
 }
 
 var gruvboxTheme = Theme{
@@ -87,7 +89,8 @@ var gruvboxTheme = Theme{
 	StatusBarLogoForegroundColor:         colors.White,
 	StatusBarLogoBackgroundColor:         colors.GruvBlue,
 	ErrorColor:                           colors.Red,
-	DefaultTextColor:                     colors.White,
+	DefaultTextColorDark:                 colors.White,
+	DefaultTextColorLight:                colors.Black,
 }
 
 var spookyTheme = Theme{
@@ -105,7 +108,8 @@ var spookyTheme = Theme{
 	StatusBarLogoForegroundColor:         colors.White,
 	StatusBarLogoBackgroundColor:         colors.SpookyOrange,
 	ErrorColor:                           colors.Red,
-	DefaultTextColor:                     colors.White,
+	DefaultTextColorDark:                 colors.White,
+	DefaultTextColorLight:                colors.Black,
 }
 
 func GetCurrentTheme(theme string) Theme {
