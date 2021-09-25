@@ -18,12 +18,12 @@ type Model struct {
 	Cursor              int
 	ShowIcons           bool
 	ShowHidden          bool
-	SelectedItemColor   string
-	UnselectedItemColor string
+	SelectedItemColor   lipgloss.AdaptiveColor
+	UnselectedItemColor lipgloss.AdaptiveColor
 }
 
 // NewModel creates a new instance of a dirtree.
-func NewModel(showIcons bool, selectedItemColor, unselectedItemColor string) Model {
+func NewModel(showIcons bool, selectedItemColor, unselectedItemColor lipgloss.AdaptiveColor) Model {
 	return Model{
 		Cursor:              0,
 		ShowIcons:           showIcons,
@@ -97,22 +97,22 @@ func (m Model) dirItem(selected bool, fileInfo fs.FileInfo) string {
 	case m.ShowIcons && selected:
 		return fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color(m.SelectedItemColor)).
+			Foreground(m.SelectedItemColor).
 			Render(fileInfo.Name()))
 	case m.ShowIcons && !selected:
 		return fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color(m.UnselectedItemColor)).
+			Foreground(m.UnselectedItemColor).
 			Render(fileInfo.Name()))
 	case !m.ShowIcons && selected:
 		return lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color(m.SelectedItemColor)).
+			Foreground(m.SelectedItemColor).
 			Render(fileInfo.Name())
 	default:
 		return lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color(m.UnselectedItemColor)).
+			Foreground(m.UnselectedItemColor).
 			Render(fileInfo.Name())
 	}
 }
@@ -126,7 +126,7 @@ func (m Model) View() string {
 	}
 
 	for i, file := range m.Files {
-		var modTimeColor string
+		var modTimeColor lipgloss.AdaptiveColor
 
 		if m.Cursor == i {
 			modTimeColor = m.SelectedItemColor
@@ -141,7 +141,7 @@ func (m Model) View() string {
 
 		modTime := lipgloss.NewStyle().
 			Align(lipgloss.Right).
-			Foreground(lipgloss.Color(modTimeColor)).
+			Foreground(modTimeColor).
 			Render(fileInfo.ModTime().
 				Format("2006-01-02 15:04:05"),
 			)

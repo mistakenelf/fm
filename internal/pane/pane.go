@@ -14,12 +14,12 @@ type Model struct {
 	IsActive            bool
 	Borderless          bool
 	AlternateBorder     bool
-	ActiveBorderColor   string
-	InactiveBorderColor string
+	ActiveBorderColor   lipgloss.AdaptiveColor
+	InactiveBorderColor lipgloss.AdaptiveColor
 }
 
 // NewModel creates a new instance of a pane.
-func NewModel(isActive, borderless bool, activeBorderColor, inactiveBorderColor string) Model {
+func NewModel(isActive, borderless bool, activeBorderColor, inactiveBorderColor lipgloss.AdaptiveColor) Model {
 	return Model{
 		IsActive:            isActive,
 		Borderless:          borderless,
@@ -136,7 +136,7 @@ func (m Model) View() string {
 	}
 
 	return m.Style.Copy().
-		BorderForeground(lipgloss.Color(borderColor)).
+		BorderForeground(borderColor).
 		PaddingLeft(padding).
 		PaddingRight(padding).
 		Border(border).

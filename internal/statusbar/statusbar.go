@@ -17,8 +17,8 @@ import (
 
 // Color is a struct that contains the foreground and background colors of the statusbar.
 type Color struct {
-	Background string
-	Foreground string
+	Background lipgloss.AdaptiveColor
+	Foreground lipgloss.AdaptiveColor
 }
 
 // Model is a struct that contains all the properties of the statusbar.
@@ -214,30 +214,30 @@ func (m Model) View() string {
 	}
 
 	selectedFileColumn := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(m.FirstColumnColors.Foreground)).
-		Background(lipgloss.Color(m.FirstColumnColors.Background)).
+		Foreground(m.FirstColumnColors.Foreground).
+		Background(m.FirstColumnColors.Background).
 		Padding(0, 1).
 		Height(m.Height).
 		Render(truncate.StringWithTail(selectedFile, 30, "..."))
 
 	fileCountColumn := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(m.ThirdColumnColors.Foreground)).
-		Background(lipgloss.Color(m.ThirdColumnColors.Background)).
+		Foreground(m.ThirdColumnColors.Foreground).
+		Background(m.ThirdColumnColors.Background).
 		Align(lipgloss.Right).
 		Padding(0, 1).
 		Height(m.Height).
 		Render(fileCount)
 
 	logoColumn := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(m.FourthColumnColors.Foreground)).
-		Background(lipgloss.Color(m.FourthColumnColors.Background)).
+		Foreground(m.FourthColumnColors.Foreground).
+		Background(m.FourthColumnColors.Background).
 		Padding(0, 1).
 		Height(m.Height).
 		Render(logo)
 
 	statusColumn := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(m.SecondColumnColors.Foreground)).
-		Background(lipgloss.Color(m.SecondColumnColors.Background)).
+		Foreground(m.SecondColumnColors.Foreground).
+		Background(m.SecondColumnColors.Background).
 		Padding(0, 1).
 		Height(m.Height).
 		Width(m.Width - width(selectedFileColumn) - width(fileCountColumn) - width(logoColumn)).
