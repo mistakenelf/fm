@@ -53,6 +53,7 @@ go install github.com/knipferrc/fm@latest
 - Mouse support
 - Themes (default, gruvbox, spooky)
 - Render PNG, JPG and JPEG as strings
+- Colors adapt to terminal background
 
 ## Usage
 
