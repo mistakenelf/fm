@@ -57,12 +57,12 @@ func NewModel() Model {
 	// Create a new spinner with some styling based on the config.
 	l := spinner.NewModel()
 	l.Spinner = spinner.Dot
-	l.Style = lipgloss.NewStyle().Foreground(lipgloss.Color(theme.SpinnerColor))
+	l.Style = lipgloss.NewStyle().Foreground(theme.SpinnerColor)
 
 	// Create a new help view.
 	h := help.NewModel()
-	h.Styles.FullKey.Foreground(lipgloss.AdaptiveColor{Dark: theme.DefaultTextColorDark, Light: theme.DefaultTextColorLight})
-	h.Styles.FullDesc.Foreground(lipgloss.AdaptiveColor{Dark: theme.DefaultTextColorDark, Light: theme.DefaultTextColorLight})
+	h.Styles.FullKey.Foreground(theme.DefaultTextColor)
+	h.Styles.FullDesc.Foreground(theme.DefaultTextColor)
 	h.ShowAll = true
 
 	// Create a new dirtree.

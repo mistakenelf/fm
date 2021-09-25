@@ -141,7 +141,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.secondaryPane.SetContent(
 			lipgloss.NewStyle().
 				Bold(true).
-				Foreground(lipgloss.Color(m.theme.ErrorColor)).
+				Foreground(m.theme.ErrorColor).
 				Width(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize()).
 				Render(string(msg)),
 		)
