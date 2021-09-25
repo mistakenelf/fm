@@ -12,14 +12,12 @@ import (
 	"time"
 )
 
-// CurrentDirectory represents the current directory.
-const CurrentDirectory = "."
-
-// PreviousDirectory represents the previous directory.
-const PreviousDirectory = ".."
-
-// HomeDirectory represents the home directory.
-const HomeDirectory = "~"
+// Constants to represent different directories.
+const (
+	CurrentDirectory  = "."
+	PreviousDirectory = ".."
+	HomeDirectory     = "~"
+)
 
 // RenameDirOrFile renames a directory or files given a source and destination.
 func RenameDirOrFile(src, dst string) error {
