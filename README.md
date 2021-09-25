@@ -11,7 +11,7 @@
 </p>
 
 <p align="center" style="margin-top: 30px; margin-bottom: 20px;">
-  <img src="./assets/screenshot.png" width="450" title="hover text">
+  <img src="./assets/default_dark.png" width="450" alt="default screenshot">
 </p>
 
 ## About The Project
@@ -54,6 +54,23 @@ go install github.com/knipferrc/fm@latest
 - Themes (default, gruvbox, spooky)
 - Render PNG, JPG and JPEG as strings
 - Colors adapt to terminal background
+
+## Themes
+
+### Default
+
+<img src="./assets/default_dark.png" width="450" alt="default dark">
+<img src="./assets/default_light.png" width="450" alt="default light">
+
+### Gruvbox
+
+<img src="./assets/gruvbox_dark.png" width="450" alt="gruvbox dark">
+<img src="./assets/gruvbox_light.png" width="450" alt="gruvbox light">
+
+### Spooky
+
+<img src="./assets/spooky_dark.png" width="450" alt="spooky dark">
+<img src="./assets/spooky_light.png" width="450" alt="spooky light">
 
 ## Usage
 
