@@ -3,7 +3,7 @@ package ui
 import (
 	"fmt"
 
-	"github.com/knipferrc/fm/directory"
+	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/internal/statusbar"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -273,10 +273,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.Left):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.statusBar.SetItemSize("")
-				m.previousDirectory, _ = directory.GetWorkingDirectory()
+				m.previousDirectory, _ = dirfs.GetWorkingDirectory()
 
 				return m, m.updateDirectoryListing(
-					fmt.Sprintf("%s/%s", m.previousDirectory, directory.PreviousDirectory),
+					fmt.Sprintf("%s/%s", m.previousDirectory, dirfs.PreviousDirectory),
 				)
 			}
 
@@ -315,7 +315,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				if m.dirTree.GetSelectedFile().IsDir() && !m.statusBar.CommandBarFocused() {
 					m.statusBar.SetItemSize("")
-					currentDir, _ := directory.GetWorkingDirectory()
+					currentDir, _ := dirfs.GetWorkingDirectory()
 
 					return m, m.updateDirectoryListing(
 						fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()),
@@ -368,21 +368,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "mkdir":
 				return m, tea.Sequentially(
 					m.createDir(value),
-					m.updateDirectoryListing(directory.CurrentDirectory),
+					m.updateDirectoryListing(dirfs.CurrentDirectory),
 				)
 
 			// Create a new file based on the value passed.
 			case "touch":
 				return m, tea.Sequentially(
 					m.createFile(value),
-					m.updateDirectoryListing(directory.CurrentDirectory),
+					m.updateDirectoryListing(dirfs.CurrentDirectory),
 				)
 
 			// Rename the currently selected file or folder based on the value passed.
 			case "mv", "rename":
 				return m, tea.Sequentially(
 					m.renameFileOrDir(m.dirTree.GetSelectedFile().Name(), value),
-					m.updateDirectoryListing(directory.CurrentDirectory),
+					m.updateDirectoryListing(dirfs.CurrentDirectory),
 				)
 
 			// Delete the currently selected item.
@@ -390,13 +390,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
 						m.deleteDir(m.dirTree.GetSelectedFile().Name()),
-						m.updateDirectoryListing(directory.CurrentDirectory),
+						m.updateDirectoryListing(dirfs.CurrentDirectory),
 					)
 				}
 
 				return m, tea.Sequentially(
 					m.deleteFile(m.dirTree.GetSelectedFile().Name()),
-					m.updateDirectoryListing(directory.CurrentDirectory),
+					m.updateDirectoryListing(dirfs.CurrentDirectory),
 				)
 
 			default:
@@ -424,7 +424,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// command bar is not curently open.
 		case key.Matches(msg, m.keys.OpenHomeDirectory):
 			if !m.showCommandBar {
-				homeDir, _ := directory.GetHomeDirectory()
+				homeDir, _ := dirfs.GetHomeDirectory()
 				return m, m.updateDirectoryListing(homeDir)
 			}
 
@@ -438,7 +438,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.ToggleHidden):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.dirTree.ToggleHidden()
-				return m, m.updateDirectoryListing(directory.CurrentDirectory)
+				return m, m.updateDirectoryListing(dirfs.CurrentDirectory)
 			}
 
 		// Toggle between the two panes if the command bar is not currently active.
@@ -453,7 +453,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				m.inMoveMode = true
 				m.primaryPane.ShowAlternateBorder(true)
-				m.initialMoveDirectory, _ = directory.GetWorkingDirectory()
+				m.initialMoveDirectory, _ = dirfs.GetWorkingDirectory()
 				m.itemToMove = m.dirTree.GetSelectedFile()
 				m.statusBar.SetContent(
 					m.dirTree.GetTotalFiles(),
@@ -468,22 +468,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Zip up the currently selected item.
 		case key.Matches(msg, m.keys.Zip):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
-				currentDir, _ := directory.GetWorkingDirectory()
+				currentDir, _ := dirfs.GetWorkingDirectory()
 
 				return m, tea.Sequentially(
 					m.zipDirectory(fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name())),
-					m.updateDirectoryListing(directory.CurrentDirectory),
+					m.updateDirectoryListing(dirfs.CurrentDirectory),
 				)
 			}
 
 		// Unzip the currently selected zip file.
 		case key.Matches(msg, m.keys.Unzip):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
-				currentDir, _ := directory.GetWorkingDirectory()
+				currentDir, _ := dirfs.GetWorkingDirectory()
 
 				return m, tea.Sequentially(
 					m.unzipDirectory(fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name())),
-					m.updateDirectoryListing(directory.CurrentDirectory),
+					m.updateDirectoryListing(dirfs.CurrentDirectory),
 				)
 			}
 
@@ -493,13 +493,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
 						m.copyDirectory(m.dirTree.GetSelectedFile().Name()),
-						m.updateDirectoryListing(directory.CurrentDirectory),
+						m.updateDirectoryListing(dirfs.CurrentDirectory),
 					)
 				}
 
 				return m, tea.Sequentially(
 					m.copyFile(m.dirTree.GetSelectedFile().Name()),
-					m.updateDirectoryListing(directory.CurrentDirectory),
+					m.updateDirectoryListing(dirfs.CurrentDirectory),
 				)
 			}
 

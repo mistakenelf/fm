@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/knipferrc/fm/directory"
+	"github.com/knipferrc/fm/dirfs"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -41,8 +41,8 @@ func (m Model) Init() tea.Cmd {
 
 			cmds = append(cmds, m.updateDirectoryListing(filePath))
 		}
-	case m.appConfig.Settings.StartDir == directory.HomeDirectory:
-		homeDir, err := directory.GetHomeDirectory()
+	case m.appConfig.Settings.StartDir == dirfs.HomeDirectory:
+		homeDir, err := dirfs.GetHomeDirectory()
 		if err != nil {
 			log.Fatal(err)
 		}

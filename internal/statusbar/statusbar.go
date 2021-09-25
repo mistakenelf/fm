@@ -5,7 +5,7 @@ import (
 	"io/fs"
 	"strings"
 
-	"github.com/knipferrc/fm/directory"
+	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/icons"
 
 	"github.com/charmbracelet/bubbles/spinner"
@@ -176,9 +176,9 @@ func (m Model) View() string {
 		selectedFile = m.SelectedFile.Name()
 		fileCount = fmt.Sprintf("%d/%d", m.Cursor+1, m.TotalFiles)
 
-		currentPath, err := directory.GetWorkingDirectory()
+		currentPath, err := dirfs.GetWorkingDirectory()
 		if err != nil {
-			currentPath = directory.CurrentDirectory
+			currentPath = dirfs.CurrentDirectory
 		}
 
 		fileInfo, err := m.SelectedFile.Info()

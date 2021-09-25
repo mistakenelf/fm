@@ -1,4 +1,4 @@
-package directory
+package dirfs
 
 import (
 	"archive/zip"
