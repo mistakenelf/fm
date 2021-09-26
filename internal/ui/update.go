@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/knipferrc/fm/dirfs"
-	"github.com/knipferrc/fm/internal/statusbar"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
@@ -60,6 +59,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// file operations.
 	case updateDirectoryListingMsg:
 		m.showCommandBar = false
+		m.inCreateFileMode = false
+		m.inCreateDirectoryMode = false
+		m.inRenameMode = false
 
 		m.dirTree.GotoTop()
 		m.dirTree.SetContent(msg)
@@ -342,51 +344,34 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			m.secondaryPane.GotoBottom()
 
-		// If in move mode, pressing enter will place the selected item to move into
-		// the current directory. If the command bar is open, commands will be processed.
+		// If in move mode, place the selected item to move into
+		// the current directory. If the commandbar is open, process the command.
 		case key.Matches(msg, m.keys.Enter):
-			if m.inMoveMode {
+			switch {
+			case m.inMoveMode:
 				return m, m.moveDirectoryItem(m.itemToMove.Name())
-			}
-
-			// Parse the commands from the command bar, command is the name
-			// of the command and value is if the command requires input to it
-			// get its value, for example (rename test.txt) text.txt is the value.
-			command, value := statusbar.ParseCommand(m.statusBar.CommandBarValue())
-
-			// Nothing was input for a command.
-			if command == "" {
+			case m.inCreateFileMode:
+				return m, tea.Sequentially(
+					m.createFile(m.statusBar.CommandBarValue()),
+					m.updateDirectoryListing(dirfs.CurrentDirectory),
+				)
+			case m.inCreateDirectoryMode:
+				return m, tea.Sequentially(
+					m.createDir(m.statusBar.CommandBarValue()),
+					m.updateDirectoryListing(dirfs.CurrentDirectory),
+				)
+			case m.inRenameMode:
+				return m, tea.Sequentially(
+					m.renameFileOrDir(m.dirTree.GetSelectedFile().Name(), m.statusBar.CommandBarValue()),
+					m.updateDirectoryListing(dirfs.CurrentDirectory),
+				)
+			default:
 				return m, nil
 			}
 
-			switch command {
-			// Exit FM.
-			case "exit", "q", "quit":
-				return m, tea.Quit
-
-			// Create a new directory based on the value passed.
-			case "mkdir":
-				return m, tea.Sequentially(
-					m.createDir(value),
-					m.updateDirectoryListing(dirfs.CurrentDirectory),
-				)
-
-			// Create a new file based on the value passed.
-			case "touch":
-				return m, tea.Sequentially(
-					m.createFile(value),
-					m.updateDirectoryListing(dirfs.CurrentDirectory),
-				)
-
-			// Rename the currently selected file or folder based on the value passed.
-			case "mv", "rename":
-				return m, tea.Sequentially(
-					m.renameFileOrDir(m.dirTree.GetSelectedFile().Name(), value),
-					m.updateDirectoryListing(dirfs.CurrentDirectory),
-				)
-
-			// Delete the currently selected item.
-			case "rm", "delete":
+		// Delete the currently selected item.
+		case key.Matches(msg, m.keys.Delete):
+			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
 						m.deleteDir(m.dirTree.GetSelectedFile().Name()),
@@ -398,14 +383,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.deleteFile(m.dirTree.GetSelectedFile().Name()),
 					m.updateDirectoryListing(dirfs.CurrentDirectory),
 				)
-
-			default:
-				return m, nil
 			}
 
-		// Activate command bar if not in move mode.
-		case key.Matches(msg, m.keys.OpenCommandBar):
-			if !m.inMoveMode {
+		// Enter create file mode.
+		case key.Matches(msg, m.keys.CreateFile):
+			if !m.inMoveMode && !m.inCreateDirectoryMode && !m.showCommandBar {
+				m.inCreateFileMode = true
 				m.showCommandBar = true
 				m.statusBar.FocusCommandBar()
 				m.statusBar.SetContent(
@@ -416,9 +399,45 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.dirTree.GetSelectedFile(),
 					m.itemToMove,
 				)
+
+				return m, nil
 			}
 
-			return m, cmd
+		// Enter create directory mode.
+		case key.Matches(msg, m.keys.CreateDirectory):
+			if !m.inMoveMode && !m.inCreateFileMode && !m.showCommandBar {
+				m.inCreateDirectoryMode = true
+				m.showCommandBar = true
+				m.statusBar.FocusCommandBar()
+				m.statusBar.SetContent(
+					m.dirTree.GetTotalFiles(),
+					m.dirTree.GetCursor(),
+					m.showCommandBar,
+					m.inMoveMode,
+					m.dirTree.GetSelectedFile(),
+					m.itemToMove,
+				)
+
+				return m, nil
+			}
+
+		// Enter create directory mode.
+		case key.Matches(msg, m.keys.Rename):
+			if !m.inMoveMode && !m.inCreateFileMode && !m.inCreateDirectoryMode && !m.showCommandBar {
+				m.inRenameMode = true
+				m.showCommandBar = true
+				m.statusBar.FocusCommandBar()
+				m.statusBar.SetContent(
+					m.dirTree.GetTotalFiles(),
+					m.dirTree.GetCursor(),
+					m.showCommandBar,
+					m.inMoveMode,
+					m.dirTree.GetSelectedFile(),
+					m.itemToMove,
+				)
+
+				return m, nil
+			}
 
 		// Shortcut to get back to the home directory if the
 		// command bar is not curently open.
@@ -510,6 +529,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.itemToMove = nil
 			m.initialMoveDirectory = ""
 			m.help.ShowAll = true
+			m.inCreateFileMode = false
+			m.inCreateDirectoryMode = false
+			m.inRenameMode = false
 			m.primaryPane.SetActive(true)
 			m.secondaryPane.SetActive(false)
 			m.statusBar.BlurCommandBar()

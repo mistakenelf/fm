@@ -12,7 +12,6 @@ type keyMap struct {
 	Right                 key.Binding
 	GotoBottom            key.Binding
 	Enter                 key.Binding
-	OpenCommandBar        key.Binding
 	OpenHomeDirectory     key.Binding
 	OpenPreviousDirectory key.Binding
 	ToggleHidden          key.Binding
@@ -22,6 +21,10 @@ type keyMap struct {
 	Unzip                 key.Binding
 	Copy                  key.Binding
 	Escape                key.Binding
+	Delete                key.Binding
+	CreateFile            key.Binding
+	CreateDirectory       key.Binding
+	Rename                key.Binding
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view. It's part
@@ -36,7 +39,6 @@ func (k keyMap) ShortHelp() []key.Binding {
 		k.Right,
 		k.GotoBottom,
 		k.Enter,
-		k.OpenCommandBar,
 		k.OpenHomeDirectory,
 		k.OpenPreviousDirectory,
 		k.ToggleHidden,
@@ -46,6 +48,10 @@ func (k keyMap) ShortHelp() []key.Binding {
 		k.Unzip,
 		k.Copy,
 		k.Escape,
+		k.Delete,
+		k.CreateFile,
+		k.CreateDirectory,
+		k.Rename,
 	}
 }
 
@@ -62,7 +68,6 @@ func (k keyMap) FullHelp() [][]key.Binding {
 			k.Right,
 			k.GotoBottom,
 			k.Enter,
-			k.OpenCommandBar,
 			k.OpenHomeDirectory,
 			k.OpenPreviousDirectory,
 			k.ToggleHidden,
@@ -72,6 +77,10 @@ func (k keyMap) FullHelp() [][]key.Binding {
 			k.Unzip,
 			k.Copy,
 			k.Escape,
+			k.Delete,
+			k.CreateFile,
+			k.CreateDirectory,
+			k.Rename,
 		},
 	}
 }
@@ -111,10 +120,6 @@ func getDefaultKeyMap() keyMap {
 			key.WithKeys("enter"),
 			key.WithHelp("enter", "handle move mode and command parsing"),
 		),
-		OpenCommandBar: key.NewBinding(
-			key.WithKeys(":"),
-			key.WithHelp(":", "open command bar in the status bar"),
-		),
 		OpenHomeDirectory: key.NewBinding(
 			key.WithKeys("~"),
 			key.WithHelp("~", "go to home directory"),
@@ -150,6 +155,22 @@ func getDefaultKeyMap() keyMap {
 		Escape: key.NewBinding(
 			key.WithKeys("esc"),
 			key.WithHelp("esc", "reset to initial state"),
+		),
+		Delete: key.NewBinding(
+			key.WithKeys("D"),
+			key.WithHelp("D", "delete the selected file or directory"),
+		),
+		CreateFile: key.NewBinding(
+			key.WithKeys("n"),
+			key.WithHelp("n", "create a new file"),
+		),
+		CreateDirectory: key.NewBinding(
+			key.WithKeys("N"),
+			key.WithHelp("N", "create a new directory"),
+		),
+		Rename: key.NewBinding(
+			key.WithKeys("r"),
+			key.WithHelp("r", "rename the currently selected file or directory"),
 		),
 	}
 }

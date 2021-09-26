@@ -26,26 +26,29 @@ type directoryItemSizeCtx struct {
 
 // Model represents the state of the UI.
 type Model struct {
-	keys                 keyMap
-	help                 help.Model
-	primaryPane          pane.Model
-	secondaryPane        pane.Model
-	loader               spinner.Model
-	dirTree              dirtree.Model
-	statusBar            statusbar.Model
-	colorimage           colorimage.Model
-	markdown             markdown.Model
-	sourcecode           sourcecode.Model
-	previousKey          tea.KeyMsg
-	itemToMove           fs.DirEntry
-	appConfig            config.Config
-	directoryItemSizeCtx *directoryItemSizeCtx
-	theme                theme.Theme
-	previousDirectory    string
-	initialMoveDirectory string
-	showCommandBar       bool
-	inMoveMode           bool
-	ready                bool
+	keys                  keyMap
+	help                  help.Model
+	primaryPane           pane.Model
+	secondaryPane         pane.Model
+	loader                spinner.Model
+	dirTree               dirtree.Model
+	statusBar             statusbar.Model
+	colorimage            colorimage.Model
+	markdown              markdown.Model
+	sourcecode            sourcecode.Model
+	previousKey           tea.KeyMsg
+	itemToMove            fs.DirEntry
+	appConfig             config.Config
+	directoryItemSizeCtx  *directoryItemSizeCtx
+	theme                 theme.Theme
+	previousDirectory     string
+	initialMoveDirectory  string
+	showCommandBar        bool
+	inMoveMode            bool
+	inCreateFileMode      bool
+	inCreateDirectoryMode bool
+	inRenameMode          bool
+	ready                 bool
 }
 
 // NewModel create an instance of the entire application model.
@@ -126,11 +129,14 @@ func NewModel() Model {
 		directoryItemSizeCtx: &directoryItemSizeCtx{
 			ctx: context.Background(),
 		},
-		theme:                theme,
-		previousDirectory:    "",
-		initialMoveDirectory: "",
-		showCommandBar:       false,
-		inMoveMode:           false,
-		ready:                false,
+		theme:                 theme,
+		previousDirectory:     "",
+		initialMoveDirectory:  "",
+		showCommandBar:        false,
+		inMoveMode:            false,
+		inCreateFileMode:      false,
+		inCreateDirectoryMode: false,
+		inRenameMode:          false,
+		ready:                 false,
 	}
 }

@@ -3,7 +3,6 @@ package statusbar
 import (
 	"fmt"
 	"io/fs"
-	"strings"
 
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/icons"
@@ -46,7 +45,8 @@ func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthCo
 	input := textinput.NewModel()
 	input.Prompt = "❯ "
 	input.CharLimit = 250
-	input.Placeholder = "Enter a command"
+	input.Placeholder = "enter a name"
+	input.PlaceholderStyle.Background(secondColumnColors.Background)
 
 	s := spinner.NewModel()
 	s.Spinner = spinner.Dot
@@ -68,32 +68,6 @@ func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthCo
 		Textinput:          input,
 		Spinner:            s,
 	}
-}
-
-// ParseCommand parses the command and returns the command name and the arguments.
-func ParseCommand(command string) (string, string) {
-	// Split the command string into an array.
-	cmdString := strings.Split(command, " ")
-
-	// If theres only one item in the array, its a singular
-	// command such as rm.
-	if len(cmdString) == 1 {
-		cmdName := cmdString[0]
-
-		return cmdName, ""
-	}
-
-	// This command has two values, first one is the name
-	// of the command, other is the value to pass back
-	// to the UI to update.
-	if len(cmdString) == 2 {
-		cmdName := cmdString[0]
-		cmdValue := cmdString[1]
-
-		return cmdName, cmdValue
-	}
-
-	return "", ""
 }
 
 // GetHeight returns the height of the statusbar.
