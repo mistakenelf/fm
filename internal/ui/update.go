@@ -10,6 +10,18 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+// updateStatusBarContent updates the content of the statusbar.
+func (m *Model) updateStatusBarContent() {
+	m.statusBar.SetContent(
+		m.dirTree.GetTotalFiles(),
+		m.dirTree.GetCursor(),
+		m.showCommandBar,
+		m.inMoveMode,
+		m.dirTree.GetSelectedFile(),
+		m.itemToMove,
+	)
+}
+
 // scrollPrimaryPane handles the scrolling of the primary pane which will handle
 // infinite scroll on the dirtree and the scrolling of the viewport.
 func (m *Model) scrollPrimaryPane() {
@@ -36,15 +48,7 @@ func (m *Model) scrollPrimaryPane() {
 		m.primaryPane.GotoBottom()
 	}
 
-	// Update the statusbar content.
-	m.statusBar.SetContent(
-		m.dirTree.GetTotalFiles(),
-		m.dirTree.GetCursor(),
-		m.showCommandBar,
-		m.inMoveMode,
-		m.dirTree.GetSelectedFile(),
-		m.itemToMove,
-	)
+	m.updateStatusBarContent()
 }
 
 // Update handles all UI interactions and events for updating the screen.
@@ -69,14 +73,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.primaryPane.GotoTop()
 		m.statusBar.BlurCommandBar()
 		m.statusBar.ResetCommandBar()
-		m.statusBar.SetContent(
-			m.dirTree.GetTotalFiles(),
-			m.dirTree.GetCursor(),
-			m.showCommandBar,
-			m.inMoveMode,
-			m.dirTree.GetSelectedFile(),
-			m.itemToMove,
-		)
+		m.updateStatusBarContent()
 
 		return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
 
@@ -89,14 +86,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.primaryPane.ShowAlternateBorder(false)
 		m.dirTree.SetContent(msg)
 		m.primaryPane.SetContent(m.dirTree.View())
-		m.statusBar.SetContent(
-			m.dirTree.GetTotalFiles(),
-			m.dirTree.GetCursor(),
-			m.showCommandBar,
-			m.inMoveMode,
-			m.dirTree.GetSelectedFile(),
-			m.itemToMove,
-		)
+		m.updateStatusBarContent()
 
 		return m, nil
 
@@ -391,14 +381,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.inCreateFileMode = true
 				m.showCommandBar = true
 				m.statusBar.FocusCommandBar()
-				m.statusBar.SetContent(
-					m.dirTree.GetTotalFiles(),
-					m.dirTree.GetCursor(),
-					m.showCommandBar,
-					m.inMoveMode,
-					m.dirTree.GetSelectedFile(),
-					m.itemToMove,
-				)
+				m.updateStatusBarContent()
 
 				return m, nil
 			}
@@ -409,14 +392,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.inCreateDirectoryMode = true
 				m.showCommandBar = true
 				m.statusBar.FocusCommandBar()
-				m.statusBar.SetContent(
-					m.dirTree.GetTotalFiles(),
-					m.dirTree.GetCursor(),
-					m.showCommandBar,
-					m.inMoveMode,
-					m.dirTree.GetSelectedFile(),
-					m.itemToMove,
-				)
+				m.updateStatusBarContent()
 
 				return m, nil
 			}
@@ -427,14 +403,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.inRenameMode = true
 				m.showCommandBar = true
 				m.statusBar.FocusCommandBar()
-				m.statusBar.SetContent(
-					m.dirTree.GetTotalFiles(),
-					m.dirTree.GetCursor(),
-					m.showCommandBar,
-					m.inMoveMode,
-					m.dirTree.GetSelectedFile(),
-					m.itemToMove,
-				)
+				m.updateStatusBarContent()
 
 				return m, nil
 			}
@@ -474,14 +443,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.primaryPane.ShowAlternateBorder(true)
 				m.initialMoveDirectory, _ = dirfs.GetWorkingDirectory()
 				m.itemToMove = m.dirTree.GetSelectedFile()
-				m.statusBar.SetContent(
-					m.dirTree.GetTotalFiles(),
-					m.dirTree.GetCursor(),
-					m.showCommandBar,
-					m.inMoveMode,
-					m.dirTree.GetSelectedFile(),
-					m.itemToMove,
-				)
+				m.updateStatusBarContent()
 			}
 
 		// Zip up the currently selected item.
@@ -545,14 +507,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
 			m.sourcecode.SetContent("")
-			m.statusBar.SetContent(
-				m.dirTree.GetTotalFiles(),
-				m.dirTree.GetCursor(),
-				m.showCommandBar,
-				m.inMoveMode,
-				m.dirTree.GetSelectedFile(),
-				m.itemToMove,
-			)
+			m.updateStatusBarContent()
 		}
 
 		// Capture the previous key so that we can capture
