@@ -230,7 +230,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		// If gg is pressed.
-		if msg.String() == "g" && m.previousKey.String() == "g" {
+		if msg.String() == "g" && m.previousKey.String() == "g" && !m.showCommandBar {
 			// If the command bar is not shown and the primary pane is active,
 			// reset the previous key, go to the top of the dirtree and pane.
 			if !m.showCommandBar && m.primaryPane.GetIsActive() {
