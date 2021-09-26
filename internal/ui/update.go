@@ -422,6 +422,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, m.updateDirectoryListing(m.previousDirectory)
 			}
 
+		// Shortcut to go back to the root directory.
+		case key.Matches(msg, m.keys.OpenRootDirectory):
+			if !m.showCommandBar {
+				return m, m.updateDirectoryListing(dirfs.RootDirectory)
+			}
+
 		// Toggle hidden files and folders.
 		case key.Matches(msg, m.keys.ToggleHidden):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() {

@@ -14,6 +14,7 @@ type keyMap struct {
 	Enter                 key.Binding
 	OpenHomeDirectory     key.Binding
 	OpenPreviousDirectory key.Binding
+	OpenRootDirectory     key.Binding
 	ToggleHidden          key.Binding
 	Tab                   key.Binding
 	EnterMoveMode         key.Binding
@@ -41,6 +42,7 @@ func (k keyMap) ShortHelp() []key.Binding {
 		k.Enter,
 		k.OpenHomeDirectory,
 		k.OpenPreviousDirectory,
+		k.OpenRootDirectory,
 		k.ToggleHidden,
 		k.Tab,
 		k.EnterMoveMode,
@@ -70,6 +72,7 @@ func (k keyMap) FullHelp() [][]key.Binding {
 			k.Enter,
 			k.OpenHomeDirectory,
 			k.OpenPreviousDirectory,
+			k.OpenRootDirectory,
 			k.ToggleHidden,
 			k.Tab,
 			k.EnterMoveMode,
@@ -127,6 +130,10 @@ func getDefaultKeyMap() keyMap {
 		OpenPreviousDirectory: key.NewBinding(
 			key.WithKeys("-"),
 			key.WithHelp("-", "go to previous directory"),
+		),
+		OpenRootDirectory: key.NewBinding(
+			key.WithKeys("/"),
+			key.WithHelp("/", "go to root directory"),
 		),
 		ToggleHidden: key.NewBinding(
 			key.WithKeys("."),

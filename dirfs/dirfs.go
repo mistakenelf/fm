@@ -17,6 +17,7 @@ const (
 	CurrentDirectory  = "."
 	PreviousDirectory = ".."
 	HomeDirectory     = "~"
+	RootDirectory     = "/"
 )
 
 // RenameDirOrFile renames a directory or files given a source and destination.
