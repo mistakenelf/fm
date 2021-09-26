@@ -47,8 +47,6 @@ func (m *Model) scrollPrimaryPane() {
 		m.dirTree.GotoBottom()
 		m.primaryPane.GotoBottom()
 	}
-
-	m.updateStatusBarContent()
 }
 
 // Update handles all UI interactions and events for updating the screen.
@@ -201,6 +199,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.dirTree.GoUp()
 				m.scrollPrimaryPane()
+				m.updateStatusBarContent()
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
 
@@ -217,6 +216,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.dirTree.GoDown()
 				m.scrollPrimaryPane()
+				m.updateStatusBarContent()
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
 
@@ -278,6 +278,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.primaryPane.GetIsActive() {
 					m.dirTree.GoDown()
 					m.scrollPrimaryPane()
+					m.updateStatusBarContent()
 					m.primaryPane.SetContent(m.dirTree.View())
 					m.statusBar.SetItemSize("")
 
@@ -293,6 +294,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.primaryPane.GetIsActive() {
 					m.dirTree.GoUp()
 					m.scrollPrimaryPane()
+					m.updateStatusBarContent()
 					m.primaryPane.SetContent(m.dirTree.View())
 					m.statusBar.SetItemSize("")
 
