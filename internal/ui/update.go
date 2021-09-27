@@ -157,26 +157,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.primaryPane.SetContent(m.dirTree.View())
 		m.help.Width = msg.Width
 
-		if m.colorimage.GetImage() != nil {
+		switch {
+		case m.colorimage.GetImage() != nil:
 			return m, m.redrawImage(
 				m.secondaryPane.GetWidth()-m.secondaryPane.GetHorizontalFrameSize(),
 				m.secondaryPane.GetHeight(),
 			)
-		}
-
-		if m.markdown.GetContent() != "" {
+		case m.markdown.GetContent() != "":
 			m.secondaryPane.SetContent(m.markdown.View())
-		}
-
-		if m.sourcecode.GetContent() != "" {
+		case m.sourcecode.GetContent() != "":
 			m.secondaryPane.SetContent(m.sourcecode.View())
-		}
-
-		if m.sourcecode.GetContent() == "" && m.markdown.GetContent() == "" && m.colorimage.GetImage() == nil {
+		case m.sourcecode.GetContent() == "" && m.markdown.GetContent() == "" && m.colorimage.GetImage() == nil:
 			m.secondaryPane.SetContent(lipgloss.NewStyle().
 				Width(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize()).
 				Render(m.help.View(m.keys)),
 			)
+		default:
+			return m, nil
 		}
 
 		if !m.ready {
