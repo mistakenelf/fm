@@ -151,7 +151,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.primaryPane.SetSize(msg.Width/2, msg.Height-m.statusBar.GetHeight())
 		m.secondaryPane.SetSize(msg.Width/2, msg.Height-m.statusBar.GetHeight())
 		m.dirTree.SetSize(m.primaryPane.GetWidth())
-		m.statusBar.SetSize(msg.Width)
 		m.sourcecode.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.markdown.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.primaryPane.SetContent(m.dirTree.View())
@@ -268,35 +267,31 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			// Scroll pane down.
 		case key.Matches(msg, m.keys.Down):
-			if !m.showCommandBar {
-				if m.primaryPane.GetIsActive() {
-					m.dirTree.GoDown()
-					m.scrollPrimaryPane()
-					m.updateStatusBarContent()
-					m.primaryPane.SetContent(m.dirTree.View())
-					m.statusBar.SetItemSize("")
+			if !m.showCommandBar && m.primaryPane.GetIsActive() {
+				m.dirTree.GoDown()
+				m.scrollPrimaryPane()
+				m.updateStatusBarContent()
+				m.primaryPane.SetContent(m.dirTree.View())
+				m.statusBar.SetItemSize("")
 
-					return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
-				}
-
-				m.secondaryPane.LineDown(1)
+				return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
 			}
+
+			m.secondaryPane.LineDown(1)
 
 		// Scroll pane up.
 		case key.Matches(msg, m.keys.Up):
-			if !m.showCommandBar {
-				if m.primaryPane.GetIsActive() {
-					m.dirTree.GoUp()
-					m.scrollPrimaryPane()
-					m.updateStatusBarContent()
-					m.primaryPane.SetContent(m.dirTree.View())
-					m.statusBar.SetItemSize("")
+			if !m.showCommandBar && m.primaryPane.GetIsActive() {
+				m.dirTree.GoUp()
+				m.scrollPrimaryPane()
+				m.updateStatusBarContent()
+				m.primaryPane.SetContent(m.dirTree.View())
+				m.statusBar.SetItemSize("")
 
-					return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
-				}
-
-				m.secondaryPane.LineUp(1)
+				return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
 			}
+
+			m.secondaryPane.LineUp(1)
 
 		// Open directory or read file content and display in secondary pane.
 		case key.Matches(msg, m.keys.Right):

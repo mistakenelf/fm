@@ -129,6 +129,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case spinner.TickMsg:
 		m.Spinner, cmd = m.Spinner.Update(msg)
 		cmds = append(cmds, cmd)
+	case tea.WindowSizeMsg:
+		m.SetSize(msg.Width)
 	}
 
 	m.Textinput, cmd = m.Textinput.Update(msg)
