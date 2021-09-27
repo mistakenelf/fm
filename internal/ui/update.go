@@ -158,11 +158,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.help.Width = msg.Width
 
 		if m.colorimage.GetImage() != nil {
-			resizeImageCmd := m.redrawImage(
+			return m, m.redrawImage(
 				m.secondaryPane.GetWidth()-m.secondaryPane.GetHorizontalFrameSize(),
 				m.secondaryPane.GetHeight(),
 			)
-			cmds = append(cmds, resizeImageCmd)
 		}
 
 		if m.markdown.GetContent() != "" {
@@ -187,8 +186,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				Render(m.help.View(m.keys)),
 			)
 		}
-
-		return m, tea.Batch(cmds...)
 
 	// Any time a mouse event is received, we get this message.
 	case tea.MouseMsg:
