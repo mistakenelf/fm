@@ -2,7 +2,7 @@ package ui
 
 import (
 	"context"
-	"io/fs"
+	"os"
 
 	"github.com/knipferrc/fm/internal/colorimage"
 	"github.com/knipferrc/fm/internal/config"
@@ -37,7 +37,7 @@ type Model struct {
 	markdown              markdown.Model
 	sourcecode            sourcecode.Model
 	previousKey           tea.KeyMsg
-	itemToMove            fs.DirEntry
+	itemToMove            os.FileInfo
 	appConfig             config.Config
 	directoryItemSizeCtx  *directoryItemSizeCtx
 	theme                 theme.Theme

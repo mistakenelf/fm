@@ -2,7 +2,7 @@ package statusbar
 
 import (
 	"fmt"
-	"io/fs"
+	"os"
 
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/icons"
@@ -30,8 +30,8 @@ type Model struct {
 	ShowCommandBar     bool
 	InMoveMode         bool
 	ItemSize           string
-	SelectedFile       fs.DirEntry
-	ItemToMove         fs.DirEntry
+	SelectedFile       os.FileInfo
+	ItemToMove         os.FileInfo
 	FirstColumnColors  Color
 	SecondColumnColors Color
 	ThirdColumnColors  Color
@@ -101,7 +101,7 @@ func (m *Model) FocusCommandBar() {
 }
 
 // SetContent sets the content of the statusbar.
-func (m *Model) SetContent(totalFiles, cursor int, showCommandBar, inMoveMode bool, selectedFile, itemToMove fs.DirEntry) {
+func (m *Model) SetContent(totalFiles, cursor int, showCommandBar, inMoveMode bool, selectedFile, itemToMove os.FileInfo) {
 	m.TotalFiles = totalFiles
 	m.Cursor = cursor
 	m.ShowCommandBar = showCommandBar
@@ -157,11 +157,6 @@ func (m Model) View() string {
 			currentPath = dirfs.CurrentDirectory
 		}
 
-		fileInfo, err := m.SelectedFile.Info()
-		if err != nil {
-			return err.Error()
-		}
-
 		if m.ItemSize != "" {
 			fileSize = m.ItemSize
 		}
@@ -170,7 +165,7 @@ func (m Model) View() string {
 		// its size, the mode and the current path.
 		status = fmt.Sprintf("%s %s %s",
 			fileSize,
-			fileInfo.Mode().String(),
+			m.SelectedFile.Mode().String(),
 			currentPath,
 		)
 	}

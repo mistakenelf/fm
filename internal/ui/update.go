@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/knipferrc/fm/dirfs"
 
@@ -296,20 +297,28 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Open directory or read file content and display in secondary pane.
 		case key.Matches(msg, m.keys.Right):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
-				if m.dirTree.GetSelectedFile().IsDir() && !m.statusBar.CommandBarFocused() {
+				switch {
+				case m.dirTree.GetSelectedFile().IsDir() && !m.statusBar.CommandBarFocused():
 					m.statusBar.SetItemSize("")
 					currentDir, _ := dirfs.GetWorkingDirectory()
 
 					return m, m.updateDirectoryListing(
 						fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()),
 					)
-				}
+				case m.dirTree.GetSelectedFile().Mode()&os.ModeSymlink == os.ModeSymlink:
+					m.statusBar.SetItemSize("")
+					originFile, _ := os.Readlink(m.dirTree.GetSelectedFile().Name())
 
-				return m, m.readFileContent(
-					m.dirTree.GetSelectedFile(),
-					m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
-					m.secondaryPane.GetHeight(),
-				)
+					return m, m.updateDirectoryListing(
+						originFile,
+					)
+				default:
+					return m, m.readFileContent(
+						m.dirTree.GetSelectedFile(),
+						m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
+						m.secondaryPane.GetHeight(),
+					)
+				}
 			}
 
 		// Jump to the bottom of a pane.

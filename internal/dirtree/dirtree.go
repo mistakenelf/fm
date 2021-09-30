@@ -3,6 +3,7 @@ package dirtree
 import (
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 
 	"github.com/knipferrc/fm/icons"
@@ -54,9 +55,10 @@ func (m *Model) GotoBottom() {
 }
 
 // GetSelectedFile returns the currently selected file in the tree.
-func (m Model) GetSelectedFile() fs.DirEntry {
+func (m Model) GetSelectedFile() os.FileInfo {
 	if len(m.Files) > 0 {
-		return m.Files[m.Cursor]
+		fileInfo, _ := m.Files[m.Cursor].Info()
+		return fileInfo
 	}
 
 	return nil
