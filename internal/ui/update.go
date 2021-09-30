@@ -307,11 +307,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					)
 				case m.dirTree.GetSelectedFile().Mode()&os.ModeSymlink == os.ModeSymlink:
 					m.statusBar.SetItemSize("")
-					originFile, _ := os.Readlink(m.dirTree.GetSelectedFile().Name())
+					symlinkFile, _ := os.Readlink(m.dirTree.GetSelectedFile().Name())
 
-					return m, m.updateDirectoryListing(
-						originFile,
-					)
+					return m, m.updateDirectoryListing(symlinkFile)
 				default:
 					return m, m.readFileContent(
 						m.dirTree.GetSelectedFile(),
@@ -455,10 +453,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Zip up the currently selected item.
 		case key.Matches(msg, m.keys.Zip):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
-				currentDir, _ := dirfs.GetWorkingDirectory()
-
 				return m, tea.Sequentially(
-					m.zipDirectory(fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name())),
+					m.zipDirectory(m.dirTree.GetSelectedFile().Name()),
 					m.updateDirectoryListing(dirfs.CurrentDirectory),
 				)
 			}
@@ -466,10 +462,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Unzip the currently selected zip file.
 		case key.Matches(msg, m.keys.Unzip):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
-				currentDir, _ := dirfs.GetWorkingDirectory()
-
 				return m, tea.Sequentially(
-					m.unzipDirectory(fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name())),
+					m.unzipDirectory(m.dirTree.GetSelectedFile().Name()),
 					m.updateDirectoryListing(dirfs.CurrentDirectory),
 				)
 			}
