@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"os"
+	"os/exec"
 
 	"github.com/knipferrc/fm/dirfs"
 
@@ -483,6 +484,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.updateDirectoryListing(dirfs.CurrentDirectory),
 				)
 			}
+
+		// Edit the currently selected file.
+		case key.Matches(msg, m.keys.EditFile):
+			if !m.showCommandBar && m.primaryPane.GetIsActive() && !m.dirTree.GetSelectedFile().IsDir() {
+				vimCmd := exec.Command("vim", m.dirTree.GetSelectedFile().Name())
+				vimCmd.Stdin = os.Stdin
+				vimCmd.Stdout = os.Stdout
+				vimCmd.Stderr = os.Stderr
+				err := vimCmd.Start()
+				if err != nil {
+					return m, nil
+				}
+				err = vimCmd.Wait()
+				if err != nil {
+					return m, nil
+				}
+			}
+
+			return m, m.updateDirectoryListing(dirfs.CurrentDirectory)
 
 		// Reset FM to its initial state.
 		case key.Matches(msg, m.keys.Escape):
