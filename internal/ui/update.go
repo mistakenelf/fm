@@ -308,8 +308,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				case m.dirTree.GetSelectedFile().Mode()&os.ModeSymlink == os.ModeSymlink:
 					m.statusBar.SetItemSize("")
 					symlinkFile, _ := os.Readlink(m.dirTree.GetSelectedFile().Name())
+					fileInfo, _ := os.Stat(symlinkFile)
 
-					return m, m.updateDirectoryListing(symlinkFile)
+					if fileInfo.IsDir() {
+						return m, m.updateDirectoryListing(symlinkFile)
+					}
+
+					return m, m.readFileContent(
+						fileInfo,
+						m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
+						m.secondaryPane.GetHeight(),
+					)
 				default:
 					return m, m.readFileContent(
 						m.dirTree.GetSelectedFile(),
