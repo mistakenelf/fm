@@ -288,3 +288,10 @@ func (m Model) getDirectoryItemSizeCmd(name string) tea.Cmd {
 		return nil
 	}
 }
+
+// handleErrorCmd returns an error message to the UI.
+func (m Model) handleErrorCmd(err error) tea.Cmd {
+	return func() tea.Msg {
+		return errorMsg(err.Error())
+	}
+}

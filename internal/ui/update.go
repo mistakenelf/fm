@@ -259,7 +259,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.Left):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.statusBar.SetItemSize("")
-				m.previousDirectory, _ = dirfs.GetWorkingDirectory()
+				previousDirectory, err := dirfs.GetWorkingDirectory()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
+
+				m.previousDirectory = previousDirectory
 
 				return m, m.updateDirectoryListingCmd(
 					fmt.Sprintf("%s/%s", m.previousDirectory, dirfs.PreviousDirectory),
@@ -300,15 +305,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				switch {
 				case m.dirTree.GetSelectedFile().IsDir() && !m.statusBar.CommandBarFocused():
 					m.statusBar.SetItemSize("")
-					currentDir, _ := dirfs.GetWorkingDirectory()
+					currentDir, err := dirfs.GetWorkingDirectory()
+					if err != nil {
+						return m, m.handleErrorCmd(err)
+					}
 
 					return m, m.updateDirectoryListingCmd(
 						fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()),
 					)
 				case m.dirTree.GetSelectedFile().Mode()&os.ModeSymlink == os.ModeSymlink:
 					m.statusBar.SetItemSize("")
-					symlinkFile, _ := os.Readlink(m.dirTree.GetSelectedFile().Name())
-					fileInfo, _ := os.Stat(symlinkFile)
+					symlinkFile, err := os.Readlink(m.dirTree.GetSelectedFile().Name())
+					if err != nil {
+						return m, m.handleErrorCmd(err)
+					}
+
+					fileInfo, err := os.Stat(symlinkFile)
+					if err != nil {
+						return m, m.handleErrorCmd(err)
+					}
 
 					if fileInfo.IsDir() {
 						return m, m.updateDirectoryListingCmd(symlinkFile)
@@ -419,7 +434,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// command bar is not curently open.
 		case key.Matches(msg, m.keys.OpenHomeDirectory):
 			if !m.showCommandBar {
-				homeDir, _ := dirfs.GetHomeDirectory()
+				homeDir, err := dirfs.GetHomeDirectory()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
+
 				return m, m.updateDirectoryListingCmd(homeDir)
 			}
 
@@ -454,7 +473,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				m.inMoveMode = true
 				m.primaryPane.ShowAlternateBorder(true)
-				m.initialMoveDirectory, _ = dirfs.GetWorkingDirectory()
+				initialMoveDirectory, err := dirfs.GetWorkingDirectory()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
+
+				m.initialMoveDirectory = initialMoveDirectory
 				m.itemToMove = m.dirTree.GetSelectedFile()
 				m.updateStatusBarContent()
 			}
