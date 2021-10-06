@@ -36,8 +36,8 @@ type readFileContentMsg struct {
 	image       image.Image
 }
 
-// updateDirectoryListing updates the directory listing based on the name of the direcoctory provided.
-func (m Model) updateDirectoryListing(name string) tea.Cmd {
+// updateDirectoryListingCmd updates the directory listing based on the name of the direcoctory provided.
+func (m Model) updateDirectoryListingCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		files, err := dirfs.GetDirectoryListing(name, m.dirTree.ShowHidden)
 		if err != nil {
@@ -48,8 +48,8 @@ func (m Model) updateDirectoryListing(name string) tea.Cmd {
 	}
 }
 
-// renameFileOrDir renames a file or directory based on the name and value provided.
-func (m Model) renameFileOrDir(name, value string) tea.Cmd {
+// renameFileOrDirCmd renames a file or directory based on the name and value provided.
+func (m Model) renameFileOrDirCmd(name, value string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.RenameDirOrFile(name, value); err != nil {
 			return errorMsg(err.Error())
@@ -59,8 +59,8 @@ func (m Model) renameFileOrDir(name, value string) tea.Cmd {
 	}
 }
 
-// moveDirectoryItem moves a file to the current working directory.
-func (m Model) moveDirectoryItem(name string) tea.Cmd {
+// moveDirectoryItemCmd moves a file to the current working directory.
+func (m Model) moveDirectoryItemCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		workingDir, err := dirfs.GetWorkingDirectory()
 		if err != nil {
@@ -88,8 +88,8 @@ func (m Model) moveDirectoryItem(name string) tea.Cmd {
 	}
 }
 
-// deleteDir deletes a directory based on the name provided.
-func (m Model) deleteDir(name string) tea.Cmd {
+// deleteDirectoryCmd deletes a directory based on the name provided.
+func (m Model) deleteDirectoryCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.DeleteDirectory(name); err != nil {
 			return errorMsg(err.Error())
@@ -99,8 +99,8 @@ func (m Model) deleteDir(name string) tea.Cmd {
 	}
 }
 
-// deleteFile deletes a file based on the name provided.
-func (m Model) deleteFile(name string) tea.Cmd {
+// deleteFileCmd deletes a file based on the name provided.
+func (m Model) deleteFileCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.DeleteFile(name); err != nil {
 			return errorMsg(err.Error())
@@ -110,8 +110,8 @@ func (m Model) deleteFile(name string) tea.Cmd {
 	}
 }
 
-// readFileContent reads the content of a file and returns it.
-func (m Model) readFileContent(file os.FileInfo, width, height int) tea.Cmd {
+// readFileContentCmd reads the content of a file and returns it.
+func (m Model) readFileContentCmd(file os.FileInfo, width, height int) tea.Cmd {
 	return func() tea.Msg {
 		content, err := dirfs.ReadFileContent(file.Name())
 		if err != nil {
@@ -172,8 +172,8 @@ func (m Model) readFileContent(file os.FileInfo, width, height int) tea.Cmd {
 	}
 }
 
-// redrawImage redraws the image based on the width and height provided.
-func (m Model) redrawImage(width, height int) tea.Cmd {
+// redrawImageCmd redraws the image based on the width and height provided.
+func (m Model) redrawImageCmd(width, height int) tea.Cmd {
 	return func() tea.Msg {
 		imageString, err := colorimage.ImageToString(uint(width), uint(height), m.colorimage.Image)
 		if err != nil {
@@ -184,8 +184,8 @@ func (m Model) redrawImage(width, height int) tea.Cmd {
 	}
 }
 
-// createDir creates a directory based on the name provided.
-func (m Model) createDir(name string) tea.Cmd {
+// createDirectoryCmd creates a directory based on the name provided.
+func (m Model) createDirectoryCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.CreateDirectory(name); err != nil {
 			return errorMsg(err.Error())
@@ -195,8 +195,8 @@ func (m Model) createDir(name string) tea.Cmd {
 	}
 }
 
-// createFile creates a file based on the name provided.
-func (m Model) createFile(name string) tea.Cmd {
+// createFileCmd creates a file based on the name provided.
+func (m Model) createFileCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.CreateFile(name); err != nil {
 			return errorMsg(err.Error())
@@ -206,8 +206,8 @@ func (m Model) createFile(name string) tea.Cmd {
 	}
 }
 
-// zipDirectory zips a directory based on the name provided.
-func (m Model) zipDirectory(name string) tea.Cmd {
+// zipDirectoryCmd zips a directory based on the name provided.
+func (m Model) zipDirectoryCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		currentDir, err := dirfs.GetWorkingDirectory()
 		if err != nil {
@@ -223,8 +223,8 @@ func (m Model) zipDirectory(name string) tea.Cmd {
 	}
 }
 
-// unzipDirectory unzips a directory based on the name provided.
-func (m Model) unzipDirectory(name string) tea.Cmd {
+// unzipDirectoryCmd unzips a directory based on the name provided.
+func (m Model) unzipDirectoryCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		currentDir, err := dirfs.GetWorkingDirectory()
 		if err != nil {
@@ -240,8 +240,8 @@ func (m Model) unzipDirectory(name string) tea.Cmd {
 	}
 }
 
-// copyFile copies a file based on the name provided.
-func (m Model) copyFile(name string) tea.Cmd {
+// copyFileCmd copies a file based on the name provided.
+func (m Model) copyFileCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.CopyFile(name); err != nil {
 			return errorMsg(err.Error())
@@ -251,8 +251,8 @@ func (m Model) copyFile(name string) tea.Cmd {
 	}
 }
 
-// copyDirectory copies a directory based on the name provided.
-func (m Model) copyDirectory(name string) tea.Cmd {
+// copyDirectoryCmd copies a directory based on the name provided.
+func (m Model) copyDirectoryCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.CopyDirectory(name); err != nil {
 			return errorMsg(err.Error())
@@ -262,8 +262,8 @@ func (m Model) copyDirectory(name string) tea.Cmd {
 	}
 }
 
-// getDirectoryItemSize calculates the size of a directory or file.
-func (m Model) getDirectoryItemSize(name string) tea.Cmd {
+// getDirectoryItemSizeCmd calculates the size of a directory or file.
+func (m Model) getDirectoryItemSizeCmd(name string) tea.Cmd {
 	if m.directoryItemSizeCtx != nil && m.directoryItemSizeCtx.cancel != nil {
 		m.directoryItemSizeCtx.cancel()
 	}
@@ -286,5 +286,12 @@ func (m Model) getDirectoryItemSize(name string) tea.Cmd {
 		}
 
 		return nil
+	}
+}
+
+// handleErrorCmd returns an error message to the UI.
+func (m Model) handleErrorCmd(err error) tea.Cmd {
+	return func() tea.Msg {
+		return errorMsg(err.Error())
 	}
 }

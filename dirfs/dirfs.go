@@ -390,30 +390,23 @@ func GetDirectoryItemSize(path string) (int64, error) {
 		return curFile.Size(), nil
 	}
 
-	entries, err := os.ReadDir(path)
-	if err != nil {
-		return 0, err
-	}
-
-	var total int64
-	for _, entry := range entries {
-		if entry.IsDir() {
-			size, err := GetDirectoryItemSize(filepath.Join(path, entry.Name()))
-			if err != nil {
-				return 0, err
-			}
-
-			total += size
-		} else {
-			info, err := entry.Info()
-
-			if err != nil {
-				return 0, err
-			}
-
-			total += info.Size()
+	var size int64
+	err = filepath.WalkDir(path, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
 		}
-	}
 
-	return total, nil
+		fileInfo, err := d.Info()
+		if err != nil {
+			return err
+		}
+
+		if !d.IsDir() {
+			size += fileInfo.Size()
+		}
+
+		return err
+	})
+
+	return size, err
 }

@@ -75,7 +75,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.statusBar.ResetCommandBar()
 		m.updateStatusBarContent()
 
-		return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
+		return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
 
 	// A moveDirItemMsg is received any time a file or directory has been moved.
 	case moveDirItemMsg:
@@ -160,7 +160,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		switch {
 		case m.colorimage.GetImage() != nil:
-			return m, m.redrawImage(
+			return m, m.redrawImageCmd(
 				m.secondaryPane.GetWidth()-m.secondaryPane.GetHorizontalFrameSize(),
 				m.secondaryPane.GetHeight(),
 			)
@@ -198,7 +198,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
 
-				return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
+				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
 			}
 
 			m.secondaryPane.LineUp(3)
@@ -215,7 +215,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
 
-				return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
+				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
 			}
 
 			m.secondaryPane.LineDown(3)
@@ -235,7 +235,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
 
-				return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
+				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
 			}
 
 			m.secondaryPane.GotoTop()
@@ -260,9 +260,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.Left):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.statusBar.SetItemSize("")
-				m.previousDirectory, _ = dirfs.GetWorkingDirectory()
+				previousDirectory, err := dirfs.GetWorkingDirectory()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 
-				return m, m.updateDirectoryListing(
+				m.previousDirectory = previousDirectory
+
+				return m, m.updateDirectoryListingCmd(
 					fmt.Sprintf("%s/%s", m.previousDirectory, dirfs.PreviousDirectory),
 				)
 			}
@@ -276,7 +281,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
 
-				return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
+				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
 			}
 
 			m.secondaryPane.LineDown(1)
@@ -290,7 +295,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
 
-				return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
+				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
 			}
 
 			m.secondaryPane.LineUp(1)
@@ -301,18 +306,37 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				switch {
 				case m.dirTree.GetSelectedFile().IsDir() && !m.statusBar.CommandBarFocused():
 					m.statusBar.SetItemSize("")
-					currentDir, _ := dirfs.GetWorkingDirectory()
+					currentDir, err := dirfs.GetWorkingDirectory()
+					if err != nil {
+						return m, m.handleErrorCmd(err)
+					}
 
-					return m, m.updateDirectoryListing(
+					return m, m.updateDirectoryListingCmd(
 						fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()),
 					)
 				case m.dirTree.GetSelectedFile().Mode()&os.ModeSymlink == os.ModeSymlink:
 					m.statusBar.SetItemSize("")
-					symlinkFile, _ := os.Readlink(m.dirTree.GetSelectedFile().Name())
+					symlinkFile, err := os.Readlink(m.dirTree.GetSelectedFile().Name())
+					if err != nil {
+						return m, m.handleErrorCmd(err)
+					}
 
-					return m, m.updateDirectoryListing(symlinkFile)
+					fileInfo, err := os.Stat(symlinkFile)
+					if err != nil {
+						return m, m.handleErrorCmd(err)
+					}
+
+					if fileInfo.IsDir() {
+						return m, m.updateDirectoryListingCmd(symlinkFile)
+					}
+
+					return m, m.readFileContentCmd(
+						fileInfo,
+						m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
+						m.secondaryPane.GetHeight(),
+					)
 				default:
-					return m, m.readFileContent(
+					return m, m.readFileContentCmd(
 						m.dirTree.GetSelectedFile(),
 						m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
 						m.secondaryPane.GetHeight(),
@@ -328,7 +352,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
 
-				return m, m.getDirectoryItemSize(m.dirTree.GetSelectedFile().Name())
+				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
 			}
 
 			m.secondaryPane.GotoBottom()
@@ -338,21 +362,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.Enter):
 			switch {
 			case m.inMoveMode:
-				return m, m.moveDirectoryItem(m.itemToMove.Name())
+				return m, m.moveDirectoryItemCmd(m.itemToMove.Name())
 			case m.inCreateFileMode:
 				return m, tea.Sequentially(
-					m.createFile(m.statusBar.CommandBarValue()),
-					m.updateDirectoryListing(dirfs.CurrentDirectory),
+					m.createFileCmd(m.statusBar.CommandBarValue()),
+					m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
 			case m.inCreateDirectoryMode:
 				return m, tea.Sequentially(
-					m.createDir(m.statusBar.CommandBarValue()),
-					m.updateDirectoryListing(dirfs.CurrentDirectory),
+					m.createDirectoryCmd(m.statusBar.CommandBarValue()),
+					m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
 			case m.inRenameMode:
 				return m, tea.Sequentially(
-					m.renameFileOrDir(m.dirTree.GetSelectedFile().Name(), m.statusBar.CommandBarValue()),
-					m.updateDirectoryListing(dirfs.CurrentDirectory),
+					m.renameFileOrDirCmd(m.dirTree.GetSelectedFile().Name(), m.statusBar.CommandBarValue()),
+					m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
 			default:
 				return m, nil
@@ -363,14 +387,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
-						m.deleteDir(m.dirTree.GetSelectedFile().Name()),
-						m.updateDirectoryListing(dirfs.CurrentDirectory),
+						m.deleteDirectoryCmd(m.dirTree.GetSelectedFile().Name()),
+						m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 					)
 				}
 
 				return m, tea.Sequentially(
-					m.deleteFile(m.dirTree.GetSelectedFile().Name()),
-					m.updateDirectoryListing(dirfs.CurrentDirectory),
+					m.deleteFileCmd(m.dirTree.GetSelectedFile().Name()),
+					m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
 			}
 
@@ -411,27 +435,31 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// command bar is not curently open.
 		case key.Matches(msg, m.keys.OpenHomeDirectory):
 			if !m.showCommandBar {
-				homeDir, _ := dirfs.GetHomeDirectory()
-				return m, m.updateDirectoryListing(homeDir)
+				homeDir, err := dirfs.GetHomeDirectory()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
+
+				return m, m.updateDirectoryListingCmd(homeDir)
 			}
 
 		// Shortcut to go back to the previous directory.
 		case key.Matches(msg, m.keys.OpenPreviousDirectory):
 			if !m.showCommandBar && m.previousDirectory != "" {
-				return m, m.updateDirectoryListing(m.previousDirectory)
+				return m, m.updateDirectoryListingCmd(m.previousDirectory)
 			}
 
 		// Shortcut to go back to the root directory.
 		case key.Matches(msg, m.keys.OpenRootDirectory):
 			if !m.showCommandBar {
-				return m, m.updateDirectoryListing(dirfs.RootDirectory)
+				return m, m.updateDirectoryListingCmd(dirfs.RootDirectory)
 			}
 
 		// Toggle hidden files and folders.
 		case key.Matches(msg, m.keys.ToggleHidden):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() {
 				m.dirTree.ToggleHidden()
-				return m, m.updateDirectoryListing(dirfs.CurrentDirectory)
+				return m, m.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 			}
 
 		// Toggle between the two panes if the command bar is not currently active.
@@ -446,7 +474,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				m.inMoveMode = true
 				m.primaryPane.ShowAlternateBorder(true)
-				m.initialMoveDirectory, _ = dirfs.GetWorkingDirectory()
+				initialMoveDirectory, err := dirfs.GetWorkingDirectory()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
+
+				m.initialMoveDirectory = initialMoveDirectory
 				m.itemToMove = m.dirTree.GetSelectedFile()
 				m.updateStatusBarContent()
 			}
@@ -455,8 +488,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.Zip):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				return m, tea.Sequentially(
-					m.zipDirectory(m.dirTree.GetSelectedFile().Name()),
-					m.updateDirectoryListing(dirfs.CurrentDirectory),
+					m.zipDirectoryCmd(m.dirTree.GetSelectedFile().Name()),
+					m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
 			}
 
@@ -464,8 +497,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.Unzip):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				return m, tea.Sequentially(
-					m.unzipDirectory(m.dirTree.GetSelectedFile().Name()),
-					m.updateDirectoryListing(dirfs.CurrentDirectory),
+					m.unzipDirectoryCmd(m.dirTree.GetSelectedFile().Name()),
+					m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
 			}
 
@@ -474,14 +507,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
-						m.copyDirectory(m.dirTree.GetSelectedFile().Name()),
-						m.updateDirectoryListing(dirfs.CurrentDirectory),
+						m.copyDirectoryCmd(m.dirTree.GetSelectedFile().Name()),
+						m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 					)
 				}
 
 				return m, tea.Sequentially(
-					m.copyFile(m.dirTree.GetSelectedFile().Name()),
-					m.updateDirectoryListing(dirfs.CurrentDirectory),
+					m.copyFileCmd(m.dirTree.GetSelectedFile().Name()),
+					m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
 			}
 

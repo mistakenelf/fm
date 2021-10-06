@@ -30,7 +30,7 @@ func (m Model) Init() tea.Cmd {
 		}
 
 		if strings.HasPrefix(startDir, "/") {
-			cmds = append(cmds, m.updateDirectoryListing(startDir))
+			cmds = append(cmds, m.updateDirectoryListingCmd(startDir))
 		} else {
 			path, err := os.Getwd()
 			if err != nil {
@@ -39,7 +39,7 @@ func (m Model) Init() tea.Cmd {
 
 			filePath := filepath.Join(path, startDir)
 
-			cmds = append(cmds, m.updateDirectoryListing(filePath))
+			cmds = append(cmds, m.updateDirectoryListingCmd(filePath))
 		}
 	case m.appConfig.Settings.StartDir == dirfs.HomeDirectory:
 		homeDir, err := dirfs.GetHomeDirectory()
@@ -47,9 +47,9 @@ func (m Model) Init() tea.Cmd {
 			log.Fatal(err)
 		}
 
-		cmds = append(cmds, m.updateDirectoryListing(homeDir))
+		cmds = append(cmds, m.updateDirectoryListingCmd(homeDir))
 	default:
-		cmds = append(cmds, m.updateDirectoryListing(m.appConfig.Settings.StartDir))
+		cmds = append(cmds, m.updateDirectoryListingCmd(m.appConfig.Settings.StartDir))
 	}
 
 	cmds = append(cmds, spinner.Tick)
