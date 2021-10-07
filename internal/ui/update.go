@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -521,21 +522,27 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Edit the currently selected file.
 		case key.Matches(msg, m.keys.EditFile):
 			if !m.showCommandBar && m.primaryPane.GetIsActive() && !m.dirTree.GetSelectedFile().IsDir() {
-				vimCmd := exec.Command("vim", m.dirTree.GetSelectedFile().Name())
-				vimCmd.Stdin = os.Stdin
-				vimCmd.Stdout = os.Stdout
-				vimCmd.Stderr = os.Stderr
-				err := vimCmd.Start()
-				if err != nil {
-					return m, nil
+				editorPath := os.Getenv("EDITOR")
+				if editorPath == "" {
+					return m, m.handleErrorCmd(errors.New("$EDITOR not set"))
 				}
-				err = vimCmd.Wait()
+
+				editorCmd := exec.Command(editorPath, m.dirTree.GetSelectedFile().Name())
+				editorCmd.Stdin = os.Stdin
+				editorCmd.Stdout = os.Stdout
+				editorCmd.Stderr = os.Stderr
+				err := editorCmd.Start()
 				if err != nil {
-					return m, nil
+					return m, m.handleErrorCmd(err)
+				}
+
+				err = editorCmd.Wait()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
 				}
 			}
 
-			return m, m.updateDirectoryListing(dirfs.CurrentDirectory)
+			return m, m.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 
 		// Reset FM to its initial state.
 		case key.Matches(msg, m.keys.Escape):
