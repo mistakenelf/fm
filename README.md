@@ -54,6 +54,7 @@ go install github.com/knipferrc/fm@latest
 - Themes (default, gruvbox, spooky)
 - Render PNG, JPG and JPEG as strings
 - Colors adapt to terminal background
+- Open selected file in editor set in EDITOR environment variable (currently only supports GUI editors)
 
 ## Themes
 
@@ -103,6 +104,7 @@ go install github.com/knipferrc/fm@latest
 | n          | Create a new file in the current directory                                                                                                                                                                                                                       |
 | N          | Create a new directory in the current directory                                                                                                                                                                                                                  |
 | r          | Rename the currently selected file or directory                                                                                                                                                                                                                  |
+| E          | Open in editor set in EDITOR environment variable                                                                                                                                                                                                                |
 
 ## Configuration
 
