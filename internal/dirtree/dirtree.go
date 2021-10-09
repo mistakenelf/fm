@@ -57,7 +57,11 @@ func (m *Model) GotoBottom() {
 // GetSelectedFile returns the currently selected file in the tree.
 func (m Model) GetSelectedFile() os.FileInfo {
 	if len(m.Files) > 0 {
-		fileInfo, _ := m.Files[m.Cursor].Info()
+		fileInfo, err := m.Files[m.Cursor].Info()
+		if err != nil {
+			return nil
+		}
+
 		return fileInfo
 	}
 
