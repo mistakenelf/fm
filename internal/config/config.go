@@ -30,6 +30,15 @@ func LoadConfig() {
 	viper.SetConfigName(".fm")
 	viper.SetConfigType("yml")
 
+	// Setup config default.
+	viper.SetDefault("settings.start_dir", ".")
+	viper.SetDefault("settings.show_icons", true)
+	viper.SetDefault("settings.enable_logging", false)
+	viper.SetDefault("settings.enable_mousewheel", true)
+	viper.SetDefault("settings.pretty_markdown", true)
+	viper.SetDefault("settings.borderless", false)
+	viper.SetDefault("settings.theme", "default")
+
 	if err := viper.SafeWriteConfig(); err != nil {
 		if os.IsNotExist(err) {
 			err = viper.WriteConfig()
@@ -53,16 +62,4 @@ func GetConfig() (config Config) {
 	}
 
 	return
-}
-
-// SetDefaults sets default values for the config.
-func SetDefaults() {
-	// App Settings.
-	viper.SetDefault("settings.start_dir", ".")
-	viper.SetDefault("settings.show_icons", true)
-	viper.SetDefault("settings.enable_logging", false)
-	viper.SetDefault("settings.enable_mousewheel", true)
-	viper.SetDefault("settings.pretty_markdown", true)
-	viper.SetDefault("settings.borderless", false)
-	viper.SetDefault("settings.theme", "default")
 }

@@ -18,7 +18,6 @@ var rootCmd = &cobra.Command{
 	Version: "0.5.4",
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		config.SetDefaults()
 		config.LoadConfig()
 
 		cfg := config.GetConfig()
