@@ -156,7 +156,7 @@ func (m Model) readFileContentCmd(file os.FileInfo, width, height int) tea.Cmd {
 				image:       img,
 			}
 		default:
-			code, err := sourcecode.Highlight(content, filepath.Ext(file.Name()))
+			code, err := sourcecode.Highlight(content, filepath.Ext(file.Name()), m.appConfig.Settings.SyntaxTheme)
 			if err != nil {
 				return errorMsg(err.Error())
 			}

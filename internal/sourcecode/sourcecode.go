@@ -16,9 +16,9 @@ type Model struct {
 }
 
 // Highlight returns a syntax highlighted string of text.
-func Highlight(content, extension string) (string, error) {
+func Highlight(content, extension, syntaxTheme string) (string, error) {
 	buf := new(bytes.Buffer)
-	if err := quick.Highlight(buf, content, extension, "terminal256", "dracula"); err != nil {
+	if err := quick.Highlight(buf, content, extension, "terminal256", syntaxTheme); err != nil {
 		return "", err
 	}
 

@@ -16,6 +16,7 @@ type SettingsConfig struct {
 	PrettyMarkdown   bool   `mapstructure:"pretty_markdown"`
 	Borderless       bool   `mapstructure:"borderless"`
 	Theme            string `mapstructure:"theme"`
+	SyntaxTheme      string `mapstructure:"syntax_theme"`
 }
 
 // Config represents the main config for the application.
@@ -38,6 +39,7 @@ func LoadConfig() {
 	viper.SetDefault("settings.pretty_markdown", true)
 	viper.SetDefault("settings.borderless", false)
 	viper.SetDefault("settings.theme", "default")
+	viper.SetDefault("settings.syntax_theme", "dracula")
 
 	if err := viper.SafeWriteConfig(); err != nil {
 		if os.IsNotExist(err) {

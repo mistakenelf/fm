@@ -48,7 +48,7 @@ go install github.com/knipferrc/fm@latest
 - Double pane layout
 - File icons
 - Layout adjusts to terminal resize
-- Syntax highlighting for source code
+- Syntax highlighting for source code with customizable themes using styles from [chroma](https://swapoff.org/chroma/playground/) (dracula, monokai etc.)
 - Render pretty markdown
 - Mouse support
 - Themes (default, gruvbox, spooky)
@@ -118,6 +118,7 @@ settings:
   pretty_markdown: true
   show_icons: true
   start_dir: .
+  syntax_theme: dracula
   theme: default
 ```
 
