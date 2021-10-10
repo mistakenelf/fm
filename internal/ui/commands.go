@@ -143,7 +143,7 @@ func (m Model) readFileContentCmd(file os.FileInfo, width, height int) tea.Cmd {
 				return errorMsg(err.Error())
 			}
 
-			imageString, err := colorimage.ImageToString(uint(width), uint(height), img)
+			imageString, err := colorimage.ImageToString(width, height, img)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
@@ -175,7 +175,7 @@ func (m Model) readFileContentCmd(file os.FileInfo, width, height int) tea.Cmd {
 // redrawImageCmd redraws the image based on the width and height provided.
 func (m Model) redrawImageCmd(width, height int) tea.Cmd {
 	return func() tea.Msg {
-		imageString, err := colorimage.ImageToString(uint(width), uint(height), m.colorimage.Image)
+		imageString, err := colorimage.ImageToString(width, height, m.colorimage.Image)
 		if err != nil {
 			return errorMsg(err.Error())
 		}

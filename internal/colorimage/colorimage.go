@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/disintegration/imaging"
 	"github.com/lucasb-eyer/go-colorful"
-	"github.com/nfnt/resize"
 )
 
 // Model is a struct that contains all the properties of colorimage.
@@ -17,15 +17,15 @@ type Model struct {
 }
 
 // ImageToString converts an image to a string representation of an image.
-func ImageToString(width, height uint, img image.Image) (string, error) {
-	img = resize.Resize(width, height*2-4, img, resize.Lanczos3)
+func ImageToString(width, height int, img image.Image) (string, error) {
+	img = imaging.Resize(img, width, 0, imaging.Lanczos)
 	b := img.Bounds()
 	w := b.Max.X
 	h := b.Max.Y
 	str := strings.Builder{}
 
 	for y := 0; y < h; y += 2 {
-		for x := w; x < int(width); x += 2 {
+		for x := w; x < width; x += 2 {
 			str.WriteString(" ")
 		}
 
