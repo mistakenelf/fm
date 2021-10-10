@@ -36,7 +36,7 @@ type readFileContentMsg struct {
 	image       image.Image
 }
 
-// updateDirectoryListingCmd updates the directory listing based on the name of the direcoctory provided.
+// updateDirectoryListingCmd updates the directory listing based on the name of the directory provided.
 func (m Model) updateDirectoryListingCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		files, err := dirfs.GetDirectoryListing(name, m.dirTree.ShowHidden)
@@ -48,10 +48,10 @@ func (m Model) updateDirectoryListingCmd(name string) tea.Cmd {
 	}
 }
 
-// renameFileOrDirCmd renames a file or directory based on the name and value provided.
-func (m Model) renameFileOrDirCmd(name, value string) tea.Cmd {
+// renameDirectoryItemCmd renames a file or directory based on the name and value provided.
+func (m Model) renameDirectoryItemCmd(name, value string) tea.Cmd {
 	return func() tea.Msg {
-		if err := dirfs.RenameDirOrFile(name, value); err != nil {
+		if err := dirfs.RenameDirectoryItem(name, value); err != nil {
 			return errorMsg(err.Error())
 		}
 

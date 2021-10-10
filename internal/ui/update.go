@@ -376,7 +376,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				)
 			case m.inRenameMode:
 				return m, tea.Sequentially(
-					m.renameFileOrDirCmd(m.dirTree.GetSelectedFile().Name(), m.statusBar.CommandBarValue()),
+					m.renameDirectoryItemCmd(m.dirTree.GetSelectedFile().Name(), m.statusBar.CommandBarValue()),
 					m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
 			default:

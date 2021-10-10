@@ -110,7 +110,8 @@ var themeMap = map[string]Theme{
 	},
 }
 
-func GetCurrentTheme(theme string) Theme {
+// GetTheme returns a theme based on the given name.
+func GetTheme(theme string) Theme {
 	switch theme {
 	case "default":
 		return themeMap["default"]

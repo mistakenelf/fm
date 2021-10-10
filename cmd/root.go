@@ -58,7 +58,7 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-// Execute executes the root command which starts the application.
+// Execute runs the root command and starts the application.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

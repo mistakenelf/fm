@@ -20,8 +20,8 @@ const (
 	RootDirectory     = "/"
 )
 
-// RenameDirOrFile renames a directory or files given a source and destination.
-func RenameDirOrFile(src, dst string) error {
+// RenameDirectoryItem renames a directory or files given a source and destination.
+func RenameDirectoryItem(src, dst string) error {
 	err := os.Rename(src, dst)
 
 	return err

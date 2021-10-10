@@ -55,7 +55,7 @@ type Model struct {
 func NewModel() Model {
 	cfg := config.GetConfig()
 	keys := getDefaultKeyMap()
-	theme := theme.GetCurrentTheme(cfg.Settings.Theme)
+	theme := theme.GetTheme(cfg.Settings.Theme)
 
 	// Create a new spinner with some styling based on the config.
 	l := spinner.NewModel()

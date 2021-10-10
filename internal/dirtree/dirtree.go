@@ -12,7 +12,7 @@ import (
 	"github.com/muesli/reflow/truncate"
 )
 
-// Model is a struct to represent the properties on a dirtree.
+// Model is a struct to represent the properties of a dirtree.
 type Model struct {
 	Files               []fs.DirEntry
 	Width               int
@@ -34,7 +34,7 @@ func NewModel(showIcons bool, selectedItemColor, unselectedItemColor lipgloss.Ad
 	}
 }
 
-// SetContent update the files currently displayed in the tree.
+// SetContent sets the files currently displayed in the tree.
 func (m *Model) SetContent(files []fs.DirEntry) {
 	m.Files = files
 }

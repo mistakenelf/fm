@@ -9,7 +9,7 @@ import (
 	"github.com/nfnt/resize"
 )
 
-// Model is a struct that contains all the properties of the image.
+// Model is a struct that contains all the properties of colorimage.
 type Model struct {
 	Image   image.Image
 	Content string
@@ -49,17 +49,17 @@ func (m Model) GetImage() image.Image {
 	return m.Image
 }
 
-// SetContent sets the content of the image.
+// SetContent sets the content of the colorimage.
 func (m *Model) SetContent(content string) {
 	m.Content = content
 }
 
-// SetImage sets the image of the image.
+// SetImage sets the image of the colorimage.
 func (m *Model) SetImage(img image.Image) {
 	m.Image = img
 }
 
-// View returns a string representation of the image.
+// View returns a string representation of a colorimage.
 func (m Model) View() string {
 	return lipgloss.NewStyle().Width(m.Width).Render(m.Content)
 }
