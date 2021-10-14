@@ -27,6 +27,7 @@ type keyMap struct {
 	CreateDirectory       key.Binding
 	Rename                key.Binding
 	EditFile              key.Binding
+	PreviewDirectory      key.Binding
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view. It's part
@@ -56,6 +57,7 @@ func (k keyMap) ShortHelp() []key.Binding {
 		k.CreateDirectory,
 		k.Rename,
 		k.EditFile,
+		k.PreviewDirectory,
 	}
 }
 
@@ -87,6 +89,7 @@ func (k keyMap) FullHelp() [][]key.Binding {
 			k.CreateDirectory,
 			k.Rename,
 			k.EditFile,
+			k.PreviewDirectory,
 		},
 	}
 }
@@ -185,6 +188,10 @@ func getDefaultKeyMap() keyMap {
 		EditFile: key.NewBinding(
 			key.WithKeys("E"),
 			key.WithHelp("E", "edit the currently selected file"),
+		),
+		PreviewDirectory: key.NewBinding(
+			key.WithKeys("p"),
+			key.WithHelp("p", "preview the currently selected directory"),
 		),
 	}
 }

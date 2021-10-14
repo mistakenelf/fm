@@ -78,6 +78,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
 
+	case previewDirectoryListingMsg:
+		m.showCommandBar = false
+		m.inCreateFileMode = false
+		m.inCreateDirectoryMode = false
+		m.inRenameMode = false
+
+		m.dirTree.GotoTop()
+		m.dirTree.SetContent(msg)
+		m.secondaryPane.SetContent(m.dirTree.View())
+		m.secondaryPane.GotoTop()
+		m.statusBar.BlurCommandBar()
+		m.statusBar.ResetCommandBar()
+
+		return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
+
 	// A moveDirItemMsg is received any time a file or directory has been moved.
 	case moveDirItemMsg:
 		m.inMoveMode = false
@@ -543,6 +558,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			return m, m.updateDirectoryListingCmd(dirfs.CurrentDirectory)
+
+		case key.Matches(msg, m.keys.PreviewDirectory):
+			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetSelectedFile().IsDir() {
+				currentDir, err := dirfs.GetWorkingDirectory()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
+
+				return m, m.previewDirectoryListingCmd(
+					fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()),
+				)
+			}
+
+			return m, nil
 
 		// Reset FM to its initial state.
 		case key.Matches(msg, m.keys.Escape):
