@@ -78,20 +78,24 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
 
+	// previewDirectoryListingMsg shows a preview of a directory in the secondary pane.
 	case previewDirectoryListingMsg:
 		m.showCommandBar = false
 		m.inCreateFileMode = false
 		m.inCreateDirectoryMode = false
 		m.inRenameMode = false
 
-		m.dirTree.GotoTop()
-		m.dirTree.SetContent(msg)
-		m.secondaryPane.SetContent(m.dirTree.View())
+		m.markdown.SetContent("")
+		m.sourcecode.SetContent("")
+		m.colorimage.SetImage(nil)
+		m.dirTreePreview.GotoTop()
+		m.dirTreePreview.SetContent(msg)
+		m.secondaryPane.SetContent(m.dirTreePreview.View())
 		m.secondaryPane.GotoTop()
 		m.statusBar.BlurCommandBar()
 		m.statusBar.ResetCommandBar()
 
-		return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
+		return m, nil
 
 	// A moveDirItemMsg is received any time a file or directory has been moved.
 	case moveDirItemMsg:
@@ -114,18 +118,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.GotoTop()
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
+			m.dirTreePreview.SetContent(nil)
 			m.sourcecode.SetContent(msg.code)
 			m.secondaryPane.SetContent(m.sourcecode.View())
 		case msg.markdown != "":
 			m.secondaryPane.GotoTop()
 			m.colorimage.SetImage(nil)
 			m.sourcecode.SetContent("")
+			m.dirTreePreview.SetContent(nil)
 			m.markdown.SetContent(msg.markdown)
 			m.secondaryPane.SetContent(m.markdown.View())
 		case msg.image != nil:
 			m.secondaryPane.GotoTop()
 			m.markdown.SetContent("")
 			m.sourcecode.SetContent("")
+			m.dirTreePreview.SetContent(nil)
 			m.colorimage.SetImage(msg.image)
 			m.colorimage.SetContent(msg.imageString)
 			m.secondaryPane.SetContent(m.colorimage.View())
@@ -169,6 +176,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.primaryPane.SetSize(msg.Width/2, msg.Height-m.statusBar.GetHeight())
 		m.secondaryPane.SetSize(msg.Width/2, msg.Height-m.statusBar.GetHeight())
 		m.dirTree.SetSize(m.primaryPane.GetWidth())
+		m.dirTreePreview.SetSize(m.secondaryPane.GetWidth())
 		m.sourcecode.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.markdown.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.primaryPane.SetContent(m.dirTree.View())
@@ -184,7 +192,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.SetContent(m.markdown.View())
 		case m.sourcecode.GetContent() != "":
 			m.secondaryPane.SetContent(m.sourcecode.View())
-		case m.sourcecode.GetContent() == "" && m.markdown.GetContent() == "" && m.colorimage.GetImage() == nil:
+		case m.dirTreePreview.GetTotalFiles() != 0:
+			m.secondaryPane.SetContent(m.dirTreePreview.View())
+		case m.sourcecode.GetContent() == "" && m.markdown.GetContent() == "" && m.colorimage.GetImage() == nil && m.dirTreePreview.GetTotalFiles() == 0:
 			m.secondaryPane.SetContent(lipgloss.NewStyle().
 				Width(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize()).
 				Render(m.help.View(m.keys)),
@@ -596,6 +606,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
 			m.sourcecode.SetContent("")
+			m.dirTreePreview.SetContent(nil)
 			m.updateStatusBarContent()
 		}
 

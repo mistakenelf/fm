@@ -32,6 +32,7 @@ type Model struct {
 	secondaryPane         pane.Model
 	loader                spinner.Model
 	dirTree               dirtree.Model
+	dirTreePreview        dirtree.Model
 	statusBar             statusbar.Model
 	colorimage            colorimage.Model
 	markdown              markdown.Model
@@ -75,6 +76,13 @@ func NewModel() Model {
 		theme.UnselectedTreeItemColor,
 	)
 
+	// Create a new dirtree for previews.
+	dirTreePreview := dirtree.NewModel(
+		cfg.Settings.ShowIcons,
+		theme.UnselectedTreeItemColor,
+		theme.UnselectedTreeItemColor,
+	)
+
 	// Initialize the primary pane as active and pass in some config values.
 	primaryPane := pane.NewModel(
 		true,
@@ -113,19 +121,20 @@ func NewModel() Model {
 	)
 
 	return Model{
-		keys:          keys,
-		help:          h,
-		primaryPane:   primaryPane,
-		secondaryPane: secondaryPane,
-		loader:        l,
-		dirTree:       dirTree,
-		statusBar:     statusBar,
-		colorimage:    colorimage.Model{},
-		markdown:      markdown.Model{},
-		sourcecode:    sourcecode.Model{},
-		previousKey:   tea.KeyMsg{},
-		itemToMove:    nil,
-		appConfig:     cfg,
+		keys:           keys,
+		help:           h,
+		primaryPane:    primaryPane,
+		secondaryPane:  secondaryPane,
+		loader:         l,
+		dirTree:        dirTree,
+		dirTreePreview: dirTreePreview,
+		statusBar:      statusBar,
+		colorimage:     colorimage.Model{},
+		markdown:       markdown.Model{},
+		sourcecode:     sourcecode.Model{},
+		previousKey:    tea.KeyMsg{},
+		itemToMove:     nil,
+		appConfig:      cfg,
 		directoryItemSizeCtx: &directoryItemSizeCtx{
 			ctx: context.Background(),
 		},
