@@ -127,7 +127,7 @@ func getDefaultKeyMap() keyMap {
 		),
 		Enter: key.NewBinding(
 			key.WithKeys("enter"),
-			key.WithHelp("enter", "handle move mode and command parsing"),
+			key.WithHelp("enter", "confirm command input"),
 		),
 		OpenHomeDirectory: key.NewBinding(
 			key.WithKeys("~"),
