@@ -40,21 +40,13 @@ func CreateDirectory(name string) error {
 }
 
 // GetDirectoryListing returns a list of files and directories within a given directory.
-func GetDirectoryListing(dir string, showHidden, changeWorkingDirectory bool) ([]fs.DirEntry, error) {
+func GetDirectoryListing(dir string, showHidden bool) ([]fs.DirEntry, error) {
 	n := 0
 
 	// Read files from the directory.
 	files, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
-	}
-
-	// Update the apps directory to the directory currently being read.
-	if changeWorkingDirectory {
-		err = os.Chdir(dir)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	if !showHidden {
