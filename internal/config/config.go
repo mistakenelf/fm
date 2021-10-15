@@ -31,7 +31,7 @@ func LoadConfig() {
 	viper.SetConfigName(".fm")
 	viper.SetConfigType("yml")
 
-	// Setup config default.
+	// Setup config defaults.
 	viper.SetDefault("settings.start_dir", ".")
 	viper.SetDefault("settings.show_icons", true)
 	viper.SetDefault("settings.enable_logging", false)
