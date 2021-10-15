@@ -300,7 +300,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			// Scroll pane down.
 		case key.Matches(msg, m.keys.Down):
-			if !m.showCommandBar && m.primaryPane.GetIsActive() {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 1 {
 				m.dirTree.GoDown()
 				m.scrollPrimaryPane()
 				m.updateStatusBarContent()
@@ -314,7 +314,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Scroll pane up.
 		case key.Matches(msg, m.keys.Up):
-			if !m.showCommandBar && m.primaryPane.GetIsActive() {
+			if !m.showCommandBar && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 1 {
 				m.dirTree.GoUp()
 				m.scrollPrimaryPane()
 				m.updateStatusBarContent()
