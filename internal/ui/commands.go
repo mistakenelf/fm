@@ -25,7 +25,7 @@ import (
 
 type updateDirectoryListingMsg []fs.DirEntry
 type previewDirectoryListingMsg []fs.DirEntry
-type moveDirItemMsg []fs.DirEntry
+type moveDirectoryItemMsg []fs.DirEntry
 type errorMsg string
 type convertImageToStringMsg string
 type directoryItemSizeMsg string
@@ -40,7 +40,16 @@ type readFileContentMsg struct {
 // updateDirectoryListingCmd updates the directory listing based on the name of the directory provided.
 func (m Model) updateDirectoryListingCmd(name string) tea.Cmd {
 	return func() tea.Msg {
-		files, err := dirfs.GetDirectoryListing(name, m.dirTree.ShowHidden, true)
+		files, err := dirfs.GetDirectoryListing(name, m.dirTree.ShowHidden)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		err = os.Chdir(name)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
 		if err != nil {
 			return errorMsg(err.Error())
 		}
@@ -52,7 +61,7 @@ func (m Model) updateDirectoryListingCmd(name string) tea.Cmd {
 // previewDirectoryListingCmd updates the directory listing based on the name of the directory provided.
 func (m Model) previewDirectoryListingCmd(name string) tea.Cmd {
 	return func() tea.Msg {
-		files, err := dirfs.GetDirectoryListing(name, m.dirTree.ShowHidden, false)
+		files, err := dirfs.GetDirectoryListing(name, m.dirTree.ShowHidden)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
@@ -92,12 +101,17 @@ func (m Model) moveDirectoryItemCmd(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		files, err := dirfs.GetDirectoryListing(m.initialMoveDirectory, m.dirTree.ShowHidden, true)
+		files, err := dirfs.GetDirectoryListing(m.initialMoveDirectory, m.dirTree.ShowHidden)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		return moveDirItemMsg(files)
+		err = os.Chdir(m.initialMoveDirectory)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		return moveDirectoryItemMsg(files)
 	}
 }
 
