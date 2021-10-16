@@ -61,7 +61,13 @@ func (m Model) updateDirectoryListingCmd(name string) tea.Cmd {
 // previewDirectoryListingCmd updates the directory listing based on the name of the directory provided.
 func (m Model) previewDirectoryListingCmd(name string) tea.Cmd {
 	return func() tea.Msg {
-		files, err := dirfs.GetDirectoryListing(name, m.dirTree.ShowHidden)
+		currentDir, err := dirfs.GetWorkingDirectory()
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		fileName := fmt.Sprintf("%s/%s", currentDir, name)
+		files, err := dirfs.GetDirectoryListing(fileName, m.dirTree.ShowHidden)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
