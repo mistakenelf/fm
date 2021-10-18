@@ -139,13 +139,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, nil
 
-	// convertImageToStringMsg is received when an image is to be converted to a string.
-	case convertImageToStringMsg:
-		m.colorimage.SetContent(string(msg))
-		m.secondaryPane.SetContent(m.colorimage.View())
-
-		return m, nil
-
 	// errorMsg is received any time something goes wrong.
 	case errorMsg:
 		m.secondaryPane.SetContent(
@@ -172,15 +165,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.dirTreePreview.SetSize(m.secondaryPane.GetWidth())
 		m.sourcecode.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.markdown.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
+		m.colorimage.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.primaryPane.SetContent(m.dirTree.View())
 		m.help.Width = msg.Width
 
 		switch {
 		case m.colorimage.GetImage() != nil:
-			return m, m.redrawImageCmd(
-				m.secondaryPane.GetWidth()-m.secondaryPane.GetHorizontalFrameSize(),
-				m.secondaryPane.GetHeight(),
-			)
+			m.secondaryPane.SetContent(m.colorimage.View())
 		case m.markdown.GetContent() != "":
 			m.secondaryPane.SetContent(m.markdown.View())
 		case m.sourcecode.GetContent() != "":
@@ -633,6 +624,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// when two keys are pressed.
 		m.previousKey = msg
 	}
+
+	m.colorimage, cmd = m.colorimage.Update(msg)
+	cmds = append(cmds, cmd)
 
 	m.statusBar, cmd = m.statusBar.Update(msg)
 	cmds = append(cmds, cmd)

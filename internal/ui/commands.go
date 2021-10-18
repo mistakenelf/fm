@@ -27,7 +27,6 @@ type updateDirectoryListingMsg []fs.DirEntry
 type previewDirectoryListingMsg []fs.DirEntry
 type moveDirItemMsg []fs.DirEntry
 type errorMsg string
-type convertImageToStringMsg string
 type directoryItemSizeMsg string
 type readFileContentMsg struct {
 	rawContent  string
@@ -166,7 +165,7 @@ func (m Model) readFileContentCmd(file os.FileInfo, width, height int) tea.Cmd {
 				return errorMsg(err.Error())
 			}
 
-			imageString, err := colorimage.ImageToString(width, height, img)
+			imageString, err := colorimage.ImageToString(width, img)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
@@ -192,18 +191,6 @@ func (m Model) readFileContentCmd(file os.FileInfo, width, height int) tea.Cmd {
 				image:       nil,
 			}
 		}
-	}
-}
-
-// redrawImageCmd redraws the image based on the width and height provided.
-func (m Model) redrawImageCmd(width, height int) tea.Cmd {
-	return func() tea.Msg {
-		imageString, err := colorimage.ImageToString(width, height, m.colorimage.Image)
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return convertImageToStringMsg(imageString)
 	}
 }
 
