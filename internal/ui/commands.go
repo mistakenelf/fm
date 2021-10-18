@@ -25,14 +25,7 @@ import (
 
 type updateDirectoryListingMsg []fs.DirEntry
 type previewDirectoryListingMsg []fs.DirEntry
-type leftKeyMsg struct {
-	files             []fs.DirEntry
-	previousDirectory string
-}
-type handleDownKeyMsg struct{}
-type handleUpKeyMsg struct{}
-type handleRightKeyMsg struct{}
-type moveDirectoryItemMsg []fs.DirEntry
+type moveDirItemMsg []fs.DirEntry
 type errorMsg string
 type convertImageToStringMsg string
 type directoryItemSizeMsg string
@@ -44,85 +37,15 @@ type readFileContentMsg struct {
 	image       image.Image
 }
 
-// getDirectoryListing returns a list of files and directories in the directory provided.
-func getDirectoryListing(name string, showHidden bool) ([]fs.DirEntry, error) {
-	files, err := dirfs.GetDirectoryListing(name, showHidden)
-	if err != nil {
-		return nil, err
-	}
-
-	err = os.Chdir(name)
-	if err != nil {
-		return nil, err
-	}
-
-	return files, nil
-}
-
-// readFileContent reads the content of the file provided.
-func readFileContentCmd(file fs.FileInfo, width, height int, prettyMarkdown bool, syntaxTheme string) (readFileContentMsg, error) {
-	content, err := dirfs.ReadFileContent(file.Name())
-	if err != nil {
-		return readFileContentMsg{}, err
-	}
-
-	switch {
-	case filepath.Ext(file.Name()) == ".md" && prettyMarkdown:
-		markdownContent, err := markdown.RenderMarkdown(width, content)
-		if err != nil {
-			return readFileContentMsg{}, err
-		}
-
-		return readFileContentMsg{
-			rawContent:  content,
-			markdown:    markdownContent,
-			code:        "",
-			imageString: "",
-			image:       nil,
-		}, nil
-	case filepath.Ext(file.Name()) == ".png" || filepath.Ext(file.Name()) == ".jpg" || filepath.Ext(file.Name()) == ".jpeg":
-		imageContent, err := os.Open(file.Name())
-		if err != nil {
-			return readFileContentMsg{}, err
-		}
-
-		img, _, err := image.Decode(imageContent)
-		if err != nil {
-			return readFileContentMsg{}, err
-		}
-
-		imageString, err := colorimage.ImageToString(width, height, img)
-		if err != nil {
-			return readFileContentMsg{}, err
-		}
-
-		return readFileContentMsg{
-			rawContent:  content,
-			code:        "",
-			markdown:    "",
-			imageString: imageString,
-			image:       img,
-		}, nil
-	default:
-		code, err := sourcecode.Highlight(content, filepath.Ext(file.Name()), syntaxTheme)
-		if err != nil {
-			return readFileContentMsg{}, err
-		}
-
-		return readFileContentMsg{
-			rawContent:  content,
-			code:        code,
-			markdown:    "",
-			imageString: "",
-			image:       nil,
-		}, nil
-	}
-}
-
 // updateDirectoryListingCmd updates the directory listing based on the name of the directory provided.
 func (m Model) updateDirectoryListingCmd(name string) tea.Cmd {
 	return func() tea.Msg {
-		files, err := getDirectoryListing(name, m.dirTree.ShowHidden)
+		files, err := dirfs.GetDirectoryListing(name, m.dirTree.ShowHidden)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		err = os.Chdir(name)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
@@ -131,118 +54,10 @@ func (m Model) updateDirectoryListingCmd(name string) tea.Cmd {
 	}
 }
 
-// handleLeftKeyCmd handles when the left key is pressed.
-func (m Model) handleLeftKeyCmd() tea.Cmd {
-	return func() tea.Msg {
-		workingDirectory, err := dirfs.GetWorkingDirectory()
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		directoryName := fmt.Sprintf("%s/%s", workingDirectory, dirfs.PreviousDirectory)
-
-		files, err := getDirectoryListing(directoryName, m.dirTree.ShowHidden)
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return leftKeyMsg{
-			files:             files,
-			previousDirectory: workingDirectory,
-		}
-	}
-}
-
-// handleDownKeyCmd handles when the down key is pressed.
-func (m Model) handleDownKeyCmd() tea.Cmd {
-	return func() tea.Msg {
-		return handleDownKeyMsg{}
-	}
-}
-
-// handleUpKeyCmd handles when the up key is pressed.
-func (m Model) handleUpKeyCmd() tea.Cmd {
-	return func() tea.Msg {
-		return handleUpKeyMsg{}
-	}
-}
-
-// handleRightKeyCmd handles when the right key is pressed.
-func (m Model) handleRightKeyCmd() tea.Cmd {
-	return func() tea.Msg {
-		switch {
-		case m.dirTree.GetSelectedFile().IsDir() && !m.statusBar.CommandBarFocused():
-			currentDir, err := dirfs.GetWorkingDirectory()
-			if err != nil {
-				return errorMsg(err.Error())
-			}
-
-			directoryName := fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name())
-			files, err := getDirectoryListing(directoryName, m.dirTree.ShowHidden)
-			if err != nil {
-				return errorMsg(err.Error())
-			}
-
-			return updateDirectoryListingMsg(files)
-		case m.dirTree.GetSelectedFile().Mode()&os.ModeSymlink == os.ModeSymlink:
-			symlinkFile, err := os.Readlink(m.dirTree.GetSelectedFile().Name())
-			if err != nil {
-				return errorMsg(err.Error())
-			}
-
-			fileInfo, err := os.Stat(symlinkFile)
-			if err != nil {
-				return errorMsg(err.Error())
-			}
-
-			if fileInfo.IsDir() {
-				files, err := getDirectoryListing(symlinkFile, m.dirTree.ShowHidden)
-				if err != nil {
-					return errorMsg(err.Error())
-				}
-
-				return updateDirectoryListingMsg(files)
-			}
-
-			fileContent, err := readFileContentCmd(fileInfo, m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(), m.secondaryPane.GetHeight(), m.appConfig.Settings.PrettyMarkdown, m.appConfig.Settings.SyntaxTheme)
-			if err != nil {
-				return errorMsg(err.Error())
-			}
-
-			return readFileContentMsg{
-				rawContent:  fileContent.rawContent,
-				code:        fileContent.code,
-				markdown:    fileContent.markdown,
-				imageString: fileContent.imageString,
-				image:       fileContent.image,
-			}
-		default:
-			fileContent, err := readFileContentCmd(m.dirTree.GetSelectedFile(), m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(), m.secondaryPane.GetHeight(), m.appConfig.Settings.PrettyMarkdown, m.appConfig.Settings.SyntaxTheme)
-			if err != nil {
-				return errorMsg(err.Error())
-			}
-
-			return readFileContentMsg{
-				rawContent:  fileContent.rawContent,
-				code:        fileContent.code,
-				markdown:    fileContent.markdown,
-				imageString: fileContent.imageString,
-				image:       fileContent.image,
-			}
-		}
-	}
-}
-
 // previewDirectoryListingCmd updates the directory listing based on the name of the directory provided.
 func (m Model) previewDirectoryListingCmd(name string) tea.Cmd {
 	return func() tea.Msg {
-		currentDir, err := dirfs.GetWorkingDirectory()
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		fileName := fmt.Sprintf("%s/%s", currentDir, name)
-		files, err := dirfs.GetDirectoryListing(fileName, m.dirTree.ShowHidden)
+		files, err := dirfs.GetDirectoryListing(name, m.dirTree.ShowHidden)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
@@ -287,12 +102,12 @@ func (m Model) moveDirectoryItemCmd(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		err = os.Chdir(m.initialMoveDirectory)
+		err = os.Chdir(name)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		return moveDirectoryItemMsg(files)
+		return moveDirItemMsg(files)
 	}
 }
 
@@ -315,6 +130,68 @@ func (m Model) deleteFileCmd(name string) tea.Cmd {
 		}
 
 		return nil
+	}
+}
+
+// readFileContentCmd reads the content of a file and returns it.
+func (m Model) readFileContentCmd(file os.FileInfo, width, height int) tea.Cmd {
+	return func() tea.Msg {
+		content, err := dirfs.ReadFileContent(file.Name())
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		switch {
+		case filepath.Ext(file.Name()) == ".md" && m.appConfig.Settings.PrettyMarkdown:
+			markdownContent, err := markdown.RenderMarkdown(width, content)
+			if err != nil {
+				return errorMsg(err.Error())
+			}
+
+			return readFileContentMsg{
+				rawContent:  content,
+				markdown:    markdownContent,
+				code:        "",
+				imageString: "",
+				image:       nil,
+			}
+		case filepath.Ext(file.Name()) == ".png" || filepath.Ext(file.Name()) == ".jpg" || filepath.Ext(file.Name()) == ".jpeg":
+			imageContent, err := os.Open(file.Name())
+			if err != nil {
+				return errorMsg(err.Error())
+			}
+
+			img, _, err := image.Decode(imageContent)
+			if err != nil {
+				return errorMsg(err.Error())
+			}
+
+			imageString, err := colorimage.ImageToString(width, height, img)
+			if err != nil {
+				return errorMsg(err.Error())
+			}
+
+			return readFileContentMsg{
+				rawContent:  content,
+				code:        "",
+				markdown:    "",
+				imageString: imageString,
+				image:       img,
+			}
+		default:
+			code, err := sourcecode.Highlight(content, filepath.Ext(file.Name()), m.appConfig.Settings.SyntaxTheme)
+			if err != nil {
+				return errorMsg(err.Error())
+			}
+
+			return readFileContentMsg{
+				rawContent:  content,
+				code:        code,
+				markdown:    "",
+				imageString: "",
+				image:       nil,
+			}
+		}
 	}
 }
 

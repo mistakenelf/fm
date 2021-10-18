@@ -2,6 +2,7 @@ package ui
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 
@@ -51,132 +52,21 @@ func (m *Model) scrollPrimaryPane() {
 	}
 }
 
-// handleUpdateDirectoryListingMsg handles the update directory listing message.
-func (m *Model) handleUpdateDirectoryListingMsg(msg updateDirectoryListingMsg) (tea.Model, tea.Cmd) {
-	m.showCommandInput = false
-	m.createFileMode = false
-	m.createDirectoryMode = false
-	m.renameMode = false
+// Update handles all UI interactions and events for updating the screen.
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	var cmds []tea.Cmd
 
-	m.dirTree.GotoTop()
-	m.dirTree.SetContent(msg)
-	m.primaryPane.SetContent(m.dirTree.View())
-	m.primaryPane.GotoTop()
-	m.statusBar.BlurCommandBar()
-	m.statusBar.ResetCommandBar()
-	m.updateStatusBarContent()
-
-	return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
-}
-
-// handlePreviewDirectoryListingMsg handles the preview directory listing message.
-func (m *Model) handlePreviewDirectoryListingMsg(msg previewDirectoryListingMsg) (tea.Model, tea.Cmd) {
-	m.showCommandInput = false
-	m.createFileMode = false
-	m.createDirectoryMode = false
-	m.renameMode = false
-
-	m.markdown.SetContent("")
-	m.sourcecode.SetContent("")
-	m.colorimage.SetImage(nil)
-	m.dirTreePreview.GotoTop()
-	m.dirTreePreview.SetContent(msg)
-	m.secondaryPane.SetContent(m.dirTreePreview.View())
-	m.secondaryPane.GotoTop()
-	m.statusBar.BlurCommandBar()
-	m.statusBar.ResetCommandBar()
-
-	return m, nil
-}
-
-// handleMoveDirectoryItemMsg handles the move directory item message.
-func (m *Model) handleMoveDirectoryItemMsg(msg moveDirectoryItemMsg) (tea.Model, tea.Cmd) {
-	m.moveMode = false
-	m.initialMoveDirectory = ""
-	m.itemToMove = nil
-
-	m.primaryPane.ShowAlternateBorder(false)
-	m.dirTree.SetContent(msg)
-	m.primaryPane.SetContent(m.dirTree.View())
-	m.updateStatusBarContent()
-
-	return m, nil
-}
-
-// handleReadFileContentMsg handles the read file content message.
-func (m *Model) handleReadFileContentMsg(msg readFileContentMsg) (tea.Model, tea.Cmd) {
-	switch {
-	case msg.code != "":
-		m.secondaryPane.GotoTop()
-		m.colorimage.SetImage(nil)
-		m.markdown.SetContent("")
-		m.dirTreePreview.SetContent(nil)
-		m.sourcecode.SetContent(msg.code)
-		m.secondaryPane.SetContent(m.sourcecode.View())
-	case msg.markdown != "":
-		m.secondaryPane.GotoTop()
-		m.colorimage.SetImage(nil)
-		m.sourcecode.SetContent("")
-		m.dirTreePreview.SetContent(nil)
-		m.markdown.SetContent(msg.markdown)
-		m.secondaryPane.SetContent(m.markdown.View())
-	case msg.image != nil:
-		m.secondaryPane.GotoTop()
-		m.markdown.SetContent("")
-		m.sourcecode.SetContent("")
-		m.dirTreePreview.SetContent(nil)
-		m.colorimage.SetImage(msg.image)
-		m.colorimage.SetContent(msg.imageString)
-		m.secondaryPane.SetContent(m.colorimage.View())
-	default:
-		m.secondaryPane.GotoTop()
-		m.secondaryPane.SetContent(msg.rawContent)
-	}
-
-	return m, nil
-}
-
-// handleConvertImageToStringMsg handles the convert image to string message.
-func (m *Model) handleConvertImageToStringMsg(msg convertImageToStringMsg) (tea.Model, tea.Cmd) {
-	m.colorimage.SetContent(string(msg))
-	m.secondaryPane.SetContent(m.colorimage.View())
-
-	return m, nil
-}
-
-// handleErrorMsg handles the error message.
-func (m *Model) handleErrorMsg(msg errorMsg) (tea.Model, tea.Cmd) {
-	m.secondaryPane.SetContent(
-		lipgloss.NewStyle().
-			Bold(true).
-			Foreground(m.theme.ErrorColor).
-			Width(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize()).
-			Render(string(msg)),
-	)
-
-	return m, nil
-}
-
-// handleDirectoryItemSizeMsg handles the directory item size message.
-func (m *Model) handleDirectoryItemSizeMsg(msg directoryItemSizeMsg) (tea.Model, tea.Cmd) {
-	m.statusBar.SetItemSize(string(msg))
-
-	return m, nil
-}
-
-// handleLeftKeyMsg handles the left key message.
-func (m *Model) handleLeftKeyMsg(msg leftKeyMsg) (tea.Model, tea.Cmd) {
-	if !m.showCommandInput && m.primaryPane.GetIsActive() {
-		m.statusBar.SetItemSize("")
-		m.previousKey = tea.KeyMsg{}
+	switch msg := msg.(type) {
+	// updateDirectoryListingMsg is received when a directory is read from.
+	case updateDirectoryListingMsg:
 		m.showCommandInput = false
 		m.createFileMode = false
 		m.createDirectoryMode = false
 		m.renameMode = false
-		m.previousDirectory = msg.previousDirectory
 
 		m.dirTree.GotoTop()
-		m.dirTree.SetContent(msg.files)
+		m.dirTree.SetContent(msg)
 		m.primaryPane.SetContent(m.dirTree.View())
 		m.primaryPane.GotoTop()
 		m.statusBar.BlurCommandBar()
@@ -184,72 +74,97 @@ func (m *Model) handleLeftKeyMsg(msg leftKeyMsg) (tea.Model, tea.Cmd) {
 		m.updateStatusBarContent()
 
 		return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
-	}
 
-	return m, nil
-}
-
-// Update handles all UI interactions and events for updating the screen.
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-	var cmds []tea.Cmd
-
-	switch msg := msg.(type) {
-	case updateDirectoryListingMsg:
-		return m.handleUpdateDirectoryListingMsg(msg)
+	// previewDirectoryListingMsg shows a preview of a directory in the secondary pane.
 	case previewDirectoryListingMsg:
-		return m.handlePreviewDirectoryListingMsg(msg)
-	case moveDirectoryItemMsg:
-		return m.handleMoveDirectoryItemMsg(msg)
+		m.showCommandInput = false
+		m.createFileMode = false
+		m.createDirectoryMode = false
+		m.renameMode = false
+
+		m.markdown.SetContent("")
+		m.sourcecode.SetContent("")
+		m.colorimage.SetImage(nil)
+		m.dirTreePreview.GotoTop()
+		m.dirTreePreview.SetContent(msg)
+		m.secondaryPane.SetContent(m.dirTreePreview.View())
+		m.secondaryPane.GotoTop()
+		m.statusBar.BlurCommandBar()
+		m.statusBar.ResetCommandBar()
+
+		return m, nil
+
+	// moveDirItemMsg is received any time a file or directory has been moved.
+	case moveDirItemMsg:
+		m.moveMode = false
+		m.initialMoveDirectory = ""
+		m.itemToMove = nil
+
+		m.primaryPane.ShowAlternateBorder(false)
+		m.dirTree.SetContent(msg)
+		m.primaryPane.SetContent(m.dirTree.View())
+		m.updateStatusBarContent()
+
+		return m, nil
+
+	// readFileContentMsg is received when a file is read from.
 	case readFileContentMsg:
-		return m.handleReadFileContentMsg(msg)
+		switch {
+		case msg.code != "":
+			m.secondaryPane.GotoTop()
+			m.colorimage.SetImage(nil)
+			m.markdown.SetContent("")
+			m.dirTreePreview.SetContent(nil)
+			m.sourcecode.SetContent(msg.code)
+			m.secondaryPane.SetContent(m.sourcecode.View())
+		case msg.markdown != "":
+			m.secondaryPane.GotoTop()
+			m.colorimage.SetImage(nil)
+			m.sourcecode.SetContent("")
+			m.dirTreePreview.SetContent(nil)
+			m.markdown.SetContent(msg.markdown)
+			m.secondaryPane.SetContent(m.markdown.View())
+		case msg.image != nil:
+			m.secondaryPane.GotoTop()
+			m.markdown.SetContent("")
+			m.sourcecode.SetContent("")
+			m.dirTreePreview.SetContent(nil)
+			m.colorimage.SetImage(msg.image)
+			m.colorimage.SetContent(msg.imageString)
+			m.secondaryPane.SetContent(m.colorimage.View())
+		default:
+			m.secondaryPane.GotoTop()
+			m.secondaryPane.SetContent(msg.rawContent)
+		}
+
+		return m, nil
+
+	// convertImageToStringMsg is received when an image is to be converted to a string.
 	case convertImageToStringMsg:
-		return m.handleConvertImageToStringMsg(msg)
+		m.colorimage.SetContent(string(msg))
+		m.secondaryPane.SetContent(m.colorimage.View())
+
+		return m, nil
+
+	// errorMsg is received any time something goes wrong.
 	case errorMsg:
-		return m.handleErrorMsg(msg)
+		m.secondaryPane.SetContent(
+			lipgloss.NewStyle().
+				Bold(true).
+				Foreground(m.theme.ErrorColor).
+				Width(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize()).
+				Render(string(msg)),
+		)
+
+		return m, nil
+
+	// directoryItemSizeMsg is received whenever the directory size needs calculated.
 	case directoryItemSizeMsg:
-		return m.handleDirectoryItemSizeMsg(msg)
-	case leftKeyMsg:
-		return m.handleLeftKeyMsg(msg)
-
-	case handleDownKeyMsg:
-		if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 1 {
-			m.dirTree.GoDown()
-			m.scrollPrimaryPane()
-			m.updateStatusBarContent()
-			m.primaryPane.SetContent(m.dirTree.View())
-			m.statusBar.SetItemSize("")
-			m.previousKey = tea.KeyMsg{}
-
-			return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
-		}
-
-		m.secondaryPane.LineDown(1)
+		m.statusBar.SetItemSize(string(msg))
 
 		return m, nil
 
-	case handleUpKeyMsg:
-		if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 1 {
-			m.dirTree.GoUp()
-			m.scrollPrimaryPane()
-			m.updateStatusBarContent()
-			m.primaryPane.SetContent(m.dirTree.View())
-			m.statusBar.SetItemSize("")
-			m.previousKey = tea.KeyMsg{}
-
-			return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
-		}
-
-		m.secondaryPane.LineUp(1)
-
-		return m, nil
-
-	case handleRightKeyMsg:
-		if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
-			m.previousKey = tea.KeyMsg{}
-		}
-
-	// tea.WindowSizeMsg is received anytime the terminal is resized.
+	// tea.WindowSizeMsg is received whenever the window size changes.
 	case tea.WindowSizeMsg:
 		m.primaryPane.SetSize(msg.Width/2, msg.Height-m.statusBar.GetHeight())
 		m.secondaryPane.SetSize(msg.Width/2, msg.Height-m.statusBar.GetHeight())
@@ -277,6 +192,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				Width(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize()).
 				Render(m.help.View(m.keys)),
 			)
+		default:
+			return m, nil
 		}
 
 		if !m.ready {
@@ -287,18 +204,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			)
 		}
 
+	// tea.MouseMsg is received whenever a mouse event is triggered.
 	case tea.MouseMsg:
 		switch msg.Type {
 		case tea.MouseWheelUp:
-			// The command bar is not open and the primary pane is active
-			// so scroll the dirtree up and update the primary panes content.
 			if !m.showCommandInput && m.primaryPane.GetIsActive() {
 				m.dirTree.GoUp()
 				m.scrollPrimaryPane()
 				m.updateStatusBarContent()
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
-				m.previousKey = tea.KeyMsg{}
 
 				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
 			}
@@ -308,15 +223,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		case tea.MouseWheelDown:
-			// Command bar is not shown and the primary pane is active
-			// so scroll the dirtree down and update the primary panes content.
 			if !m.showCommandInput && m.primaryPane.GetIsActive() {
 				m.dirTree.GoDown()
 				m.scrollPrimaryPane()
 				m.updateStatusBarContent()
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
-				m.previousKey = tea.KeyMsg{}
 
 				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
 			}
@@ -326,11 +238,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
-	// tea.KeyMsg is received anytime a key event is received.
 	case tea.KeyMsg:
-		// when gg is pressed.
+		// If gg is pressed.
 		if msg.String() == "g" && m.previousKey.String() == "g" && !m.showCommandInput {
-			if m.primaryPane.GetIsActive() {
+			if !m.showCommandInput && m.primaryPane.GetIsActive() {
 				m.previousKey = tea.KeyMsg{}
 				m.dirTree.GotoTop()
 				m.primaryPane.GotoTop()
@@ -356,37 +267,110 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 
-		// Go back a directory.
+		// If the command bar is not shown and the primary pane is active
+		// set the previous directory to the current directory,
+		// and update the directory listing to go back one directory.
 		case key.Matches(msg, m.keys.Left):
-			return m, m.handleLeftKeyCmd()
+			if !m.showCommandInput && m.primaryPane.GetIsActive() {
+				m.statusBar.SetItemSize("")
+				previousDirectory, err := dirfs.GetWorkingDirectory()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 
-		// Scroll down in directory tree or pane.
+				m.previousDirectory = previousDirectory
+
+				return m, m.updateDirectoryListingCmd(
+					fmt.Sprintf("%s/%s", m.previousDirectory, dirfs.PreviousDirectory),
+				)
+			}
+
+		// Scroll pane down.
 		case key.Matches(msg, m.keys.Down):
-			return m, m.handleDownKeyCmd()
+			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 1 {
+				m.dirTree.GoDown()
+				m.scrollPrimaryPane()
+				m.updateStatusBarContent()
+				m.primaryPane.SetContent(m.dirTree.View())
+				m.statusBar.SetItemSize("")
 
-		// Scroll up in directory tree or pane.
+				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
+			}
+
+			m.secondaryPane.LineDown(1)
+
+		// Scroll pane up.
 		case key.Matches(msg, m.keys.Up):
-			return m, m.handleUpKeyCmd()
+			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 1 {
+				m.dirTree.GoUp()
+				m.scrollPrimaryPane()
+				m.updateStatusBarContent()
+				m.primaryPane.SetContent(m.dirTree.View())
+				m.statusBar.SetItemSize("")
 
-		// Open directory or read file content and display it.
+				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
+			}
+
+			m.secondaryPane.LineUp(1)
+
+		// Open directory or read file content and display in secondary pane.
 		case key.Matches(msg, m.keys.Right):
-			return m, m.handleRightKeyCmd()
+			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+				switch {
+				case m.dirTree.GetSelectedFile().IsDir() && !m.statusBar.CommandBarFocused():
+					m.statusBar.SetItemSize("")
+					currentDir, err := dirfs.GetWorkingDirectory()
+					if err != nil {
+						return m, m.handleErrorCmd(err)
+					}
 
-		// Jump to bottom of directory tree or pane.
+					return m, m.updateDirectoryListingCmd(
+						fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()),
+					)
+				case m.dirTree.GetSelectedFile().Mode()&os.ModeSymlink == os.ModeSymlink:
+					m.statusBar.SetItemSize("")
+					symlinkFile, err := os.Readlink(m.dirTree.GetSelectedFile().Name())
+					if err != nil {
+						return m, m.handleErrorCmd(err)
+					}
+
+					fileInfo, err := os.Stat(symlinkFile)
+					if err != nil {
+						return m, m.handleErrorCmd(err)
+					}
+
+					if fileInfo.IsDir() {
+						return m, m.updateDirectoryListingCmd(symlinkFile)
+					}
+
+					return m, m.readFileContentCmd(
+						fileInfo,
+						m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
+						m.secondaryPane.GetHeight(),
+					)
+				default:
+					return m, m.readFileContentCmd(
+						m.dirTree.GetSelectedFile(),
+						m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
+						m.secondaryPane.GetHeight(),
+					)
+				}
+			}
+
+		// Jump to the bottom of a pane.
 		case key.Matches(msg, m.keys.GotoBottom):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() {
 				m.dirTree.GotoBottom()
 				m.primaryPane.GotoBottom()
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
-				m.previousKey = tea.KeyMsg{}
 
 				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
 			}
 
 			m.secondaryPane.GotoBottom()
 
-		// Handle confirmation of actions (move, create and rename).
+		// process command bar input.
 		case key.Matches(msg, m.keys.Enter):
 			switch {
 			case m.moveMode:
@@ -410,7 +394,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-		// Delete the currently selected directory item.
+		// Delete the currently selected item.
 		case key.Matches(msg, m.keys.Delete):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() {
 				if m.dirTree.GetSelectedFile().IsDir() {
@@ -426,7 +410,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				)
 			}
 
-		// Create file mode.
+		// Enter create file mode.
 		case key.Matches(msg, m.keys.CreateFile):
 			if !m.moveMode && !m.createDirectoryMode && !m.showCommandInput {
 				m.createFileMode = true
@@ -437,7 +421,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-		// Create directory mode.
+		// Enter create directory mode.
 		case key.Matches(msg, m.keys.CreateDirectory):
 			if !m.moveMode && !m.createFileMode && !m.showCommandInput {
 				m.createDirectoryMode = true
@@ -448,7 +432,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-		// Rename directory mode.
+		// Enter create directory mode.
 		case key.Matches(msg, m.keys.Rename):
 			if !m.moveMode && !m.createFileMode && !m.createDirectoryMode && !m.showCommandInput {
 				m.renameMode = true
@@ -459,7 +443,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-		// Go to home directory.
+		// Shortcut to get back to the home directory if the
+		// command bar is not curently open.
 		case key.Matches(msg, m.keys.OpenHomeDirectory):
 			if !m.showCommandInput {
 				homeDir, err := dirfs.GetHomeDirectory()
@@ -470,13 +455,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, m.updateDirectoryListingCmd(homeDir)
 			}
 
-		// Go to previous directory.
+		// Shortcut to go back to the previous directory.
 		case key.Matches(msg, m.keys.OpenPreviousDirectory):
 			if !m.showCommandInput && m.previousDirectory != "" {
 				return m, m.updateDirectoryListingCmd(m.previousDirectory)
 			}
 
-		// Go to root directory.
+		// Shortcut to go back to the root directory.
 		case key.Matches(msg, m.keys.OpenRootDirectory):
 			if !m.showCommandInput {
 				return m, m.updateDirectoryListingCmd(dirfs.RootDirectory)
@@ -496,7 +481,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.secondaryPane.SetActive(!m.secondaryPane.GetIsActive())
 			}
 
-		// Move mode.
+		// Enter move mode.
 		case key.Matches(msg, m.keys.EnterMoveMode):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				m.moveMode = true
@@ -511,7 +496,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.updateStatusBarContent()
 			}
 
-		// Create zip of currently selected directory item.
+		// Zip up the currently selected item.
 		case key.Matches(msg, m.keys.Zip):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				return m, tea.Sequentially(
@@ -529,7 +514,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				)
 			}
 
-		// Copy the currently selected directory item.
+		// Copy the currently selected item.
 		case key.Matches(msg, m.keys.Copy):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				if m.dirTree.GetSelectedFile().IsDir() {
@@ -566,17 +551,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if err != nil {
 					return m, m.handleErrorCmd(err)
 				}
-
-				return m, m.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 			}
 
-		// Preview the currently selected directory.
+			return m, m.updateDirectoryListingCmd(dirfs.CurrentDirectory)
+
 		case key.Matches(msg, m.keys.PreviewDirectory):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetSelectedFile().IsDir() {
-				return m, m.previewDirectoryListingCmd(m.dirTree.GetSelectedFile().Name())
+				currentDir, err := dirfs.GetWorkingDirectory()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
+
+				return m, m.previewDirectoryListingCmd(
+					fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()),
+				)
 			}
 
-		// Reset to initial state.
+			return m, nil
+
+		// Reset FM to its initial state.
 		case key.Matches(msg, m.keys.Escape):
 			m.showCommandInput = false
 			m.moveMode = false
@@ -586,7 +579,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.createFileMode = false
 			m.createDirectoryMode = false
 			m.renameMode = false
-			m.previousKey = tea.KeyMsg{}
 			m.primaryPane.SetActive(true)
 			m.secondaryPane.SetActive(false)
 			m.statusBar.BlurCommandBar()
