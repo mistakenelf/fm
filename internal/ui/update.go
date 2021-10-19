@@ -164,6 +164,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, nil
 
+	// copyToClipboardMsg when the selected directory item is copyied to the clipboard.
+	case copyToClipboardMsg:
+		m.sourcecode.SetContent(string(msg))
+		m.secondaryPane.SetContent(m.sourcecode.View())
+
+		return m, nil
+
 	// tea.WindowSizeMsg is received whenever the window size changes.
 	case tea.WindowSizeMsg:
 		m.primaryPane.SetSize(msg.Width/2, msg.Height-m.statusBar.GetHeight())
@@ -597,6 +604,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, m.previewDirectoryListingCmd(
 					fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()),
 				)
+			}
+
+			return m, nil
+
+		case key.Matches(msg, m.keys.CopyToClipboard):
+			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+				return m, m.copyToClipboardCmd(m.dirTree.GetSelectedFile().Name())
 			}
 
 			return m, nil
