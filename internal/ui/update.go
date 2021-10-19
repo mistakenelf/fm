@@ -172,15 +172,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.dirTreePreview.SetSize(m.secondaryPane.GetWidth())
 		m.sourcecode.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.markdown.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
+		m.colorimage.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.primaryPane.SetContent(m.dirTree.View())
 		m.help.Width = msg.Width
 
 		switch {
 		case m.colorimage.GetImage() != nil:
-			return m, m.redrawImageCmd(
-				m.secondaryPane.GetWidth()-m.secondaryPane.GetHorizontalFrameSize(),
-				m.secondaryPane.GetHeight(),
-			)
+			cmds = append(cmds, m.redrawImageCmd(m.colorimage.GetWidth()))
 		case m.markdown.GetContent() != "":
 			m.secondaryPane.SetContent(m.markdown.View())
 		case m.sourcecode.GetContent() != "":
@@ -198,10 +196,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if !m.ready {
 			m.ready = true
-			m.secondaryPane.SetContent(lipgloss.NewStyle().
-				Width(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize()).
-				Render(m.help.View(m.keys)),
-			)
 		}
 
 	// tea.MouseMsg is received whenever a mouse event is triggered.
@@ -351,13 +345,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, m.readFileContentCmd(
 						fileInfo,
 						m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
-						m.secondaryPane.GetHeight(),
 					)
 				default:
 					return m, m.readFileContentCmd(
 						m.dirTree.GetSelectedFile(),
 						m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
-						m.secondaryPane.GetHeight(),
 					)
 				}
 			}

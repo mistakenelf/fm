@@ -17,7 +17,7 @@ type Model struct {
 }
 
 // ImageToString converts an image to a string representation of an image.
-func ImageToString(width, height int, img image.Image) (string, error) {
+func ImageToString(width int, img image.Image) string {
 	img = imaging.Resize(img, width, 0, imaging.Lanczos)
 	b := img.Bounds()
 	w := b.Max.X
@@ -41,7 +41,12 @@ func ImageToString(width, height int, img image.Image) (string, error) {
 		str.WriteString("\n")
 	}
 
-	return str.String(), nil
+	return str.String()
+}
+
+// SetSize sets the size of the colorimage.
+func (m *Model) SetSize(width int) {
+	m.Width = width
 }
 
 // GetImage returns the currently set image.
@@ -57,6 +62,11 @@ func (m *Model) SetContent(content string) {
 // SetImage sets the image of the colorimage.
 func (m *Model) SetImage(img image.Image) {
 	m.Image = img
+}
+
+// GetWidth returns the width of the colorimage.
+func (m Model) GetWidth() int {
+	return m.Width
 }
 
 // View returns a string representation of a colorimage.
