@@ -55,6 +55,8 @@ go install github.com/knipferrc/fm@latest
 - Render PNG, JPG and JPEG as strings
 - Colors adapt to terminal background
 - Open selected file in editor set in EDITOR environment variable (currently only supports GUI editors)
+- Preview a directory in the secondary pane
+- Copy selected directory items path to the clipboard
 
 ## Themes
 
@@ -105,6 +107,8 @@ go install github.com/knipferrc/fm@latest
 | N          | Create a new directory in the current directory                                                                                                                                                                                                                  |
 | r          | Rename the currently selected file or directory                                                                                                                                                                                                                  |
 | E          | Open in editor set in EDITOR environment variable                                                                                                                                                                                                                |
+| p          | Preview a directory in the secondary pane                                                                                                                                                                                                                        |
+| y          | Copy selected directory items path to the clipboard                                                                                                                                                                                                              |
 
 ## Configuration
 
