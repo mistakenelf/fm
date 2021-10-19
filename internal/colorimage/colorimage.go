@@ -64,6 +64,11 @@ func (m *Model) SetImage(img image.Image) {
 	m.Image = img
 }
 
+// GetWidth returns the width of the colorimage.
+func (m Model) GetWidth() int {
+	return m.Width
+}
+
 // View returns a string representation of a colorimage.
 func (m Model) View() string {
 	return lipgloss.NewStyle().Width(m.Width).Render(m.Content)

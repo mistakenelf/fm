@@ -178,7 +178,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		switch {
 		case m.colorimage.GetImage() != nil:
-			cmds = append(cmds, m.redrawImageCmd(m.secondaryPane.GetWidth()-m.secondaryPane.GetHorizontalFrameSize()))
+			cmds = append(cmds, m.redrawImageCmd(m.colorimage.GetWidth()))
 		case m.markdown.GetContent() != "":
 			m.secondaryPane.SetContent(m.markdown.View())
 		case m.sourcecode.GetContent() != "":
