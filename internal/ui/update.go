@@ -139,6 +139,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, nil
 
+	// convertImageToStringMsg is received when an image is to be converted to a string.
+	case convertImageToStringMsg:
+		m.colorimage.SetContent(string(msg))
+		m.secondaryPane.SetContent(m.colorimage.View())
+
+		return m, nil
+
 	// errorMsg is received any time something goes wrong.
 	case errorMsg:
 		m.secondaryPane.SetContent(
@@ -171,7 +178,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		switch {
 		case m.colorimage.GetImage() != nil:
-			m.secondaryPane.SetContent(m.colorimage.View())
+			cmds = append(cmds, m.redrawImageCmd(m.secondaryPane.GetWidth()-m.secondaryPane.GetHorizontalFrameSize()))
 		case m.markdown.GetContent() != "":
 			m.secondaryPane.SetContent(m.markdown.View())
 		case m.sourcecode.GetContent() != "":
@@ -189,10 +196,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if !m.ready {
 			m.ready = true
-			m.secondaryPane.SetContent(lipgloss.NewStyle().
-				Width(m.secondaryPane.GetWidth() - m.secondaryPane.Style.GetHorizontalFrameSize()).
-				Render(m.help.View(m.keys)),
-			)
 		}
 
 	// tea.MouseMsg is received whenever a mouse event is triggered.
@@ -342,13 +345,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, m.readFileContentCmd(
 						fileInfo,
 						m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
-						m.secondaryPane.GetHeight(),
 					)
 				default:
 					return m, m.readFileContentCmd(
 						m.dirTree.GetSelectedFile(),
 						m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
-						m.secondaryPane.GetHeight(),
 					)
 				}
 			}
@@ -624,9 +625,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// when two keys are pressed.
 		m.previousKey = msg
 	}
-
-	m.colorimage, cmd = m.colorimage.Update(msg)
-	cmds = append(cmds, cmd)
 
 	m.statusBar, cmd = m.statusBar.Update(msg)
 	cmds = append(cmds, cmd)

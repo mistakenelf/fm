@@ -4,7 +4,6 @@ import (
 	"image"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/disintegration/imaging"
 	"github.com/lucasb-eyer/go-colorful"
@@ -15,14 +14,10 @@ type Model struct {
 	Image   image.Image
 	Content string
 	Width   int
-	Height  int
 }
 
-type convertImageToStringMsg string
-type errorMsg string
-
 // ImageToString converts an image to a string representation of an image.
-func ImageToString(width int, img image.Image) (string, error) {
+func ImageToString(width int, img image.Image) string {
 	img = imaging.Resize(img, width, 0, imaging.Lanczos)
 	b := img.Bounds()
 	w := b.Max.X
@@ -46,39 +41,7 @@ func ImageToString(width int, img image.Image) (string, error) {
 		str.WriteString("\n")
 	}
 
-	return str.String(), nil
-}
-
-// redrawImageCmd redraws the image based on the width and height provided.
-func (m Model) redrawImageCmd(width int) tea.Cmd {
-	return func() tea.Msg {
-		imageString, err := ImageToString(width, m.Image)
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return convertImageToStringMsg(imageString)
-	}
-}
-
-// Update updates the colorimage.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
-	var cmds []tea.Cmd
-
-	switch msg := msg.(type) {
-	case convertImageToStringMsg:
-		m.SetContent(string(msg))
-
-		return m, nil
-	case errorMsg:
-		m.Content = string(msg)
-	case tea.WindowSizeMsg:
-		if m.Image != nil {
-			return m, m.redrawImageCmd(msg.Width)
-		}
-	}
-
-	return m, tea.Batch(cmds...)
+	return str.String()
 }
 
 // SetSize sets the size of the colorimage.

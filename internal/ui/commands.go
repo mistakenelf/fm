@@ -28,6 +28,7 @@ type previewDirectoryListingMsg []fs.DirEntry
 type moveDirItemMsg []fs.DirEntry
 type errorMsg string
 type directoryItemSizeMsg string
+type convertImageToStringMsg string
 type readFileContentMsg struct {
 	rawContent  string
 	markdown    string
@@ -110,6 +111,15 @@ func (m Model) moveDirectoryItemCmd(name string) tea.Cmd {
 	}
 }
 
+// redrawImageCmd redraws the image based on the width provided.
+func (m Model) redrawImageCmd(width int) tea.Cmd {
+	return func() tea.Msg {
+		imageString := colorimage.ImageToString(width, m.colorimage.Image)
+
+		return convertImageToStringMsg(imageString)
+	}
+}
+
 // deleteDirectoryCmd deletes a directory based on the name provided.
 func (m Model) deleteDirectoryCmd(name string) tea.Cmd {
 	return func() tea.Msg {
@@ -133,7 +143,7 @@ func (m Model) deleteFileCmd(name string) tea.Cmd {
 }
 
 // readFileContentCmd reads the content of a file and returns it.
-func (m Model) readFileContentCmd(file os.FileInfo, width, height int) tea.Cmd {
+func (m Model) readFileContentCmd(file os.FileInfo, width int) tea.Cmd {
 	return func() tea.Msg {
 		content, err := dirfs.ReadFileContent(file.Name())
 		if err != nil {
@@ -165,10 +175,7 @@ func (m Model) readFileContentCmd(file os.FileInfo, width, height int) tea.Cmd {
 				return errorMsg(err.Error())
 			}
 
-			imageString, err := colorimage.ImageToString(width, img)
-			if err != nil {
-				return errorMsg(err.Error())
-			}
+			imageString := colorimage.ImageToString(width, img)
 
 			return readFileContentMsg{
 				rawContent:  content,
