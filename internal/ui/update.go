@@ -83,7 +83,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.renameMode = false
 
 		m.markdown.SetContent("")
-		m.sourcecode.SetContent("")
+		m.text.SetContent("")
 		m.colorimage.SetImage(nil)
 		m.dirTreePreview.GotoTop()
 		m.dirTreePreview.SetContent(msg)
@@ -115,19 +115,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
 			m.dirTreePreview.SetContent(nil)
-			m.sourcecode.SetContent(msg.code)
-			m.secondaryPane.SetContent(m.sourcecode.View())
+			m.text.SetContent(msg.code)
+			m.secondaryPane.SetContent(m.text.View())
 		case msg.markdown != "":
 			m.secondaryPane.GotoTop()
 			m.colorimage.SetImage(nil)
-			m.sourcecode.SetContent("")
+			m.text.SetContent("")
 			m.dirTreePreview.SetContent(nil)
 			m.markdown.SetContent(msg.markdown)
 			m.secondaryPane.SetContent(m.markdown.View())
 		case msg.image != nil:
 			m.secondaryPane.GotoTop()
 			m.markdown.SetContent("")
-			m.sourcecode.SetContent("")
+			m.text.SetContent("")
 			m.dirTreePreview.SetContent(nil)
 			m.colorimage.SetImage(msg.image)
 			m.colorimage.SetContent(msg.imageString)
@@ -166,8 +166,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// copyToClipboardMsg when the selected directory item is copyied to the clipboard.
 	case copyToClipboardMsg:
-		m.sourcecode.SetContent(string(msg))
-		m.secondaryPane.SetContent(m.sourcecode.View())
+		m.text.SetContent(string(msg))
+		m.secondaryPane.SetContent(m.text.View())
 
 		return m, nil
 
@@ -177,7 +177,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.secondaryPane.SetSize(msg.Width/2, msg.Height-m.statusBar.GetHeight())
 		m.dirTree.SetSize(m.primaryPane.GetWidth())
 		m.dirTreePreview.SetSize(m.secondaryPane.GetWidth())
-		m.sourcecode.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
+		m.text.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.markdown.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.colorimage.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.primaryPane.SetContent(m.dirTree.View())
@@ -188,11 +188,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, m.redrawImageCmd(m.colorimage.GetWidth()))
 		case m.markdown.GetContent() != "":
 			m.secondaryPane.SetContent(m.markdown.View())
-		case m.sourcecode.GetContent() != "":
-			m.secondaryPane.SetContent(m.sourcecode.View())
+		case m.text.GetContent() != "":
+			m.secondaryPane.SetContent(m.text.View())
 		case m.dirTreePreview.GetTotalFiles() != 0:
 			m.secondaryPane.SetContent(m.dirTreePreview.View())
-		case m.sourcecode.GetContent() == "" && m.markdown.GetContent() == "" && m.colorimage.GetImage() == nil && m.dirTreePreview.GetTotalFiles() == 0:
+		case m.text.GetContent() == "" && m.markdown.GetContent() == "" && m.colorimage.GetImage() == nil && m.dirTreePreview.GetTotalFiles() == 0:
 			m.secondaryPane.SetContent(lipgloss.NewStyle().
 				Width(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize()).
 				Render(m.help.View(m.keys)),
@@ -595,7 +595,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			)
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
-			m.sourcecode.SetContent("")
+			m.text.SetContent("")
 			m.dirTreePreview.SetContent(nil)
 			m.updateStatusBarContent()
 		}

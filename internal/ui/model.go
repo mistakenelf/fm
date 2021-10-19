@@ -9,8 +9,8 @@ import (
 	"github.com/knipferrc/fm/internal/dirtree"
 	"github.com/knipferrc/fm/internal/markdown"
 	"github.com/knipferrc/fm/internal/pane"
-	"github.com/knipferrc/fm/internal/sourcecode"
 	"github.com/knipferrc/fm/internal/statusbar"
+	"github.com/knipferrc/fm/internal/text"
 	"github.com/knipferrc/fm/internal/theme"
 
 	"github.com/charmbracelet/bubbles/help"
@@ -35,7 +35,7 @@ type Model struct {
 	statusBar            statusbar.Model
 	colorimage           colorimage.Model
 	markdown             markdown.Model
-	sourcecode           sourcecode.Model
+	text                 text.Model
 	itemToMove           os.FileInfo
 	appConfig            config.Config
 	directoryItemSizeCtx *directoryItemSizeCtx
@@ -129,7 +129,7 @@ func NewModel() Model {
 		statusBar:      statusBar,
 		colorimage:     colorimage.Model{},
 		markdown:       markdown.Model{},
-		sourcecode:     sourcecode.Model{},
+		text:           text.Model{},
 		itemToMove:     nil,
 		appConfig:      cfg,
 		directoryItemSizeCtx: &directoryItemSizeCtx{

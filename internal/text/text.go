@@ -1,4 +1,4 @@
-package sourcecode
+package text
 
 import (
 	"bytes"

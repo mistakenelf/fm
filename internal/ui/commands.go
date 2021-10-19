@@ -17,7 +17,7 @@ import (
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/internal/colorimage"
 	"github.com/knipferrc/fm/internal/markdown"
-	"github.com/knipferrc/fm/internal/sourcecode"
+	"github.com/knipferrc/fm/internal/text"
 	"github.com/knipferrc/fm/strfmt"
 	"golang.design/x/clipboard"
 
@@ -187,7 +187,7 @@ func (m Model) readFileContentCmd(file os.FileInfo, width int) tea.Cmd {
 				image:       img,
 			}
 		default:
-			code, err := sourcecode.Highlight(content, filepath.Ext(file.Name()), m.appConfig.Settings.SyntaxTheme)
+			code, err := text.Highlight(content, filepath.Ext(file.Name()), m.appConfig.Settings.SyntaxTheme)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
