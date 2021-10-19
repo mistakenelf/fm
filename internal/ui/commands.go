@@ -19,6 +19,7 @@ import (
 	"github.com/knipferrc/fm/internal/markdown"
 	"github.com/knipferrc/fm/internal/sourcecode"
 	"github.com/knipferrc/fm/strfmt"
+	"golang.design/x/clipboard"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -28,6 +29,7 @@ type previewDirectoryListingMsg []fs.DirEntry
 type moveDirItemMsg []fs.DirEntry
 type errorMsg string
 type directoryItemSizeMsg string
+type copyToClipboardMsg string
 type convertImageToStringMsg string
 type readFileContentMsg struct {
 	rawContent  string
@@ -310,5 +312,20 @@ func (m Model) getDirectoryItemSizeCmd(name string) tea.Cmd {
 func (m Model) handleErrorCmd(err error) tea.Cmd {
 	return func() tea.Msg {
 		return errorMsg(err.Error())
+	}
+}
+
+// copyToClipboardCmd copies the provided string to the clipboard.
+func (m Model) copyToClipboardCmd(name string) tea.Cmd {
+	return func() tea.Msg {
+		workingDir, err := dirfs.GetWorkingDirectory()
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		filePath := fmt.Sprintf("%s/%s", workingDir, name)
+		clipboard.Write(clipboard.FmtText, []byte(filePath))
+
+		return copyToClipboardMsg(fmt.Sprintf("%s %s %s", "Successfully copied", filePath, "to clipboard"))
 	}
 }

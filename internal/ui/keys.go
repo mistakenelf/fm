@@ -28,6 +28,7 @@ type keyMap struct {
 	Rename                key.Binding
 	EditFile              key.Binding
 	PreviewDirectory      key.Binding
+	CopyToClipboard       key.Binding
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view. It's part
@@ -58,6 +59,7 @@ func (k keyMap) ShortHelp() []key.Binding {
 		k.Rename,
 		k.EditFile,
 		k.PreviewDirectory,
+		k.CopyToClipboard,
 	}
 }
 
@@ -90,6 +92,7 @@ func (k keyMap) FullHelp() [][]key.Binding {
 			k.Rename,
 			k.EditFile,
 			k.PreviewDirectory,
+			k.CopyToClipboard,
 		},
 	}
 }
@@ -192,6 +195,10 @@ func getDefaultKeyMap() keyMap {
 		PreviewDirectory: key.NewBinding(
 			key.WithKeys("p"),
 			key.WithHelp("p", "preview the currently selected directory"),
+		),
+		CopyToClipboard: key.NewBinding(
+			key.WithKeys("y"),
+			key.WithHelp("y", "copy selected directory items path to clipboard"),
 		),
 	}
 }
