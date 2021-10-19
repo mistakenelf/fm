@@ -10,7 +10,8 @@ type keyMap struct {
 	Down                  key.Binding
 	Up                    key.Binding
 	Right                 key.Binding
-	GotoBottom            key.Binding
+	JumpToTop             key.Binding
+	JumpToBottom          key.Binding
 	Enter                 key.Binding
 	OpenHomeDirectory     key.Binding
 	OpenPreviousDirectory key.Binding
@@ -41,7 +42,8 @@ func (k keyMap) ShortHelp() []key.Binding {
 		k.Down,
 		k.Up,
 		k.Right,
-		k.GotoBottom,
+		k.JumpToTop,
+		k.JumpToBottom,
 		k.Enter,
 		k.OpenHomeDirectory,
 		k.OpenPreviousDirectory,
@@ -74,7 +76,8 @@ func (k keyMap) FullHelp() [][]key.Binding {
 			k.Down,
 			k.Up,
 			k.Right,
-			k.GotoBottom,
+			k.JumpToTop,
+			k.JumpToBottom,
 			k.Enter,
 			k.OpenHomeDirectory,
 			k.OpenPreviousDirectory,
@@ -124,9 +127,13 @@ func getDefaultKeyMap() keyMap {
 			key.WithKeys("right", "l"),
 			key.WithHelp("→/l", "move right"),
 		),
-		GotoBottom: key.NewBinding(
+		JumpToTop: key.NewBinding(
+			key.WithKeys("ctrl+g", "ctrl+g"),
+			key.WithHelp("ctrl+g", "jump to top of the active pane"),
+		),
+		JumpToBottom: key.NewBinding(
 			key.WithKeys("G"),
-			key.WithHelp("G", "go to bottom of active pane"),
+			key.WithHelp("G", "jump to bottom of active pane"),
 		),
 		Enter: key.NewBinding(
 			key.WithKeys("enter"),

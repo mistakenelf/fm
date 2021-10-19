@@ -15,7 +15,6 @@ import (
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/spinner"
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -37,7 +36,6 @@ type Model struct {
 	colorimage           colorimage.Model
 	markdown             markdown.Model
 	sourcecode           sourcecode.Model
-	previousKey          tea.KeyMsg
 	itemToMove           os.FileInfo
 	appConfig            config.Config
 	directoryItemSizeCtx *directoryItemSizeCtx
@@ -132,7 +130,6 @@ func NewModel() Model {
 		colorimage:     colorimage.Model{},
 		markdown:       markdown.Model{},
 		sourcecode:     sourcecode.Model{},
-		previousKey:    tea.KeyMsg{},
 		itemToMove:     nil,
 		appConfig:      cfg,
 		directoryItemSizeCtx: &directoryItemSizeCtx{

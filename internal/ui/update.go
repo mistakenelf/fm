@@ -240,23 +240,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case tea.KeyMsg:
-		// If gg is pressed.
-		if msg.String() == "g" && m.previousKey.String() == "g" && !m.showCommandInput {
-			if !m.showCommandInput && m.primaryPane.GetIsActive() {
-				m.previousKey = tea.KeyMsg{}
-				m.dirTree.GotoTop()
-				m.primaryPane.GotoTop()
-				m.primaryPane.SetContent(m.dirTree.View())
-				m.statusBar.SetItemSize("")
-
-				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
-			}
-
-			m.secondaryPane.GotoTop()
-
-			return m, nil
-		}
-
 		switch {
 		// Exit FM.
 		case key.Matches(msg, m.keys.Exit):
@@ -274,7 +257,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.Left):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() {
 				m.statusBar.SetItemSize("")
-				m.previousKey = tea.KeyMsg{}
 				previousDirectory, err := dirfs.GetWorkingDirectory()
 				if err != nil {
 					return m, m.handleErrorCmd(err)
@@ -295,7 +277,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.updateStatusBarContent()
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
-				m.previousKey = tea.KeyMsg{}
 
 				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
 			}
@@ -310,7 +291,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.updateStatusBarContent()
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
-				m.previousKey = tea.KeyMsg{}
 
 				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
 			}
@@ -320,8 +300,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Open directory or read file content and display in secondary pane.
 		case key.Matches(msg, m.keys.Right):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
-				m.previousKey = tea.KeyMsg{}
-
 				switch {
 				case m.dirTree.GetSelectedFile().IsDir() && !m.statusBar.CommandBarFocused():
 					m.statusBar.SetItemSize("")
@@ -361,14 +339,27 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
+		case key.Matches(msg, m.keys.JumpToTop):
+			if !m.showCommandInput && m.primaryPane.GetIsActive() {
+				m.dirTree.GotoTop()
+				m.primaryPane.GotoTop()
+				m.primaryPane.SetContent(m.dirTree.View())
+				m.statusBar.SetItemSize("")
+
+				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
+			}
+
+			m.secondaryPane.GotoTop()
+
+			return m, nil
+
 		// Jump to the bottom of a pane.
-		case key.Matches(msg, m.keys.GotoBottom):
+		case key.Matches(msg, m.keys.JumpToBottom):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() {
 				m.dirTree.GotoBottom()
 				m.primaryPane.GotoBottom()
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
-				m.previousKey = tea.KeyMsg{}
 
 				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
 			}
@@ -377,8 +368,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// process command bar input.
 		case key.Matches(msg, m.keys.Enter):
-			m.previousKey = tea.KeyMsg{}
-
 			switch {
 			case m.moveMode:
 				return m, m.moveDirectoryItemCmd(m.itemToMove.Name())
@@ -404,8 +393,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Delete the currently selected item.
 		case key.Matches(msg, m.keys.Delete):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() {
-				m.previousKey = tea.KeyMsg{}
-
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
 						m.deleteDirectoryCmd(m.dirTree.GetSelectedFile().Name()),
@@ -426,7 +413,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.showCommandInput = true
 				m.statusBar.FocusCommandBar()
 				m.updateStatusBarContent()
-				m.previousKey = tea.KeyMsg{}
 
 				return m, nil
 			}
@@ -438,7 +424,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.showCommandInput = true
 				m.statusBar.FocusCommandBar()
 				m.updateStatusBarContent()
-				m.previousKey = tea.KeyMsg{}
 
 				return m, nil
 			}
@@ -450,7 +435,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.showCommandInput = true
 				m.statusBar.FocusCommandBar()
 				m.updateStatusBarContent()
-				m.previousKey = tea.KeyMsg{}
 
 				return m, nil
 			}
@@ -459,7 +443,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// command bar is not curently open.
 		case key.Matches(msg, m.keys.OpenHomeDirectory):
 			if !m.showCommandInput {
-				m.previousKey = tea.KeyMsg{}
 				homeDir, err := dirfs.GetHomeDirectory()
 				if err != nil {
 					return m, m.handleErrorCmd(err)
@@ -471,16 +454,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Shortcut to go back to the previous directory.
 		case key.Matches(msg, m.keys.OpenPreviousDirectory):
 			if !m.showCommandInput && m.previousDirectory != "" {
-				m.previousKey = tea.KeyMsg{}
-
 				return m, m.updateDirectoryListingCmd(m.previousDirectory)
 			}
 
 		// Shortcut to go back to the root directory.
 		case key.Matches(msg, m.keys.OpenRootDirectory):
 			if !m.showCommandInput {
-				m.previousKey = tea.KeyMsg{}
-
 				return m, m.updateDirectoryListingCmd(dirfs.RootDirectory)
 			}
 
@@ -488,7 +467,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.ToggleHidden):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() {
 				m.dirTree.ToggleHidden()
-				m.previousKey = tea.KeyMsg{}
 
 				return m, m.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 			}
@@ -496,7 +474,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Toggle between the two panes if the command bar is not currently active.
 		case key.Matches(msg, m.keys.Tab):
 			if !m.showCommandInput {
-				m.previousKey = tea.KeyMsg{}
 				m.primaryPane.SetActive(!m.primaryPane.GetIsActive())
 				m.secondaryPane.SetActive(!m.secondaryPane.GetIsActive())
 			}
@@ -505,7 +482,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.EnterMoveMode):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				m.moveMode = true
-				m.previousKey = tea.KeyMsg{}
 				m.primaryPane.ShowAlternateBorder(true)
 				initialMoveDirectory, err := dirfs.GetWorkingDirectory()
 				if err != nil {
@@ -520,8 +496,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Zip up the currently selected item.
 		case key.Matches(msg, m.keys.Zip):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
-				m.previousKey = tea.KeyMsg{}
-
 				return m, tea.Sequentially(
 					m.zipDirectoryCmd(m.dirTree.GetSelectedFile().Name()),
 					m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
@@ -531,8 +505,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Unzip the currently selected zip file.
 		case key.Matches(msg, m.keys.Unzip):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
-				m.previousKey = tea.KeyMsg{}
-
 				return m, tea.Sequentially(
 					m.unzipDirectoryCmd(m.dirTree.GetSelectedFile().Name()),
 					m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
@@ -542,8 +514,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Copy the currently selected item.
 		case key.Matches(msg, m.keys.Copy):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
-				m.previousKey = tea.KeyMsg{}
-
 				if m.dirTree.GetSelectedFile().IsDir() {
 					return m, tea.Sequentially(
 						m.copyDirectoryCmd(m.dirTree.GetSelectedFile().Name()),
@@ -560,8 +530,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Edit the currently selected file.
 		case key.Matches(msg, m.keys.EditFile):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && !m.dirTree.GetSelectedFile().IsDir() {
-				m.previousKey = tea.KeyMsg{}
-
 				editorPath := os.Getenv("EDITOR")
 				if editorPath == "" {
 					return m, m.handleErrorCmd(errors.New("$EDITOR not set"))
@@ -586,8 +554,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, m.keys.PreviewDirectory):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetSelectedFile().IsDir() {
-				m.previousKey = tea.KeyMsg{}
-
 				currentDir, err := dirfs.GetWorkingDirectory()
 				if err != nil {
 					return m, m.handleErrorCmd(err)
@@ -617,7 +583,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.createFileMode = false
 			m.createDirectoryMode = false
 			m.renameMode = false
-			m.previousKey = tea.KeyMsg{}
 			m.primaryPane.SetActive(true)
 			m.secondaryPane.SetActive(false)
 			m.statusBar.BlurCommandBar()
@@ -634,10 +599,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.dirTreePreview.SetContent(nil)
 			m.updateStatusBarContent()
 		}
-
-		// Capture the previous key so that we can capture
-		// when two keys are pressed.
-		m.previousKey = msg
 	}
 
 	m.statusBar, cmd = m.statusBar.Update(msg)
