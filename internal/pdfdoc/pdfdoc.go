@@ -3,8 +3,9 @@ package pdfdoc
 import (
 	"bytes"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/knipferrc/fm/strfmt"
+
+	"github.com/charmbracelet/lipgloss"
 	"github.com/ledongthuc/pdf"
 )
 
@@ -22,11 +23,10 @@ func ReadPdf(name string) (string, error) {
 	}
 
 	defer f.Close()
-	if err != nil {
-		return "", err
-	}
-	var buf bytes.Buffer
+
+	buf := new(bytes.Buffer)
 	b, err := r.GetPlainText()
+
 	if err != nil {
 		return "", err
 	}
