@@ -17,6 +17,7 @@ import (
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/internal/colorimage"
 	"github.com/knipferrc/fm/internal/markdown"
+	"github.com/knipferrc/fm/internal/pdfdoc"
 	"github.com/knipferrc/fm/internal/text"
 	"github.com/knipferrc/fm/strfmt"
 	"golang.design/x/clipboard"
@@ -36,6 +37,7 @@ type readFileContentMsg struct {
 	markdown    string
 	code        string
 	imageString string
+	pdfContent  string
 	image       image.Image
 }
 
@@ -164,6 +166,7 @@ func (m Model) readFileContentCmd(file os.FileInfo, width int) tea.Cmd {
 				markdown:    markdownContent,
 				code:        "",
 				imageString: "",
+				pdfContent:  "",
 				image:       nil,
 			}
 		case filepath.Ext(file.Name()) == ".png" || filepath.Ext(file.Name()) == ".jpg" || filepath.Ext(file.Name()) == ".jpeg":
@@ -184,7 +187,22 @@ func (m Model) readFileContentCmd(file os.FileInfo, width int) tea.Cmd {
 				code:        "",
 				markdown:    "",
 				imageString: imageString,
+				pdfContent:  "",
 				image:       img,
+			}
+		case filepath.Ext(file.Name()) == ".pdf":
+			pdfContent, err := pdfdoc.ReadPdf(file.Name())
+			if err != nil {
+				return errorMsg(err.Error())
+			}
+
+			return readFileContentMsg{
+				rawContent:  content,
+				code:        "",
+				markdown:    "",
+				imageString: "",
+				pdfContent:  pdfContent,
+				image:       nil,
 			}
 		default:
 			code, err := text.Highlight(content, filepath.Ext(file.Name()), m.appConfig.Settings.SyntaxTheme)
@@ -197,6 +215,7 @@ func (m Model) readFileContentCmd(file os.FileInfo, width int) tea.Cmd {
 				code:        code,
 				markdown:    "",
 				imageString: "",
+				pdfContent:  "",
 				image:       nil,
 			}
 		}
