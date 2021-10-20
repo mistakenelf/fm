@@ -317,6 +317,9 @@ func Unzip(name string) error {
 
 // CopyFile copies a file given a name.
 func CopyFile(name string) error {
+	var splitName []string
+	var output string
+
 	srcFile, err := os.Open(name)
 	if err != nil {
 		return err
@@ -326,8 +329,20 @@ func CopyFile(name string) error {
 		err = srcFile.Close()
 	}()
 
-	splitName := strings.Split(name, ".")
-	output := fmt.Sprintf("%s_%d.%s", splitName[0], time.Now().Unix(), splitName[1])
+	fileExtension := filepath.Ext(name)
+	switch {
+	case strings.HasPrefix(name, ".") && fileExtension != "" && fileExtension == name:
+		output = fmt.Sprintf("%s_%d", name, time.Now().Unix())
+	case strings.HasPrefix(name, ".") && fileExtension != "" && fileExtension != name:
+		splitName = strings.Split(name, ".")
+		output = fmt.Sprintf(".%s_%d.%s", splitName[1], time.Now().Unix(), splitName[2])
+	case fileExtension != "":
+		splitName = strings.Split(name, ".")
+		output = fmt.Sprintf("%s_%d.%s", splitName[0], time.Now().Unix(), splitName[1])
+	default:
+		output = fmt.Sprintf("%s_%d", name, time.Now().Unix())
+	}
+
 	destFile, err := os.Create(output)
 	if err != nil {
 		return err
