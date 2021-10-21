@@ -73,7 +73,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.statusBar.ResetCommandBar()
 		m.updateStatusBarContent()
 
-		return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
+		if len(msg) > 0 {
+			return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
+		}
+
+		return m, nil
 
 	// previewDirectoryListingMsg shows a preview of a directory in the secondary pane.
 	case previewDirectoryListingMsg:
@@ -116,19 +120,30 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.markdown.SetContent("")
 			m.dirTreePreview.SetContent(nil)
 			m.text.SetContent(msg.code)
+			m.pdfdoc.SetContent("")
 			m.secondaryPane.SetContent(m.text.View())
+		case msg.pdfContent != "":
+			m.secondaryPane.GotoTop()
+			m.colorimage.SetImage(nil)
+			m.markdown.SetContent("")
+			m.dirTreePreview.SetContent(nil)
+			m.text.SetContent("")
+			m.pdfdoc.SetContent(msg.pdfContent)
+			m.secondaryPane.SetContent(m.pdfdoc.View())
 		case msg.markdown != "":
 			m.secondaryPane.GotoTop()
 			m.colorimage.SetImage(nil)
 			m.text.SetContent("")
 			m.dirTreePreview.SetContent(nil)
 			m.markdown.SetContent(msg.markdown)
+			m.pdfdoc.SetContent("")
 			m.secondaryPane.SetContent(m.markdown.View())
 		case msg.image != nil:
 			m.secondaryPane.GotoTop()
 			m.markdown.SetContent("")
 			m.text.SetContent("")
 			m.dirTreePreview.SetContent(nil)
+			m.pdfdoc.SetContent("")
 			m.colorimage.SetImage(msg.image)
 			m.colorimage.SetContent(msg.imageString)
 			m.secondaryPane.SetContent(m.colorimage.View())
@@ -180,6 +195,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.text.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.markdown.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.colorimage.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
+		m.pdfdoc.SetSize(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize())
 		m.primaryPane.SetContent(m.dirTree.View())
 		m.help.Width = msg.Width
 
@@ -192,7 +208,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.secondaryPane.SetContent(m.text.View())
 		case m.dirTreePreview.GetTotalFiles() != 0:
 			m.secondaryPane.SetContent(m.dirTreePreview.View())
-		case m.text.GetContent() == "" && m.markdown.GetContent() == "" && m.colorimage.GetImage() == nil && m.dirTreePreview.GetTotalFiles() == 0:
+		case m.pdfdoc.GetContent() != "":
+			m.secondaryPane.SetContent(m.pdfdoc.View())
+		case m.text.GetContent() == "" && m.markdown.GetContent() == "" && m.colorimage.GetImage() == nil && m.dirTreePreview.GetTotalFiles() == 0 && m.pdfdoc.GetContent() == "":
 			m.secondaryPane.SetContent(lipgloss.NewStyle().
 				Width(m.secondaryPane.GetWidth() - m.secondaryPane.GetHorizontalFrameSize()).
 				Render(m.help.View(m.keys)),
@@ -596,6 +614,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.colorimage.SetImage(nil)
 			m.markdown.SetContent("")
 			m.text.SetContent("")
+			m.pdfdoc.SetContent("")
 			m.dirTreePreview.SetContent(nil)
 			m.updateStatusBarContent()
 		}

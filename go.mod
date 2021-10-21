@@ -9,6 +9,7 @@ require (
 	github.com/charmbracelet/glamour v0.3.0
 	github.com/charmbracelet/lipgloss v0.4.0
 	github.com/disintegration/imaging v1.6.2
+	github.com/ledongthuc/pdf v0.0.0-20210621053716-e28cb8259002
 	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/muesli/reflow v0.3.0
 	github.com/spf13/cobra v1.2.1
