@@ -57,6 +57,7 @@ go install github.com/knipferrc/fm@latest
 - Open selected file in editor set in EDITOR environment variable (currently only supports GUI editors)
 - Preview a directory in the secondary pane
 - Copy selected directory items path to the clipboard
+- Read PDF files
 
 ## Themes
 
