@@ -20,9 +20,9 @@ import (
 	"github.com/knipferrc/fm/internal/pdfdoc"
 	"github.com/knipferrc/fm/internal/text"
 	"github.com/knipferrc/fm/strfmt"
-	"golang.design/x/clipboard"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"golang.design/x/clipboard"
 )
 
 type updateDirectoryListingMsg []fs.DirEntry
