@@ -345,3 +345,20 @@ func (m Model) copyToClipboardCmd(name string) tea.Cmd {
 		return copyToClipboardMsg(fmt.Sprintf("%s %s %s", "Successfully copied", filePath, "to clipboard"))
 	}
 }
+
+// getDirectoryListingByTypeCmd returns only directories in the current directory.
+func (m Model) getDirectoryListingByType(listType string) tea.Cmd {
+	return func() tea.Msg {
+		workingDir, err := dirfs.GetWorkingDirectory()
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		directories, err := dirfs.GetDirectoryListingByType(workingDir, listType)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		return updateDirectoryListingMsg(directories)
+	}
+}

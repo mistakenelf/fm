@@ -350,8 +350,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			m.secondaryPane.GotoTop()
 
-			return m, nil
-
 		// Jump to the bottom of a pane.
 		case key.Matches(msg, m.keys.JumpToBottom):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() {
@@ -547,9 +545,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if err != nil {
 					return m, m.handleErrorCmd(err)
 				}
-			}
 
-			return m, m.updateDirectoryListingCmd(dirfs.CurrentDirectory)
+				return m, m.updateDirectoryListingCmd(dirfs.CurrentDirectory)
+			}
 
 		case key.Matches(msg, m.keys.PreviewDirectory):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetSelectedFile().IsDir() {
@@ -563,14 +561,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				)
 			}
 
-			return m, nil
-
 		case key.Matches(msg, m.keys.CopyToClipboard):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				return m, m.copyToClipboardCmd(m.dirTree.GetSelectedFile().Name())
 			}
 
-			return m, nil
+		case key.Matches(msg, m.keys.ShowOnlyDirectories):
+			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+				return m, m.getDirectoryListingByType("directories")
+			}
+
+		case key.Matches(msg, m.keys.ShowOnlyFiles):
+			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+				return m, m.getDirectoryListingByType("files")
+			}
 
 		// Reset FM to its initial state.
 		case key.Matches(msg, m.keys.Escape):
@@ -596,6 +600,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.renderer.SetContent("")
 			m.dirTreePreview.SetContent(nil)
 			m.updateStatusBarContent()
+			cmds = append(cmds, m.updateDirectoryListingCmd(dirfs.CurrentDirectory))
 		}
 	}
 

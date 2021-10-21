@@ -30,6 +30,8 @@ type keyMap struct {
 	EditFile              key.Binding
 	PreviewDirectory      key.Binding
 	CopyToClipboard       key.Binding
+	ShowOnlyDirectories   key.Binding
+	ShowOnlyFiles         key.Binding
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view. It's part
@@ -62,6 +64,8 @@ func (k keyMap) ShortHelp() []key.Binding {
 		k.EditFile,
 		k.PreviewDirectory,
 		k.CopyToClipboard,
+		k.ShowOnlyDirectories,
+		k.ShowOnlyFiles,
 	}
 }
 
@@ -96,6 +100,8 @@ func (k keyMap) FullHelp() [][]key.Binding {
 			k.EditFile,
 			k.PreviewDirectory,
 			k.CopyToClipboard,
+			k.ShowOnlyDirectories,
+			k.ShowOnlyFiles,
 		},
 	}
 }
@@ -206,6 +212,14 @@ func getDefaultKeyMap() keyMap {
 		CopyToClipboard: key.NewBinding(
 			key.WithKeys("y"),
 			key.WithHelp("y", "copy selected directory items path to clipboard"),
+		),
+		ShowOnlyDirectories: key.NewBinding(
+			key.WithKeys("S"),
+			key.WithHelp("S", "only show directories in the directory tree"),
+		),
+		ShowOnlyFiles: key.NewBinding(
+			key.WithKeys("s"),
+			key.WithHelp("s", "only show files in the directory tree"),
 		),
 	}
 }

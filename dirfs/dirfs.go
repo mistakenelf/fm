@@ -67,6 +67,31 @@ func GetDirectoryListing(dir string, showHidden bool) ([]fs.DirEntry, error) {
 	return files, nil
 }
 
+// GetDirectoryListingByType returns a directory listing based on type (directories | files).
+func GetDirectoryListingByType(dir, listType string) ([]fs.DirEntry, error) {
+	n := 0
+
+	// Read files from the directory.
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, file := range files {
+		if file.IsDir() && listType == "directories" {
+			files[n] = file
+			n++
+		}
+
+		if !file.IsDir() && listType == "files" {
+			files[n] = file
+			n++
+		}
+	}
+
+	return files[:n], nil
+}
+
 // DeleteDirectory deletes a directory given a name.
 func DeleteDirectory(name string) error {
 	err := os.RemoveAll(name)
