@@ -64,6 +64,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.createFileMode = false
 		m.createDirectoryMode = false
 		m.renameMode = false
+		m.findMode = false
 
 		m.dirTree.GotoTop()
 		m.dirTree.SetContent(msg)
@@ -383,6 +384,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.renameDirectoryItemCmd(m.dirTree.GetSelectedFile().Name(), m.statusBar.CommandBarValue()),
 					m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
+			case m.findMode:
+				return m, m.findFilesByNameCmd(m.statusBar.CommandBarValue())
 			default:
 				return m, nil
 			}
@@ -576,6 +579,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, m.getDirectoryListingByType("files")
 			}
 
+		case key.Matches(msg, m.keys.Find):
+			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+				m.findMode = true
+				m.showCommandInput = true
+				m.statusBar.FocusCommandBar()
+				m.updateStatusBarContent()
+
+				return m, nil
+			}
+
 		// Reset FM to its initial state.
 		case key.Matches(msg, m.keys.Escape):
 			m.showCommandInput = false
@@ -586,6 +599,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.createFileMode = false
 			m.createDirectoryMode = false
 			m.renameMode = false
+			m.findMode = false
 			m.primaryPane.SetActive(true)
 			m.secondaryPane.SetActive(false)
 			m.statusBar.BlurCommandBar()

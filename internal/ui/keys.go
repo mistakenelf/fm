@@ -32,6 +32,7 @@ type keyMap struct {
 	CopyToClipboard       key.Binding
 	ShowOnlyDirectories   key.Binding
 	ShowOnlyFiles         key.Binding
+	Find                  key.Binding
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view. It's part
@@ -66,6 +67,7 @@ func (k keyMap) ShortHelp() []key.Binding {
 		k.CopyToClipboard,
 		k.ShowOnlyDirectories,
 		k.ShowOnlyFiles,
+		k.Find,
 	}
 }
 
@@ -102,6 +104,7 @@ func (k keyMap) FullHelp() [][]key.Binding {
 			k.CopyToClipboard,
 			k.ShowOnlyDirectories,
 			k.ShowOnlyFiles,
+			k.Find,
 		},
 	}
 }
@@ -220,6 +223,10 @@ func getDefaultKeyMap() keyMap {
 		ShowOnlyFiles: key.NewBinding(
 			key.WithKeys("s"),
 			key.WithHelp("s", "only show files in the directory tree"),
+		),
+		Find: key.NewBinding(
+			key.WithKeys("ctrl+f"),
+			key.WithHelp("ctrl+f", "find files by name"),
 		),
 	}
 }

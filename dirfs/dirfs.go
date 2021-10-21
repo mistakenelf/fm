@@ -444,3 +444,21 @@ func GetDirectoryItemSize(path string) (int64, error) {
 
 	return size, err
 }
+
+func FindFilesByName(name, dir string) ([]fs.DirEntry, error) {
+	var files []fs.DirEntry
+
+	err := filepath.WalkDir(dir, func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return filepath.SkipDir
+		}
+
+		if entry.Name() == name {
+			files = append(files, entry)
+		}
+
+		return err
+	})
+
+	return files, err
+}

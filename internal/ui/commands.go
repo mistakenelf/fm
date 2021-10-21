@@ -362,3 +362,20 @@ func (m Model) getDirectoryListingByType(listType string) tea.Cmd {
 		return updateDirectoryListingMsg(directories)
 	}
 }
+
+// findFilesByNameCmd finds files based on name.
+func (m Model) findFilesByNameCmd(name string) tea.Cmd {
+	return func() tea.Msg {
+		workingDir, err := dirfs.GetWorkingDirectory()
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		directories, err := dirfs.FindFilesByName(name, workingDir)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		return updateDirectoryListingMsg(directories)
+	}
+}
