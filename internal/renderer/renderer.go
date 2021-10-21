@@ -13,7 +13,7 @@ import (
 	"github.com/lucasb-eyer/go-colorful"
 )
 
-// Model is a struct that contains all the properties of colorimage.
+// Model is a struct that contains all the properties of renderer.
 type Model struct {
 	Image   image.Image
 	Content string
@@ -103,7 +103,7 @@ func Highlight(content, extension, syntaxTheme string) (string, error) {
 	return buf.String(), nil
 }
 
-// SetSize sets the size of the colorimage.
+// SetSize sets the size of the renderer.
 func (m *Model) SetSize(width int) {
 	m.Width = width
 }
@@ -113,17 +113,17 @@ func (m Model) GetImage() image.Image {
 	return m.Image
 }
 
-// SetContent sets the content of the colorimage.
+// SetContent sets the content of the renderer.
 func (m *Model) SetContent(content string) {
 	m.Content = content
 }
 
-// SetImage sets the image of the colorimage.
+// SetImage sets the image of the renderer.
 func (m *Model) SetImage(img image.Image) {
 	m.Image = img
 }
 
-// GetWidth returns the width of the colorimage.
+// GetWidth returns the width of the renderer.
 func (m Model) GetWidth() int {
 	return m.Width
 }
@@ -133,7 +133,7 @@ func (m Model) GetContent() string {
 	return m.Content
 }
 
-// View returns a string representation of a colorimage.
+// View returns a string representation of a renderer.
 func (m Model) View() string {
 	return lipgloss.NewStyle().Width(m.Width).Render(m.Content)
 }
