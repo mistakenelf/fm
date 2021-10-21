@@ -4,14 +4,11 @@ import (
 	"context"
 	"os"
 
-	"github.com/knipferrc/fm/internal/colorimage"
 	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/dirtree"
-	"github.com/knipferrc/fm/internal/markdown"
 	"github.com/knipferrc/fm/internal/pane"
-	"github.com/knipferrc/fm/internal/pdfdoc"
+	"github.com/knipferrc/fm/internal/renderer"
 	"github.com/knipferrc/fm/internal/statusbar"
-	"github.com/knipferrc/fm/internal/text"
 	"github.com/knipferrc/fm/internal/theme"
 
 	"github.com/charmbracelet/bubbles/help"
@@ -34,10 +31,7 @@ type Model struct {
 	dirTree              dirtree.Model
 	dirTreePreview       dirtree.Model
 	statusBar            statusbar.Model
-	colorimage           colorimage.Model
-	markdown             markdown.Model
-	text                 text.Model
-	pdfdoc               pdfdoc.Model
+	renderer             renderer.Model
 	itemToMove           os.FileInfo
 	appConfig            config.Config
 	directoryItemSizeCtx *directoryItemSizeCtx
@@ -129,10 +123,7 @@ func NewModel() Model {
 		dirTree:        dirTree,
 		dirTreePreview: dirTreePreview,
 		statusBar:      statusBar,
-		colorimage:     colorimage.Model{},
-		markdown:       markdown.Model{},
-		text:           text.Model{},
-		pdfdoc:         pdfdoc.Model{},
+		renderer:       renderer.Model{},
 		itemToMove:     nil,
 		appConfig:      cfg,
 		directoryItemSizeCtx: &directoryItemSizeCtx{

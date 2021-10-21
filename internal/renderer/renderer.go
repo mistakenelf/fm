@@ -1,11 +1,15 @@
-package colorimage
+package renderer
 
 import (
+	"bytes"
 	"image"
 	"strings"
 
+	"github.com/alecthomas/chroma/quick"
+	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/disintegration/imaging"
+	"github.com/ledongthuc/pdf"
 	"github.com/lucasb-eyer/go-colorful"
 )
 
@@ -44,6 +48,61 @@ func ImageToString(width int, img image.Image) string {
 	return str.String()
 }
 
+// RenderMarkdown renders the markdown content with glamour.
+func RenderMarkdown(width int, content string) (string, error) {
+	bg := "light"
+
+	if lipgloss.HasDarkBackground() {
+		bg = "dark"
+	}
+
+	r, _ := glamour.NewTermRenderer(
+		glamour.WithWordWrap(width),
+		glamour.WithStandardStyle(bg),
+	)
+
+	out, err := r.Render(content)
+	if err != nil {
+		return "", err
+	}
+
+	return out, nil
+}
+
+// ReadPdf reads a PDF file given a name.
+func ReadPdf(name string) (string, error) {
+	f, r, err := pdf.Open(name)
+	if err != nil {
+		return "", err
+	}
+
+	defer f.Close()
+
+	buf := new(bytes.Buffer)
+	b, err := r.GetPlainText()
+
+	if err != nil {
+		return "", err
+	}
+
+	_, err = buf.ReadFrom(b)
+	if err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
+}
+
+// Highlight returns a syntax highlighted string of text.
+func Highlight(content, extension, syntaxTheme string) (string, error) {
+	buf := new(bytes.Buffer)
+	if err := quick.Highlight(buf, content, extension, "terminal256", syntaxTheme); err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
+}
+
 // SetSize sets the size of the colorimage.
 func (m *Model) SetSize(width int) {
 	m.Width = width
@@ -67,6 +126,11 @@ func (m *Model) SetImage(img image.Image) {
 // GetWidth returns the width of the colorimage.
 func (m Model) GetWidth() int {
 	return m.Width
+}
+
+// GetContent returns the content of the renderer.
+func (m Model) GetContent() string {
+	return m.Content
 }
 
 // View returns a string representation of a colorimage.
