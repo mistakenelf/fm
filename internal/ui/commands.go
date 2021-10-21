@@ -15,10 +15,7 @@ import (
 	_ "image/png"
 
 	"github.com/knipferrc/fm/dirfs"
-	"github.com/knipferrc/fm/internal/colorimage"
-	"github.com/knipferrc/fm/internal/markdown"
-	"github.com/knipferrc/fm/internal/pdfdoc"
-	"github.com/knipferrc/fm/internal/text"
+	"github.com/knipferrc/fm/internal/renderer"
 	"github.com/knipferrc/fm/strfmt"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -118,7 +115,7 @@ func (m Model) moveDirectoryItemCmd(name string) tea.Cmd {
 // redrawImageCmd redraws the image based on the width provided.
 func (m Model) redrawImageCmd(width int) tea.Cmd {
 	return func() tea.Msg {
-		imageString := colorimage.ImageToString(width, m.colorimage.Image)
+		imageString := renderer.ImageToString(width, m.renderer.Image)
 
 		return convertImageToStringMsg(imageString)
 	}
@@ -156,7 +153,7 @@ func (m Model) readFileContentCmd(file os.FileInfo, width int) tea.Cmd {
 
 		switch {
 		case filepath.Ext(file.Name()) == ".md" && m.appConfig.Settings.PrettyMarkdown:
-			markdownContent, err := markdown.RenderMarkdown(width, content)
+			markdownContent, err := renderer.RenderMarkdown(width, content)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
@@ -180,7 +177,7 @@ func (m Model) readFileContentCmd(file os.FileInfo, width int) tea.Cmd {
 				return errorMsg(err.Error())
 			}
 
-			imageString := colorimage.ImageToString(width, img)
+			imageString := renderer.ImageToString(width, img)
 
 			return readFileContentMsg{
 				rawContent:  content,
@@ -191,7 +188,7 @@ func (m Model) readFileContentCmd(file os.FileInfo, width int) tea.Cmd {
 				image:       img,
 			}
 		case filepath.Ext(file.Name()) == ".pdf":
-			pdfContent, err := pdfdoc.ReadPdf(file.Name())
+			pdfContent, err := renderer.ReadPdf(file.Name())
 			if err != nil {
 				return errorMsg(err.Error())
 			}
@@ -205,7 +202,7 @@ func (m Model) readFileContentCmd(file os.FileInfo, width int) tea.Cmd {
 				image:       nil,
 			}
 		default:
-			code, err := text.Highlight(content, filepath.Ext(file.Name()), m.appConfig.Settings.SyntaxTheme)
+			code, err := renderer.Highlight(content, filepath.Ext(file.Name()), m.appConfig.Settings.SyntaxTheme)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
