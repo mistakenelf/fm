@@ -186,8 +186,8 @@ func getDefaultKeyMap() keyMap {
 			key.WithHelp("esc", "reset to initial state"),
 		),
 		Delete: key.NewBinding(
-			key.WithKeys("D"),
-			key.WithHelp("D", "delete the selected file or directory"),
+			key.WithKeys("ctrl+d"),
+			key.WithHelp("ctrl+d", "delete the selected file or directory"),
 		),
 		CreateFile: key.NewBinding(
 			key.WithKeys("n"),
