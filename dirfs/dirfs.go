@@ -68,7 +68,7 @@ func GetDirectoryListing(dir string, showHidden bool) ([]fs.DirEntry, error) {
 }
 
 // GetDirectoryListingByType returns a directory listing based on type (directories | files).
-func GetDirectoryListingByType(dir, listType string) ([]fs.DirEntry, error) {
+func GetDirectoryListingByType(dir, listType string, showHidden bool) ([]fs.DirEntry, error) {
 	n := 0
 
 	// Read files from the directory.
@@ -78,12 +78,21 @@ func GetDirectoryListingByType(dir, listType string) ([]fs.DirEntry, error) {
 	}
 
 	for _, file := range files {
-		if file.IsDir() && listType == "directories" {
+		switch {
+		case file.IsDir() && listType == "directories" && !showHidden:
+			if !strings.HasPrefix(file.Name(), ".") {
+				files[n] = file
+				n++
+			}
+		case file.IsDir() && listType == "directories" && showHidden:
 			files[n] = file
 			n++
-		}
-
-		if !file.IsDir() && listType == "files" {
+		case !file.IsDir() && listType == "files" && !showHidden:
+			if !strings.HasPrefix(file.Name(), ".") {
+				files[n] = file
+				n++
+			}
+		case !file.IsDir() && listType == "files" && showHidden:
 			files[n] = file
 			n++
 		}

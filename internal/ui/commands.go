@@ -58,7 +58,12 @@ func (m Model) updateDirectoryListingCmd(name string) tea.Cmd {
 // previewDirectoryListingCmd updates the directory listing based on the name of the directory provided.
 func (m Model) previewDirectoryListingCmd(name string) tea.Cmd {
 	return func() tea.Msg {
-		files, err := dirfs.GetDirectoryListing(name, m.dirTree.ShowHidden)
+		currentDir, err := dirfs.GetWorkingDirectory()
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		files, err := dirfs.GetDirectoryListing(filepath.Join(currentDir, name), m.dirTree.ShowHidden)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
@@ -88,11 +93,11 @@ func (m Model) moveDirectoryItemCmd(name string) tea.Cmd {
 
 		// Get the directory from which the move was intiated from
 		// and give it the same file name.
-		src := fmt.Sprintf("%s/%s", m.initialMoveDirectory, name)
+		src := filepath.Join(m.initialMoveDirectory, name)
 
 		// Destination is the current working directory with
 		// the same file name that it had.
-		dst := fmt.Sprintf("%s/%s", workingDir, name)
+		dst := filepath.Join(workingDir, name)
 
 		if err = dirfs.MoveDirectoryItem(src, dst); err != nil {
 			return errorMsg(err.Error())
@@ -103,7 +108,7 @@ func (m Model) moveDirectoryItemCmd(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		err = os.Chdir(name)
+		err = os.Chdir(m.initialMoveDirectory)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
@@ -249,7 +254,7 @@ func (m Model) zipDirectoryCmd(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		dirToZip := fmt.Sprintf("%s/%s", currentDir, name)
+		dirToZip := filepath.Join(currentDir, name)
 		if err := dirfs.Zip(dirToZip); err != nil {
 			return errorMsg(err.Error())
 		}
@@ -266,7 +271,7 @@ func (m Model) unzipDirectoryCmd(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		dirToUnzip := fmt.Sprintf("%s/%s", currentDir, name)
+		dirToUnzip := filepath.Join(currentDir, name)
 		if err := dirfs.Unzip(dirToUnzip); err != nil {
 			return errorMsg(err.Error())
 		}
@@ -339,7 +344,7 @@ func (m Model) copyToClipboardCmd(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		filePath := fmt.Sprintf("%s/%s", workingDir, name)
+		filePath := filepath.Join(workingDir, name)
 		clipboard.Write(clipboard.FmtText, []byte(filePath))
 
 		return copyToClipboardMsg(fmt.Sprintf("%s %s %s", "Successfully copied", filePath, "to clipboard"))
@@ -347,14 +352,14 @@ func (m Model) copyToClipboardCmd(name string) tea.Cmd {
 }
 
 // getDirectoryListingByTypeCmd returns only directories in the current directory.
-func (m Model) getDirectoryListingByType(listType string) tea.Cmd {
+func (m Model) getDirectoryListingByType(listType string, showHidden bool) tea.Cmd {
 	return func() tea.Msg {
 		workingDir, err := dirfs.GetWorkingDirectory()
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		directories, err := dirfs.GetDirectoryListingByType(workingDir, listType)
+		directories, err := dirfs.GetDirectoryListingByType(workingDir, listType, showHidden)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
