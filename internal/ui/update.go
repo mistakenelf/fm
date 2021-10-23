@@ -2,9 +2,9 @@ package ui
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/knipferrc/fm/dirfs"
 
@@ -257,16 +257,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.Left):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() {
 				m.statusBar.SetItemSize("")
-				previousDirectory, err := dirfs.GetWorkingDirectory()
+				workingDirectory, err := dirfs.GetWorkingDirectory()
 				if err != nil {
 					return m, m.handleErrorCmd(err)
 				}
 
-				m.previousDirectory = previousDirectory
+				m.previousDirectory = workingDirectory
 
-				return m, m.updateDirectoryListingCmd(
-					fmt.Sprintf("%s/%s", m.previousDirectory, dirfs.PreviousDirectory),
-				)
+				return m, m.updateDirectoryListingCmd(filepath.Join(workingDirectory, dirfs.PreviousDirectory))
 			}
 
 		// Scroll pane down.
@@ -308,9 +306,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						return m, m.handleErrorCmd(err)
 					}
 
-					return m, m.updateDirectoryListingCmd(
-						fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()),
-					)
+					return m, m.updateDirectoryListingCmd(filepath.Join(currentDir, m.dirTree.GetSelectedFile().Name()))
 				case m.dirTree.GetSelectedFile().Mode()&os.ModeSymlink == os.ModeSymlink:
 					m.statusBar.SetItemSize("")
 					symlinkFile, err := os.Readlink(m.dirTree.GetSelectedFile().Name())
@@ -467,8 +463,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.ToggleHidden):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() {
 				m.dirTree.ToggleHidden()
+				m.showHidden = !m.showHidden
 
-				return m, m.updateDirectoryListingCmd(dirfs.CurrentDirectory)
+				switch {
+				case m.showDirectoriesOnly:
+					return m, m.getDirectoryListingByType("directories", m.showHidden)
+				case m.showFilesOnly:
+					return m, m.getDirectoryListingByType("files", m.showHidden)
+				default:
+					return m, m.updateDirectoryListingCmd(dirfs.CurrentDirectory)
+				}
 			}
 
 		// Toggle between the two panes if the command bar is not currently active.
@@ -554,14 +558,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, m.keys.PreviewDirectory):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetSelectedFile().IsDir() {
-				currentDir, err := dirfs.GetWorkingDirectory()
-				if err != nil {
-					return m, m.handleErrorCmd(err)
-				}
-
-				return m, m.previewDirectoryListingCmd(
-					fmt.Sprintf("%s/%s", currentDir, m.dirTree.GetSelectedFile().Name()),
-				)
+				return m, m.previewDirectoryListingCmd(m.dirTree.GetSelectedFile().Name())
 			}
 
 		case key.Matches(msg, m.keys.CopyToClipboard):
@@ -571,12 +568,26 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, m.keys.ShowOnlyDirectories):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
-				return m, m.getDirectoryListingByType("directories")
+				m.showDirectoriesOnly = !m.showDirectoriesOnly
+				m.showFilesOnly = false
+
+				if m.showDirectoriesOnly {
+					return m, m.getDirectoryListingByType("directories", m.showHidden)
+				}
+
+				return m, m.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 			}
 
 		case key.Matches(msg, m.keys.ShowOnlyFiles):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
-				return m, m.getDirectoryListingByType("files")
+				m.showFilesOnly = !m.showFilesOnly
+				m.showDirectoriesOnly = false
+
+				if m.showFilesOnly {
+					return m, m.getDirectoryListingByType("files", m.showHidden)
+				}
+
+				return m, m.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 			}
 
 		case key.Matches(msg, m.keys.Find):
@@ -600,6 +611,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.createDirectoryMode = false
 			m.renameMode = false
 			m.findMode = false
+			m.showFilesOnly = false
+			m.showHidden = false
+			m.showDirectoriesOnly = false
 			m.primaryPane.SetActive(true)
 			m.secondaryPane.SetActive(false)
 			m.statusBar.BlurCommandBar()
