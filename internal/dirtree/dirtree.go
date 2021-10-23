@@ -15,6 +15,7 @@ import (
 // Model is a struct to represent the properties of a dirtree.
 type Model struct {
 	Files               []fs.DirEntry
+	FilePaths           []string
 	Width               int
 	Cursor              int
 	ShowIcons           bool
@@ -37,6 +38,11 @@ func NewModel(showIcons bool, selectedItemColor, unselectedItemColor lipgloss.Ad
 // SetContent sets the files currently displayed in the tree.
 func (m *Model) SetContent(files []fs.DirEntry) {
 	m.Files = files
+}
+
+// SetFilePaths sets an array of file paths.
+func (m *Model) SetFilePaths(filePaths []string) {
+	m.FilePaths = filePaths
 }
 
 // SetSize updates the size of the dirtree, useful when resizing the terminal.

@@ -177,6 +177,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, nil
 
+	// findFilesByNameMsg is received when a file listing is to be found by name.
+	case findFilesByNameMsg:
+		m.showCommandInput = false
+		m.createFileMode = false
+		m.createDirectoryMode = false
+		m.renameMode = false
+		m.findMode = false
+
+		m.dirTree.GotoTop()
+		m.dirTree.SetContent(msg.entries)
+		m.dirTree.SetFilePaths(msg.paths)
+		m.primaryPane.SetContent(m.dirTree.View())
+		m.primaryPane.GotoTop()
+		m.statusBar.BlurCommandBar()
+		m.statusBar.ResetCommandBar()
+		m.updateStatusBarContent()
+
 	// tea.WindowSizeMsg is received whenever the window size changes.
 	case tea.WindowSizeMsg:
 		m.primaryPane.SetSize(msg.Width/2, msg.Height-m.statusBar.GetHeight())
@@ -306,6 +323,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						return m, m.handleErrorCmd(err)
 					}
 
+					if len(m.dirTree.FilePaths) > 0 {
+						return m, m.updateDirectoryListingCmd(m.dirTree.FilePaths[m.dirTree.GetCursor()])
+					}
+
 					return m, m.updateDirectoryListingCmd(filepath.Join(currentDir, m.dirTree.GetSelectedFile().Name()))
 				case m.dirTree.GetSelectedFile().Mode()&os.ModeSymlink == os.ModeSymlink:
 					m.statusBar.SetItemSize("")
@@ -324,12 +345,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}
 
 					return m, m.readFileContentCmd(
-						fileInfo,
+						fileInfo.Name(),
 						m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
 					)
 				default:
+					if len(m.dirTree.FilePaths) > 0 {
+						return m, m.readFileContentCmd(
+							m.dirTree.FilePaths[m.dirTree.GetCursor()],
+							m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
+						)
+					}
+
 					return m, m.readFileContentCmd(
-						m.dirTree.GetSelectedFile(),
+						m.dirTree.GetSelectedFile().Name(),
 						m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
 					)
 				}
