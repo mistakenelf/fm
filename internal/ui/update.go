@@ -14,15 +14,22 @@ import (
 )
 
 // updateStatusBarContent updates the content of the statusbar.
-func (m *Model) updateStatusBarContent() {
+func (m *Model) updateStatusBarContent() error {
+	selectedFile, err := m.dirTree.GetSelectedFile()
+	if err != nil {
+		return err
+	}
+
 	m.statusBar.SetContent(
 		m.dirTree.GetTotalFiles(),
 		m.dirTree.GetCursor(),
 		m.showCommandInput,
 		m.moveMode,
-		m.dirTree.GetSelectedFile(),
+		selectedFile,
 		m.itemToMove,
 	)
+
+	return nil
 }
 
 // scrollPrimaryPane handles the scrolling of the primary pane which will handle
@@ -71,10 +78,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.primaryPane.GotoTop()
 		m.statusBar.BlurCommandBar()
 		m.statusBar.ResetCommandBar()
-		m.updateStatusBarContent()
+		err := m.updateStatusBarContent()
+		if err != nil {
+			return m, m.handleErrorCmd(err)
+		}
 
 		if len(msg) > 0 {
-			return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
+			selectedFile, err := m.dirTree.GetSelectedFile()
+			if err != nil {
+				return m, m.handleErrorCmd(err)
+			}
+
+			return m, m.getDirectoryItemSizeCmd(selectedFile.Name())
 		}
 
 		return m, nil
@@ -106,7 +121,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.primaryPane.ShowAlternateBorder(false)
 		m.dirTree.SetContent(msg)
 		m.primaryPane.SetContent(m.dirTree.View())
-		m.updateStatusBarContent()
+		err := m.updateStatusBarContent()
+		if err != nil {
+			return m, m.handleErrorCmd(err)
+		}
 
 		return m, nil
 
@@ -211,11 +229,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandInput && m.primaryPane.GetIsActive() {
 				m.dirTree.GoUp()
 				m.scrollPrimaryPane()
-				m.updateStatusBarContent()
+				err := m.updateStatusBarContent()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
+				selectedFile, err := m.dirTree.GetSelectedFile()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 
-				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
+				return m, m.getDirectoryItemSizeCmd(selectedFile.Name())
 			}
 
 			m.secondaryPane.LineUp(3)
@@ -226,11 +251,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandInput && m.primaryPane.GetIsActive() {
 				m.dirTree.GoDown()
 				m.scrollPrimaryPane()
-				m.updateStatusBarContent()
+				err := m.updateStatusBarContent()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
+				selectedFile, err := m.dirTree.GetSelectedFile()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 
-				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
+				return m, m.getDirectoryItemSizeCmd(selectedFile.Name())
 			}
 
 			m.secondaryPane.LineDown(3)
@@ -271,11 +303,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 1 {
 				m.dirTree.GoDown()
 				m.scrollPrimaryPane()
-				m.updateStatusBarContent()
+				err := m.updateStatusBarContent()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
+				selectedFile, err := m.dirTree.GetSelectedFile()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 
-				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
+				return m, m.getDirectoryItemSizeCmd(selectedFile.Name())
 			}
 
 			m.secondaryPane.LineDown(1)
@@ -285,11 +324,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 1 {
 				m.dirTree.GoUp()
 				m.scrollPrimaryPane()
-				m.updateStatusBarContent()
+				err := m.updateStatusBarContent()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
+				selectedFile, err := m.dirTree.GetSelectedFile()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 
-				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
+				return m, m.getDirectoryItemSizeCmd(selectedFile.Name())
 			}
 
 			m.secondaryPane.LineUp(1)
@@ -297,18 +343,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Open directory or read file content and display in secondary pane.
 		case key.Matches(msg, m.keys.Right):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+				selectedFile, err := m.dirTree.GetSelectedFile()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
+
 				switch {
-				case m.dirTree.GetSelectedFile().IsDir() && !m.statusBar.CommandBarFocused():
+				case selectedFile.IsDir() && !m.statusBar.CommandBarFocused():
 					m.statusBar.SetItemSize("")
 					currentDir, err := dirfs.GetWorkingDirectory()
 					if err != nil {
 						return m, m.handleErrorCmd(err)
 					}
 
-					return m, m.updateDirectoryListingCmd(filepath.Join(currentDir, m.dirTree.GetSelectedFile().Name()))
-				case m.dirTree.GetSelectedFile().Mode()&os.ModeSymlink == os.ModeSymlink:
+					return m, m.updateDirectoryListingCmd(filepath.Join(currentDir, selectedFile.Name()))
+				case selectedFile.Mode()&os.ModeSymlink == os.ModeSymlink:
 					m.statusBar.SetItemSize("")
-					symlinkFile, err := os.Readlink(m.dirTree.GetSelectedFile().Name())
+					symlinkFile, err := os.Readlink(selectedFile.Name())
 					if err != nil {
 						return m, m.handleErrorCmd(err)
 					}
@@ -319,7 +370,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}
 
 					if fileInfo.IsDir() {
-						return m, m.updateDirectoryListingCmd(symlinkFile)
+						currentDir, err := dirfs.GetWorkingDirectory()
+						if err != nil {
+							return m, m.handleErrorCmd(err)
+						}
+
+						return m, m.updateDirectoryListingCmd(filepath.Join(currentDir, fileInfo.Name()))
 					}
 
 					return m, m.readFileContentCmd(
@@ -328,7 +384,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					)
 				default:
 					return m, m.readFileContentCmd(
-						m.dirTree.GetSelectedFile(),
+						selectedFile,
 						m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
 					)
 				}
@@ -340,8 +396,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.primaryPane.GotoTop()
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
+				selectedFile, err := m.dirTree.GetSelectedFile()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 
-				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
+				return m, m.getDirectoryItemSizeCmd(selectedFile.Name())
 			}
 
 			m.secondaryPane.GotoTop()
@@ -353,14 +413,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.primaryPane.GotoBottom()
 				m.primaryPane.SetContent(m.dirTree.View())
 				m.statusBar.SetItemSize("")
+				selectedFile, err := m.dirTree.GetSelectedFile()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 
-				return m, m.getDirectoryItemSizeCmd(m.dirTree.GetSelectedFile().Name())
+				return m, m.getDirectoryItemSizeCmd(selectedFile.Name())
 			}
 
 			m.secondaryPane.GotoBottom()
 
 		// process command bar input.
 		case key.Matches(msg, m.keys.Enter):
+			selectedFile, err := m.dirTree.GetSelectedFile()
+			if err != nil {
+				return m, m.handleErrorCmd(err)
+			}
+
 			switch {
 			case m.moveMode:
 				return m, m.moveDirectoryItemCmd(m.itemToMove.Name())
@@ -376,7 +445,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				)
 			case m.renameMode:
 				return m, tea.Sequentially(
-					m.renameDirectoryItemCmd(m.dirTree.GetSelectedFile().Name(), m.statusBar.CommandBarValue()),
+					m.renameDirectoryItemCmd(selectedFile.Name(), m.statusBar.CommandBarValue()),
 					m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
 			default:
@@ -386,15 +455,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Delete the currently selected item.
 		case key.Matches(msg, m.keys.Delete):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() {
-				if m.dirTree.GetSelectedFile().IsDir() {
+				selectedFile, err := m.dirTree.GetSelectedFile()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
+
+				if selectedFile.IsDir() {
 					return m, tea.Sequentially(
-						m.deleteDirectoryCmd(m.dirTree.GetSelectedFile().Name()),
+						m.deleteDirectoryCmd(selectedFile.Name()),
 						m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 					)
 				}
 
 				return m, tea.Sequentially(
-					m.deleteFileCmd(m.dirTree.GetSelectedFile().Name()),
+					m.deleteFileCmd(selectedFile.Name()),
 					m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
 			}
@@ -405,7 +479,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.createFileMode = true
 				m.showCommandInput = true
 				m.statusBar.FocusCommandBar()
-				m.updateStatusBarContent()
+				err := m.updateStatusBarContent()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 
 				return m, nil
 			}
@@ -416,7 +493,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.createDirectoryMode = true
 				m.showCommandInput = true
 				m.statusBar.FocusCommandBar()
-				m.updateStatusBarContent()
+				err := m.updateStatusBarContent()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 
 				return m, nil
 			}
@@ -427,7 +507,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.renameMode = true
 				m.showCommandInput = true
 				m.statusBar.FocusCommandBar()
-				m.updateStatusBarContent()
+				err := m.updateStatusBarContent()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 
 				return m, nil
 			}
@@ -489,16 +572,29 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, m.handleErrorCmd(err)
 				}
 
+				selectedFile, err := m.dirTree.GetSelectedFile()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
+
 				m.initialMoveDirectory = initialMoveDirectory
-				m.itemToMove = m.dirTree.GetSelectedFile()
-				m.updateStatusBarContent()
+				m.itemToMove = selectedFile
+				err = m.updateStatusBarContent()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 			}
 
 		// Zip up the currently selected item.
 		case key.Matches(msg, m.keys.Zip):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+				selectedFile, err := m.dirTree.GetSelectedFile()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
+
 				return m, tea.Sequentially(
-					m.zipDirectoryCmd(m.dirTree.GetSelectedFile().Name()),
+					m.zipDirectoryCmd(selectedFile.Name()),
 					m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
 			}
@@ -506,8 +602,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Unzip the currently selected zip file.
 		case key.Matches(msg, m.keys.Unzip):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+				selectedFile, err := m.dirTree.GetSelectedFile()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
+
 				return m, tea.Sequentially(
-					m.unzipDirectoryCmd(m.dirTree.GetSelectedFile().Name()),
+					m.unzipDirectoryCmd(selectedFile.Name()),
 					m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
 			}
@@ -515,28 +616,38 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Copy the currently selected item.
 		case key.Matches(msg, m.keys.Copy):
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
-				if m.dirTree.GetSelectedFile().IsDir() {
+				selectedFile, err := m.dirTree.GetSelectedFile()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
+
+				if selectedFile.IsDir() {
 					return m, tea.Sequentially(
-						m.copyDirectoryCmd(m.dirTree.GetSelectedFile().Name()),
+						m.copyDirectoryCmd(selectedFile.Name()),
 						m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 					)
 				}
 
 				return m, tea.Sequentially(
-					m.copyFileCmd(m.dirTree.GetSelectedFile().Name()),
+					m.copyFileCmd(selectedFile.Name()),
 					m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
 			}
 
 		// Edit the currently selected file.
 		case key.Matches(msg, m.keys.EditFile):
-			if !m.showCommandInput && m.primaryPane.GetIsActive() && !m.dirTree.GetSelectedFile().IsDir() {
+			selectedFile, err := m.dirTree.GetSelectedFile()
+			if err != nil {
+				return m, m.handleErrorCmd(err)
+			}
+
+			if !m.showCommandInput && m.primaryPane.GetIsActive() && !selectedFile.IsDir() {
 				editorPath := os.Getenv("EDITOR")
 				if editorPath == "" {
 					return m, m.handleErrorCmd(errors.New("$EDITOR not set"))
 				}
 
-				editorCmd := exec.Command(editorPath, m.dirTree.GetSelectedFile().Name())
+				editorCmd := exec.Command(editorPath, selectedFile.Name())
 				editorCmd.Stdin = os.Stdin
 				editorCmd.Stdout = os.Stdout
 				editorCmd.Stderr = os.Stderr
@@ -554,13 +665,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case key.Matches(msg, m.keys.PreviewDirectory):
-			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetSelectedFile().IsDir() {
-				return m, m.previewDirectoryListingCmd(m.dirTree.GetSelectedFile().Name())
+			selectedFile, err := m.dirTree.GetSelectedFile()
+			if err != nil {
+				return m, m.handleErrorCmd(err)
+			}
+
+			if !m.showCommandInput && m.primaryPane.GetIsActive() && selectedFile.IsDir() {
+				return m, m.previewDirectoryListingCmd(selectedFile.Name())
 			}
 
 		case key.Matches(msg, m.keys.CopyToClipboard):
+			selectedFile, err := m.dirTree.GetSelectedFile()
+			if err != nil {
+				return m, m.handleErrorCmd(err)
+			}
+
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
-				return m, m.copyToClipboardCmd(m.dirTree.GetSelectedFile().Name())
+				return m, m.copyToClipboardCmd(selectedFile.Name())
 			}
 
 		case key.Matches(msg, m.keys.ShowOnlyDirectories):
@@ -613,7 +734,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.renderer.SetImage(nil)
 			m.renderer.SetContent("")
 			m.dirTreePreview.SetContent(nil)
-			m.updateStatusBarContent()
+			err := m.updateStatusBarContent()
+			if err != nil {
+				return m, m.handleErrorCmd(err)
+			}
 			cmds = append(cmds, m.updateDirectoryListingCmd(dirfs.CurrentDirectory))
 		}
 	}
