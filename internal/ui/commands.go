@@ -4,15 +4,12 @@ import (
 	"context"
 	"fmt"
 	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"time"
-
-	// "image/jpeg" is needed for the image.Decode function.
-	_ "image/jpeg"
-	// "image/png" is needed for the image.Decode function.
-	_ "image/png"
 
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/internal/renderer"
