@@ -665,13 +665,32 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case key.Matches(msg, m.keys.PreviewDirectory):
-			selectedFile, err := m.dirTree.GetSelectedFile()
-			if err != nil {
-				return m, m.handleErrorCmd(err)
-			}
+			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+				selectedFile, err := m.dirTree.GetSelectedFile()
+				if err != nil {
+					return m, m.handleErrorCmd(err)
+				}
 
-			if !m.showCommandInput && m.primaryPane.GetIsActive() && selectedFile.IsDir() {
-				return m, m.previewDirectoryListingCmd(selectedFile.Name())
+				switch {
+				case selectedFile.IsDir() && !m.statusBar.CommandBarFocused():
+					return m, m.previewDirectoryListingCmd(selectedFile.Name())
+				case selectedFile.Mode()&os.ModeSymlink == os.ModeSymlink:
+					symlinkFile, err := os.Readlink(selectedFile.Name())
+					if err != nil {
+						return m, m.handleErrorCmd(err)
+					}
+
+					fileInfo, err := os.Stat(symlinkFile)
+					if err != nil {
+						return m, m.handleErrorCmd(err)
+					}
+
+					if fileInfo.IsDir() {
+						return m, m.previewDirectoryListingCmd(fileInfo.Name())
+					}
+				default:
+					return m, m.previewDirectoryListingCmd(selectedFile.Name())
+				}
 			}
 
 		case key.Matches(msg, m.keys.CopyToClipboard):
