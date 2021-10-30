@@ -364,3 +364,14 @@ func (m Model) getDirectoryListingByType(listType string, showHidden bool) tea.C
 		return updateDirectoryListingMsg(directories)
 	}
 }
+
+// writeToFile writes content to the file specified.
+func (m Model) writeToFile(filePath, content string) tea.Cmd {
+	return func() tea.Msg {
+		if err := dirfs.WriteToFile(filePath, content); err != nil {
+			return errorMsg(err.Error())
+		}
+
+		return nil
+	}
+}

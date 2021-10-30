@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/knipferrc/fm/dirfs"
+	"github.com/spf13/viper"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
@@ -665,27 +666,33 @@ func (m *Model) handleEditFileKeyPress(cmds *[]tea.Cmd) {
 	}
 
 	if !m.showCommandInput && m.primaryPane.GetIsActive() && !selectedFile.IsDir() {
-		editorPath := os.Getenv("EDITOR")
-		if editorPath == "" {
-			*cmds = append(*cmds, m.handleErrorCmd(errors.New("$EDITOR not set")))
+		selectionPath := viper.GetString("selection-path")
+
+		if selectionPath == "" {
+			editorPath := os.Getenv("EDITOR")
+			if editorPath == "" {
+				*cmds = append(*cmds, m.handleErrorCmd(errors.New("$EDITOR not set")))
+			}
+
+			editorCmd := exec.Command(editorPath, selectedFile.Name())
+			editorCmd.Stdin = os.Stdin
+			editorCmd.Stdout = os.Stdout
+			editorCmd.Stderr = os.Stderr
+
+			err := editorCmd.Start()
+			if err != nil {
+				*cmds = append(*cmds, m.handleErrorCmd(err))
+			}
+
+			err = editorCmd.Wait()
+			if err != nil {
+				*cmds = append(*cmds, m.handleErrorCmd(err))
+			}
+
+			*cmds = append(*cmds, m.updateDirectoryListingCmd(dirfs.CurrentDirectory))
+		} else {
+			*cmds = append(*cmds, m.writeToFile(selectedFile.Name(), selectionPath))
 		}
-
-		editorCmd := exec.Command(editorPath, selectedFile.Name())
-		editorCmd.Stdin = os.Stdin
-		editorCmd.Stdout = os.Stdout
-		editorCmd.Stderr = os.Stderr
-
-		err := editorCmd.Start()
-		if err != nil {
-			*cmds = append(*cmds, m.handleErrorCmd(err))
-		}
-
-		err = editorCmd.Wait()
-		if err != nil {
-			*cmds = append(*cmds, m.handleErrorCmd(err))
-		}
-
-		*cmds = append(*cmds, m.updateDirectoryListingCmd(dirfs.CurrentDirectory))
 	}
 }
 
