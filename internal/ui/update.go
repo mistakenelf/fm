@@ -488,46 +488,39 @@ func (m *Model) handleDeleteKeyPress(cmds *[]tea.Cmd) {
 
 // handleCreateFileKeyPress creates a new file.
 func (m *Model) handleCreateFileKeyPress(cmds *[]tea.Cmd) {
-	if !m.moveMode && !m.createDirectoryMode && !m.showCommandInput {
-		m.createFileMode = true
-		m.showCommandInput = true
+	m.createFileMode = true
+	m.showCommandInput = true
+	m.statusBar.FocusCommandBar()
 
-		m.statusBar.FocusCommandBar()
-
-		err := m.updateStatusBarContent()
-		if err != nil {
-			*cmds = append(*cmds, m.handleErrorCmd(err))
-		}
+	err := m.updateStatusBarContent()
+	if err != nil {
+		*cmds = append(*cmds, m.handleErrorCmd(err))
 	}
 }
 
 // handleCreateDirectoryKeyPress creates a new directory.
 func (m *Model) handleCreateDirectoryKeyPress(cmds *[]tea.Cmd) {
-	if !m.moveMode && !m.createFileMode && !m.showCommandInput {
-		m.createDirectoryMode = true
-		m.showCommandInput = true
+	m.createDirectoryMode = true
+	m.showCommandInput = true
 
-		m.statusBar.FocusCommandBar()
+	m.statusBar.FocusCommandBar()
 
-		err := m.updateStatusBarContent()
-		if err != nil {
-			*cmds = append(*cmds, m.handleErrorCmd(err))
-		}
+	err := m.updateStatusBarContent()
+	if err != nil {
+		*cmds = append(*cmds, m.handleErrorCmd(err))
 	}
 }
 
 // handleRenameKeyPress renames the selected directory item.
 func (m *Model) handleRenameKeyPress(cmds *[]tea.Cmd) {
-	if !m.moveMode && !m.createFileMode && !m.createDirectoryMode && !m.showCommandInput {
-		m.renameMode = true
-		m.showCommandInput = true
+	m.renameMode = true
+	m.showCommandInput = true
 
-		m.statusBar.FocusCommandBar()
+	m.statusBar.FocusCommandBar()
 
-		err := m.updateStatusBarContent()
-		if err != nil {
-			*cmds = append(*cmds, m.handleErrorCmd(err))
-		}
+	err := m.updateStatusBarContent()
+	if err != nil {
+		*cmds = append(*cmds, m.handleErrorCmd(err))
 	}
 }
 
@@ -852,11 +845,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.Delete):
 			m.handleDeleteKeyPress(&cmds)
 		case key.Matches(msg, m.keys.CreateFile):
-			m.handleCreateFileKeyPress(&cmds)
+			if !m.moveMode && !m.createDirectoryMode && !m.showCommandInput {
+				m.handleCreateFileKeyPress(&cmds)
+				return m, nil
+			}
 		case key.Matches(msg, m.keys.CreateDirectory):
-			m.handleCreateDirectoryKeyPress(&cmds)
+			if !m.moveMode && !m.createFileMode && !m.showCommandInput {
+				m.handleCreateDirectoryKeyPress(&cmds)
+				return m, nil
+			}
 		case key.Matches(msg, m.keys.Rename):
-			m.handleRenameKeyPress(&cmds)
+			if !m.moveMode && !m.createFileMode && !m.createDirectoryMode && !m.showCommandInput {
+				m.handleRenameKeyPress(&cmds)
+				return m, nil
+			}
 		case key.Matches(msg, m.keys.OpenHomeDirectory):
 			m.handleOpenHomeDirectoryKeyPress(&cmds)
 		case key.Matches(msg, m.keys.OpenPreviousDirectory):
