@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/knipferrc/fm/dirfs"
+	"github.com/spf13/viper"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -15,12 +16,7 @@ import (
 // Init initializes the UI and sets up initial data.
 func (m Model) Init() tea.Cmd {
 	var cmds []tea.Cmd
-	startDir := ""
-
-	// If a starting directory was specified, use it.
-	if len(os.Args) > 1 {
-		startDir = os.Args[1]
-	}
+	startDir := viper.GetString("start-dir")
 
 	switch {
 	case startDir != "":
