@@ -78,7 +78,9 @@ go install github.com/knipferrc/fm@latest
 
 ## Usage
 
-- Run `fm` or `fm /some/dir`
+- `fm` will start fm in the current directory
+- `fm --start-dir=/some/start/dir` will start fm in the specified directory
+- `fm --selection-path=/tmp/tmpfile` will write the selected items path to the selection path when pressing <kbd>E</kbd> and exit fm
 
 ## Navigation
 

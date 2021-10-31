@@ -453,3 +453,29 @@ func GetDirectoryItemSize(path string) (int64, error) {
 
 	return size, err
 }
+
+// WriteToFile writes content to a file.
+func WriteToFile(path, content string) error {
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+
+	workingDir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	_, err = f.WriteString(fmt.Sprintf("%s\n", filepath.Join(workingDir, content)))
+	if err != nil {
+		f.Close()
+		return err
+	}
+
+	err = f.Close()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

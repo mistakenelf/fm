@@ -18,7 +18,10 @@ var rootCmd = &cobra.Command{
 	Version: "0.6.1",
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		config.LoadConfig()
+		startDir := cmd.Flags().Lookup("start-dir")
+		selectionPath := cmd.Flags().Lookup("selection-path")
+
+		config.LoadConfig(startDir, selectionPath)
 
 		cfg := config.GetConfig()
 
@@ -60,6 +63,9 @@ var rootCmd = &cobra.Command{
 
 // Execute runs the root command and starts the application.
 func Execute() {
+	rootCmd.PersistentFlags().String("selection-path", "", "Path to write to file on open.")
+	rootCmd.PersistentFlags().String("start-dir", "", "Starting directory for FM")
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
