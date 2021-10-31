@@ -684,7 +684,7 @@ func (m *Model) handleEditFileKeyPress(cmds *[]tea.Cmd) {
 
 			*cmds = append(*cmds, m.updateDirectoryListingCmd(dirfs.CurrentDirectory))
 		} else {
-			*cmds = append(*cmds, m.writeToFile(selectedFile.Name(), selectionPath))
+			*cmds = append(*cmds, tea.Sequentially(m.writeSelectionPath(selectionPath, selectedFile.Name()), tea.Quit))
 		}
 	}
 }
