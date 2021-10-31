@@ -658,10 +658,10 @@ func (m *Model) handleEditFileKeyPress(cmds *[]tea.Cmd) {
 		*cmds = append(*cmds, m.handleErrorCmd(err))
 	}
 
-	if !m.showCommandInput && m.primaryPane.GetIsActive() && !selectedFile.IsDir() {
+	if !m.showCommandInput && m.primaryPane.GetIsActive() {
 		selectionPath := viper.GetString("selection-path")
 
-		if selectionPath == "" {
+		if selectionPath == "" && !selectedFile.IsDir() {
 			editorPath := os.Getenv("EDITOR")
 			if editorPath == "" {
 				*cmds = append(*cmds, m.handleErrorCmd(errors.New("$EDITOR not set")))
