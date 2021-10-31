@@ -33,6 +33,14 @@ type appColors struct {
 	gruvBlue           string
 	gruvYellow         string
 	gruvOrange         string
+	nordRed            string
+	nordGreen          string
+	nordBlue           string
+	nordYellow         string
+	nordWhite          string
+	nordBlack          string
+	nordGray           string
+	nordOrange         string
 	spookyPurple       string
 	spookyOrange       string
 	spookyYellow       string
@@ -51,9 +59,17 @@ var colors = appColors{
 	gruvBlue:           "#458588",
 	gruvYellow:         "#d79921",
 	gruvOrange:         "#d65d0e",
-	spookyPurple:       "#881EE4 ",
-	spookyOrange:       "#F75F1C ",
-	spookyYellow:       "#FF9A00 ",
+	nordRed:            "#bf616a",
+	nordGreen:          "#a3be8c",
+	nordBlue:           "#81a1c1",
+	nordYellow:         "#ebcb8b",
+	nordWhite:          "#e5e9f0",
+	nordBlack:          "#3b4252",
+	nordGray:           "#4c566a",
+	nordOrange:         "#d08770",
+	spookyPurple:       "#881EE4",
+	spookyOrange:       "#F75F1C",
+	spookyYellow:       "#FF9A00",
 }
 
 var themeMap = map[string]Theme{
@@ -91,6 +107,23 @@ var themeMap = map[string]Theme{
 		ErrorColor:                           lipgloss.AdaptiveColor{Dark: colors.red, Light: colors.red},
 		DefaultTextColor:                     lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.black},
 	},
+	"nord": {
+		SelectedTreeItemColor:                lipgloss.AdaptiveColor{Dark: colors.nordOrange, Light: colors.nordOrange},
+		UnselectedTreeItemColor:              lipgloss.AdaptiveColor{Dark: colors.nordWhite, Light: colors.nordBlack},
+		ActivePaneBorderColor:                lipgloss.AdaptiveColor{Dark: colors.nordGreen, Light: colors.nordGreen},
+		InactivePaneBorderColor:              lipgloss.AdaptiveColor{Dark: colors.nordWhite, Light: colors.nordBlack},
+		SpinnerColor:                         lipgloss.AdaptiveColor{Dark: colors.nordRed, Light: colors.nordRed},
+		StatusBarSelectedFileForegroundColor: lipgloss.AdaptiveColor{Dark: colors.nordWhite, Light: colors.nordWhite},
+		StatusBarSelectedFileBackgroundColor: lipgloss.AdaptiveColor{Dark: colors.nordRed, Light: colors.nordRed},
+		StatusBarBarForegroundColor:          lipgloss.AdaptiveColor{Dark: colors.nordWhite, Light: colors.nordWhite},
+		StatusBarBarBackgroundColor:          lipgloss.AdaptiveColor{Dark: colors.nordGray, Light: colors.nordGray},
+		StatusBarTotalFilesForegroundColor:   lipgloss.AdaptiveColor{Dark: colors.nordWhite, Light: colors.nordWhite},
+		StatusBarTotalFilesBackgroundColor:   lipgloss.AdaptiveColor{Dark: colors.nordYellow, Light: colors.nordYellow},
+		StatusBarLogoForegroundColor:         lipgloss.AdaptiveColor{Dark: colors.nordWhite, Light: colors.nordWhite},
+		StatusBarLogoBackgroundColor:         lipgloss.AdaptiveColor{Dark: colors.nordBlue, Light: colors.nordBlue},
+		ErrorColor:                           lipgloss.AdaptiveColor{Dark: colors.nordRed, Light: colors.nordRed},
+		DefaultTextColor:                     lipgloss.AdaptiveColor{Dark: colors.nordWhite, Light: colors.nordBlack},
+	},
 	"spooky": {
 		SelectedTreeItemColor:                lipgloss.AdaptiveColor{Dark: colors.spookyOrange, Light: colors.spookyOrange},
 		UnselectedTreeItemColor:              lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.black},
@@ -117,6 +150,8 @@ func GetTheme(theme string) Theme {
 		return themeMap["default"]
 	case "gruvbox":
 		return themeMap["gruvbox"]
+	case "nord":
+		return themeMap["nord"]
 	case "spooky":
 		return themeMap["spooky"]
 	default:
