@@ -349,7 +349,7 @@ func (m Model) copyToClipboardCmd(name string) tea.Cmd {
 }
 
 // getDirectoryListingByTypeCmd returns only directories in the current directory.
-func (m Model) getDirectoryListingByType(listType string, showHidden bool) tea.Cmd {
+func (m Model) getDirectoryListingByTypeCmd(listType string, showHidden bool) tea.Cmd {
 	return func() tea.Msg {
 		workingDir, err := dirfs.GetWorkingDirectory()
 		if err != nil {
@@ -365,8 +365,8 @@ func (m Model) getDirectoryListingByType(listType string, showHidden bool) tea.C
 	}
 }
 
-// writeSelectionPath writes content to the file specified.
-func (m Model) writeSelectionPath(selectionPath, filePath string) tea.Cmd {
+// writeSelectionPathCmd writes content to the file specified.
+func (m Model) writeSelectionPathCmd(selectionPath, filePath string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.WriteToFile(selectionPath, filePath); err != nil {
 			return errorMsg(err.Error())
