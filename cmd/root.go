@@ -22,7 +22,6 @@ var rootCmd = &cobra.Command{
 		selectionPath := cmd.Flags().Lookup("selection-path")
 
 		config.LoadConfig(startDir, selectionPath)
-
 		cfg := config.GetConfig()
 
 		// If logging is enabled, logs will be output to debug.log.
@@ -52,7 +51,7 @@ var rootCmd = &cobra.Command{
 			opts = append(opts, tea.WithMouseAllMotion())
 		}
 
-		// Initialize new app.
+		// Initialize and start app.
 		p := tea.NewProgram(m, opts...)
 		if err := p.Start(); err != nil {
 			log.Fatal("Failed to start fm", err)

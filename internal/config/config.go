@@ -33,8 +33,16 @@ func LoadConfig(startDir, selectionPath *pflag.Flag) {
 	viper.SetConfigType("yml")
 
 	// Setup flags.
-	_ = viper.BindPFlag("start-dir", startDir)
-	_ = viper.BindPFlag("selection-path", selectionPath)
+	err := viper.BindPFlag("start-dir", startDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = viper.BindPFlag("selection-path", selectionPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	viper.SetDefault("start-dir", "")
 	viper.SetDefault("selection-path", "")
 

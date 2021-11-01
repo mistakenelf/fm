@@ -154,7 +154,7 @@ func ReadFileContent(name string) (string, error) {
 
 // CreateFile creates a file given a name.
 func CreateFile(name string) error {
-	f, err := os.OpenFile(name, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(name, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -268,16 +268,12 @@ func Zip(name string) error {
 		}
 	}
 
-	if err != nil {
-		return err
-	}
-
 	err = zipWriter.Close()
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return err
 }
 
 // Unzip unzips a directory given a name.
@@ -346,7 +342,7 @@ func Unzip(name string) error {
 		}
 	}
 
-	return nil
+	return err
 }
 
 // CopyFile copies a file given a name.
@@ -396,12 +392,11 @@ func CopyFile(name string) error {
 		return err
 	}
 
-	return nil
+	return err
 }
 
 // CopyDirectory copies a directory given a name.
 func CopyDirectory(name string) error {
-	// Generate a unique name for the output folder.
 	output := fmt.Sprintf("%s_%d", name, time.Now().Unix())
 
 	err := filepath.Walk(name, func(path string, info os.FileInfo, err error) error {
@@ -454,9 +449,9 @@ func GetDirectoryItemSize(path string) (int64, error) {
 	return size, err
 }
 
-// WriteToFile writes content to a file.
+// WriteToFile writes content to a file, overwriting content if it exists.
 func WriteToFile(path, content string) error {
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -477,5 +472,5 @@ func WriteToFile(path, content string) error {
 		return err
 	}
 
-	return nil
+	return err
 }

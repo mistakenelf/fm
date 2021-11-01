@@ -95,7 +95,6 @@ func (m *Model) ToggleHidden() {
 
 // dirItem returns a string representation of a directory item.
 func (m Model) dirItem(selected bool, fileInfo fs.FileInfo) string {
-	// Get the icon and color based on the current file.
 	icon, color := icons.GetIcon(fileInfo.Name(), filepath.Ext(fileInfo.Name()), icons.GetIndicator(fileInfo.Mode()))
 	fileIcon := fmt.Sprintf("%s%s", color, icon)
 
