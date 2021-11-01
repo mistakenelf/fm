@@ -30,7 +30,7 @@ func (m *Model) updateStatusBarContent() error {
 		m.itemToMove,
 	)
 
-	return nil
+	return err
 }
 
 // scrollPrimaryPane handles the scrolling of the primary pane which will handle
@@ -558,9 +558,9 @@ func (m *Model) handleToggleHiddenKeyPress(cmds *[]tea.Cmd) {
 
 		switch {
 		case m.showDirectoriesOnly:
-			*cmds = append(*cmds, m.getDirectoryListingByType("directories", m.showHidden))
+			*cmds = append(*cmds, m.getDirectoryListingByTypeCmd("directories", m.showHidden))
 		case m.showFilesOnly:
-			*cmds = append(*cmds, m.getDirectoryListingByType("files", m.showHidden))
+			*cmds = append(*cmds, m.getDirectoryListingByTypeCmd("files", m.showHidden))
 		default:
 			*cmds = append(*cmds, m.updateDirectoryListingCmd(dirfs.CurrentDirectory))
 		}
@@ -684,7 +684,7 @@ func (m *Model) handleEditFileKeyPress(cmds *[]tea.Cmd) {
 
 			*cmds = append(*cmds, m.updateDirectoryListingCmd(dirfs.CurrentDirectory))
 		} else {
-			*cmds = append(*cmds, tea.Sequentially(m.writeSelectionPath(selectionPath, selectedFile.Name()), tea.Quit))
+			*cmds = append(*cmds, tea.Sequentially(m.writeSelectionPathCmd(selectionPath, selectedFile.Name()), tea.Quit))
 		}
 	}
 }
@@ -734,12 +734,12 @@ func (m *Model) handleCopyToClipboardKeyPress(cmds *[]tea.Cmd) {
 
 // handleShowOnlyDirectoriesKeyPress shows only directories in the directory tree.
 func (m *Model) handleShowOnlyDirectoriesKeyPress(cmds *[]tea.Cmd) {
-	if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+	if !m.showCommandInput && m.primaryPane.GetIsActive() {
 		m.showDirectoriesOnly = !m.showDirectoriesOnly
 		m.showFilesOnly = false
 
 		if m.showDirectoriesOnly {
-			*cmds = append(*cmds, m.getDirectoryListingByType("directories", m.showHidden))
+			*cmds = append(*cmds, m.getDirectoryListingByTypeCmd("directories", m.showHidden))
 		}
 
 		*cmds = append(*cmds, m.updateDirectoryListingCmd(dirfs.CurrentDirectory))
@@ -748,12 +748,12 @@ func (m *Model) handleShowOnlyDirectoriesKeyPress(cmds *[]tea.Cmd) {
 
 // handleShowOnlyFilesKeyPress shows only files in the directory tree.
 func (m *Model) handleShowOnlyFilesKeyPress(cmds *[]tea.Cmd) {
-	if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+	if !m.showCommandInput && m.primaryPane.GetIsActive() {
 		m.showFilesOnly = !m.showFilesOnly
 		m.showDirectoriesOnly = false
 
 		if m.showFilesOnly {
-			*cmds = append(*cmds, m.getDirectoryListingByType("files", m.showHidden))
+			*cmds = append(*cmds, m.getDirectoryListingByTypeCmd("files", m.showHidden))
 		}
 
 		*cmds = append(*cmds, m.updateDirectoryListingCmd(dirfs.CurrentDirectory))
