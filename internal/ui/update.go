@@ -466,7 +466,7 @@ func (m *Model) handleEnterKeyPress(cmds *[]tea.Cmd) {
 
 // handleDeleteKeyPress deletes the selected directory item.
 func (m *Model) handleDeleteKeyPress(cmds *[]tea.Cmd) {
-	if !m.showCommandInput && m.primaryPane.GetIsActive() {
+	if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 		selectedFile, err := m.dirTree.GetSelectedFile()
 		if err != nil {
 			*cmds = append(*cmds, m.handleErrorCmd(err))
