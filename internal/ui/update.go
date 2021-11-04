@@ -466,7 +466,7 @@ func (m *Model) handleEnterKeyPress(cmds *[]tea.Cmd) {
 
 // handleDeleteKeyPress deletes the selected directory item.
 func (m *Model) handleDeleteKeyPress(cmds *[]tea.Cmd) {
-	if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+	if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 && !m.moveMode && !m.renameMode {
 		selectedFile, err := m.dirTree.GetSelectedFile()
 		if err != nil {
 			*cmds = append(*cmds, m.handleErrorCmd(err))
@@ -489,6 +489,8 @@ func (m *Model) handleDeleteKeyPress(cmds *[]tea.Cmd) {
 // handleCreateFileKeyPress creates a new file.
 func (m *Model) handleCreateFileKeyPress(cmds *[]tea.Cmd) {
 	m.createFileMode = true
+	m.moveMode = false
+	m.createDirectoryMode = false
 	m.showCommandInput = true
 	m.statusBar.FocusCommandBar()
 
@@ -501,6 +503,8 @@ func (m *Model) handleCreateFileKeyPress(cmds *[]tea.Cmd) {
 // handleCreateDirectoryKeyPress creates a new directory.
 func (m *Model) handleCreateDirectoryKeyPress(cmds *[]tea.Cmd) {
 	m.createDirectoryMode = true
+	m.createFileMode = false
+	m.moveMode = false
 	m.showCommandInput = true
 
 	m.statusBar.FocusCommandBar()
@@ -513,14 +517,21 @@ func (m *Model) handleCreateDirectoryKeyPress(cmds *[]tea.Cmd) {
 
 // handleRenameKeyPress renames the selected directory item.
 func (m *Model) handleRenameKeyPress(cmds *[]tea.Cmd) {
-	m.renameMode = true
-	m.showCommandInput = true
-
-	m.statusBar.FocusCommandBar()
-
-	err := m.updateStatusBarContent()
+	selectedFile, err := m.dirTree.GetSelectedFile()
 	if err != nil {
 		*cmds = append(*cmds, m.handleErrorCmd(err))
+	}
+
+	if selectedFile != nil {
+		m.renameMode = true
+		m.showCommandInput = true
+
+		m.statusBar.FocusCommandBar()
+
+		err = m.updateStatusBarContent()
+		if err != nil {
+			*cmds = append(*cmds, m.handleErrorCmd(err))
+		}
 	}
 }
 
