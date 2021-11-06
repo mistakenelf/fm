@@ -7,7 +7,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Model struct represents property of a pane.
+// Model is a struct to represent the properties of a pane.
 type Model struct {
 	Viewport            viewport.Model
 	Style               lipgloss.Style
@@ -18,7 +18,7 @@ type Model struct {
 	InactiveBorderColor lipgloss.AdaptiveColor
 }
 
-// NewModel creates a new instance of a pane.
+// NewModel creates an instance of a pane.
 func NewModel(isActive, borderless bool, activeBorderColor, inactiveBorderColor lipgloss.AdaptiveColor) Model {
 	return Model{
 		IsActive:            isActive,

@@ -51,7 +51,7 @@ go install github.com/knipferrc/fm@latest
 - Syntax highlighting for source code with customizable themes using styles from [chroma](https://swapoff.org/chroma/playground/) (dracula, monokai etc.)
 - Render pretty markdown
 - Mouse support
-- Themes (default, gruvbox, spooky)
+- Themes (`default`, `gruvbox`, `spooky`, `nord`)
 - Render PNG, JPG and JPEG as strings
 - Colors adapt to terminal background
 - Open selected file in editor set in EDITOR environment variable (currently only supports GUI editors)
@@ -76,9 +76,16 @@ go install github.com/knipferrc/fm@latest
 <img src="./assets/spooky_dark.png" width="450" alt="spooky dark">
 <img src="./assets/spooky_light.png" width="450" alt="spooky light">
 
+### Nord
+
+<img src="./assets/nord_dark.png" width="450" alt="nord dark">
+<img src="./assets/nord_light.png" width="450" alt="nord light">
+
 ## Usage
 
-- Run `fm` or `fm /some/dir`
+- `fm` will start fm in the current directory
+- `fm --start-dir=/some/start/dir` will start fm in the specified directory
+- `fm --selection-path=/tmp/tmpfile` will write the selected items path to the selection path when pressing <kbd>E</kbd> and exit fm
 
 ## Navigation
 

@@ -15,11 +15,13 @@ import (
 var rootCmd = &cobra.Command{
 	Use:     "fm",
 	Short:   "FM is a simple, configurable, and fun to use file manager",
-	Version: "0.6.0",
+	Version: "0.7.3",
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		config.LoadConfig()
+		startDir := cmd.Flags().Lookup("start-dir")
+		selectionPath := cmd.Flags().Lookup("selection-path")
 
+		config.LoadConfig(startDir, selectionPath)
 		cfg := config.GetConfig()
 
 		// If logging is enabled, logs will be output to debug.log.
@@ -49,7 +51,7 @@ var rootCmd = &cobra.Command{
 			opts = append(opts, tea.WithMouseAllMotion())
 		}
 
-		// Initialize new app.
+		// Initialize and start app.
 		p := tea.NewProgram(m, opts...)
 		if err := p.Start(); err != nil {
 			log.Fatal("Failed to start fm", err)
@@ -60,6 +62,9 @@ var rootCmd = &cobra.Command{
 
 // Execute runs the root command and starts the application.
 func Execute() {
+	rootCmd.PersistentFlags().String("selection-path", "", "Path to write to file on open.")
+	rootCmd.PersistentFlags().String("start-dir", "", "Starting directory for FM")
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

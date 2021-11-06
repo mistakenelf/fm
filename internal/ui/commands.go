@@ -4,15 +4,12 @@ import (
 	"context"
 	"fmt"
 	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"time"
-
-	// "image/jpeg" is needed for the image.Decode function.
-	_ "image/jpeg"
-	// "image/png" is needed for the image.Decode function.
-	_ "image/png"
 
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/internal/renderer"
@@ -356,7 +353,7 @@ func (m Model) copyToClipboardCmd(name string) tea.Cmd {
 }
 
 // getDirectoryListingByTypeCmd returns only directories in the current directory.
-func (m Model) getDirectoryListingByType(listType string, showHidden bool) tea.Cmd {
+func (m Model) getDirectoryListingByTypeCmd(listType string, showHidden bool) tea.Cmd {
 	return func() tea.Msg {
 		workingDir, err := dirfs.GetWorkingDirectory()
 		if err != nil {
@@ -384,5 +381,16 @@ func (m Model) findFilesByNameCmd(name string) tea.Cmd {
 			paths:   paths,
 			entries: entries,
 		}
+	}
+}
+
+// writeSelectionPathCmd writes content to the file specified.
+func (m Model) writeSelectionPathCmd(selectionPath, filePath string) tea.Cmd {
+	return func() tea.Msg {
+		if err := dirfs.WriteToFile(selectionPath, filePath); err != nil {
+			return errorMsg(err.Error())
+		}
+
+		return nil
 	}
 }

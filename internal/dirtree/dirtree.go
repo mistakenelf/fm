@@ -61,17 +61,17 @@ func (m *Model) GotoBottom() {
 }
 
 // GetSelectedFile returns the currently selected file in the tree.
-func (m Model) GetSelectedFile() os.FileInfo {
+func (m Model) GetSelectedFile() (os.FileInfo, error) {
 	if len(m.Files) > 0 {
 		fileInfo, err := m.Files[m.Cursor].Info()
 		if err != nil {
-			return nil
+			return nil, err
 		}
 
-		return fileInfo
+		return fileInfo, nil
 	}
 
-	return nil
+	return nil, nil
 }
 
 // GetCursor gets the position of the cursor in the tree.
@@ -101,7 +101,6 @@ func (m *Model) ToggleHidden() {
 
 // dirItem returns a string representation of a directory item.
 func (m Model) dirItem(selected bool, fileInfo fs.FileInfo) string {
-	// Get the icon and color based on the current file.
 	icon, color := icons.GetIcon(fileInfo.Name(), filepath.Ext(fileInfo.Name()), icons.GetIndicator(fileInfo.Mode()))
 	fileIcon := fmt.Sprintf("%s%s", color, icon)
 

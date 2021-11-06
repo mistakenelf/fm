@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
@@ -26,10 +27,24 @@ type Config struct {
 
 // LoadConfig loads a users config and creates the config if it does not exist
 // located at ~/.fm.yml.
-func LoadConfig() {
+func LoadConfig(startDir, selectionPath *pflag.Flag) {
 	viper.AddConfigPath("$HOME")
 	viper.SetConfigName(".fm")
 	viper.SetConfigType("yml")
+
+	// Setup flags.
+	err := viper.BindPFlag("start-dir", startDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = viper.BindPFlag("selection-path", selectionPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	viper.SetDefault("start-dir", "")
+	viper.SetDefault("selection-path", "")
 
 	// Setup config defaults.
 	viper.SetDefault("settings.start_dir", ".")
