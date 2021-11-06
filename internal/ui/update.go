@@ -197,6 +197,29 @@ func (m *Model) handleCopyToClipboardMsg(msg copyToClipboardMsg) (tea.Model, tea
 	return m, nil
 }
 
+// handleFindFilesByNameMsg is received when searching for a file by name.
+func (m *Model) handleFindFilesByNameMsg(msg findFilesByNameMsg) (tea.Model, tea.Cmd) {
+	m.showCommandInput = false
+	m.createFileMode = false
+	m.createDirectoryMode = false
+	m.renameMode = false
+	m.findMode = false
+
+	m.dirTree.GotoTop()
+	m.dirTree.SetContent(msg.entries)
+	m.dirTree.SetFilePaths(msg.paths)
+	m.primaryPane.SetContent(m.dirTree.View())
+	m.primaryPane.GotoTop()
+	m.statusBar.BlurCommandBar()
+	m.statusBar.ResetCommandBar()
+	err := m.updateStatusBarContent()
+	if err != nil {
+		return m, m.handleErrorCmd(err)
+	}
+
+	return m, nil
+}
+
 // handleWindowSizeMsg is received whenever the window size changes.
 func (m *Model) handleWindowSizeMsg(msg tea.WindowSizeMsg, cmds *[]tea.Cmd) {
 	m.primaryPane.SetSize(msg.Width/2, msg.Height-m.statusBar.GetHeight())
@@ -459,6 +482,14 @@ func (m *Model) handleEnterKeyPress(cmds *[]tea.Cmd) {
 			m.renameDirectoryItemCmd(selectedFile.Name(), m.statusBar.CommandBarValue()),
 			m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 		))
+	case m.findMode:
+		m.findMode = false
+		m.showCommandInput = false
+		err := m.updateStatusBarContent()
+		if err != nil {
+			*cmds = append(*cmds, m.handleErrorCmd(err))
+		}
+		*cmds = append(*cmds, m.findFilesByNameCmd(m.statusBar.CommandBarValue()))
 	default:
 		return
 	}
@@ -771,6 +802,17 @@ func (m *Model) handleShowOnlyFilesKeyPress(cmds *[]tea.Cmd) {
 	}
 }
 
+// handleFindKeyPress searches for a file in the directory tree.
+func (m *Model) handleFindKeyPress(cmds *[]tea.Cmd) {
+	m.findMode = true
+	m.showCommandInput = true
+	m.statusBar.FocusCommandBar()
+	err := m.updateStatusBarContent()
+	if err != nil {
+		*cmds = append(*cmds, m.handleErrorCmd(err))
+	}
+}
+
 // handleEscapeKeyPress resets FM to its initial state.
 func (m *Model) handleEscapeKeyPress(cmds *[]tea.Cmd) {
 	m.showCommandInput = false
@@ -784,6 +826,7 @@ func (m *Model) handleEscapeKeyPress(cmds *[]tea.Cmd) {
 	m.showFilesOnly = false
 	m.showHidden = false
 	m.showDirectoriesOnly = false
+	m.findMode = false
 	m.primaryPane.SetActive(true)
 	m.secondaryPane.SetActive(false)
 	m.statusBar.BlurCommandBar()
@@ -827,6 +870,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handleDirectoryItemSizeMsg(msg)
 	case copyToClipboardMsg:
 		return m.handleCopyToClipboardMsg(msg)
+	case findFilesByNameMsg:
+		return m.handleFindFilesByNameMsg(msg)
 	case tea.WindowSizeMsg:
 		m.handleWindowSizeMsg(msg, &cmds)
 	case tea.MouseMsg:
@@ -898,6 +943,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.handleShowOnlyDirectoriesKeyPress(&cmds)
 		case key.Matches(msg, m.keys.ShowOnlyFiles):
 			m.handleShowOnlyFilesKeyPress(&cmds)
+		case key.Matches(msg, m.keys.Find):
+			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+				m.handleFindKeyPress(&cmds)
+				return m, nil
+			}
 		case key.Matches(msg, m.keys.Escape):
 			m.handleEscapeKeyPress(&cmds)
 		}

@@ -372,7 +372,12 @@ func (m Model) getDirectoryListingByTypeCmd(listType string, showHidden bool) te
 // findFilesByNameCmd finds files based on name.
 func (m Model) findFilesByNameCmd(name string) tea.Cmd {
 	return func() tea.Msg {
-		paths, entries, err := dirfs.FindFilesByName(name, dirfs.RootDirectory)
+		workingDir, err := dirfs.GetWorkingDirectory()
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		paths, entries, err := dirfs.FindFilesByName(name, workingDir)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
