@@ -843,6 +843,8 @@ func (m *Model) handleEscapeKeyPress(cmds *[]tea.Cmd) {
 	m.findMode = false
 	m.primaryPane.SetActive(true)
 	m.secondaryPane.SetActive(false)
+	m.primaryPane.ShowSpinner(false)
+	m.dirTree.SetFilePaths(nil)
 	m.statusBar.BlurCommandBar()
 	m.statusBar.ResetCommandBar()
 	m.secondaryPane.GotoTop()
