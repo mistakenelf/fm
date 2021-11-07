@@ -30,6 +30,7 @@ type Model struct {
 	ShowCommandBar     bool
 	InMoveMode         bool
 	ItemSize           string
+	FilePaths          []string
 	SelectedFile       os.FileInfo
 	ItemToMove         os.FileInfo
 	FirstColumnColors  Color
@@ -101,13 +102,14 @@ func (m *Model) FocusCommandBar() {
 }
 
 // SetContent sets the content of the statusbar.
-func (m *Model) SetContent(totalFiles, cursor int, showCommandBar, inMoveMode bool, selectedFile, itemToMove os.FileInfo) {
+func (m *Model) SetContent(totalFiles, cursor int, showCommandBar, inMoveMode bool, selectedFile, itemToMove os.FileInfo, filePaths []string) {
 	m.TotalFiles = totalFiles
 	m.Cursor = cursor
 	m.ShowCommandBar = showCommandBar
 	m.InMoveMode = inMoveMode
 	m.SelectedFile = selectedFile
 	m.ItemToMove = itemToMove
+	m.FilePaths = filePaths
 }
 
 // SetItemSize sets the size of the currently selected directory item as a formatted size string.
@@ -160,6 +162,10 @@ func (m Model) View() string {
 
 		if m.ItemSize != "" {
 			fileSize = m.ItemSize
+		}
+
+		if len(m.FilePaths) > 0 {
+			currentPath = m.FilePaths[m.Cursor]
 		}
 
 		// Display some information about the currently seleted file including

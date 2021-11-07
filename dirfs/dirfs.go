@@ -449,6 +449,26 @@ func GetDirectoryItemSize(path string) (int64, error) {
 	return size, err
 }
 
+func FindFilesByName(name, dir string) ([]string, []fs.DirEntry, error) {
+	var paths []string
+	var entries []fs.DirEntry
+
+	err := filepath.WalkDir(dir, func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return filepath.SkipDir
+		}
+
+		if strings.Contains(entry.Name(), name) {
+			paths = append(paths, path)
+			entries = append(entries, entry)
+		}
+
+		return err
+	})
+
+	return paths, entries, err
+}
+
 // WriteToFile writes content to a file, overwriting content if it exists.
 func WriteToFile(path, content string) error {
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)

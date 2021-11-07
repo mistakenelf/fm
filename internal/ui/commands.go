@@ -26,6 +26,10 @@ type errorMsg string
 type directoryItemSizeMsg string
 type copyToClipboardMsg string
 type convertImageToStringMsg string
+type findFilesByNameMsg struct {
+	paths   []string
+	entries []fs.DirEntry
+}
 type readFileContentMsg struct {
 	rawContent  string
 	markdown    string
@@ -146,15 +150,15 @@ func (m Model) deleteFileCmd(name string) tea.Cmd {
 }
 
 // readFileContentCmd reads the content of a file and returns it.
-func (m Model) readFileContentCmd(file os.FileInfo, width int) tea.Cmd {
+func (m Model) readFileContentCmd(fileName string, width int) tea.Cmd {
 	return func() tea.Msg {
-		content, err := dirfs.ReadFileContent(file.Name())
+		content, err := dirfs.ReadFileContent(fileName)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
 		switch {
-		case filepath.Ext(file.Name()) == ".md" && m.appConfig.Settings.PrettyMarkdown:
+		case filepath.Ext(fileName) == ".md" && m.appConfig.Settings.PrettyMarkdown:
 			markdownContent, err := renderer.RenderMarkdown(width, content)
 			if err != nil {
 				return errorMsg(err.Error())
@@ -168,8 +172,8 @@ func (m Model) readFileContentCmd(file os.FileInfo, width int) tea.Cmd {
 				pdfContent:  "",
 				image:       nil,
 			}
-		case filepath.Ext(file.Name()) == ".png" || filepath.Ext(file.Name()) == ".jpg" || filepath.Ext(file.Name()) == ".jpeg":
-			imageContent, err := os.Open(file.Name())
+		case filepath.Ext(fileName) == ".png" || filepath.Ext(fileName) == ".jpg" || filepath.Ext(fileName) == ".jpeg":
+			imageContent, err := os.Open(fileName)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
@@ -189,8 +193,8 @@ func (m Model) readFileContentCmd(file os.FileInfo, width int) tea.Cmd {
 				pdfContent:  "",
 				image:       img,
 			}
-		case filepath.Ext(file.Name()) == ".pdf":
-			pdfContent, err := renderer.ReadPdf(file.Name())
+		case filepath.Ext(fileName) == ".pdf":
+			pdfContent, err := renderer.ReadPdf(fileName)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
@@ -204,7 +208,7 @@ func (m Model) readFileContentCmd(file os.FileInfo, width int) tea.Cmd {
 				image:       nil,
 			}
 		default:
-			code, err := renderer.Highlight(content, filepath.Ext(file.Name()), m.appConfig.Settings.SyntaxTheme)
+			code, err := renderer.Highlight(content, filepath.Ext(fileName), m.appConfig.Settings.SyntaxTheme)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
@@ -362,6 +366,26 @@ func (m Model) getDirectoryListingByTypeCmd(listType string, showHidden bool) te
 		}
 
 		return updateDirectoryListingMsg(directories)
+	}
+}
+
+// findFilesByNameCmd finds files based on name.
+func (m Model) findFilesByNameCmd(name string) tea.Cmd {
+	return func() tea.Msg {
+		workingDir, err := dirfs.GetWorkingDirectory()
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		paths, entries, err := dirfs.FindFilesByName(name, workingDir)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		return findFilesByNameMsg{
+			paths:   paths,
+			entries: entries,
+		}
 	}
 }
 

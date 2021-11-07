@@ -58,28 +58,29 @@ go install github.com/knipferrc/fm@latest
 - Preview a directory in the secondary pane
 - Copy selected directory items path to the clipboard
 - Read PDF files
+- Experimental find files/directories (might be a little buggy)
 
 ## Themes
 
 ### Default
 
-<img src="./assets/default_dark.png" width="450" alt="default dark">
-<img src="./assets/default_light.png" width="450" alt="default light">
+<img src="./assets/default_dark.png" width="350" alt="default dark">
+<img src="./assets/default_light.png" width="350" alt="default light">
 
 ### Gruvbox
 
-<img src="./assets/gruvbox_dark.png" width="450" alt="gruvbox dark">
-<img src="./assets/gruvbox_light.png" width="450" alt="gruvbox light">
+<img src="./assets/gruvbox_dark.png" width="350" alt="gruvbox dark">
+<img src="./assets/gruvbox_light.png" width="350" alt="gruvbox light">
 
 ### Spooky
 
-<img src="./assets/spooky_dark.png" width="450" alt="spooky dark">
-<img src="./assets/spooky_light.png" width="450" alt="spooky light">
+<img src="./assets/spooky_dark.png" width="350" alt="spooky dark">
+<img src="./assets/spooky_light.png" width="350" alt="spooky light">
 
 ### Nord
 
-<img src="./assets/nord_dark.png" width="450" alt="nord dark">
-<img src="./assets/nord_light.png" width="450" alt="nord light">
+<img src="./assets/nord_dark.png" width="350" alt="nord dark">
+<img src="./assets/nord_light.png" width="350" alt="nord light">
 
 ## Usage
 
@@ -89,33 +90,34 @@ go install github.com/knipferrc/fm@latest
 
 ## Navigation
 
-| Key            | Description                                                                                                                                                                                                                                                      |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **h or left**  | Go back to previous directory                                                                                                                                                                                                                                    |
-| **j or down**  | Move down in the file tree or scroll pane down                                                                                                                                                                                                                   |
-| **k or up**    | Move up in the file tree or scroll pane up                                                                                                                                                                                                                       |
-| **l or right** | Opens the currently selected directory or file                                                                                                                                                                                                                   |
-| **ctrl+g**     | Jump to bottom of file tree or pane                                                                                                                                                                                                                              |
-| **G**          | Jump to top of file tree or pane                                                                                                                                                                                                                                 |
-| **~**          | Go to home directory                                                                                                                                                                                                                                             |
-| **/**          | Go to the root directory                                                                                                                                                                                                                                         |
-| **.**          | Toggle hidden files and directories                                                                                                                                                                                                                              |
-| **-**          | Go to previous directory                                                                                                                                                                                                                                         |
-| **ctrl+c**     | Exit                                                                                                                                                                                                                                                             |
-| **q**          | Exit if command bar is not open                                                                                                                                                                                                                                  |
-| **m**          | Move the currently selected file or directory. Once pressed, the file manager enters move mode. Navigate the tree as usual and press enter in the desired destination directory. It will navigate back to the starting direcotry in which the move was initiated |
-| **tab**        | Toggle between panes                                                                                                                                                                                                                                             |
-| **esc**        | Reset FM to its initial state                                                                                                                                                                                                                                    |
-| **z**          | Create a zip file of the currently selected directory item                                                                                                                                                                                                       |
-| **u**          | Unzip a zip file                                                                                                                                                                                                                                                 |
-| **c**          | Create a copy of a file or directory                                                                                                                                                                                                                             |
-| **ctrl+d**     | Delete the currently selected file or directory                                                                                                                                                                                                                  |
-| **n**          | Create a new file in the current directory                                                                                                                                                                                                                       |
-| **N**          | Create a new directory in the current directory                                                                                                                                                                                                                  |
-| **r**          | Rename the currently selected file or directory                                                                                                                                                                                                                  |
-| **E**          | Open in editor set in EDITOR environment variable                                                                                                                                                                                                                |
-| **p**          | Preview a directory in the secondary pane                                                                                                                                                                                                                        |
-| **y**          | Copy selected directory items path to the clipboard                                                                                                                                                                                                              |
+| Key                   | Description                                                                                                                                                                                                                                                      |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <kbd>h or left</kbd>  | Go back to previous directory                                                                                                                                                                                                                                    |
+| <kbd> or down</kbd>   | Move down in the file tree or scroll pane down                                                                                                                                                                                                                   |
+| <kbd>k or up</kbd>    | Move up in the file tree or scroll pane up                                                                                                                                                                                                                       |
+| <kbd>l or right</kbd> | Opens the currently selected directory or file                                                                                                                                                                                                                   |
+| <kbd>ctrl+g</kbd>     | Jump to bottom of file tree or pane                                                                                                                                                                                                                              |
+| <kbd>G</kbd>          | Jump to top of file tree or pane                                                                                                                                                                                                                                 |
+| <kbd>~</kbd>          | Go to home directory                                                                                                                                                                                                                                             |
+| <kbd>/</kbd>          | Go to the root directory                                                                                                                                                                                                                                         |
+| <kbd>.</kbd>          | Toggle hidden files and directories                                                                                                                                                                                                                              |
+| <kbd>-</kbd>          | Go to previous directory                                                                                                                                                                                                                                         |
+| <kbd>ctrl+c</kbd>     | Exit                                                                                                                                                                                                                                                             |
+| <kbd>q</kbd>          | Exit if command bar is not open                                                                                                                                                                                                                                  |
+| <kbd>m</kbd>          | Move the currently selected file or directory. Once pressed, the file manager enters move mode. Navigate the tree as usual and press enter in the desired destination directory. It will navigate back to the starting direcotry in which the move was initiated |
+| <kbd>tab</kbd>        | Toggle between panes                                                                                                                                                                                                                                             |
+| <kbd>esc</kbd>        | Reset FM to its initial state                                                                                                                                                                                                                                    |
+| <kbd>z</kbd>          | Create a zip file of the currently selected directory item                                                                                                                                                                                                       |
+| <kbd>u</kbd>          | Unzip a zip file                                                                                                                                                                                                                                                 |
+| <kbd>c</kbd>          | Create a copy of a file or directory                                                                                                                                                                                                                             |
+| <kbd>ctrl+d</kbd>     | Delete the currently selected file or directory                                                                                                                                                                                                                  |
+| <kbd>n</kbd>          | Create a new file in the current directory                                                                                                                                                                                                                       |
+| <kbd>N</kbd>          | Create a new directory in the current directory                                                                                                                                                                                                                  |
+| <kbd>r</kbd>          | Rename the currently selected file or directory                                                                                                                                                                                                                  |
+| <kbd>E</kbd>          | Open in editor set in EDITOR environment variable                                                                                                                                                                                                                |
+| <kbd>p</kbd>          | Preview a directory in the secondary pane                                                                                                                                                                                                                        |
+| <kbd>y</kbd>          | Copy selected directory items path to the clipboard                                                                                                                                                                                                              |
+| <kbd>ctrl+f</kbd>     | Find files and directories in working directory                                                                                                                                                                                                                  |
 
 ## Configuration
 

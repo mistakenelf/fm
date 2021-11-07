@@ -28,6 +28,7 @@ func (m *Model) updateStatusBarContent() error {
 		m.moveMode,
 		selectedFile,
 		m.itemToMove,
+		m.dirTree.GetFilePaths(),
 	)
 
 	return err
@@ -69,6 +70,7 @@ func (m *Model) handleUpdateDirectoryListingMsg(msg updateDirectoryListingMsg) (
 
 	m.dirTree.GotoTop()
 	m.dirTree.SetContent(msg)
+	m.dirTree.SetFilePaths(nil)
 	m.primaryPane.SetContent(m.dirTree.View())
 	m.primaryPane.GotoTop()
 	m.statusBar.BlurCommandBar()
@@ -193,6 +195,29 @@ func (m *Model) handleDirectoryItemSizeMsg(msg directoryItemSizeMsg) (tea.Model,
 func (m *Model) handleCopyToClipboardMsg(msg copyToClipboardMsg) (tea.Model, tea.Cmd) {
 	m.renderer.SetContent(string(msg))
 	m.secondaryPane.SetContent(m.renderer.View())
+
+	return m, nil
+}
+
+// handleFindFilesByNameMsg is received when searching for a file by name.
+func (m *Model) handleFindFilesByNameMsg(msg findFilesByNameMsg) (tea.Model, tea.Cmd) {
+	m.showCommandInput = false
+	m.createFileMode = false
+	m.createDirectoryMode = false
+	m.renameMode = false
+	m.findMode = false
+	m.primaryPane.ShowSpinner(false)
+	m.dirTree.GotoTop()
+	m.dirTree.SetContent(msg.entries)
+	m.dirTree.SetFilePaths(msg.paths)
+	m.primaryPane.SetContent(m.dirTree.View())
+	m.primaryPane.GotoTop()
+	m.statusBar.BlurCommandBar()
+	m.statusBar.ResetCommandBar()
+	err := m.updateStatusBarContent()
+	if err != nil {
+		return m, m.handleErrorCmd(err)
+	}
 
 	return m, nil
 }
@@ -359,7 +384,13 @@ func (m *Model) handleRightKeyPress(cmds *[]tea.Cmd) {
 				*cmds = append(*cmds, m.handleErrorCmd(err))
 			}
 
-			*cmds = append(*cmds, m.updateDirectoryListingCmd(filepath.Join(currentDir, selectedFile.Name())))
+			directoryToOpen := filepath.Join(currentDir, selectedFile.Name())
+
+			if len(m.dirTree.GetFilePaths()) > 0 {
+				directoryToOpen = m.dirTree.GetFilePaths()[m.dirTree.GetCursor()]
+			}
+
+			*cmds = append(*cmds, m.updateDirectoryListingCmd(directoryToOpen))
 		case selectedFile.Mode()&os.ModeSymlink == os.ModeSymlink:
 			m.statusBar.SetItemSize("")
 			symlinkFile, err := os.Readlink(selectedFile.Name())
@@ -382,12 +413,18 @@ func (m *Model) handleRightKeyPress(cmds *[]tea.Cmd) {
 			}
 
 			*cmds = append(*cmds, m.readFileContentCmd(
-				fileInfo,
+				fileInfo.Name(),
 				m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
 			))
 		default:
+			fileToRead := selectedFile.Name()
+
+			if len(m.dirTree.GetFilePaths()) > 0 {
+				fileToRead = m.dirTree.GetFilePaths()[m.dirTree.GetCursor()]
+			}
+
 			*cmds = append(*cmds, m.readFileContentCmd(
-				selectedFile,
+				fileToRead,
 				m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
 			))
 		}
@@ -459,6 +496,14 @@ func (m *Model) handleEnterKeyPress(cmds *[]tea.Cmd) {
 			m.renameDirectoryItemCmd(selectedFile.Name(), m.statusBar.CommandBarValue()),
 			m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 		))
+	case m.findMode:
+		m.showCommandInput = false
+		m.primaryPane.ShowSpinner(true)
+		err := m.updateStatusBarContent()
+		if err != nil {
+			*cmds = append(*cmds, m.handleErrorCmd(err))
+		}
+		*cmds = append(*cmds, m.findFilesByNameCmd(m.statusBar.CommandBarValue()))
 	default:
 		return
 	}
@@ -771,6 +816,17 @@ func (m *Model) handleShowOnlyFilesKeyPress(cmds *[]tea.Cmd) {
 	}
 }
 
+// handleFindKeyPress searches for a file in the directory tree.
+func (m *Model) handleFindKeyPress(cmds *[]tea.Cmd) {
+	m.findMode = true
+	m.showCommandInput = true
+	m.statusBar.FocusCommandBar()
+	err := m.updateStatusBarContent()
+	if err != nil {
+		*cmds = append(*cmds, m.handleErrorCmd(err))
+	}
+}
+
 // handleEscapeKeyPress resets FM to its initial state.
 func (m *Model) handleEscapeKeyPress(cmds *[]tea.Cmd) {
 	m.showCommandInput = false
@@ -784,8 +840,11 @@ func (m *Model) handleEscapeKeyPress(cmds *[]tea.Cmd) {
 	m.showFilesOnly = false
 	m.showHidden = false
 	m.showDirectoriesOnly = false
+	m.findMode = false
 	m.primaryPane.SetActive(true)
 	m.secondaryPane.SetActive(false)
+	m.primaryPane.ShowSpinner(false)
+	m.dirTree.SetFilePaths(nil)
 	m.statusBar.BlurCommandBar()
 	m.statusBar.ResetCommandBar()
 	m.secondaryPane.GotoTop()
@@ -827,6 +886,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handleDirectoryItemSizeMsg(msg)
 	case copyToClipboardMsg:
 		return m.handleCopyToClipboardMsg(msg)
+	case findFilesByNameMsg:
+		return m.handleFindFilesByNameMsg(msg)
 	case tea.WindowSizeMsg:
 		m.handleWindowSizeMsg(msg, &cmds)
 	case tea.MouseMsg:
@@ -898,12 +959,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.handleShowOnlyDirectoriesKeyPress(&cmds)
 		case key.Matches(msg, m.keys.ShowOnlyFiles):
 			m.handleShowOnlyFilesKeyPress(&cmds)
+		case key.Matches(msg, m.keys.Find):
+			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
+				m.handleFindKeyPress(&cmds)
+				return m, nil
+			}
 		case key.Matches(msg, m.keys.Escape):
 			m.handleEscapeKeyPress(&cmds)
 		}
 	}
 
 	m.statusBar, cmd = m.statusBar.Update(msg)
+	cmds = append(cmds, cmd)
+
+	m.primaryPane, cmd = m.primaryPane.Update(msg)
 	cmds = append(cmds, cmd)
 
 	m.loader, cmd = m.loader.Update(msg)

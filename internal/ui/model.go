@@ -43,6 +43,7 @@ type Model struct {
 	createFileMode       bool
 	createDirectoryMode  bool
 	renameMode           bool
+	findMode             bool
 	showHidden           bool
 	showDirectoriesOnly  bool
 	showFilesOnly        bool
@@ -140,6 +141,7 @@ func NewModel() Model {
 		createFileMode:       false,
 		createDirectoryMode:  false,
 		renameMode:           false,
+		findMode:             false,
 		showHidden:           true,
 		showDirectoriesOnly:  false,
 		showFilesOnly:        false,
