@@ -42,7 +42,9 @@ type Model struct {
 }
 
 // NewModel creates an instance of a statusbar.
-func NewModel(firstColumnColors, secondColumnColors, thirdColumnColors, fourthColumnColors Color, showIcons bool) Model {
+func NewModel(
+	firstColumnColors, secondColumnColors, thirdColumnColors, fourthColumnColors Color, showIcons bool,
+) Model {
 	input := textinput.NewModel()
 	input.Prompt = "❯ "
 	input.CharLimit = 250
@@ -102,7 +104,11 @@ func (m *Model) FocusCommandBar() {
 }
 
 // SetContent sets the content of the statusbar.
-func (m *Model) SetContent(totalFiles, cursor int, showCommandBar, inMoveMode bool, selectedFile, itemToMove os.FileInfo, filePaths []string) {
+func (m *Model) SetContent(
+	totalFiles, cursor int,
+	showCommandBar, inMoveMode bool,
+	selectedFile, itemToMove os.FileInfo, filePaths []string,
+) {
 	m.TotalFiles = totalFiles
 	m.Cursor = cursor
 	m.ShowCommandBar = showCommandBar
@@ -112,7 +118,8 @@ func (m *Model) SetContent(totalFiles, cursor int, showCommandBar, inMoveMode bo
 	m.FilePaths = filePaths
 }
 
-// SetItemSize sets the size of the currently selected directory item as a formatted size string.
+// SetItemSize sets the size of the currently selected
+// directory item as a formatted size string.
 func (m *Model) SetItemSize(itemSize string) {
 	m.ItemSize = itemSize
 }

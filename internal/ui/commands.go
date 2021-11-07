@@ -13,7 +13,6 @@ import (
 
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/internal/renderer"
-	"github.com/knipferrc/fm/strfmt"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"golang.design/x/clipboard"
@@ -321,7 +320,7 @@ func (m Model) getDirectoryItemSizeCmd(name string) tea.Cmd {
 				return directoryItemSizeMsg("N/A")
 			}
 
-			sizeString := strfmt.ConvertBytesToSizeString(size)
+			sizeString := renderer.ConvertBytesToSizeString(size)
 
 			return directoryItemSizeMsg(sizeString)
 		}

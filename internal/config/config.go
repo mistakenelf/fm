@@ -43,6 +43,7 @@ func LoadConfig(startDir, selectionPath *pflag.Flag) {
 		log.Fatal(err)
 	}
 
+	// Setup flag defaults.
 	viper.SetDefault("start-dir", "")
 	viper.SetDefault("selection-path", "")
 

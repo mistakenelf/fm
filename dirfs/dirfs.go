@@ -12,12 +12,18 @@ import (
 	"time"
 )
 
-// Constants to represent different directories.
+// Directory shortcuts.
 const (
 	CurrentDirectory  = "."
 	PreviousDirectory = ".."
 	HomeDirectory     = "~"
 	RootDirectory     = "/"
+)
+
+// Different types of listings.
+const (
+	DirectoriesListingType = "directories"
+	FilesListingType       = "files"
 )
 
 // RenameDirectoryItem renames a directory or files given a source and destination.
@@ -43,7 +49,6 @@ func CreateDirectory(name string) error {
 func GetDirectoryListing(dir string, showHidden bool) ([]fs.DirEntry, error) {
 	n := 0
 
-	// Read files from the directory.
 	files, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
@@ -68,10 +73,9 @@ func GetDirectoryListing(dir string, showHidden bool) ([]fs.DirEntry, error) {
 }
 
 // GetDirectoryListingByType returns a directory listing based on type (directories | files).
-func GetDirectoryListingByType(dir, listType string, showHidden bool) ([]fs.DirEntry, error) {
+func GetDirectoryListingByType(dir, listingType string, showHidden bool) ([]fs.DirEntry, error) {
 	n := 0
 
-	// Read files from the directory.
 	files, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
@@ -79,20 +83,20 @@ func GetDirectoryListingByType(dir, listType string, showHidden bool) ([]fs.DirE
 
 	for _, file := range files {
 		switch {
-		case file.IsDir() && listType == "directories" && !showHidden:
+		case file.IsDir() && listingType == DirectoriesListingType && !showHidden:
 			if !strings.HasPrefix(file.Name(), ".") {
 				files[n] = file
 				n++
 			}
-		case file.IsDir() && listType == "directories" && showHidden:
+		case file.IsDir() && listingType == DirectoriesListingType && showHidden:
 			files[n] = file
 			n++
-		case !file.IsDir() && listType == "files" && !showHidden:
+		case !file.IsDir() && listingType == FilesListingType && !showHidden:
 			if !strings.HasPrefix(file.Name(), ".") {
 				files[n] = file
 				n++
 			}
-		case !file.IsDir() && listType == "files" && showHidden:
+		case !file.IsDir() && listingType == FilesListingType && showHidden:
 			files[n] = file
 			n++
 		}

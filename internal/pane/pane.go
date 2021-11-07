@@ -3,7 +3,7 @@ package pane
 import (
 	"fmt"
 
-	"github.com/knipferrc/fm/strfmt"
+	"github.com/knipferrc/fm/internal/renderer"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -141,6 +141,7 @@ func (m Model) View() string {
 	borderColor := m.InactiveBorderColor
 	border := lipgloss.NormalBorder()
 	padding := 1
+	content := m.Viewport.View()
 	alternateBorder := lipgloss.Border{
 		Top:         "-",
 		Bottom:      "-",
@@ -164,8 +165,6 @@ func (m Model) View() string {
 		borderColor = m.ActiveBorderColor
 	}
 
-	content := m.Viewport.View()
-
 	if m.ShowLoading {
 		content = fmt.Sprintf("%s%s", m.Spinner.View(), "loading...")
 	}
@@ -177,5 +176,5 @@ func (m Model) View() string {
 		Border(border).
 		Width(m.Viewport.Width).
 		Height(m.Viewport.Height).
-		Render(strfmt.ConvertTabsToSpaces(content))
+		Render(renderer.ConvertTabsToSpaces(content))
 }

@@ -2,6 +2,7 @@ package renderer
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"strings"
 
@@ -18,6 +19,29 @@ type Model struct {
 	Image   image.Image
 	Content string
 	Width   int
+}
+
+// ConvertTabsToSpaces converts tabs to spaces.
+func ConvertTabsToSpaces(input string) string {
+	return strings.ReplaceAll(input, "\t", "    ")
+}
+
+// ConvertByesToSizeString converts a byte count to a human readable string.
+func ConvertBytesToSizeString(b int64) string {
+	const unit = 1000
+
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+
+	return fmt.Sprintf("%.1f %cB",
+		float64(b)/float64(div), "kMGTPE"[exp])
 }
 
 // ImageToString converts an image to a string representation of an image.
