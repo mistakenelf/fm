@@ -28,6 +28,7 @@ func (m *Model) updateStatusBarContent() error {
 		m.moveMode,
 		selectedFile,
 		m.itemToMove,
+		m.dirTree.GetFilePaths(),
 	)
 
 	return err
@@ -69,6 +70,7 @@ func (m *Model) handleUpdateDirectoryListingMsg(msg updateDirectoryListingMsg) (
 
 	m.dirTree.GotoTop()
 	m.dirTree.SetContent(msg)
+	m.dirTree.SetFilePaths(nil)
 	m.primaryPane.SetContent(m.dirTree.View())
 	m.primaryPane.GotoTop()
 	m.statusBar.BlurCommandBar()
@@ -204,7 +206,7 @@ func (m *Model) handleFindFilesByNameMsg(msg findFilesByNameMsg) (tea.Model, tea
 	m.createDirectoryMode = false
 	m.renameMode = false
 	m.findMode = false
-
+	m.primaryPane.ShowSpinner(false)
 	m.dirTree.GotoTop()
 	m.dirTree.SetContent(msg.entries)
 	m.dirTree.SetFilePaths(msg.paths)
@@ -382,7 +384,13 @@ func (m *Model) handleRightKeyPress(cmds *[]tea.Cmd) {
 				*cmds = append(*cmds, m.handleErrorCmd(err))
 			}
 
-			*cmds = append(*cmds, m.updateDirectoryListingCmd(filepath.Join(currentDir, selectedFile.Name())))
+			directoryToOpen := filepath.Join(currentDir, selectedFile.Name())
+
+			if len(m.dirTree.GetFilePaths()) > 0 {
+				directoryToOpen = m.dirTree.GetFilePaths()[m.dirTree.GetCursor()]
+			}
+
+			*cmds = append(*cmds, m.updateDirectoryListingCmd(directoryToOpen))
 		case selectedFile.Mode()&os.ModeSymlink == os.ModeSymlink:
 			m.statusBar.SetItemSize("")
 			symlinkFile, err := os.Readlink(selectedFile.Name())
@@ -409,8 +417,14 @@ func (m *Model) handleRightKeyPress(cmds *[]tea.Cmd) {
 				m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
 			))
 		default:
+			fileToRead := selectedFile.Name()
+
+			if len(m.dirTree.GetFilePaths()) > 0 {
+				fileToRead = m.dirTree.GetFilePaths()[m.dirTree.GetCursor()]
+			}
+
 			*cmds = append(*cmds, m.readFileContentCmd(
-				selectedFile.Name(),
+				fileToRead,
 				m.secondaryPane.GetWidth()-m.secondaryPane.Style.GetHorizontalFrameSize(),
 			))
 		}
@@ -483,8 +497,8 @@ func (m *Model) handleEnterKeyPress(cmds *[]tea.Cmd) {
 			m.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 		))
 	case m.findMode:
-		m.findMode = false
 		m.showCommandInput = false
+		m.primaryPane.ShowSpinner(true)
 		err := m.updateStatusBarContent()
 		if err != nil {
 			*cmds = append(*cmds, m.handleErrorCmd(err))
@@ -954,6 +968,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	m.statusBar, cmd = m.statusBar.Update(msg)
+	cmds = append(cmds, cmd)
+
+	m.primaryPane, cmd = m.primaryPane.Update(msg)
 	cmds = append(cmds, cmd)
 
 	m.loader, cmd = m.loader.Update(msg)

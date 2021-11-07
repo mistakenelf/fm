@@ -45,6 +45,11 @@ func (m *Model) SetFilePaths(filePaths []string) {
 	m.FilePaths = filePaths
 }
 
+// GetFilePaths returns an array of file paths.
+func (m Model) GetFilePaths() []string {
+	return m.FilePaths
+}
+
 // SetSize updates the size of the dirtree, useful when resizing the terminal.
 func (m *Model) SetSize(width int) {
 	m.Width = width

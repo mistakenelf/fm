@@ -3,7 +3,9 @@ package pane
 import (
 	"github.com/knipferrc/fm/strfmt"
 
+	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/viewport"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -14,17 +16,23 @@ type Model struct {
 	IsActive            bool
 	Borderless          bool
 	AlternateBorder     bool
+	ShowLoading         bool
 	ActiveBorderColor   lipgloss.AdaptiveColor
 	InactiveBorderColor lipgloss.AdaptiveColor
+	Spinner             spinner.Model
 }
 
 // NewModel creates an instance of a pane.
 func NewModel(isActive, borderless bool, activeBorderColor, inactiveBorderColor lipgloss.AdaptiveColor) Model {
+	s := spinner.NewModel()
+	s.Spinner = spinner.Dot
+
 	return Model{
 		IsActive:            isActive,
 		Borderless:          borderless,
 		ActiveBorderColor:   activeBorderColor,
 		InactiveBorderColor: inactiveBorderColor,
+		Spinner:             s,
 	}
 }
 
@@ -107,6 +115,25 @@ func (m Model) GetYOffset() int {
 	return m.Viewport.YOffset
 }
 
+// ShowSpinner determines wether to show the spinner or not.
+func (m *Model) ShowSpinner(show bool) {
+	m.ShowLoading = show
+}
+
+// Update updates the pane.
+func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+	var cmd tea.Cmd
+	var cmds []tea.Cmd
+
+	switch msg := msg.(type) {
+	case spinner.TickMsg:
+		m.Spinner, cmd = m.Spinner.Update(msg)
+		cmds = append(cmds, cmd)
+	}
+
+	return m, tea.Batch(cmds...)
+}
+
 // View returns a string representation of the pane.
 func (m Model) View() string {
 	borderColor := m.InactiveBorderColor
@@ -135,11 +162,18 @@ func (m Model) View() string {
 		borderColor = m.ActiveBorderColor
 	}
 
+	content := m.Viewport.View()
+
+	if m.ShowLoading {
+		content = m.Spinner.View()
+	}
+
 	return m.Style.Copy().
 		BorderForeground(borderColor).
 		PaddingLeft(padding).
 		PaddingRight(padding).
 		Border(border).
 		Width(m.Viewport.Width).
-		Render(strfmt.ConvertTabsToSpaces(m.Viewport.View()))
+		Height(m.Viewport.Height).
+		Render(strfmt.ConvertTabsToSpaces(content))
 }
