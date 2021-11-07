@@ -1,6 +1,8 @@
 package pane
 
 import (
+	"fmt"
+
 	"github.com/knipferrc/fm/strfmt"
 
 	"github.com/charmbracelet/bubbles/spinner"
@@ -165,7 +167,7 @@ func (m Model) View() string {
 	content := m.Viewport.View()
 
 	if m.ShowLoading {
-		content = m.Spinner.View()
+		content = fmt.Sprintf("%s%s", m.Spinner.View(), "loading...")
 	}
 
 	return m.Style.Copy().
