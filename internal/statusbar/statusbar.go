@@ -27,7 +27,7 @@ type Model struct {
 	TotalFiles         int
 	Cursor             int
 	ShowIcons          bool
-	ShowCommandBar     bool
+	ShowCommandInput   bool
 	InMoveMode         bool
 	ItemSize           string
 	FilePaths          []string
@@ -59,7 +59,7 @@ func NewModel(
 		TotalFiles:         0,
 		Cursor:             0,
 		ShowIcons:          showIcons,
-		ShowCommandBar:     false,
+		ShowCommandInput:   false,
 		InMoveMode:         false,
 		ItemSize:           "",
 		SelectedFile:       nil,
@@ -78,49 +78,54 @@ func (m Model) GetHeight() int {
 	return m.Height
 }
 
-// BlurCommandBar blurs the textinput used for the command bar.
-func (m *Model) BlurCommandBar() {
+// BlurCommandInput blurs the textinput used for the command input.
+func (m *Model) BlurCommandInput() {
 	m.Textinput.Blur()
 }
 
-// ResetCommandBar resets the textinput used for the command bar.
-func (m *Model) ResetCommandBar() {
+// ResetCommandInput resets the textinput used for the command input.
+func (m *Model) ResetCommandInput() {
 	m.Textinput.Reset()
 }
 
-// CommandBarValue returns the value of the command bar.
-func (m Model) CommandBarValue() string {
+// CommandInputValue returns the value of the command input.
+func (m Model) CommandInputValue() string {
 	return m.Textinput.Value()
 }
 
-// CommandBarFocused returns true if the command bar is focused.
-func (m Model) CommandBarFocused() bool {
+// CommandInputFocused returns true if the command input is focused.
+func (m Model) CommandInputFocused() bool {
 	return m.Textinput.Focused()
 }
 
-// FocusCommandBar focuses the command bar.
-func (m *Model) FocusCommandBar() {
+// FocusCommandInput focuses the command input.
+func (m *Model) FocusCommandInput() {
 	m.Textinput.Focus()
+}
+
+// SetCommandInputPlaceholderText sets the placeholder text of the command input.
+func (m *Model) SetCommandInputPlaceholderText(text string) {
+	m.Textinput.Placeholder = text
 }
 
 // SetContent sets the content of the statusbar.
 func (m *Model) SetContent(
 	totalFiles, cursor int,
-	showCommandBar, inMoveMode bool,
+	showCommandInput, inMoveMode bool,
 	selectedFile, itemToMove os.FileInfo, filePaths []string,
 ) {
 	m.TotalFiles = totalFiles
 	m.Cursor = cursor
-	m.ShowCommandBar = showCommandBar
+	m.ShowCommandInput = showCommandInput
 	m.InMoveMode = inMoveMode
 	m.SelectedFile = selectedFile
 	m.ItemToMove = itemToMove
 	m.FilePaths = filePaths
 }
 
-// SetItemSize sets the size of the currently selected
+// SetDirectoryItemSize sets the size of the currently selected
 // directory item as a formatted size string.
-func (m *Model) SetItemSize(itemSize string) {
+func (m *Model) SetDirectoryItemSize(itemSize string) {
 	m.ItemSize = itemSize
 }
 
@@ -184,7 +189,7 @@ func (m Model) View() string {
 		)
 	}
 
-	if m.ShowCommandBar {
+	if m.ShowCommandInput {
 		status = m.Textinput.View()
 	}
 
