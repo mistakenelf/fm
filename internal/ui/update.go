@@ -761,7 +761,7 @@ func (m *Model) handlePreviewDirectoryKeyPress(cmds *[]tea.Cmd) {
 				*cmds = append(*cmds, m.previewDirectoryListingCmd(fileInfo.Name()))
 			}
 		default:
-			*cmds = append(*cmds, m.previewDirectoryListingCmd(selectedFile.Name()))
+			return
 		}
 	}
 }
