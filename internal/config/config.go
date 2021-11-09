@@ -18,6 +18,7 @@ type SettingsConfig struct {
 	Borderless       bool   `mapstructure:"borderless"`
 	Theme            string `mapstructure:"theme"`
 	SyntaxTheme      string `mapstructure:"syntax_theme"`
+	SimpleMode       bool   `mapstructure:"simple_mode"`
 }
 
 // Config represents the main config for the application.
@@ -56,6 +57,7 @@ func LoadConfig(startDir, selectionPath *pflag.Flag) {
 	viper.SetDefault("settings.borderless", false)
 	viper.SetDefault("settings.theme", "default")
 	viper.SetDefault("settings.syntax_theme", "dracula")
+	viper.SetDefault("settings.simple_mode", false)
 
 	if err := viper.SafeWriteConfig(); err != nil {
 		if os.IsNotExist(err) {
