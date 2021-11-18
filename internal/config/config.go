@@ -33,21 +33,6 @@ func LoadConfig(startDir, selectionPath *pflag.Flag) {
 	viper.SetConfigName(".fm")
 	viper.SetConfigType("yml")
 
-	// Setup flags.
-	err := viper.BindPFlag("start-dir", startDir)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = viper.BindPFlag("selection-path", selectionPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Setup flag defaults.
-	viper.SetDefault("start-dir", "")
-	viper.SetDefault("selection-path", "")
-
 	// Setup config defaults.
 	viper.SetDefault("settings.start_dir", ".")
 	viper.SetDefault("settings.show_icons", true)
@@ -73,6 +58,21 @@ func LoadConfig(startDir, selectionPath *pflag.Flag) {
 			log.Fatal(err)
 		}
 	}
+
+	// Setup flags.
+	err := viper.BindPFlag("start-dir", startDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = viper.BindPFlag("selection-path", selectionPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Setup flag defaults.
+	viper.SetDefault("start-dir", "")
+	viper.SetDefault("selection-path", "")
 }
 
 // GetConfig returns the users config.
