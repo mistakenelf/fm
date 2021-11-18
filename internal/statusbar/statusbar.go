@@ -29,6 +29,7 @@ type Model struct {
 	ShowIcons          bool
 	ShowCommandInput   bool
 	InMoveMode         bool
+	SimpleMode         bool
 	ItemSize           string
 	FilePaths          []string
 	SelectedFile       os.FileInfo
@@ -43,7 +44,7 @@ type Model struct {
 
 // NewModel creates an instance of a statusbar.
 func NewModel(
-	firstColumnColors, secondColumnColors, thirdColumnColors, fourthColumnColors Color, showIcons bool,
+	firstColumnColors, secondColumnColors, thirdColumnColors, fourthColumnColors Color, showIcons, simpleMode bool,
 ) Model {
 	input := textinput.NewModel()
 	input.Prompt = "❯ "
@@ -61,6 +62,7 @@ func NewModel(
 		ShowIcons:          showIcons,
 		ShowCommandInput:   false,
 		InMoveMode:         false,
+		SimpleMode:         simpleMode,
 		ItemSize:           "",
 		SelectedFile:       nil,
 		ItemToMove:         nil,
@@ -203,31 +205,63 @@ func (m Model) View() string {
 		logo = "FM"
 	}
 
-	selectedFileColumn := lipgloss.NewStyle().
+	// Selected file styles
+	selectedFileStyle := lipgloss.NewStyle().
 		Foreground(m.FirstColumnColors.Foreground).
-		Background(m.FirstColumnColors.Background).
+		Background(m.FirstColumnColors.Background)
+
+	if m.SimpleMode {
+		selectedFileStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
+	}
+
+	selectedFileColumn := selectedFileStyle.
 		Padding(0, 1).
 		Height(m.Height).
 		Render(truncate.StringWithTail(selectedFile, 30, "..."))
 
-	fileCountColumn := lipgloss.NewStyle().
+	// File count styles
+	fileCountStyle := lipgloss.NewStyle().
 		Foreground(m.ThirdColumnColors.Foreground).
-		Background(m.ThirdColumnColors.Background).
+		Background(m.ThirdColumnColors.Background)
+
+	if m.SimpleMode {
+		fileCountStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
+	}
+
+	fileCountColumn := fileCountStyle.
 		Align(lipgloss.Right).
 		Padding(0, 1).
 		Height(m.Height).
 		Render(fileCount)
 
-	logoColumn := lipgloss.NewStyle().
+	// Logo styles
+	logoStyle := lipgloss.NewStyle().
 		Foreground(m.FourthColumnColors.Foreground).
-		Background(m.FourthColumnColors.Background).
+		Background(m.FourthColumnColors.Background)
+
+	if m.SimpleMode {
+		logoStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
+	}
+
+	logoColumn := logoStyle.
 		Padding(0, 1).
 		Height(m.Height).
 		Render(logo)
 
-	statusColumn := lipgloss.NewStyle().
+	// Status styles
+	statusStyle := lipgloss.NewStyle().
 		Foreground(m.SecondColumnColors.Foreground).
-		Background(m.SecondColumnColors.Background).
+		Background(m.SecondColumnColors.Background)
+
+	if m.SimpleMode {
+		statusStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
+	}
+
+	statusColumn := statusStyle.
 		Padding(0, 1).
 		Height(m.Height).
 		Width(m.Width - width(selectedFileColumn) - width(fileCountColumn) - width(logoColumn)).

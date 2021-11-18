@@ -616,7 +616,7 @@ func (m *Model) handleToggleHiddenKeyPress(cmds *[]tea.Cmd) {
 
 // handleTabKeyPress switches between panes.
 func (m *Model) handleTabKeyPress() {
-	if !m.showCommandInput {
+	if !m.showCommandInput && !m.appConfig.Settings.SimpleMode {
 		m.primaryPane.SetActive(!m.primaryPane.GetIsActive())
 		m.secondaryPane.SetActive(!m.secondaryPane.GetIsActive())
 	}
