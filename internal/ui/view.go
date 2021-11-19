@@ -20,6 +20,10 @@ func (m Model) View() string {
 	)
 
 	if m.appConfig.Settings.SimpleMode {
+		if m.help.ShowAll {
+			return m.help.View(m.keys)
+		}
+
 		horizontalView = lipgloss.JoinHorizontal(lipgloss.Top, m.primaryPane.View())
 	}
 

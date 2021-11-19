@@ -33,6 +33,7 @@ type keyMap struct {
 	ShowOnlyDirectories   key.Binding
 	ShowOnlyFiles         key.Binding
 	Find                  key.Binding
+	ShowHelp              key.Binding
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view. It's part
@@ -68,6 +69,7 @@ func (k keyMap) ShortHelp() []key.Binding {
 		k.ShowOnlyDirectories,
 		k.ShowOnlyFiles,
 		k.Find,
+		k.ShowHelp,
 	}
 }
 
@@ -105,6 +107,7 @@ func (k keyMap) FullHelp() [][]key.Binding {
 			k.ShowOnlyDirectories,
 			k.ShowOnlyFiles,
 			k.Find,
+			k.ShowHelp,
 		},
 	}
 }
@@ -227,6 +230,10 @@ func getDefaultKeyMap() keyMap {
 		Find: key.NewBinding(
 			key.WithKeys("ctrl+f"),
 			key.WithHelp("ctrl+f", "find files by name"),
+		),
+		ShowHelp: key.NewBinding(
+			key.WithKeys("?"),
+			key.WithHelp("?", "show help/keybindings"),
 		),
 	}
 }

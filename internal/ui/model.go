@@ -66,7 +66,10 @@ func NewModel() Model {
 	h := help.NewModel()
 	h.Styles.FullKey.Foreground(theme.DefaultTextColor)
 	h.Styles.FullDesc.Foreground(theme.DefaultTextColor)
-	h.ShowAll = true
+
+	if !cfg.Settings.SimpleMode {
+		h.ShowAll = true
+	}
 
 	// Create a new dirtree.
 	dirTree := dirtree.NewModel(
