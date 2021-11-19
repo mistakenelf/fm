@@ -83,6 +83,10 @@ go install github.com/knipferrc/fm@latest
 <img src="./assets/nord_dark.png" width="350" alt="nord dark">
 <img src="./assets/nord_light.png" width="350" alt="nord light">
 
+## Simple Mode
+
+<img src="./assets/simple_mode.png" width="350" alt="simple mode">
+
 ## Usage
 
 - `fm` will start fm in the current directory
