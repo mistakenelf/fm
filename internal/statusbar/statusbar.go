@@ -50,7 +50,10 @@ func NewModel(
 	input.Prompt = "❯ "
 	input.CharLimit = 250
 	input.Placeholder = "enter a name"
-	input.PlaceholderStyle.Background(secondColumnColors.Background)
+
+	if !simpleMode {
+		input.PlaceholderStyle.Background(secondColumnColors.Background)
+	}
 
 	s := spinner.NewModel()
 	s.Spinner = spinner.Dot
