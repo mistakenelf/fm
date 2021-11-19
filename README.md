@@ -59,6 +59,7 @@ go install github.com/knipferrc/fm@latest
 - Copy selected directory items path to the clipboard
 - Read PDF files
 - Experimental find files/directories (might be a little buggy)
+- Simple mode
 
 ## Themes
 
@@ -118,6 +119,7 @@ go install github.com/knipferrc/fm@latest
 | <kbd>p</kbd>          | Preview a directory in the secondary pane                                                                                                                                                                                                                        |
 | <kbd>y</kbd>          | Copy selected directory items path to the clipboard                                                                                                                                                                                                              |
 | <kbd>ctrl+f</kbd>     | Find files and directories in working directory                                                                                                                                                                                                                  |
+| <kbd>?</kbd>          | Toggle help screen in simple mode                                                                                                                                                                                                                                |
 
 ## Configuration
 
@@ -130,6 +132,7 @@ settings:
   enable_mousewheel: true
   pretty_markdown: true
   show_icons: true
+  simple_mode: false
   start_dir: .
   syntax_theme: dracula
   theme: default

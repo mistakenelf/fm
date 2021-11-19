@@ -66,11 +66,14 @@ func NewModel() Model {
 	h := help.NewModel()
 	h.Styles.FullKey.Foreground(theme.DefaultTextColor)
 	h.Styles.FullDesc.Foreground(theme.DefaultTextColor)
-	h.ShowAll = true
+
+	if !cfg.Settings.SimpleMode {
+		h.ShowAll = true
+	}
 
 	// Create a new dirtree.
 	dirTree := dirtree.NewModel(
-		cfg.Settings.ShowIcons,
+		!cfg.Settings.SimpleMode && cfg.Settings.ShowIcons,
 		theme.SelectedTreeItemColor,
 		theme.UnselectedTreeItemColor,
 	)
@@ -85,7 +88,7 @@ func NewModel() Model {
 	// Initialize the primary pane as active and pass in some config values.
 	primaryPane := pane.NewModel(
 		true,
-		cfg.Settings.Borderless,
+		cfg.Settings.SimpleMode || cfg.Settings.Borderless,
 		theme.ActivePaneBorderColor,
 		theme.InactivePaneBorderColor,
 	)
@@ -116,7 +119,8 @@ func NewModel() Model {
 			Background: theme.StatusBarLogoBackgroundColor,
 			Foreground: theme.StatusBarLogoForegroundColor,
 		},
-		cfg.Settings.ShowIcons,
+		!cfg.Settings.SimpleMode && cfg.Settings.ShowIcons,
+		cfg.Settings.SimpleMode,
 	)
 
 	return Model{

@@ -616,7 +616,7 @@ func (m *Model) handleToggleHiddenKeyPress(cmds *[]tea.Cmd) {
 
 // handleTabKeyPress switches between panes.
 func (m *Model) handleTabKeyPress() {
-	if !m.showCommandInput {
+	if !m.showCommandInput && !m.appConfig.Settings.SimpleMode {
 		m.primaryPane.SetActive(!m.primaryPane.GetIsActive())
 		m.secondaryPane.SetActive(!m.secondaryPane.GetIsActive())
 	}
@@ -761,7 +761,7 @@ func (m *Model) handlePreviewDirectoryKeyPress(cmds *[]tea.Cmd) {
 				*cmds = append(*cmds, m.previewDirectoryListingCmd(fileInfo.Name()))
 			}
 		default:
-			*cmds = append(*cmds, m.previewDirectoryListingCmd(selectedFile.Name()))
+			return
 		}
 	}
 }
@@ -822,7 +822,6 @@ func (m *Model) handleEscapeKeyPress(cmds *[]tea.Cmd) {
 	m.moveMode = false
 	m.itemToMove = nil
 	m.initialMoveDirectory = ""
-	m.help.ShowAll = true
 	m.createFileMode = false
 	m.createDirectoryMode = false
 	m.renameMode = false
@@ -831,6 +830,11 @@ func (m *Model) handleEscapeKeyPress(cmds *[]tea.Cmd) {
 	m.showDirectoriesOnly = false
 	m.findMode = false
 	m.deleteMode = false
+	m.help.ShowAll = false
+
+	if !m.appConfig.Settings.SimpleMode {
+		m.help.ShowAll = true
+	}
 
 	m.primaryPane.SetActive(true)
 	m.secondaryPane.SetActive(false)
@@ -951,6 +955,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 0 {
 				m.handleFindKeyPress(&cmds)
 				return m, nil
+			}
+		case key.Matches(msg, m.keys.ShowHelp):
+			if m.appConfig.Settings.SimpleMode {
+				m.help.ShowAll = !m.help.ShowAll
 			}
 		case key.Matches(msg, m.keys.Escape):
 			m.handleEscapeKeyPress(&cmds)

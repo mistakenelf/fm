@@ -18,6 +18,7 @@ type SettingsConfig struct {
 	Borderless       bool   `mapstructure:"borderless"`
 	Theme            string `mapstructure:"theme"`
 	SyntaxTheme      string `mapstructure:"syntax_theme"`
+	SimpleMode       bool   `mapstructure:"simple_mode"`
 }
 
 // Config represents the main config for the application.
@@ -32,21 +33,6 @@ func LoadConfig(startDir, selectionPath *pflag.Flag) {
 	viper.SetConfigName(".fm")
 	viper.SetConfigType("yml")
 
-	// Setup flags.
-	err := viper.BindPFlag("start-dir", startDir)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = viper.BindPFlag("selection-path", selectionPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Setup flag defaults.
-	viper.SetDefault("start-dir", "")
-	viper.SetDefault("selection-path", "")
-
 	// Setup config defaults.
 	viper.SetDefault("settings.start_dir", ".")
 	viper.SetDefault("settings.show_icons", true)
@@ -56,6 +42,7 @@ func LoadConfig(startDir, selectionPath *pflag.Flag) {
 	viper.SetDefault("settings.borderless", false)
 	viper.SetDefault("settings.theme", "default")
 	viper.SetDefault("settings.syntax_theme", "dracula")
+	viper.SetDefault("settings.simple_mode", false)
 
 	if err := viper.SafeWriteConfig(); err != nil {
 		if os.IsNotExist(err) {
@@ -71,6 +58,21 @@ func LoadConfig(startDir, selectionPath *pflag.Flag) {
 			log.Fatal(err)
 		}
 	}
+
+	// Setup flags.
+	err := viper.BindPFlag("start-dir", startDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = viper.BindPFlag("selection-path", selectionPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Setup flag defaults.
+	viper.SetDefault("start-dir", "")
+	viper.SetDefault("selection-path", "")
 }
 
 // GetConfig returns the users config.
