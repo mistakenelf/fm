@@ -43,7 +43,7 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/yuin/goldmark v1.4.4 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
-	golang.org/x/exp v0.0.0-20211118223901-eb295bbb7f92 // indirect
+	golang.org/x/exp v0.0.0-20211121162702-d9423ad70779 // indirect
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
 	golang.org/x/mobile v0.0.0-20211109191125-d61a72f26a1a // indirect
 	golang.org/x/net v0.0.0-20211118161319-6a13c67c3ce4 // indirect
