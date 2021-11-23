@@ -77,15 +77,6 @@ func (m *Model) handleUpdateDirectoryListingMsg(msg updateDirectoryListingMsg, c
 	m.statusBar.ResetCommandInput()
 	m.updateStatusBarContent(cmds)
 
-	if len(msg) > 0 {
-		selectedFile, err := m.dirTree.GetSelectedFile()
-		if err != nil {
-			return m, m.handleErrorCmd(err)
-		}
-
-		return m, m.getDirectoryItemSizeCmd(selectedFile.Name())
-	}
-
 	return m, nil
 }
 
@@ -178,13 +169,6 @@ func (m *Model) handleErrorMsg(msg errorMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-// handleDirectoryItemSizeMsg is received whenever the directory size has been calculated.
-func (m *Model) handleDirectoryItemSizeMsg(msg directoryItemSizeMsg) (tea.Model, tea.Cmd) {
-	m.statusBar.SetDirectoryItemSize(string(msg))
-
-	return m, nil
-}
-
 // handleCopyToClipboardMsg is received when the selected directory item is copied to the clipboard.
 func (m *Model) handleCopyToClipboardMsg(msg copyToClipboardMsg) (tea.Model, tea.Cmd) {
 	m.renderer.SetContent(string(msg))
@@ -252,14 +236,6 @@ func (m *Model) handleMouseMsg(msg tea.MouseMsg, cmds *[]tea.Cmd) (tea.Model, te
 			m.scrollPrimaryPane()
 			m.updateStatusBarContent(cmds)
 			m.primaryPane.SetContent(m.dirTree.View())
-			m.statusBar.SetDirectoryItemSize("")
-
-			selectedFile, err := m.dirTree.GetSelectedFile()
-			if err != nil {
-				return m, m.handleErrorCmd(err)
-			}
-
-			return m, m.getDirectoryItemSizeCmd(selectedFile.Name())
 		}
 
 		m.secondaryPane.LineUp(3)
@@ -272,14 +248,6 @@ func (m *Model) handleMouseMsg(msg tea.MouseMsg, cmds *[]tea.Cmd) (tea.Model, te
 			m.scrollPrimaryPane()
 			m.updateStatusBarContent(cmds)
 			m.primaryPane.SetContent(m.dirTree.View())
-			m.statusBar.SetDirectoryItemSize("")
-
-			selectedFile, err := m.dirTree.GetSelectedFile()
-			if err != nil {
-				return m, m.handleErrorCmd(err)
-			}
-
-			return m, m.getDirectoryItemSizeCmd(selectedFile.Name())
 		}
 
 		m.secondaryPane.LineDown(3)
@@ -293,8 +261,6 @@ func (m *Model) handleMouseMsg(msg tea.MouseMsg, cmds *[]tea.Cmd) (tea.Model, te
 // handleLeftKeyPress goes back to the previous directory when pressed.
 func (m *Model) handleLeftKeyPress(cmds *[]tea.Cmd) {
 	if !m.showCommandInput && m.primaryPane.GetIsActive() {
-		m.statusBar.SetDirectoryItemSize("")
-
 		workingDirectory, err := dirfs.GetWorkingDirectory()
 		if err != nil {
 			*cmds = append(*cmds, m.handleErrorCmd(err))
@@ -313,14 +279,6 @@ func (m *Model) handleDownKeyPress(cmds *[]tea.Cmd) {
 		m.scrollPrimaryPane()
 		m.updateStatusBarContent(cmds)
 		m.primaryPane.SetContent(m.dirTree.View())
-		m.statusBar.SetDirectoryItemSize("")
-
-		selectedFile, err := m.dirTree.GetSelectedFile()
-		if err != nil {
-			*cmds = append(*cmds, m.handleErrorCmd(err))
-		}
-
-		*cmds = append(*cmds, m.getDirectoryItemSizeCmd(selectedFile.Name()))
 	}
 
 	if !m.showCommandInput && m.secondaryPane.GetIsActive() {
@@ -335,14 +293,6 @@ func (m *Model) handleUpKeyPress(cmds *[]tea.Cmd) {
 		m.scrollPrimaryPane()
 		m.updateStatusBarContent(cmds)
 		m.primaryPane.SetContent(m.dirTree.View())
-		m.statusBar.SetDirectoryItemSize("")
-
-		selectedFile, err := m.dirTree.GetSelectedFile()
-		if err != nil {
-			*cmds = append(*cmds, m.handleErrorCmd(err))
-		}
-
-		*cmds = append(*cmds, m.getDirectoryItemSizeCmd(selectedFile.Name()))
 	}
 
 	if !m.showCommandInput && m.secondaryPane.GetIsActive() {
@@ -360,7 +310,6 @@ func (m *Model) handleRightKeyPress(cmds *[]tea.Cmd) {
 
 		switch {
 		case selectedFile.IsDir() && !m.statusBar.CommandInputFocused():
-			m.statusBar.SetDirectoryItemSize("")
 			currentDir, err := dirfs.GetWorkingDirectory()
 			if err != nil {
 				*cmds = append(*cmds, m.handleErrorCmd(err))
@@ -374,7 +323,6 @@ func (m *Model) handleRightKeyPress(cmds *[]tea.Cmd) {
 
 			*cmds = append(*cmds, m.updateDirectoryListingCmd(directoryToOpen))
 		case selectedFile.Mode()&os.ModeSymlink == os.ModeSymlink:
-			m.statusBar.SetDirectoryItemSize("")
 			symlinkFile, err := os.Readlink(selectedFile.Name())
 			if err != nil {
 				*cmds = append(*cmds, m.handleErrorCmd(err))
@@ -414,19 +362,11 @@ func (m *Model) handleRightKeyPress(cmds *[]tea.Cmd) {
 }
 
 // handleJumpToTopKeyPress jumps to the top of a pane.
-func (m *Model) handleJumpToTopKeyPress(cmds *[]tea.Cmd) {
+func (m *Model) handleJumpToTopKeyPress() {
 	if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 1 {
 		m.dirTree.GotoTop()
 		m.primaryPane.GotoTop()
 		m.primaryPane.SetContent(m.dirTree.View())
-		m.statusBar.SetDirectoryItemSize("")
-
-		selectedFile, err := m.dirTree.GetSelectedFile()
-		if err != nil {
-			*cmds = append(*cmds, m.handleErrorCmd(err))
-		}
-
-		*cmds = append(*cmds, m.getDirectoryItemSizeCmd(selectedFile.Name()))
 	}
 
 	if !m.showCommandInput && m.secondaryPane.GetIsActive() {
@@ -435,19 +375,11 @@ func (m *Model) handleJumpToTopKeyPress(cmds *[]tea.Cmd) {
 }
 
 // handleJumpToBottomKeyPress jumps to the bottom of a pane.
-func (m *Model) handleJumpToBottomKeyPress(cmds *[]tea.Cmd) {
+func (m *Model) handleJumpToBottomKeyPress() {
 	if !m.showCommandInput && m.primaryPane.GetIsActive() && m.dirTree.GetTotalFiles() > 1 {
 		m.dirTree.GotoBottom()
 		m.primaryPane.GotoBottom()
 		m.primaryPane.SetContent(m.dirTree.View())
-		m.statusBar.SetDirectoryItemSize("")
-
-		selectedFile, err := m.dirTree.GetSelectedFile()
-		if err != nil {
-			*cmds = append(*cmds, m.handleErrorCmd(err))
-		}
-
-		*cmds = append(*cmds, m.getDirectoryItemSizeCmd(selectedFile.Name()))
 	}
 
 	if !m.showCommandInput && m.secondaryPane.GetIsActive() {
@@ -874,8 +806,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handleConvertImageToStringMsg(msg)
 	case errorMsg:
 		return m.handleErrorMsg(msg)
-	case directoryItemSizeMsg:
-		return m.handleDirectoryItemSizeMsg(msg)
 	case copyToClipboardMsg:
 		return m.handleCopyToClipboardMsg(msg)
 	case findFilesByNameMsg:
@@ -901,9 +831,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.Right):
 			m.handleRightKeyPress(&cmds)
 		case key.Matches(msg, m.keys.JumpToTop):
-			m.handleJumpToTopKeyPress(&cmds)
+			m.handleJumpToTopKeyPress()
 		case key.Matches(msg, m.keys.JumpToBottom):
-			m.handleJumpToBottomKeyPress(&cmds)
+			m.handleJumpToBottomKeyPress()
 		case key.Matches(msg, m.keys.Enter):
 			m.handleEnterKeyPress(&cmds)
 		case key.Matches(msg, m.keys.Delete):

@@ -7,7 +7,6 @@ import (
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/icons"
 
-	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -30,7 +29,6 @@ type Model struct {
 	ShowCommandInput   bool
 	InMoveMode         bool
 	SimpleMode         bool
-	ItemSize           string
 	FilePaths          []string
 	SelectedFile       os.FileInfo
 	ItemToMove         os.FileInfo
@@ -39,7 +37,6 @@ type Model struct {
 	ThirdColumnColors  Color
 	FourthColumnColors Color
 	Textinput          textinput.Model
-	Spinner            spinner.Model
 }
 
 // NewModel creates an instance of a statusbar.
@@ -55,9 +52,6 @@ func NewModel(
 		input.PlaceholderStyle.Background(secondColumnColors.Background)
 	}
 
-	s := spinner.NewModel()
-	s.Spinner = spinner.Dot
-
 	return Model{
 		Height:             1,
 		TotalFiles:         0,
@@ -66,7 +60,6 @@ func NewModel(
 		ShowCommandInput:   false,
 		InMoveMode:         false,
 		SimpleMode:         simpleMode,
-		ItemSize:           "",
 		SelectedFile:       nil,
 		ItemToMove:         nil,
 		FirstColumnColors:  firstColumnColors,
@@ -74,7 +67,6 @@ func NewModel(
 		ThirdColumnColors:  thirdColumnColors,
 		FourthColumnColors: fourthColumnColors,
 		Textinput:          input,
-		Spinner:            s,
 	}
 }
 
@@ -128,12 +120,6 @@ func (m *Model) SetContent(
 	m.FilePaths = filePaths
 }
 
-// SetDirectoryItemSize sets the size of the currently selected
-// directory item as a formatted size string.
-func (m *Model) SetDirectoryItemSize(itemSize string) {
-	m.ItemSize = itemSize
-}
-
 // SetSize sets the size of the statusbar, useful when the terminal is resized.
 func (m *Model) SetSize(width int) {
 	m.Width = width
@@ -145,9 +131,6 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
-	case spinner.TickMsg:
-		m.Spinner, cmd = m.Spinner.Update(msg)
-		cmds = append(cmds, cmd)
 	case tea.WindowSizeMsg:
 		m.SetSize(msg.Width)
 	}
@@ -166,7 +149,6 @@ func (m Model) View() string {
 	width := lipgloss.Width
 	selectedFile := "N/A"
 	fileCount := "0/0"
-	fileSize := m.Spinner.View()
 
 	if m.TotalFiles > 0 && m.SelectedFile != nil {
 		selectedFile = m.SelectedFile.Name()
@@ -177,10 +159,6 @@ func (m Model) View() string {
 			currentPath = dirfs.CurrentDirectory
 		}
 
-		if m.ItemSize != "" {
-			fileSize = m.ItemSize
-		}
-
 		if len(m.FilePaths) > 0 {
 			currentPath = m.FilePaths[m.Cursor]
 		}
@@ -188,7 +166,7 @@ func (m Model) View() string {
 		// Display some information about the currently seleted file including
 		// its size, the mode and the current path.
 		status = fmt.Sprintf("%s %s %s",
-			fileSize,
+			m.SelectedFile.ModTime().Format("2006-01-02 15:04:05"),
 			m.SelectedFile.Mode().String(),
 			currentPath,
 		)

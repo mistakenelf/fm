@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"context"
 	"os"
 
 	"github.com/knipferrc/fm/internal/config"
@@ -16,11 +15,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type directoryItemSizeCtx struct {
-	ctx    context.Context
-	cancel context.CancelFunc
-}
-
 // Model represents the state of the UI.
 type Model struct {
 	keys                 keyMap
@@ -34,7 +28,6 @@ type Model struct {
 	renderer             renderer.Model
 	itemToMove           os.FileInfo
 	appConfig            config.Config
-	directoryItemSizeCtx *directoryItemSizeCtx
 	theme                theme.Theme
 	previousDirectory    string
 	initialMoveDirectory string
@@ -124,20 +117,17 @@ func NewModel() Model {
 	)
 
 	return Model{
-		keys:           keys,
-		help:           h,
-		primaryPane:    primaryPane,
-		secondaryPane:  secondaryPane,
-		loader:         l,
-		dirTree:        dirTree,
-		dirTreePreview: dirTreePreview,
-		statusBar:      statusBar,
-		renderer:       renderer.Model{},
-		itemToMove:     nil,
-		appConfig:      cfg,
-		directoryItemSizeCtx: &directoryItemSizeCtx{
-			ctx: context.Background(),
-		},
+		keys:                 keys,
+		help:                 h,
+		primaryPane:          primaryPane,
+		secondaryPane:        secondaryPane,
+		loader:               l,
+		dirTree:              dirTree,
+		dirTreePreview:       dirTreePreview,
+		statusBar:            statusBar,
+		renderer:             renderer.Model{},
+		itemToMove:           nil,
+		appConfig:            cfg,
 		theme:                theme,
 		previousDirectory:    "",
 		initialMoveDirectory: "",

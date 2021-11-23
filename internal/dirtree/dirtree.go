@@ -7,7 +7,9 @@ import (
 	"path/filepath"
 
 	"github.com/knipferrc/fm/icons"
+	"github.com/knipferrc/fm/internal/renderer"
 
+	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/truncate"
 )
@@ -22,16 +24,21 @@ type Model struct {
 	ShowHidden          bool
 	SelectedItemColor   lipgloss.AdaptiveColor
 	UnselectedItemColor lipgloss.AdaptiveColor
+	Spinner             spinner.Model
 }
 
 // NewModel creates a new instance of a dirtree.
 func NewModel(showIcons bool, selectedItemColor, unselectedItemColor lipgloss.AdaptiveColor) Model {
+	s := spinner.NewModel()
+	s.Spinner = spinner.Dot
+
 	return Model{
 		Cursor:              0,
 		ShowIcons:           showIcons,
 		ShowHidden:          true,
 		SelectedItemColor:   selectedItemColor,
 		UnselectedItemColor: unselectedItemColor,
+		Spinner:             s,
 	}
 }
 
@@ -142,12 +149,12 @@ func (m Model) View() string {
 	}
 
 	for i, file := range m.Files {
-		var modTimeColor lipgloss.AdaptiveColor
+		var fileSizeColor lipgloss.AdaptiveColor
 
 		if m.Cursor == i {
-			modTimeColor = m.SelectedItemColor
+			fileSizeColor = m.SelectedItemColor
 		} else {
-			modTimeColor = m.UnselectedItemColor
+			fileSizeColor = m.UnselectedItemColor
 		}
 
 		fileInfo, err := file.Info()
@@ -155,20 +162,17 @@ func (m Model) View() string {
 			return err.Error()
 		}
 
-		modTime := lipgloss.NewStyle().
-			Align(lipgloss.Right).
-			Foreground(modTimeColor).
-			Render(fileInfo.ModTime().
-				Format("2006-01-02 15:04:05"),
-			)
+		fileSize := lipgloss.NewStyle().
+			Foreground(fileSizeColor).
+			Render(renderer.ConvertBytesToSizeString(fileInfo.Size()))
 
-		dirItem := lipgloss.NewStyle().Width(m.Width - lipgloss.Width(modTime) - 2).Render(
+		dirItem := lipgloss.NewStyle().Width(m.Width - lipgloss.Width(fileSize) - 2).Render(
 			truncate.StringWithTail(
-				m.dirItem(m.Cursor == i, fileInfo), uint(m.Width-lipgloss.Width(modTime)), "...",
+				m.dirItem(m.Cursor == i, fileInfo), uint(m.Width-lipgloss.Width(fileSize)), "...",
 			),
 		)
 
-		row := lipgloss.JoinHorizontal(lipgloss.Top, dirItem, modTime)
+		row := lipgloss.JoinHorizontal(lipgloss.Top, dirItem, fileSize)
 
 		curFiles += fmt.Sprintf("%s\n", row)
 	}

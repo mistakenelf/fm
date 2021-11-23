@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"context"
 	"fmt"
 	"image"
 	_ "image/jpeg"
@@ -9,7 +8,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/internal/renderer"
@@ -22,7 +20,6 @@ type updateDirectoryListingMsg []fs.DirEntry
 type previewDirectoryListingMsg []fs.DirEntry
 type moveDirItemMsg []fs.DirEntry
 type errorMsg string
-type directoryItemSizeMsg string
 type copyToClipboardMsg string
 type convertImageToStringMsg string
 type findFilesByNameMsg struct {
@@ -296,33 +293,6 @@ func (m Model) copyDirectoryCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.CopyDirectory(name); err != nil {
 			return errorMsg(err.Error())
-		}
-
-		return nil
-	}
-}
-
-// getDirectoryItemSizeCmd calculates the size of a directory or file.
-func (m Model) getDirectoryItemSizeCmd(name string) tea.Cmd {
-	if m.directoryItemSizeCtx != nil && m.directoryItemSizeCtx.cancel != nil {
-		m.directoryItemSizeCtx.cancel()
-	}
-
-	ctx, cancel := context.WithTimeout(m.directoryItemSizeCtx.ctx, 300*time.Millisecond)
-	m.directoryItemSizeCtx.cancel = cancel
-
-	return func() tea.Msg {
-		defer cancel()
-		<-ctx.Done()
-		if ctx.Err() == context.DeadlineExceeded {
-			size, err := dirfs.GetDirectoryItemSize(name)
-			if err != nil {
-				return directoryItemSizeMsg("N/A")
-			}
-
-			sizeString := renderer.ConvertBytesToSizeString(size)
-
-			return directoryItemSizeMsg(sizeString)
 		}
 
 		return nil
