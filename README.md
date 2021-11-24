@@ -90,6 +90,7 @@ go install github.com/knipferrc/fm@latest
 ## Usage
 
 - `fm` will start fm in the current directory
+- `fm update` will update fm to the latest version
 - `fm --start-dir=/some/start/dir` will start fm in the specified directory
 - `fm --selection-path=/tmp/tmpfile` will write the selected items path to the selection path when pressing <kbd>E</kbd> and exit fm
 

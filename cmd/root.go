@@ -62,6 +62,7 @@ var rootCmd = &cobra.Command{
 
 // Execute runs the root command and starts the application.
 func Execute() {
+	rootCmd.AddCommand(updateCmd)
 	rootCmd.PersistentFlags().String("selection-path", "", "Path to write to file on open.")
 	rootCmd.PersistentFlags().String("start-dir", "", "Starting directory for FM")
 
