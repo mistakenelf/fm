@@ -11,7 +11,22 @@ before:
 builds:
   - main: ./main.go
     binary: fm
-    goos: ["linux", "darwin", "windows"]
-    goarch: ["386", "amd64"]
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
     env:
       - CGO_ENABLED=0
+
+nfpms:
+  - maintainer: Tyler Knipfer <knipferrc@gmail.com>
+    description: FM is a simple, configurable, and fun to use file manager
+    homepage: https://github.com/knipferrc/fm
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
