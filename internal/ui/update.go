@@ -71,8 +71,8 @@ func (m *Model) handleUpdateDirectoryListingMsg(msg updateDirectoryListingMsg, c
 	m.dirTree.GotoTop()
 	m.dirTree.SetContent(msg)
 	m.dirTree.SetFilePaths(nil)
-	m.primaryPane.SetContent(m.dirTree.View())
 	m.primaryPane.GotoTop()
+	m.primaryPane.SetContent(m.dirTree.View())
 	m.statusBar.BlurCommandInput()
 	m.statusBar.ResetCommandInput()
 	m.updateStatusBarContent(cmds)
@@ -91,8 +91,8 @@ func (m *Model) handlePreviewDirectoryListingMsg(msg previewDirectoryListingMsg)
 	m.renderer.SetImage(nil)
 	m.dirTreePreview.GotoTop()
 	m.dirTreePreview.SetContent(msg)
-	m.secondaryPane.SetContent(m.dirTreePreview.View())
 	m.secondaryPane.GotoTop()
+	m.secondaryPane.SetContent(m.dirTreePreview.View())
 	m.statusBar.BlurCommandInput()
 	m.statusBar.ResetCommandInput()
 
@@ -894,6 +894,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.handleEscapeKeyPress(&cmds)
 		}
 	}
+
+	if m.dirTree.Cmds == nil {
+		m.primaryPane.SetContent(m.dirTree.View())
+	}
+
+	m.dirTree, cmd = m.dirTree.Update(msg)
+	cmds = append(cmds, cmd)
 
 	m.statusBar, cmd = m.statusBar.Update(msg)
 	cmds = append(cmds, cmd)

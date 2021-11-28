@@ -6,18 +6,26 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/internal/renderer"
 
 	"github.com/charmbracelet/bubbles/spinner"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/truncate"
 )
+
+type directoryItemSizeMsg struct {
+	size  string
+	index int
+}
 
 // Model is a struct to represent the properties of a dirtree.
 type Model struct {
 	Files               []fs.DirEntry
 	FilePaths           []string
+	FileSizes           []string
 	Width               int
 	Cursor              int
 	ShowIcons           bool
@@ -25,6 +33,7 @@ type Model struct {
 	SelectedItemColor   lipgloss.AdaptiveColor
 	UnselectedItemColor lipgloss.AdaptiveColor
 	Spinner             spinner.Model
+	Cmds                []tea.Cmd
 }
 
 // NewModel creates a new instance of a dirtree.
@@ -42,9 +51,32 @@ func NewModel(showIcons bool, selectedItemColor, unselectedItemColor lipgloss.Ad
 	}
 }
 
+// getDirectoryItemSizeCmd calculates the size of a directory or file.
+func (m Model) getDirectoryItemSizeCmd(name string, i int) tea.Cmd {
+	return func() tea.Msg {
+		size, err := dirfs.GetDirectoryItemSize(name)
+		if err != nil {
+			return directoryItemSizeMsg{size: "N/A", index: i}
+		}
+
+		sizeString := renderer.ConvertBytesToSizeString(size)
+
+		return directoryItemSizeMsg{
+			size:  sizeString,
+			index: i,
+		}
+	}
+}
+
 // SetContent sets the files currently displayed in the tree.
 func (m *Model) SetContent(files []fs.DirEntry) {
 	m.Files = files
+	m.FileSizes = nil
+
+	for i, file := range files {
+		m.FileSizes = append(m.FileSizes, "")
+		m.Cmds = append(m.Cmds, m.getDirectoryItemSizeCmd(file.Name(), i))
+	}
 }
 
 // SetFilePaths sets an array of file paths.
@@ -111,38 +143,31 @@ func (m *Model) ToggleHidden() {
 	m.ShowHidden = !m.ShowHidden
 }
 
-// dirItem returns a string representation of a directory item.
-func (m Model) dirItem(selected bool, fileInfo fs.FileInfo) string {
-	icon, color := icons.GetIcon(fileInfo.Name(), filepath.Ext(fileInfo.Name()), icons.GetIndicator(fileInfo.Mode()))
-	fileIcon := fmt.Sprintf("%s%s", color, icon)
+// Update updates the statusbar.
+func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+	var cmds []tea.Cmd
+	var cmd tea.Cmd
 
-	switch {
-	case m.ShowIcons && selected:
-		return fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
-			Bold(true).
-			Foreground(m.SelectedItemColor).
-			Render(fileInfo.Name()))
-	case m.ShowIcons && !selected:
-		return fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
-			Bold(true).
-			Foreground(m.UnselectedItemColor).
-			Render(fileInfo.Name()))
-	case !m.ShowIcons && selected:
-		return lipgloss.NewStyle().
-			Bold(true).
-			Foreground(m.SelectedItemColor).
-			Render(fileInfo.Name())
-	default:
-		return lipgloss.NewStyle().
-			Bold(true).
-			Foreground(m.UnselectedItemColor).
-			Render(fileInfo.Name())
+	switch msg := msg.(type) {
+	case directoryItemSizeMsg:
+		m.FileSizes[msg.index] = msg.size
+	case spinner.TickMsg:
+		m.Spinner, cmd = m.Spinner.Update(msg)
+		cmds = append(cmds, cmd)
 	}
+
+	if len(m.Cmds) > 0 {
+		cmds = append(cmds, m.Cmds...)
+		m.Cmds = nil
+	}
+
+	return m, tea.Batch(cmds...)
 }
 
 // View returns a string representation of the current tree.
 func (m Model) View() string {
 	curFiles := ""
+	var directoryItem string
 
 	if len(m.Files) == 0 {
 		return "Directory is empty"
@@ -164,11 +189,37 @@ func (m Model) View() string {
 
 		fileSize := lipgloss.NewStyle().
 			Foreground(fileSizeColor).
-			Render(renderer.ConvertBytesToSizeString(fileInfo.Size()))
+			Render(m.FileSizes[i])
+
+		icon, color := icons.GetIcon(fileInfo.Name(), filepath.Ext(fileInfo.Name()), icons.GetIndicator(fileInfo.Mode()))
+		fileIcon := fmt.Sprintf("%s%s", color, icon)
+
+		switch {
+		case m.ShowIcons && m.Cursor == i:
+			directoryItem = fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
+				Bold(true).
+				Foreground(m.SelectedItemColor).
+				Render(fileInfo.Name()))
+		case m.ShowIcons && m.Cursor != i:
+			directoryItem = fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
+				Bold(true).
+				Foreground(m.UnselectedItemColor).
+				Render(fileInfo.Name()))
+		case !m.ShowIcons && m.Cursor == i:
+			directoryItem = lipgloss.NewStyle().
+				Bold(true).
+				Foreground(m.SelectedItemColor).
+				Render(fileInfo.Name())
+		default:
+			directoryItem = lipgloss.NewStyle().
+				Bold(true).
+				Foreground(m.UnselectedItemColor).
+				Render(fileInfo.Name())
+		}
 
 		dirItem := lipgloss.NewStyle().Width(m.Width - lipgloss.Width(fileSize) - 2).Render(
 			truncate.StringWithTail(
-				m.dirItem(m.Cursor == i, fileInfo), uint(m.Width-lipgloss.Width(fileSize)), "...",
+				directoryItem, uint(m.Width-lipgloss.Width(fileSize)), "...",
 			),
 		)
 
