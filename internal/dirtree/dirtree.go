@@ -32,22 +32,18 @@ type Model struct {
 	ShowHidden          bool
 	SelectedItemColor   lipgloss.AdaptiveColor
 	UnselectedItemColor lipgloss.AdaptiveColor
-	Spinner             spinner.Model
+	Spinners            []spinner.Model
 	Cmds                []tea.Cmd
 }
 
 // NewModel creates a new instance of a dirtree.
 func NewModel(showIcons bool, selectedItemColor, unselectedItemColor lipgloss.AdaptiveColor) Model {
-	s := spinner.NewModel()
-	s.Spinner = spinner.Dot
-
 	return Model{
 		Cursor:              0,
 		ShowIcons:           showIcons,
 		ShowHidden:          true,
 		SelectedItemColor:   selectedItemColor,
 		UnselectedItemColor: unselectedItemColor,
-		Spinner:             s,
 	}
 }
 
@@ -72,9 +68,13 @@ func (m Model) getDirectoryItemSizeCmd(name string, i int) tea.Cmd {
 func (m *Model) SetContent(files []fs.DirEntry) {
 	m.Files = files
 	m.FileSizes = nil
+	m.Spinners = make([]spinner.Model, len(m.Files))
 
 	for i, file := range files {
-		m.FileSizes = append(m.FileSizes, "")
+		s := spinner.NewModel()
+		s.Spinner = spinner.Dot
+		m.Spinners[i] = s
+		m.FileSizes = append(m.FileSizes, m.Spinners[i].View())
 		m.Cmds = append(m.Cmds, m.getDirectoryItemSizeCmd(file.Name(), i))
 	}
 }
@@ -152,7 +152,14 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case directoryItemSizeMsg:
 		m.FileSizes[msg.index] = msg.size
 	case spinner.TickMsg:
-		m.Spinner, cmd = m.Spinner.Update(msg)
+		for i, spinner := range m.Spinners {
+			m.Spinners[i], cmd = spinner.Update(msg)
+			cmds = append(cmds, cmd)
+		}
+	}
+
+	for i, spinner := range m.Spinners {
+		m.Spinners[i], cmd = spinner.Update(msg)
 		cmds = append(cmds, cmd)
 	}
 
