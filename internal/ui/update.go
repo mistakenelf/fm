@@ -895,13 +895,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	if m.dirTree.Cmds == nil {
-		m.primaryPane.SetContent(m.dirTree.View())
-	}
-
-	m.dirTree, cmd = m.dirTree.Update(msg)
-	cmds = append(cmds, cmd)
-
 	m.statusBar, cmd = m.statusBar.Update(msg)
 	cmds = append(cmds, cmd)
 

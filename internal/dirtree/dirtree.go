@@ -10,7 +10,6 @@ import (
 	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/internal/renderer"
 
-	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/truncate"
@@ -25,15 +24,12 @@ type directoryItemSizeMsg struct {
 type Model struct {
 	Files               []fs.DirEntry
 	FilePaths           []string
-	FileSizes           []string
 	Width               int
 	Cursor              int
 	ShowIcons           bool
 	ShowHidden          bool
 	SelectedItemColor   lipgloss.AdaptiveColor
 	UnselectedItemColor lipgloss.AdaptiveColor
-	Spinners            []spinner.Model
-	Cmds                []tea.Cmd
 }
 
 // NewModel creates a new instance of a dirtree.
@@ -67,16 +63,6 @@ func (m Model) getDirectoryItemSizeCmd(name string, i int) tea.Cmd {
 // SetContent sets the files currently displayed in the tree.
 func (m *Model) SetContent(files []fs.DirEntry) {
 	m.Files = files
-	m.FileSizes = nil
-	m.Spinners = make([]spinner.Model, len(m.Files))
-
-	for i, file := range files {
-		s := spinner.NewModel()
-		s.Spinner = spinner.Dot
-		m.Spinners[i] = s
-		m.FileSizes = append(m.FileSizes, m.Spinners[i].View())
-		m.Cmds = append(m.Cmds, m.getDirectoryItemSizeCmd(file.Name(), i))
-	}
 }
 
 // SetFilePaths sets an array of file paths.
@@ -143,34 +129,6 @@ func (m *Model) ToggleHidden() {
 	m.ShowHidden = !m.ShowHidden
 }
 
-// Update updates the statusbar.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
-	var cmds []tea.Cmd
-	var cmd tea.Cmd
-
-	switch msg := msg.(type) {
-	case directoryItemSizeMsg:
-		m.FileSizes[msg.index] = msg.size
-	case spinner.TickMsg:
-		for i, spinner := range m.Spinners {
-			m.Spinners[i], cmd = spinner.Update(msg)
-			cmds = append(cmds, cmd)
-		}
-	}
-
-	for i, spinner := range m.Spinners {
-		m.Spinners[i], cmd = spinner.Update(msg)
-		cmds = append(cmds, cmd)
-	}
-
-	if len(m.Cmds) > 0 {
-		cmds = append(cmds, m.Cmds...)
-		m.Cmds = nil
-	}
-
-	return m, tea.Batch(cmds...)
-}
-
 // View returns a string representation of the current tree.
 func (m Model) View() string {
 	curFiles := ""
@@ -196,7 +154,7 @@ func (m Model) View() string {
 
 		fileSize := lipgloss.NewStyle().
 			Foreground(fileSizeColor).
-			Render(m.FileSizes[i])
+			Render(renderer.ConvertBytesToSizeString(fileInfo.Size()))
 
 		icon, color := icons.GetIcon(fileInfo.Name(), filepath.Ext(fileInfo.Name()), icons.GetIndicator(fileInfo.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
