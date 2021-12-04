@@ -1,53 +1,30 @@
 package ui
 
 import (
-	"os"
-
 	"github.com/knipferrc/fm/internal/config"
-	"github.com/knipferrc/fm/internal/dirtree"
-	"github.com/knipferrc/fm/internal/pane"
+	"github.com/knipferrc/fm/internal/filetree"
 	"github.com/knipferrc/fm/internal/renderer"
 	"github.com/knipferrc/fm/internal/statusbar"
 	"github.com/knipferrc/fm/internal/theme"
 
-	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/lipgloss"
 )
 
 // Model represents the state of the UI.
 type Model struct {
-	keys                 keyMap
-	help                 help.Model
-	primaryPane          pane.Model
-	secondaryPane        pane.Model
-	loader               spinner.Model
-	dirTree              dirtree.Model
-	dirTreePreview       dirtree.Model
-	statusBar            statusbar.Model
-	renderer             renderer.Model
-	itemToMove           os.FileInfo
-	appConfig            config.Config
-	theme                theme.Theme
-	previousDirectory    string
-	initialMoveDirectory string
-	showCommandInput     bool
-	moveMode             bool
-	createFileMode       bool
-	createDirectoryMode  bool
-	renameMode           bool
-	findMode             bool
-	deleteMode           bool
-	showHidden           bool
-	showDirectoriesOnly  bool
-	showFilesOnly        bool
-	ready                bool
+	loader    spinner.Model
+	fileTree  filetree.Model
+	statusBar statusbar.Model
+	renderer  renderer.Model
+	appConfig config.Config
+	theme     theme.Theme
+	ready     bool
 }
 
 // NewModel create an instance of the entire application model.
 func NewModel() Model {
 	cfg := config.GetConfig()
-	keys := getDefaultKeyMap()
 	theme := theme.GetTheme(cfg.Settings.Theme)
 
 	// Create a new spinner with some styling based on the config.
@@ -55,43 +32,12 @@ func NewModel() Model {
 	l.Spinner = spinner.Dot
 	l.Style = lipgloss.NewStyle().Foreground(theme.SpinnerColor)
 
-	// Create a new help view.
-	h := help.NewModel()
-	h.Styles.FullKey.Foreground(theme.DefaultTextColor)
-	h.Styles.FullDesc.Foreground(theme.DefaultTextColor)
-
-	if !cfg.Settings.SimpleMode {
-		h.ShowAll = true
-	}
-
-	// Create a new dirtree.
-	dirTree := dirtree.NewModel(
+	fileTree := filetree.NewModel(
 		!cfg.Settings.SimpleMode && cfg.Settings.ShowIcons,
+		cfg.Settings.Borderless,
 		theme.SelectedTreeItemColor,
 		theme.UnselectedTreeItemColor,
-	)
-
-	// Create a new dirtree for previews.
-	dirTreePreview := dirtree.NewModel(
-		cfg.Settings.ShowIcons,
-		theme.UnselectedTreeItemColor,
-		theme.UnselectedTreeItemColor,
-	)
-
-	// Initialize the primary pane as active and pass in some config values.
-	primaryPane := pane.NewModel(
-		true,
-		cfg.Settings.SimpleMode || cfg.Settings.Borderless,
-		theme.ActivePaneBorderColor,
-		theme.InactivePaneBorderColor,
-	)
-
-	// Initialize the secondary pane as inactive and pass in some config values.
-	secondaryPane := pane.NewModel(
-		false,
-		cfg.Settings.Borderless,
-		theme.ActivePaneBorderColor,
-		theme.InactivePaneBorderColor,
+		cfg,
 	)
 
 	// Initialize a status bar passing in config values.
@@ -117,30 +63,12 @@ func NewModel() Model {
 	)
 
 	return Model{
-		keys:                 keys,
-		help:                 h,
-		primaryPane:          primaryPane,
-		secondaryPane:        secondaryPane,
-		loader:               l,
-		dirTree:              dirTree,
-		dirTreePreview:       dirTreePreview,
-		statusBar:            statusBar,
-		renderer:             renderer.Model{},
-		itemToMove:           nil,
-		appConfig:            cfg,
-		theme:                theme,
-		previousDirectory:    "",
-		initialMoveDirectory: "",
-		showCommandInput:     false,
-		moveMode:             false,
-		createFileMode:       false,
-		createDirectoryMode:  false,
-		renameMode:           false,
-		findMode:             false,
-		deleteMode:           false,
-		showHidden:           true,
-		showDirectoriesOnly:  false,
-		showFilesOnly:        false,
-		ready:                false,
+		loader:    l,
+		fileTree:  fileTree,
+		statusBar: statusBar,
+		renderer:  renderer.Model{},
+		appConfig: cfg,
+		theme:     theme,
+		ready:     false,
 	}
 }
