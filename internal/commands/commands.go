@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/knipferrc/fm/dirfs"
-	"github.com/knipferrc/fm/internal/renderer"
+	"github.com/knipferrc/fm/strfmt"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"golang.design/x/clipboard"
@@ -31,12 +31,12 @@ type DirectoryItemSizeMsg struct {
 	index int
 }
 type ReadFileContentMsg struct {
-	rawContent  string
-	markdown    string
-	code        string
-	imageString string
-	pdfContent  string
-	image       image.Image
+	RawContent  string
+	Markdown    string
+	Code        string
+	ImageString string
+	PDFContent  string
+	Image       image.Image
 }
 
 // UpdateDirectoryListingCmd updates the directory listing based on the name of the directory provided.
@@ -121,7 +121,7 @@ func MoveDirectoryItemCmd(name, initialMoveDirectory string, showHidden bool) te
 // RedrawImageCmd redraws the image based on the width provided.
 func RedrawImageCmd(width int, img image.Image) tea.Cmd {
 	return func() tea.Msg {
-		imageString := renderer.ImageToString(width, img)
+		imageString := strfmt.ImageToString(width, img)
 
 		return ConvertImageToStringMsg(imageString)
 	}
@@ -159,18 +159,18 @@ func ReadFileContentCmd(fileName, syntaxTheme string, width int, prettyMarkdown 
 
 		switch {
 		case filepath.Ext(fileName) == ".md" && prettyMarkdown:
-			markdownContent, err := renderer.RenderMarkdown(width, content)
+			markdownContent, err := strfmt.RenderMarkdown(width, content)
 			if err != nil {
 				return ErrorMsg(err.Error())
 			}
 
 			return ReadFileContentMsg{
-				rawContent:  content,
-				markdown:    markdownContent,
-				code:        "",
-				imageString: "",
-				pdfContent:  "",
-				image:       nil,
+				RawContent:  content,
+				Markdown:    markdownContent,
+				Code:        "",
+				ImageString: "",
+				PDFContent:  "",
+				Image:       nil,
 			}
 		case filepath.Ext(fileName) == ".png" || filepath.Ext(fileName) == ".jpg" || filepath.Ext(fileName) == ".jpeg":
 			imageContent, err := os.Open(fileName)
@@ -183,43 +183,43 @@ func ReadFileContentCmd(fileName, syntaxTheme string, width int, prettyMarkdown 
 				return ErrorMsg(err.Error())
 			}
 
-			imageString := renderer.ImageToString(width, img)
+			imageString := strfmt.ImageToString(width, img)
 
 			return ReadFileContentMsg{
-				rawContent:  content,
-				code:        "",
-				markdown:    "",
-				imageString: imageString,
-				pdfContent:  "",
-				image:       img,
+				RawContent:  content,
+				Code:        "",
+				Markdown:    "",
+				ImageString: imageString,
+				PDFContent:  "",
+				Image:       img,
 			}
 		case filepath.Ext(fileName) == ".pdf":
-			pdfContent, err := renderer.ReadPdf(fileName)
+			pdfContent, err := strfmt.ReadPdf(fileName)
 			if err != nil {
 				return ErrorMsg(err.Error())
 			}
 
 			return ReadFileContentMsg{
-				rawContent:  content,
-				code:        "",
-				markdown:    "",
-				imageString: "",
-				pdfContent:  pdfContent,
-				image:       nil,
+				RawContent:  content,
+				Code:        "",
+				Markdown:    "",
+				ImageString: "",
+				PDFContent:  pdfContent,
+				Image:       nil,
 			}
 		default:
-			code, err := renderer.Highlight(content, filepath.Ext(fileName), syntaxTheme)
+			code, err := strfmt.Highlight(content, filepath.Ext(fileName), syntaxTheme)
 			if err != nil {
 				return ErrorMsg(err.Error())
 			}
 
 			return ReadFileContentMsg{
-				rawContent:  content,
-				code:        code,
-				markdown:    "",
-				imageString: "",
-				pdfContent:  "",
-				image:       nil,
+				RawContent:  content,
+				Code:        code,
+				Markdown:    "",
+				ImageString: "",
+				PDFContent:  "",
+				Image:       nil,
 			}
 		}
 	}
@@ -311,7 +311,7 @@ func GetDirectoryItemSizeCmd(name string, i int) tea.Cmd {
 			return DirectoryItemSizeMsg{size: "N/A", index: i}
 		}
 
-		sizeString := renderer.ConvertBytesToSizeString(size)
+		sizeString := strfmt.ConvertBytesToSizeString(size)
 
 		return DirectoryItemSizeMsg{
 			size:  sizeString,

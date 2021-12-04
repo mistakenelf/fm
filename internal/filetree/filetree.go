@@ -12,8 +12,8 @@ import (
 	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/internal/commands"
 	"github.com/knipferrc/fm/internal/config"
-	"github.com/knipferrc/fm/internal/renderer"
 	"github.com/knipferrc/fm/internal/statusbar"
+	"github.com/knipferrc/fm/strfmt"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -133,13 +133,14 @@ func (m *Model) scrollFiletree() {
 
 // handleRightKeyPress opens directory if it is one or reads a files content.
 func (m *Model) handleRightKeyPress(cmds *[]tea.Cmd) {
-	if m.IsActive && m.GetTotalFiles() > 0 {
+	if m.GetIsActive() && m.GetTotalFiles() > 0 {
 		selectedFile, err := m.GetSelectedFile()
 		if err != nil {
 			*cmds = append(*cmds, commands.HandleErrorCmd(err))
 		}
 
-		if selectedFile.IsDir() {
+		switch {
+		case selectedFile.IsDir():
 			currentDir, err := dirfs.GetWorkingDirectory()
 			if err != nil {
 				*cmds = append(*cmds, commands.HandleErrorCmd(err))
@@ -152,6 +153,45 @@ func (m *Model) handleRightKeyPress(cmds *[]tea.Cmd) {
 			}
 
 			*cmds = append(*cmds, commands.UpdateDirectoryListingCmd(directoryToOpen, m.ShowHidden))
+		case selectedFile.Mode()&os.ModeSymlink == os.ModeSymlink:
+			symlinkFile, err := os.Readlink(selectedFile.Name())
+			if err != nil {
+				*cmds = append(*cmds, commands.HandleErrorCmd(err))
+			}
+
+			fileInfo, err := os.Stat(symlinkFile)
+			if err != nil {
+				*cmds = append(*cmds, commands.HandleErrorCmd(err))
+			}
+
+			if fileInfo.IsDir() {
+				currentDir, err := dirfs.GetWorkingDirectory()
+				if err != nil {
+					*cmds = append(*cmds, commands.HandleErrorCmd(err))
+				}
+
+				*cmds = append(*cmds, commands.UpdateDirectoryListingCmd(filepath.Join(currentDir, fileInfo.Name()), m.ShowHidden))
+			}
+
+			*cmds = append(*cmds, commands.ReadFileContentCmd(
+				fileInfo.Name(),
+				m.AppConfig.Settings.SyntaxTheme,
+				m.Viewport.Width,
+				m.AppConfig.Settings.PrettyMarkdown,
+			))
+		default:
+			fileToRead := selectedFile.Name()
+
+			if len(m.GetFilePaths()) > 0 {
+				fileToRead = m.GetFilePaths()[m.GetCursor()]
+			}
+
+			*cmds = append(*cmds, commands.ReadFileContentCmd(
+				fileToRead,
+				m.AppConfig.Settings.SyntaxTheme,
+				m.Viewport.Width,
+				m.AppConfig.Settings.PrettyMarkdown,
+			))
 		}
 	}
 }
@@ -188,7 +228,7 @@ func (m *Model) SetContent(files []fs.DirEntry) {
 
 		fileSize := lipgloss.NewStyle().
 			Foreground(fileSizeColor).
-			Render(renderer.ConvertBytesToSizeString(fileInfo.Size()))
+			Render(strfmt.ConvertBytesToSizeString(fileInfo.Size()))
 
 		icon, color := icons.GetIcon(fileInfo.Name(), filepath.Ext(fileInfo.Name()), icons.GetIndicator(fileInfo.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
@@ -240,7 +280,7 @@ func (m Model) GetFilePaths() []string {
 	return m.FilePaths
 }
 
-// SetSize updates the size of the dirtree, useful when resizing the terminal.
+// SetSize updates the size of the filetree, useful when resizing the terminal.
 func (m *Model) SetSize(width, height int) {
 	m.Viewport.Width = (width / 2) - m.Style.GetHorizontalBorderSize()
 	m.Viewport.Height = height - m.Style.GetVerticalBorderSize() - statusbar.StatusbarHeight
