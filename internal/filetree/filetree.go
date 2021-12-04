@@ -10,43 +10,39 @@ import (
 
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/icons"
+	"github.com/knipferrc/fm/internal/commands"
 	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/renderer"
-	"github.com/spf13/viper"
+	"github.com/knipferrc/fm/internal/statusbar"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/truncate"
+	"github.com/spf13/viper"
 )
-
-type updateDirectoryListingMsg []fs.DirEntry
-type errorMsg string
-type directoryItemSizeMsg struct {
-	size  string
-	index int
-}
 
 // Model is a struct to represent the properties of a filetree.
 type Model struct {
 	Viewport            viewport.Model
 	AppConfig           config.Config
-	Files               []fs.DirEntry
 	Style               lipgloss.Style
+	UnselectedItemColor lipgloss.AdaptiveColor
+	SelectedItemColor   lipgloss.AdaptiveColor
+	ActiveBorderColor   lipgloss.AdaptiveColor
+	InactiveBorderColor lipgloss.AdaptiveColor
+	Files               []fs.DirEntry
 	FilePaths           []string
 	Cursor              int
 	ShowIcons           bool
 	ShowHidden          bool
 	Borderless          bool
-	SelectedItemColor   lipgloss.AdaptiveColor
-	UnselectedItemColor lipgloss.AdaptiveColor
 	IsActive            bool
 	AlternateBorder     bool
 	ShowLoading         bool
-	ActiveBorderColor   lipgloss.AdaptiveColor
-	InactiveBorderColor lipgloss.AdaptiveColor
 }
 
+// Init intializes the filetree.
 func (m Model) Init() tea.Cmd {
 	startDir := viper.GetString("start-dir")
 
@@ -58,7 +54,7 @@ func (m Model) Init() tea.Cmd {
 		}
 
 		if strings.HasPrefix(startDir, "/") {
-			return m.updateDirectoryListingCmd(startDir)
+			return commands.UpdateDirectoryListingCmd(startDir, m.ShowHidden)
 		} else {
 			path, err := os.Getwd()
 			if err != nil {
@@ -67,7 +63,7 @@ func (m Model) Init() tea.Cmd {
 
 			filePath := filepath.Join(path, startDir)
 
-			return m.updateDirectoryListingCmd(filePath)
+			return commands.UpdateDirectoryListingCmd(filePath, m.ShowHidden)
 		}
 	case m.AppConfig.Settings.StartDir == dirfs.HomeDirectory:
 		homeDir, err := dirfs.GetHomeDirectory()
@@ -75,14 +71,18 @@ func (m Model) Init() tea.Cmd {
 			log.Fatal(err)
 		}
 
-		return m.updateDirectoryListingCmd(homeDir)
+		return commands.UpdateDirectoryListingCmd(homeDir, m.ShowHidden)
 	default:
-		return m.updateDirectoryListingCmd(m.AppConfig.Settings.StartDir)
+		return commands.UpdateDirectoryListingCmd(m.AppConfig.Settings.StartDir, m.ShowHidden)
 	}
 }
 
 // NewModel creates a new instance of a filetree.
-func NewModel(showIcons, borderless bool, selectedItemColor, unselectedItemColor lipgloss.AdaptiveColor, appConfig config.Config) Model {
+func NewModel(
+	showIcons, borderless, isActive, showHidden bool,
+	selectedItemColor, unselectedItemColor, activeBorderColor, inactiveBorderColor lipgloss.AdaptiveColor,
+	appConfig config.Config,
+) Model {
 	border := lipgloss.NormalBorder()
 	padding := 1
 
@@ -98,64 +98,30 @@ func NewModel(showIcons, borderless bool, selectedItemColor, unselectedItemColor
 	return Model{
 		Cursor:              0,
 		ShowIcons:           showIcons,
-		ShowHidden:          true,
+		Borderless:          borderless,
+		IsActive:            isActive,
+		ShowHidden:          showHidden,
 		SelectedItemColor:   selectedItemColor,
 		UnselectedItemColor: unselectedItemColor,
+		ActiveBorderColor:   activeBorderColor,
+		InactiveBorderColor: inactiveBorderColor,
 		AppConfig:           appConfig,
 		Style:               style,
 	}
 }
 
-// updateDirectoryListingCmd updates the directory listing based on the name of the directory provided.
-func (m Model) updateDirectoryListingCmd(name string) tea.Cmd {
-	return func() tea.Msg {
-		files, err := dirfs.GetDirectoryListing(name, m.ShowHidden)
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		err = os.Chdir(name)
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return updateDirectoryListingMsg(files)
-	}
-}
-
-// getDirectoryItemSizeCmd calculates the size of a directory or file.
-func (m Model) getDirectoryItemSizeCmd(name string, i int) tea.Cmd {
-	return func() tea.Msg {
-		size, err := dirfs.GetDirectoryItemSize(name)
-		if err != nil {
-			return directoryItemSizeMsg{size: "N/A", index: i}
-		}
-
-		sizeString := renderer.ConvertBytesToSizeString(size)
-
-		return directoryItemSizeMsg{
-			size:  sizeString,
-			index: i,
-		}
-	}
-}
-
-func (m *Model) scrollPrimaryPane() {
+// scrollFiletree moves handles wrapping of the filetree and
+// scrolling of the viewport.
+func (m *Model) scrollFiletree() {
 	top := m.Viewport.YOffset
 	bottom := m.Viewport.Height + m.Viewport.YOffset - 1
 
-	// If the cursor is above the top of the viewport scroll up on the viewport
-	// else were at the bottom and need to scroll the viewport down.
 	if m.Cursor < top {
 		m.Viewport.LineUp(1)
 	} else if m.Cursor > bottom {
 		m.Viewport.LineDown(1)
 	}
 
-	// If the cursor of the dirtree is at the bottom of the files
-	// set the cursor to 0 to go to the top of the dirtree and
-	// scroll the pane to the top else, were at the top of the dirtree and pane so
-	// scroll the pane to the bottom and set the cursor to the bottom.
 	if m.Cursor > m.GetTotalFiles()-1 {
 		m.GotoTop()
 		m.Viewport.GotoTop()
@@ -165,11 +131,49 @@ func (m *Model) scrollPrimaryPane() {
 	}
 }
 
+// handleRightKeyPress opens directory if it is one or reads a files content.
+func (m *Model) handleRightKeyPress(cmds *[]tea.Cmd) {
+	if m.IsActive && m.GetTotalFiles() > 0 {
+		selectedFile, err := m.GetSelectedFile()
+		if err != nil {
+			*cmds = append(*cmds, commands.HandleErrorCmd(err))
+		}
+
+		if selectedFile.IsDir() {
+			currentDir, err := dirfs.GetWorkingDirectory()
+			if err != nil {
+				*cmds = append(*cmds, commands.HandleErrorCmd(err))
+			}
+
+			directoryToOpen := filepath.Join(currentDir, selectedFile.Name())
+
+			if len(m.GetFilePaths()) > 0 {
+				directoryToOpen = m.GetFilePaths()[m.GetCursor()]
+			}
+
+			*cmds = append(*cmds, commands.UpdateDirectoryListingCmd(directoryToOpen, m.ShowHidden))
+		}
+	}
+}
+
+// handleLeftKeyPress goes to the previous directory.
+func (m *Model) handleLeftKeyPress(cmds *[]tea.Cmd) {
+	if m.IsActive && m.GetTotalFiles() > 0 {
+		workingDirectory, err := dirfs.GetWorkingDirectory()
+		if err != nil {
+			*cmds = append(*cmds, commands.HandleErrorCmd(err))
+		}
+
+		*cmds = append(*cmds, commands.UpdateDirectoryListingCmd(filepath.Join(workingDirectory, dirfs.PreviousDirectory), m.ShowHidden))
+	}
+}
+
 // SetContent sets the files currently displayed in the tree.
 func (m *Model) SetContent(files []fs.DirEntry) {
-	m.Files = files
 	var directoryItem string
 	curFiles := ""
+
+	m.Files = files
 
 	for i, file := range files {
 		var fileSizeColor lipgloss.AdaptiveColor
@@ -238,8 +242,8 @@ func (m Model) GetFilePaths() []string {
 
 // SetSize updates the size of the dirtree, useful when resizing the terminal.
 func (m *Model) SetSize(width, height int) {
-	m.Viewport.Width = width - m.Style.GetHorizontalBorderSize()
-	m.Viewport.Height = height - m.Style.GetVerticalBorderSize() - 1
+	m.Viewport.Width = (width / 2) - m.Style.GetHorizontalBorderSize()
+	m.Viewport.Height = height - m.Style.GetVerticalBorderSize() - statusbar.StatusbarHeight
 }
 
 // GotoTop goes to the top of the tree.
@@ -291,12 +295,25 @@ func (m *Model) ToggleHidden() {
 	m.ShowHidden = !m.ShowHidden
 }
 
+// GetIsActive returns the active state of the filetree.
+func (m Model) GetIsActive() bool {
+	return m.IsActive
+}
+
+// SetIsActive sets the active state of the filetree.
+func (m *Model) SetIsActive(isActive bool) {
+	m.IsActive = isActive
+}
+
 // Update updates the statusbar.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
-	case updateDirectoryListingMsg:
+	case commands.UpdateDirectoryListingMsg:
+		m.GotoTop()
+		m.SetFilePaths(nil)
+		m.Viewport.GotoTop()
 		m.SetContent(msg)
 		return m, nil
 	case tea.WindowSizeMsg:
@@ -305,13 +322,25 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "up", "k":
-			m.GoUp()
-			m.scrollPrimaryPane()
-			m.SetContent(m.Files)
+			if m.IsActive {
+				m.GoUp()
+				m.scrollFiletree()
+				m.SetContent(m.Files)
+			}
 		case "down", "j":
-			m.GoDown()
-			m.scrollPrimaryPane()
-			m.SetContent(m.Files)
+			if m.IsActive {
+				m.GoDown()
+				m.scrollFiletree()
+				m.SetContent(m.Files)
+			}
+		case "right", "l":
+			if m.IsActive {
+				m.handleRightKeyPress(&cmds)
+			}
+		case "left", "h":
+			if m.IsActive {
+				m.handleLeftKeyPress(&cmds)
+			}
 		}
 	}
 

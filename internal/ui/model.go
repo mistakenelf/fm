@@ -35,9 +35,20 @@ func NewModel() Model {
 	fileTree := filetree.NewModel(
 		!cfg.Settings.SimpleMode && cfg.Settings.ShowIcons,
 		cfg.Settings.Borderless,
+		true,
+		true,
 		theme.SelectedTreeItemColor,
 		theme.UnselectedTreeItemColor,
+		theme.ActivePaneBorderColor,
+		theme.InactivePaneBorderColor,
 		cfg,
+	)
+
+	renderer := renderer.NewModel(
+		cfg.Settings.Borderless,
+		false,
+		theme.ActivePaneBorderColor,
+		theme.InactivePaneBorderColor,
 	)
 
 	// Initialize a status bar passing in config values.
@@ -66,7 +77,7 @@ func NewModel() Model {
 		loader:    l,
 		fileTree:  fileTree,
 		statusBar: statusBar,
-		renderer:  renderer.Model{},
+		renderer:  renderer,
 		appConfig: cfg,
 		theme:     theme,
 		ready:     false,

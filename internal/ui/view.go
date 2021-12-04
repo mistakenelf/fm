@@ -16,6 +16,7 @@ func (m Model) View() string {
 	horizontalView := lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		m.fileTree.View(),
+		m.renderer.View(),
 	)
 
 	if m.appConfig.Settings.SimpleMode {

@@ -13,6 +13,9 @@ import (
 	"github.com/muesli/reflow/truncate"
 )
 
+// StatusbarHeight is the height of the statusbar.
+const StatusbarHeight = 1
+
 // Color is a struct that contains the foreground and background colors of the statusbar.
 type Color struct {
 	Background lipgloss.AdaptiveColor
@@ -53,7 +56,7 @@ func NewModel(
 	}
 
 	return Model{
-		Height:             1,
+		Height:             StatusbarHeight,
 		TotalFiles:         0,
 		Cursor:             0,
 		ShowIcons:          showIcons,

@@ -6,7 +6,10 @@ import (
 
 // updateStatusBarContent updates the content of the statusbar.
 func (m *Model) updateStatusBarContent() {
-	selectedFile, _ := m.fileTree.GetSelectedFile()
+	selectedFile, err := m.fileTree.GetSelectedFile()
+	if err != nil {
+		selectedFile = nil
+	}
 
 	m.statusBar.SetContent(
 		m.fileTree.GetTotalFiles(),
@@ -38,12 +41,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
+		case "tab":
+			if m.fileTree.GetIsActive() {
+				m.fileTree.SetIsActive(false)
+				m.renderer.SetIsActive(true)
+			} else {
+				m.fileTree.SetIsActive(true)
+				m.renderer.SetIsActive(false)
+			}
 		}
 	}
 
 	m.updateStatusBarContent()
 
 	m.fileTree, cmd = m.fileTree.Update(msg)
+	cmds = append(cmds, cmd)
+
+	m.renderer, cmd = m.renderer.Update(msg)
 	cmds = append(cmds, cmd)
 
 	m.statusBar, cmd = m.statusBar.Update(msg)
