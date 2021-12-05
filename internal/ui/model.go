@@ -6,31 +6,21 @@ import (
 	"github.com/knipferrc/fm/internal/renderer"
 	"github.com/knipferrc/fm/internal/statusbar"
 	"github.com/knipferrc/fm/internal/theme"
-
-	"github.com/charmbracelet/bubbles/spinner"
-	"github.com/charmbracelet/lipgloss"
 )
 
 // Model represents the state of the UI.
 type Model struct {
-	loader    spinner.Model
 	fileTree  filetree.Model
 	statusBar statusbar.Model
 	renderer  renderer.Model
 	appConfig config.Config
 	theme     theme.Theme
-	ready     bool
 }
 
 // NewModel create an instance of the entire application model.
 func NewModel() Model {
 	cfg := config.GetConfig()
 	theme := theme.GetTheme(cfg.Settings.Theme)
-
-	// Create a new spinner with some styling based on the config.
-	l := spinner.NewModel()
-	l.Spinner = spinner.Dot
-	l.Style = lipgloss.NewStyle().Foreground(theme.SpinnerColor)
 
 	fileTree := filetree.NewModel(
 		!cfg.Settings.SimpleMode && cfg.Settings.ShowIcons,
@@ -74,12 +64,10 @@ func NewModel() Model {
 	)
 
 	return Model{
-		loader:    l,
 		fileTree:  fileTree,
 		statusBar: statusBar,
 		renderer:  renderer,
 		appConfig: cfg,
 		theme:     theme,
-		ready:     false,
 	}
 }

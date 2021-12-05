@@ -1,18 +1,11 @@
 package ui
 
 import (
-	"fmt"
-
 	"github.com/charmbracelet/lipgloss"
 )
 
 // View returns a string representation of the entire application UI.
 func (m Model) View() string {
-	// If the viewport on the panes is not ready display the spinner.
-	if !m.ready {
-		return fmt.Sprintf("%s%s", m.loader.View(), "loading...")
-	}
-
 	horizontalView := lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		m.fileTree.View(),

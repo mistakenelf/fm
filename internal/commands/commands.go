@@ -27,8 +27,8 @@ type FindFilesByNameMsg struct {
 	entries []fs.DirEntry
 }
 type DirectoryItemSizeMsg struct {
-	size  string
-	index int
+	Size  string
+	Index int
 }
 type ReadFileContentMsg struct {
 	RawContent  string
@@ -308,14 +308,14 @@ func GetDirectoryItemSizeCmd(name string, i int) tea.Cmd {
 	return func() tea.Msg {
 		size, err := dirfs.GetDirectoryItemSize(name)
 		if err != nil {
-			return DirectoryItemSizeMsg{size: "N/A", index: i}
+			return DirectoryItemSizeMsg{Size: "N/A", Index: i}
 		}
 
 		sizeString := strfmt.ConvertBytesToSizeString(size)
 
 		return DirectoryItemSizeMsg{
-			size:  sizeString,
-			index: i,
+			Size:  sizeString,
+			Index: i,
 		}
 	}
 }

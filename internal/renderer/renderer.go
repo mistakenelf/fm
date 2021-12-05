@@ -21,6 +21,7 @@ type Model struct {
 	Borderless          bool
 	IsActive            bool
 	SyntaxTheme         string
+	Content             string
 	Height              int
 	Width               int
 }
@@ -56,13 +57,14 @@ func (m *Model) SetSize(width, height int) {
 	m.Width = (width / 2) - m.Style.GetHorizontalBorderSize()
 	m.Height = height - m.Style.GetVerticalBorderSize() - statusbar.StatusbarHeight
 
-	m.Viewport.Width = m.Width - m.Style.GetHorizontalPadding()
-	m.Viewport.Height = m.Height - m.Style.GetVerticalPadding()
+	m.Viewport.Width = m.Width - m.Style.GetHorizontalFrameSize() - m.Style.GetHorizontalPadding()
+	m.Viewport.Height = m.Height
 }
 
 // SetContent sets the content of the renderer.
 func (m *Model) SetContent(content string) {
-	m.Viewport.SetContent(strfmt.ConvertTabsToSpaces(content))
+	m.Content = strfmt.ConvertTabsToSpaces(content)
+	m.Viewport.SetContent(m.Content)
 }
 
 // SetImage sets the image of the renderer.
@@ -109,7 +111,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		}
 	case tea.WindowSizeMsg:
 		m.SetSize(msg.Width, msg.Height)
-		m.SetContent("Welcome to FM")
+		m.SetContent(m.Content)
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "down", "j":
@@ -129,12 +131,6 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 // View returns a string representation of a renderer.
 func (m Model) View() string {
 	borderColor := m.InactiveBorderColor
-	border := lipgloss.NormalBorder()
-	padding := 1
-
-	if m.Borderless {
-		border = lipgloss.HiddenBorder()
-	}
 
 	if m.IsActive {
 		borderColor = m.ActiveBorderColor
@@ -142,9 +138,6 @@ func (m Model) View() string {
 
 	return m.Style.Copy().
 		BorderForeground(borderColor).
-		PaddingLeft(padding).
-		PaddingRight(padding).
-		Border(border).
 		Width(m.Width).
 		Height(m.Height).
 		Render(m.Viewport.View())
