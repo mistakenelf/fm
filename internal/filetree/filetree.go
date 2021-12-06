@@ -256,7 +256,7 @@ func (m *Model) SetContent(files []fs.DirEntry) {
 				Render(fileInfo.Name())
 		}
 
-		dirItem := lipgloss.NewStyle().Width(m.Viewport.Width - lipgloss.Width(fileSize) - 2).Render(
+		dirItem := lipgloss.NewStyle().Width(m.Viewport.Width - lipgloss.Width(fileSize) - m.Style.GetHorizontalPadding()).Render(
 			truncate.StringWithTail(
 				directoryItem, uint(m.Viewport.Width-lipgloss.Width(fileSize)), "...",
 			),
@@ -355,10 +355,25 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.SetFilePaths(nil)
 		m.Viewport.GotoTop()
 		m.SetContent(msg)
-		return m, nil
+		return m, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths)
 	case tea.WindowSizeMsg:
 		m.SetSize(msg.Width, msg.Height)
 		m.SetContent(m.Files)
+	case tea.MouseMsg:
+		switch msg.Type {
+		case tea.MouseWheelUp:
+			if m.IsActive {
+				m.GoUp()
+				m.scrollFiletree()
+				m.SetContent(m.Files)
+			}
+		case tea.MouseWheelDown:
+			if m.IsActive {
+				m.GoDown()
+				m.scrollFiletree()
+				m.SetContent(m.Files)
+			}
+		}
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "up", "k":
@@ -366,20 +381,51 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.GoUp()
 				m.scrollFiletree()
 				m.SetContent(m.Files)
+				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
 			}
 		case "down", "j":
 			if m.IsActive {
 				m.GoDown()
 				m.scrollFiletree()
 				m.SetContent(m.Files)
+				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
 			}
 		case "right", "l":
 			if m.IsActive {
 				m.handleRightKeyPress(&cmds)
+				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
 			}
 		case "left", "h":
 			if m.IsActive {
 				m.handleLeftKeyPress(&cmds)
+				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
+			}
+		case "ctrl+g":
+			if m.IsActive {
+				m.GotoTop()
+				m.Viewport.GotoTop()
+				m.SetContent(m.Files)
+				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
+			}
+		case "G":
+			if m.IsActive {
+				m.GotoBottom()
+				m.Viewport.GotoBottom()
+				m.SetContent(m.Files)
+				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
+			}
+		case "~":
+			if m.IsActive {
+				homeDir, err := dirfs.GetHomeDirectory()
+				if err != nil {
+					cmds = append(cmds, commands.HandleErrorCmd(err))
+				}
+
+				cmds = append(cmds, commands.UpdateDirectoryListingCmd(homeDir, m.ShowHidden))
+			}
+		case "/":
+			if m.IsActive {
+				cmds = append(cmds, commands.UpdateDirectoryListingCmd(dirfs.RootDirectory, m.ShowHidden))
 			}
 		}
 	}
@@ -395,7 +441,6 @@ func (m Model) View() string {
 
 	borderColor := m.InactiveBorderColor
 	border := lipgloss.NormalBorder()
-	padding := 1
 	content := m.Viewport.View()
 	alternateBorder := lipgloss.Border{
 		Top:         "-",
@@ -422,8 +467,6 @@ func (m Model) View() string {
 
 	return m.Style.Copy().
 		BorderForeground(borderColor).
-		PaddingLeft(padding).
-		PaddingRight(padding).
 		Border(border).
 		Width(m.Viewport.Width).
 		Height(m.Viewport.Height).

@@ -22,6 +22,15 @@ type MoveDirItemMsg []fs.DirEntry
 type ErrorMsg string
 type CopyToClipboardMsg string
 type ConvertImageToStringMsg string
+type UpdateStatusbarMsg struct {
+	TotalFiles       int
+	Cursor           int
+	ShowCommandInput bool
+	InMoveMode       bool
+	SelectedFile     os.FileInfo
+	ItemToMove       os.FileInfo
+	FilePaths        []string
+}
 type FindFilesByNameMsg struct {
 	paths   []string
 	entries []fs.DirEntry
@@ -183,7 +192,7 @@ func ReadFileContentCmd(fileName, syntaxTheme string, width int, prettyMarkdown 
 				return ErrorMsg(err.Error())
 			}
 
-			imageString := strfmt.ImageToString(width, img)
+			imageString := strfmt.ImageToString(width-2, img)
 
 			return ReadFileContentMsg{
 				RawContent:  content,
@@ -387,5 +396,25 @@ func WriteSelectionPathCmd(selectionPath, filePath string) tea.Cmd {
 		}
 
 		return nil
+	}
+}
+
+// UpdateStatusbarCmd gets the updated status of the filetree.
+func UpdateStatusbarCmd(files []fs.DirEntry, cursor int, filePaths []string) tea.Cmd {
+	return func() tea.Msg {
+		selectedFile, err := files[cursor].Info()
+		if err != nil {
+			selectedFile = nil
+		}
+
+		return UpdateStatusbarMsg{
+			TotalFiles:       len(files),
+			Cursor:           cursor,
+			ShowCommandInput: false,
+			InMoveMode:       false,
+			SelectedFile:     selectedFile,
+			ItemToMove:       nil,
+			FilePaths:        filePaths,
+		}
 	}
 }

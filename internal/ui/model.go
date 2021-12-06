@@ -15,6 +15,7 @@ type Model struct {
 	renderer  renderer.Model
 	appConfig config.Config
 	theme     theme.Theme
+	ready     bool
 }
 
 // NewModel create an instance of the entire application model.
@@ -41,7 +42,6 @@ func NewModel() Model {
 		theme.InactivePaneBorderColor,
 	)
 
-	// Initialize a status bar passing in config values.
 	statusBar := statusbar.NewModel(
 		statusbar.Color{
 			Background: theme.StatusBarSelectedFileBackgroundColor,
@@ -69,5 +69,6 @@ func NewModel() Model {
 		renderer:  renderer,
 		appConfig: cfg,
 		theme:     theme,
+		ready:     false,
 	}
 }

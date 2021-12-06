@@ -8,7 +8,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/knipferrc/fm/internal/commands"
 	"github.com/knipferrc/fm/internal/statusbar"
-	"github.com/knipferrc/fm/strfmt"
 )
 
 // Model is a struct that contains all the properties of renderer.
@@ -22,8 +21,6 @@ type Model struct {
 	IsActive            bool
 	SyntaxTheme         string
 	Content             string
-	Height              int
-	Width               int
 }
 
 // NewModel creates a new instance of a renderer.
@@ -54,17 +51,19 @@ func NewModel(
 
 // SetSize sets the size of the renderer.
 func (m *Model) SetSize(width, height int) {
-	m.Width = (width / 2) - m.Style.GetHorizontalBorderSize()
-	m.Height = height - m.Style.GetVerticalBorderSize() - statusbar.StatusbarHeight
-
-	m.Viewport.Width = m.Width - m.Style.GetHorizontalFrameSize() - m.Style.GetHorizontalPadding()
-	m.Viewport.Height = m.Height
+	m.Viewport.Width = (width / 2) - m.Style.GetHorizontalBorderSize()
+	m.Viewport.Height = height - m.Style.GetVerticalBorderSize() - statusbar.StatusbarHeight
 }
 
 // SetContent sets the content of the renderer.
 func (m *Model) SetContent(content string) {
-	m.Content = strfmt.ConvertTabsToSpaces(content)
-	m.Viewport.SetContent(m.Content)
+	curContent := lipgloss.NewStyle().
+		Width(m.Viewport.Width - m.Style.GetHorizontalPadding()).
+		Height(m.Viewport.Height - m.Style.GetVerticalPadding()).
+		Render(content)
+
+	m.Content = content
+	m.Viewport.SetContent(curContent)
 }
 
 // SetImage sets the image of the renderer.
@@ -108,10 +107,29 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		default:
 			m.Viewport.GotoTop()
 			m.SetContent(msg.RawContent)
+			m.SetImage(nil)
 		}
+	case commands.ConvertImageToStringMsg:
+		m.SetContent(string(msg))
+		return m, nil
 	case tea.WindowSizeMsg:
 		m.SetSize(msg.Width, msg.Height)
 		m.SetContent(m.Content)
+
+		if m.Image != nil {
+			cmds = append(cmds, commands.RedrawImageCmd(msg.Width, m.Image))
+		}
+	case tea.MouseMsg:
+		switch msg.Type {
+		case tea.MouseWheelUp:
+			if m.IsActive {
+				m.Viewport.LineUp(1)
+			}
+		case tea.MouseWheelDown:
+			if m.IsActive {
+				m.Viewport.LineDown(1)
+			}
+		}
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "down", "j":
@@ -121,6 +139,14 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case "up", "k":
 			if m.IsActive {
 				m.Viewport.LineUp(1)
+			}
+		case "ctrl+g":
+			if m.IsActive {
+				m.Viewport.GotoTop()
+			}
+		case "G":
+			if m.IsActive {
+				m.Viewport.GotoBottom()
 			}
 		}
 	}
@@ -138,7 +164,7 @@ func (m Model) View() string {
 
 	return m.Style.Copy().
 		BorderForeground(borderColor).
-		Width(m.Width).
-		Height(m.Height).
+		Width(m.Viewport.Width).
+		Height(m.Viewport.Height).
 		Render(m.Viewport.View())
 }

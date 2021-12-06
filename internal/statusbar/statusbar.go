@@ -6,6 +6,7 @@ import (
 
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/icons"
+	"github.com/knipferrc/fm/internal/commands"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -134,6 +135,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
+	case commands.UpdateStatusbarMsg:
+		m.SetContent(msg.TotalFiles, msg.Cursor, msg.ShowCommandInput, msg.InMoveMode, msg.SelectedFile, msg.ItemToMove, msg.FilePaths)
 	case tea.WindowSizeMsg:
 		m.SetSize(msg.Width)
 	}

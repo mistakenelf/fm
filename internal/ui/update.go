@@ -4,24 +4,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// updateStatusBarContent updates the content of the statusbar.
-func (m *Model) updateStatusBarContent() {
-	selectedFile, err := m.fileTree.GetSelectedFile()
-	if err != nil {
-		selectedFile = nil
-	}
-
-	m.statusBar.SetContent(
-		m.fileTree.GetTotalFiles(),
-		m.fileTree.GetCursor(),
-		false,
-		false,
-		selectedFile,
-		nil,
-		m.fileTree.GetFilePaths(),
-	)
-}
-
 // Update handles all UI interactions and events for updating the screen.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
@@ -42,8 +24,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	}
-
-	m.updateStatusBarContent()
 
 	m.fileTree, cmd = m.fileTree.Update(msg)
 	cmds = append(cmds, cmd)
