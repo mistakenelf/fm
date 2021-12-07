@@ -2,14 +2,19 @@ package ui
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/knipferrc/fm/internal/commands"
 )
 
 // Update handles all UI interactions and events for updating the screen.
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
+	case commands.PreviewDirectoryListingMsg:
+		m.showPreview = true
+	case commands.ReadFileContentMsg:
+		m.showPreview = false
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
@@ -18,16 +23,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.fileTree.GetIsActive() {
 				m.fileTree.SetIsActive(false)
 				m.renderer.SetIsActive(true)
+				m.previewer.SetIsActive(true)
 			} else {
 				m.fileTree.SetIsActive(true)
 				m.renderer.SetIsActive(false)
+				m.previewer.SetIsActive(false)
 			}
-		case "r", "right":
-			m.showPreview = false
-		case "l", "left":
-			m.showPreview = false
-		case "p":
-			m.showPreview = true
 		}
 	}
 
@@ -37,7 +38,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.renderer, cmd = m.renderer.Update(msg)
 	cmds = append(cmds, cmd)
 
-	m.treePreview, cmd = m.treePreview.Update(msg)
+	m.previewer, cmd = m.previewer.Update(msg)
 	cmds = append(cmds, cmd)
 
 	m.statusBar, cmd = m.statusBar.Update(msg)

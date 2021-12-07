@@ -24,8 +24,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Model is a struct to represent the properties of a filetree.
-type Model struct {
+// Bubble is a struct to represent the properties of a filetree.
+type Bubble struct {
 	Viewport            viewport.Model
 	AppConfig           config.Config
 	Style               lipgloss.Style
@@ -47,7 +47,7 @@ type Model struct {
 }
 
 // Init intializes the filetree.
-func (m Model) Init() tea.Cmd {
+func (m Bubble) Init() tea.Cmd {
 	startDir := viper.GetString("start-dir")
 
 	switch {
@@ -81,12 +81,12 @@ func (m Model) Init() tea.Cmd {
 	}
 }
 
-// NewModel creates a new instance of a filetree.
-func NewModel(
+// NewBubble creates a new instance of a filetree.
+func NewBubble(
 	showIcons, borderless, isActive, showHidden bool,
 	selectedItemColor, unselectedItemColor, activeBorderColor, inactiveBorderColor lipgloss.AdaptiveColor,
 	appConfig config.Config,
-) Model {
+) Bubble {
 	border := lipgloss.NormalBorder()
 	padding := 1
 
@@ -99,7 +99,7 @@ func NewModel(
 		PaddingRight(padding).
 		Border(border)
 
-	return Model{
+	return Bubble{
 		Cursor:              0,
 		ShowIcons:           showIcons,
 		Borderless:          borderless,
@@ -116,7 +116,7 @@ func NewModel(
 
 // scrollFiletree moves handles wrapping of the filetree and
 // scrolling of the viewport.
-func (m *Model) scrollFiletree() {
+func (m *Bubble) scrollFiletree() {
 	top := m.Viewport.YOffset
 	bottom := m.Viewport.Height + m.Viewport.YOffset - 1
 
@@ -136,7 +136,7 @@ func (m *Model) scrollFiletree() {
 }
 
 // SetContent sets the files currently displayed in the tree.
-func (m *Model) SetContent(files []fs.DirEntry) {
+func (m *Bubble) SetContent(files []fs.DirEntry) {
 	var directoryItem string
 	curFiles := ""
 
@@ -198,33 +198,33 @@ func (m *Model) SetContent(files []fs.DirEntry) {
 }
 
 // SetFilePaths sets an array of file paths.
-func (m *Model) SetFilePaths(filePaths []string) {
+func (m *Bubble) SetFilePaths(filePaths []string) {
 	m.FilePaths = filePaths
 }
 
 // GetFilePaths returns an array of file paths.
-func (m Model) GetFilePaths() []string {
+func (m Bubble) GetFilePaths() []string {
 	return m.FilePaths
 }
 
 // SetSize updates the size of the filetree, useful when resizing the terminal.
-func (m *Model) SetSize(width, height int) {
+func (m *Bubble) SetSize(width, height int) {
 	m.Viewport.Width = (width / 2) - m.Style.GetHorizontalBorderSize()
 	m.Viewport.Height = height - m.Style.GetVerticalBorderSize() - statusbar.StatusbarHeight
 }
 
 // GotoTop goes to the top of the tree.
-func (m *Model) GotoTop() {
+func (m *Bubble) GotoTop() {
 	m.Cursor = 0
 }
 
 // GotoBottom goes to the bottom of the tree.
-func (m *Model) GotoBottom() {
+func (m *Bubble) GotoBottom() {
 	m.Cursor = len(m.Files) - 1
 }
 
 // GetSelectedFile returns the currently selected file in the tree.
-func (m Model) GetSelectedFile() (os.FileInfo, error) {
+func (m Bubble) GetSelectedFile() (os.FileInfo, error) {
 	if len(m.Files) > 0 {
 		fileInfo, err := m.Files[m.Cursor].Info()
 		if err != nil {
@@ -238,42 +238,37 @@ func (m Model) GetSelectedFile() (os.FileInfo, error) {
 }
 
 // GetCursor gets the position of the cursor in the tree.
-func (m Model) GetCursor() int {
+func (m Bubble) GetCursor() int {
 	return m.Cursor
 }
 
 // GoDown goes down the tree by one.
-func (m *Model) GoDown() {
+func (m *Bubble) GoDown() {
 	m.Cursor++
 }
 
 // GoUp goes up the tree by one.
-func (m *Model) GoUp() {
+func (m *Bubble) GoUp() {
 	m.Cursor--
 }
 
 // GetTotalFiles returns the total number of files in the tree.
-func (m Model) GetTotalFiles() int {
+func (m Bubble) GetTotalFiles() int {
 	return len(m.Files)
 }
 
-// ToggleHidden toggles the visibility of hidden files.
-func (m *Model) ToggleHidden() {
-	m.ShowHidden = !m.ShowHidden
-}
-
 // GetIsActive returns the active state of the filetree.
-func (m Model) GetIsActive() bool {
+func (m Bubble) GetIsActive() bool {
 	return m.IsActive
 }
 
 // SetIsActive sets the active state of the filetree.
-func (m *Model) SetIsActive(isActive bool) {
+func (m *Bubble) SetIsActive(isActive bool) {
 	m.IsActive = isActive
 }
 
 // Update updates the statusbar.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
@@ -282,6 +277,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.SetFilePaths(nil)
 		m.Viewport.GotoTop()
 		m.SetContent(msg)
+
 		return m, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths)
 	case tea.WindowSizeMsg:
 		m.SetSize(msg.Width, msg.Height)
@@ -355,7 +351,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 							cmds = append(cmds, commands.HandleErrorCmd(err))
 						}
 
-						cmds = append(cmds, commands.UpdateDirectoryListingCmd(filepath.Join(currentDir, fileInfo.Name()), m.ShowHidden))
+						cmds = append(
+							cmds,
+							commands.UpdateDirectoryListingCmd(
+								filepath.Join(currentDir, fileInfo.Name()),
+								m.ShowHidden),
+						)
 					}
 
 					cmds = append(cmds, commands.ReadFileContentCmd(
@@ -390,7 +391,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 					cmds = append(cmds, commands.HandleErrorCmd(err))
 				}
 
-				cmds = append(cmds, commands.UpdateDirectoryListingCmd(filepath.Join(workingDirectory, dirfs.PreviousDirectory), m.ShowHidden))
+				cmds = append(
+					cmds,
+					commands.UpdateDirectoryListingCmd(
+						filepath.Join(workingDirectory, dirfs.PreviousDirectory),
+						m.ShowHidden),
+				)
 
 				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
 			}
@@ -579,7 +585,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 // View returns a string representation of the current tree.
-func (m Model) View() string {
+func (m Bubble) View() string {
 	borderColor := m.InactiveBorderColor
 	border := lipgloss.NormalBorder()
 	content := m.Viewport.View()

@@ -24,9 +24,8 @@ type Color struct {
 }
 
 // Model is a struct that contains all the properties of the statusbar.
-type Model struct {
+type Bubble struct {
 	Width              int
-	Height             int
 	TotalFiles         int
 	Cursor             int
 	ShowIcons          bool
@@ -43,10 +42,10 @@ type Model struct {
 	Textinput          textinput.Model
 }
 
-// NewModel creates an instance of a statusbar.
-func NewModel(
+// NewBubble creates an instance of a statusbar.
+func NewBubble(
 	firstColumnColors, secondColumnColors, thirdColumnColors, fourthColumnColors Color, showIcons, simpleMode bool,
-) Model {
+) Bubble {
 	input := textinput.NewModel()
 	input.Prompt = "❯ "
 	input.CharLimit = 250
@@ -56,8 +55,7 @@ func NewModel(
 		input.PlaceholderStyle.Background(secondColumnColors.Background)
 	}
 
-	return Model{
-		Height:             StatusbarHeight,
+	return Bubble{
 		TotalFiles:         0,
 		Cursor:             0,
 		ShowIcons:          showIcons,
@@ -74,43 +72,38 @@ func NewModel(
 	}
 }
 
-// GetHeight returns the height of the statusbar.
-func (m Model) GetHeight() int {
-	return m.Height
-}
-
 // BlurCommandInput blurs the textinput used for the command input.
-func (m *Model) BlurCommandInput() {
+func (m *Bubble) BlurCommandInput() {
 	m.Textinput.Blur()
 }
 
 // ResetCommandInput resets the textinput used for the command input.
-func (m *Model) ResetCommandInput() {
+func (m *Bubble) ResetCommandInput() {
 	m.Textinput.Reset()
 }
 
 // CommandInputValue returns the value of the command input.
-func (m Model) CommandInputValue() string {
+func (m Bubble) CommandInputValue() string {
 	return m.Textinput.Value()
 }
 
 // CommandInputFocused returns true if the command input is focused.
-func (m Model) CommandInputFocused() bool {
+func (m Bubble) CommandInputFocused() bool {
 	return m.Textinput.Focused()
 }
 
 // FocusCommandInput focuses the command input.
-func (m *Model) FocusCommandInput() {
+func (m *Bubble) FocusCommandInput() {
 	m.Textinput.Focus()
 }
 
 // SetCommandInputPlaceholderText sets the placeholder text of the command input.
-func (m *Model) SetCommandInputPlaceholderText(text string) {
+func (m *Bubble) SetCommandInputPlaceholderText(text string) {
 	m.Textinput.Placeholder = text
 }
 
 // SetContent sets the content of the statusbar.
-func (m *Model) SetContent(
+func (m *Bubble) SetContent(
 	totalFiles, cursor int,
 	showCommandInput, inMoveMode bool,
 	selectedFile, itemToMove os.FileInfo, filePaths []string,
@@ -125,18 +118,26 @@ func (m *Model) SetContent(
 }
 
 // SetSize sets the size of the statusbar, useful when the terminal is resized.
-func (m *Model) SetSize(width int) {
+func (m *Bubble) SetSize(width int) {
 	m.Width = width
 }
 
 // Update updates the statusbar.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
 	case commands.UpdateStatusbarMsg:
-		m.SetContent(msg.TotalFiles, msg.Cursor, msg.ShowCommandInput, msg.InMoveMode, msg.SelectedFile, msg.ItemToMove, msg.FilePaths)
+		m.SetContent(
+			msg.TotalFiles,
+			msg.Cursor,
+			msg.ShowCommandInput,
+			msg.InMoveMode,
+			msg.SelectedFile,
+			msg.ItemToMove,
+			msg.FilePaths,
+		)
 	case tea.WindowSizeMsg:
 		m.SetSize(msg.Width)
 	}
@@ -148,7 +149,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 // View returns a string representation of the statusbar.
-func (m Model) View() string {
+func (m Bubble) View() string {
 	var logo string
 	var status string
 
@@ -204,7 +205,7 @@ func (m Model) View() string {
 
 	selectedFileColumn := selectedFileStyle.
 		Padding(0, 1).
-		Height(m.Height).
+		Height(StatusbarHeight).
 		Render(truncate.StringWithTail(selectedFile, 30, "..."))
 
 	// File count styles
@@ -220,7 +221,7 @@ func (m Model) View() string {
 	fileCountColumn := fileCountStyle.
 		Align(lipgloss.Right).
 		Padding(0, 1).
-		Height(m.Height).
+		Height(StatusbarHeight).
 		Render(fileCount)
 
 	// Logo styles
@@ -235,7 +236,7 @@ func (m Model) View() string {
 
 	logoColumn := logoStyle.
 		Padding(0, 1).
-		Height(m.Height).
+		Height(StatusbarHeight).
 		Render(logo)
 
 	// Status styles
@@ -250,7 +251,7 @@ func (m Model) View() string {
 
 	statusColumn := statusStyle.
 		Padding(0, 1).
-		Height(m.Height).
+		Height(StatusbarHeight).
 		Width(m.Width - width(selectedFileColumn) - width(fileCountColumn) - width(logoColumn)).
 		Render(truncate.StringWithTail(
 			status,

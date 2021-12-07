@@ -1,4 +1,4 @@
-package treepreview
+package previewer
 
 import (
 	"fmt"
@@ -17,8 +17,8 @@ import (
 	"github.com/muesli/reflow/truncate"
 )
 
-// Model is a struct to represent the properties of a filetree.
-type Model struct {
+// Bubble is a struct to represent the properties of a filetree.
+type Bubble struct {
 	Viewport            viewport.Model
 	AppConfig           config.Config
 	Style               lipgloss.Style
@@ -27,19 +27,18 @@ type Model struct {
 	ActiveBorderColor   lipgloss.AdaptiveColor
 	InactiveBorderColor lipgloss.AdaptiveColor
 	Files               []fs.DirEntry
-	Cursor              int
 	ShowIcons           bool
 	ShowHidden          bool
 	Borderless          bool
 	IsActive            bool
 }
 
-// NewModel creates a new instance of a filetree.
-func NewModel(
+// NewBubble creates a new instance of a filetree.
+func NewBubble(
 	showIcons, borderless, isActive, showHidden bool,
 	selectedItemColor, unselectedItemColor, activeBorderColor, inactiveBorderColor lipgloss.AdaptiveColor,
 	appConfig config.Config,
-) Model {
+) Bubble {
 	border := lipgloss.NormalBorder()
 	padding := 1
 
@@ -52,8 +51,7 @@ func NewModel(
 		PaddingRight(padding).
 		Border(border)
 
-	return Model{
-		Cursor:              0,
+	return Bubble{
 		ShowIcons:           showIcons,
 		Borderless:          borderless,
 		IsActive:            isActive,
@@ -68,20 +66,14 @@ func NewModel(
 }
 
 // SetContent sets the files currently displayed in the tree.
-func (m *Model) SetContent(files []fs.DirEntry) {
+func (m *Bubble) SetContent(files []fs.DirEntry) {
 	var directoryItem string
 	curFiles := ""
 
 	m.Files = files
 
-	for i, file := range files {
+	for _, file := range files {
 		var fileSizeColor lipgloss.AdaptiveColor
-
-		if m.Cursor == i {
-			fileSizeColor = m.SelectedItemColor
-		} else {
-			fileSizeColor = m.UnselectedItemColor
-		}
 
 		fileInfo, _ := file.Info()
 
@@ -93,20 +85,15 @@ func (m *Model) SetContent(files []fs.DirEntry) {
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
 
 		switch {
-		case m.ShowIcons && m.Cursor == i:
-			directoryItem = fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
-				Bold(true).
-				Foreground(m.SelectedItemColor).
-				Render(fileInfo.Name()))
-		case m.ShowIcons && m.Cursor != i:
+		case m.ShowIcons:
 			directoryItem = fmt.Sprintf("%s\033[0m %s", fileIcon, lipgloss.NewStyle().
 				Bold(true).
 				Foreground(m.UnselectedItemColor).
 				Render(fileInfo.Name()))
-		case !m.ShowIcons && m.Cursor == i:
+		case !m.ShowIcons:
 			directoryItem = lipgloss.NewStyle().
 				Bold(true).
-				Foreground(m.SelectedItemColor).
+				Foreground(m.UnselectedItemColor).
 				Render(fileInfo.Name())
 		default:
 			directoryItem = lipgloss.NewStyle().
@@ -130,28 +117,23 @@ func (m *Model) SetContent(files []fs.DirEntry) {
 }
 
 // SetSize updates the size of the filetree, useful when resizing the terminal.
-func (m *Model) SetSize(width, height int) {
+func (m *Bubble) SetSize(width, height int) {
 	m.Viewport.Width = (width / 2) - m.Style.GetHorizontalBorderSize()
 	m.Viewport.Height = height - m.Style.GetVerticalBorderSize() - statusbar.StatusbarHeight
 }
 
-// GetTotalFiles returns the total number of files in the tree.
-func (m Model) GetTotalFiles() int {
-	return len(m.Files)
-}
-
 // GetIsActive returns the active state of the filetree.
-func (m Model) GetIsActive() bool {
+func (m Bubble) GetIsActive() bool {
 	return m.IsActive
 }
 
 // SetIsActive sets the active state of the filetree.
-func (m *Model) SetIsActive(isActive bool) {
+func (m *Bubble) SetIsActive(isActive bool) {
 	m.IsActive = isActive
 }
 
 // Update updates the statusbar.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
@@ -192,7 +174,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 // View returns a string representation of the current tree.
-func (m Model) View() string {
+func (m Bubble) View() string {
 	borderColor := m.InactiveBorderColor
 	border := lipgloss.NormalBorder()
 	content := m.Viewport.View()

@@ -10,8 +10,8 @@ import (
 	"github.com/knipferrc/fm/internal/statusbar"
 )
 
-// Model is a struct that contains all the properties of renderer.
-type Model struct {
+// Bubble is a struct that contains all the properties of renderer.
+type Bubble struct {
 	Image               image.Image
 	Style               lipgloss.Style
 	Viewport            viewport.Model
@@ -23,11 +23,11 @@ type Model struct {
 	Content             string
 }
 
-// NewModel creates a new instance of a renderer.
-func NewModel(
+// NewBubble creates a new instance of a renderer.
+func NewBubble(
 	borderless, isActive bool,
 	activeBorderColor, inactiveBorderColor lipgloss.AdaptiveColor,
-) Model {
+) Bubble {
 	border := lipgloss.NormalBorder()
 	padding := 1
 
@@ -40,7 +40,7 @@ func NewModel(
 		PaddingRight(padding).
 		Border(border)
 
-	return Model{
+	return Bubble{
 		Borderless:          borderless,
 		IsActive:            isActive,
 		ActiveBorderColor:   activeBorderColor,
@@ -50,13 +50,13 @@ func NewModel(
 }
 
 // SetSize sets the size of the renderer.
-func (m *Model) SetSize(width, height int) {
+func (m *Bubble) SetSize(width, height int) {
 	m.Viewport.Width = (width / 2) - m.Style.GetHorizontalBorderSize()
 	m.Viewport.Height = height - m.Style.GetVerticalBorderSize() - statusbar.StatusbarHeight
 }
 
 // SetContent sets the content of the renderer.
-func (m *Model) SetContent(content string) {
+func (m *Bubble) SetContent(content string) {
 	curContent := lipgloss.NewStyle().
 		Width(m.Viewport.Width - m.Style.GetHorizontalPadding()).
 		Height(m.Viewport.Height - m.Style.GetVerticalPadding()).
@@ -67,22 +67,22 @@ func (m *Model) SetContent(content string) {
 }
 
 // SetImage sets the image of the renderer.
-func (m *Model) SetImage(img image.Image) {
+func (m *Bubble) SetImage(img image.Image) {
 	m.Image = img
 }
 
 // GetIsActive returns the active state of the renderer.
-func (m Model) GetIsActive() bool {
+func (m Bubble) GetIsActive() bool {
 	return m.IsActive
 }
 
 // SetIsActive sets the active state of the renderer.
-func (m *Model) SetIsActive(isActive bool) {
+func (m *Bubble) SetIsActive(isActive bool) {
 	m.IsActive = isActive
 }
 
 // Update updates the statusbar.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
@@ -159,7 +159,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 // View returns a string representation of a renderer.
-func (m Model) View() string {
+func (m Bubble) View() string {
 	borderColor := m.InactiveBorderColor
 
 	if m.IsActive {

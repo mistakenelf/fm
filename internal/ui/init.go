@@ -5,7 +5,7 @@ import (
 )
 
 // Init initializes the UI and sets up initial data.
-func (m Model) Init() tea.Cmd {
+func (m Bubble) Init() tea.Cmd {
 	var cmds []tea.Cmd
 
 	cmds = append(cmds, m.fileTree.Init())
