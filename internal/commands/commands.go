@@ -404,7 +404,7 @@ func UpdateStatusbarCmd(files []fs.DirEntry, cursor int, filePaths []string) tea
 	return func() tea.Msg {
 		selectedFile, err := files[cursor].Info()
 		if err != nil {
-			selectedFile = nil
+			return ErrorMsg(err.Error())
 		}
 
 		return UpdateStatusbarMsg{

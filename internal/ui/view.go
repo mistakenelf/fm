@@ -6,10 +6,15 @@ import (
 
 // View returns a string representation of the entire application UI.
 func (m Model) View() string {
+	currentPane := m.renderer.View()
+
+	if m.showPreview {
+		currentPane = m.treePreview.View()
+	}
 	horizontalView := lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		m.fileTree.View(),
-		m.renderer.View(),
+		currentPane,
 	)
 
 	if m.appConfig.Settings.SimpleMode {

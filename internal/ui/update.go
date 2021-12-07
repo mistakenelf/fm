@@ -22,6 +22,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.fileTree.SetIsActive(true)
 				m.renderer.SetIsActive(false)
 			}
+		case "r", "right":
+			m.showPreview = false
+		case "l", "left":
+			m.showPreview = false
+		case "p":
+			m.showPreview = true
 		}
 	}
 
@@ -29,6 +35,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, cmd)
 
 	m.renderer, cmd = m.renderer.Update(msg)
+	cmds = append(cmds, cmd)
+
+	m.treePreview, cmd = m.treePreview.Update(msg)
 	cmds = append(cmds, cmd)
 
 	m.statusBar, cmd = m.statusBar.Update(msg)

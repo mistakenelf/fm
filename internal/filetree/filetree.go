@@ -318,7 +318,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
 			}
 		case "right", "l":
-			if m.IsActive {
+			if m.IsActive && len(m.Files) > 0 {
 				selectedFile, err := m.GetSelectedFile()
 				if err != nil {
 					cmds = append(cmds, commands.HandleErrorCmd(err))
@@ -377,8 +377,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 						m.Viewport.Width,
 						m.AppConfig.Settings.PrettyMarkdown,
 					))
-
 				}
+
 				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
 			}
 		case "left", "h":
@@ -543,7 +543,34 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				} else {
 					cmds = append(cmds, tea.Sequentially(commands.WriteSelectionPathCmd(selectionPath, selectedFile.Name()), tea.Quit))
 				}
+			}
+		case "p":
+			if m.IsActive {
+				selectedFile, err := m.GetSelectedFile()
+				if err != nil {
+					cmds = append(cmds, commands.HandleErrorCmd(err))
+				}
 
+				switch {
+				case selectedFile.IsDir():
+					cmds = append(cmds, commands.PreviewDirectoryListingCmd(selectedFile.Name(), m.ShowHidden))
+				case selectedFile.Mode()&os.ModeSymlink == os.ModeSymlink:
+					symlinkFile, err := os.Readlink(selectedFile.Name())
+					if err != nil {
+						cmds = append(cmds, commands.HandleErrorCmd(err))
+					}
+
+					fileInfo, err := os.Stat(symlinkFile)
+					if err != nil {
+						cmds = append(cmds, commands.HandleErrorCmd(err))
+					}
+
+					if fileInfo.IsDir() {
+						cmds = append(cmds, commands.PreviewDirectoryListingCmd(fileInfo.Name(), m.ShowHidden))
+					}
+				default:
+					return m, nil
+				}
 			}
 		}
 	}
@@ -553,10 +580,6 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 // View returns a string representation of the current tree.
 func (m Model) View() string {
-	if len(m.Files) == 0 {
-		return "Directory is empty"
-	}
-
 	borderColor := m.InactiveBorderColor
 	border := lipgloss.NormalBorder()
 	content := m.Viewport.View()
@@ -569,6 +592,15 @@ func (m Model) View() string {
 		TopRight:    "*",
 		BottomLeft:  "*",
 		BottomRight: "*",
+	}
+
+	if len(m.Files) == 0 {
+		return m.Style.Copy().
+			BorderForeground(borderColor).
+			Border(border).
+			Width(m.Viewport.Width).
+			Height(m.Viewport.Height).
+			Render("Directory is empty")
 	}
 
 	if m.Borderless {

@@ -6,16 +6,18 @@ import (
 	"github.com/knipferrc/fm/internal/renderer"
 	"github.com/knipferrc/fm/internal/statusbar"
 	"github.com/knipferrc/fm/internal/theme"
+	"github.com/knipferrc/fm/internal/treepreview"
 )
 
 // Model represents the state of the UI.
 type Model struct {
-	fileTree  filetree.Model
-	statusBar statusbar.Model
-	renderer  renderer.Model
-	appConfig config.Config
-	theme     theme.Theme
-	ready     bool
+	fileTree    filetree.Model
+	treePreview treepreview.Model
+	statusBar   statusbar.Model
+	renderer    renderer.Model
+	appConfig   config.Config
+	theme       theme.Theme
+	showPreview bool
 }
 
 // NewModel create an instance of the entire application model.
@@ -24,6 +26,18 @@ func NewModel() Model {
 	theme := theme.GetTheme(cfg.Settings.Theme)
 
 	fileTree := filetree.NewModel(
+		!cfg.Settings.SimpleMode && cfg.Settings.ShowIcons,
+		cfg.Settings.Borderless,
+		true,
+		true,
+		theme.SelectedTreeItemColor,
+		theme.UnselectedTreeItemColor,
+		theme.ActivePaneBorderColor,
+		theme.InactivePaneBorderColor,
+		cfg,
+	)
+
+	treePreview := treepreview.NewModel(
 		!cfg.Settings.SimpleMode && cfg.Settings.ShowIcons,
 		cfg.Settings.Borderless,
 		true,
@@ -64,11 +78,12 @@ func NewModel() Model {
 	)
 
 	return Model{
-		fileTree:  fileTree,
-		statusBar: statusBar,
-		renderer:  renderer,
-		appConfig: cfg,
-		theme:     theme,
-		ready:     false,
+		fileTree:    fileTree,
+		treePreview: treePreview,
+		statusBar:   statusBar,
+		renderer:    renderer,
+		appConfig:   cfg,
+		theme:       theme,
+		showPreview: false,
 	}
 }
