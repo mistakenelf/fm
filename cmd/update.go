@@ -21,7 +21,6 @@ var updateCmd = &cobra.Command{
 		err := updateCommand.Run()
 		if err != nil {
 			log.Fatal(err)
-			os.Exit(1)
 		}
 
 		os.Exit(0)
