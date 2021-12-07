@@ -1,10 +1,12 @@
 package filetree
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -40,6 +42,8 @@ type Model struct {
 	IsActive            bool
 	AlternateBorder     bool
 	ShowLoading         bool
+	ShowDirectoriesOnly bool
+	ShowFilesOnly       bool
 }
 
 // Init intializes the filetree.
@@ -128,83 +132,6 @@ func (m *Model) scrollFiletree() {
 	} else if m.Cursor < top {
 		m.GotoBottom()
 		m.Viewport.GotoBottom()
-	}
-}
-
-// handleRightKeyPress opens directory if it is one or reads a files content.
-func (m *Model) handleRightKeyPress(cmds *[]tea.Cmd) {
-	if m.GetIsActive() && m.GetTotalFiles() > 0 {
-		selectedFile, err := m.GetSelectedFile()
-		if err != nil {
-			*cmds = append(*cmds, commands.HandleErrorCmd(err))
-		}
-
-		switch {
-		case selectedFile.IsDir():
-			currentDir, err := dirfs.GetWorkingDirectory()
-			if err != nil {
-				*cmds = append(*cmds, commands.HandleErrorCmd(err))
-			}
-
-			directoryToOpen := filepath.Join(currentDir, selectedFile.Name())
-
-			if len(m.GetFilePaths()) > 0 {
-				directoryToOpen = m.GetFilePaths()[m.GetCursor()]
-			}
-
-			*cmds = append(*cmds, commands.UpdateDirectoryListingCmd(directoryToOpen, m.ShowHidden))
-		case selectedFile.Mode()&os.ModeSymlink == os.ModeSymlink:
-			symlinkFile, err := os.Readlink(selectedFile.Name())
-			if err != nil {
-				*cmds = append(*cmds, commands.HandleErrorCmd(err))
-			}
-
-			fileInfo, err := os.Stat(symlinkFile)
-			if err != nil {
-				*cmds = append(*cmds, commands.HandleErrorCmd(err))
-			}
-
-			if fileInfo.IsDir() {
-				currentDir, err := dirfs.GetWorkingDirectory()
-				if err != nil {
-					*cmds = append(*cmds, commands.HandleErrorCmd(err))
-				}
-
-				*cmds = append(*cmds, commands.UpdateDirectoryListingCmd(filepath.Join(currentDir, fileInfo.Name()), m.ShowHidden))
-			}
-
-			*cmds = append(*cmds, commands.ReadFileContentCmd(
-				fileInfo.Name(),
-				m.AppConfig.Settings.SyntaxTheme,
-				m.Viewport.Width,
-				m.AppConfig.Settings.PrettyMarkdown,
-			))
-		default:
-			fileToRead := selectedFile.Name()
-
-			if len(m.GetFilePaths()) > 0 {
-				fileToRead = m.GetFilePaths()[m.GetCursor()]
-			}
-
-			*cmds = append(*cmds, commands.ReadFileContentCmd(
-				fileToRead,
-				m.AppConfig.Settings.SyntaxTheme,
-				m.Viewport.Width,
-				m.AppConfig.Settings.PrettyMarkdown,
-			))
-		}
-	}
-}
-
-// handleLeftKeyPress goes to the previous directory.
-func (m *Model) handleLeftKeyPress(cmds *[]tea.Cmd) {
-	if m.IsActive && m.GetTotalFiles() > 0 {
-		workingDirectory, err := dirfs.GetWorkingDirectory()
-		if err != nil {
-			*cmds = append(*cmds, commands.HandleErrorCmd(err))
-		}
-
-		*cmds = append(*cmds, commands.UpdateDirectoryListingCmd(filepath.Join(workingDirectory, dirfs.PreviousDirectory), m.ShowHidden))
 	}
 }
 
@@ -392,12 +319,79 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			}
 		case "right", "l":
 			if m.IsActive {
-				m.handleRightKeyPress(&cmds)
+				selectedFile, err := m.GetSelectedFile()
+				if err != nil {
+					cmds = append(cmds, commands.HandleErrorCmd(err))
+				}
+
+				switch {
+				case selectedFile.IsDir():
+					currentDir, err := dirfs.GetWorkingDirectory()
+					if err != nil {
+						cmds = append(cmds, commands.HandleErrorCmd(err))
+					}
+
+					directoryToOpen := filepath.Join(currentDir, selectedFile.Name())
+
+					if len(m.GetFilePaths()) > 0 {
+						directoryToOpen = m.GetFilePaths()[m.GetCursor()]
+					}
+
+					cmds = append(cmds, commands.UpdateDirectoryListingCmd(directoryToOpen, m.ShowHidden))
+				case selectedFile.Mode()&os.ModeSymlink == os.ModeSymlink:
+					symlinkFile, err := os.Readlink(selectedFile.Name())
+					if err != nil {
+						cmds = append(cmds, commands.HandleErrorCmd(err))
+					}
+
+					fileInfo, err := os.Stat(symlinkFile)
+					if err != nil {
+						cmds = append(cmds, commands.HandleErrorCmd(err))
+					}
+
+					if fileInfo.IsDir() {
+						currentDir, err := dirfs.GetWorkingDirectory()
+						if err != nil {
+							cmds = append(cmds, commands.HandleErrorCmd(err))
+						}
+
+						cmds = append(cmds, commands.UpdateDirectoryListingCmd(filepath.Join(currentDir, fileInfo.Name()), m.ShowHidden))
+					}
+
+					cmds = append(cmds, commands.ReadFileContentCmd(
+						fileInfo.Name(),
+						m.AppConfig.Settings.SyntaxTheme,
+						m.Viewport.Width,
+						m.AppConfig.Settings.PrettyMarkdown,
+					))
+				default:
+					fileToRead := selectedFile.Name()
+
+					if len(m.GetFilePaths()) > 0 {
+						fileToRead = m.GetFilePaths()[m.GetCursor()]
+					}
+
+					cmds = append(cmds, commands.ReadFileContentCmd(
+						fileToRead,
+						m.AppConfig.Settings.SyntaxTheme,
+						m.Viewport.Width,
+						m.AppConfig.Settings.PrettyMarkdown,
+					))
+
+				}
 				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
 			}
 		case "left", "h":
 			if m.IsActive {
-				m.handleLeftKeyPress(&cmds)
+				m.ShowFilesOnly = false
+				m.ShowDirectoriesOnly = false
+				workingDirectory, err := dirfs.GetWorkingDirectory()
+				if err != nil {
+					cmds = append(cmds, commands.HandleErrorCmd(err))
+				}
+
+				cmds = append(cmds, commands.UpdateDirectoryListingCmd(filepath.Join(workingDirectory, dirfs.PreviousDirectory), m.ShowHidden))
+
 				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
 			}
 		case "ctrl+g":
@@ -426,6 +420,130 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case "/":
 			if m.IsActive {
 				cmds = append(cmds, commands.UpdateDirectoryListingCmd(dirfs.RootDirectory, m.ShowHidden))
+			}
+		case ".":
+			if m.IsActive {
+				m.ShowHidden = !m.ShowHidden
+
+				switch {
+				case m.ShowDirectoriesOnly:
+					cmds = append(cmds, commands.GetDirectoryListingByTypeCmd(dirfs.DirectoriesListingType, m.ShowHidden))
+				case m.ShowFilesOnly:
+					cmds = append(cmds, commands.GetDirectoryListingByTypeCmd(dirfs.FilesListingType, m.ShowHidden))
+				default:
+					cmds = append(cmds, commands.UpdateDirectoryListingCmd(dirfs.CurrentDirectory, m.ShowHidden))
+				}
+			}
+		case "s":
+			if m.IsActive {
+				m.ShowFilesOnly = !m.ShowFilesOnly
+				m.ShowDirectoriesOnly = false
+
+				if m.ShowFilesOnly {
+					cmds = append(cmds, commands.GetDirectoryListingByTypeCmd(dirfs.FilesListingType, m.ShowHidden))
+				}
+
+				cmds = append(cmds, commands.UpdateDirectoryListingCmd(dirfs.CurrentDirectory, m.ShowHidden))
+			}
+		case "S":
+			if m.IsActive {
+				m.ShowDirectoriesOnly = !m.ShowDirectoriesOnly
+				m.ShowFilesOnly = false
+
+				if m.ShowDirectoriesOnly {
+					cmds = append(cmds, commands.GetDirectoryListingByTypeCmd(dirfs.DirectoriesListingType, m.ShowHidden))
+				}
+
+				cmds = append(cmds, commands.UpdateDirectoryListingCmd(dirfs.CurrentDirectory, m.ShowHidden))
+			}
+		case "C":
+			if m.IsActive {
+				selectedFile, err := m.GetSelectedFile()
+				if err != nil {
+					cmds = append(cmds, commands.HandleErrorCmd(err))
+				}
+
+				if selectedFile.IsDir() {
+					cmds = append(cmds, tea.Sequentially(
+						commands.CopyDirectoryCmd(selectedFile.Name()),
+						commands.UpdateDirectoryListingCmd(dirfs.CurrentDirectory, m.ShowHidden),
+					))
+				} else {
+					cmds = append(cmds, tea.Sequentially(
+						commands.CopyFileCmd(selectedFile.Name()),
+						commands.UpdateDirectoryListingCmd(dirfs.CurrentDirectory, m.ShowHidden),
+					))
+				}
+			}
+		case "Z":
+			if m.IsActive {
+				selectedFile, err := m.GetSelectedFile()
+				if err != nil {
+					cmds = append(cmds, commands.HandleErrorCmd(err))
+				}
+
+				cmds = append(cmds, tea.Sequentially(
+					commands.ZipDirectoryCmd(selectedFile.Name()),
+					commands.UpdateDirectoryListingCmd(dirfs.CurrentDirectory, m.ShowHidden),
+				))
+			}
+		case "U":
+			if m.IsActive {
+				selectedFile, err := m.GetSelectedFile()
+				if err != nil {
+					cmds = append(cmds, commands.HandleErrorCmd(err))
+				}
+
+				cmds = append(cmds, tea.Sequentially(
+					commands.UnzipDirectoryCmd(selectedFile.Name()),
+					commands.UpdateDirectoryListingCmd(dirfs.CurrentDirectory, m.ShowHidden),
+				))
+			}
+		case "Y":
+			if m.IsActive {
+				selectedFile, err := m.GetSelectedFile()
+				if err != nil {
+					cmds = append(cmds, commands.HandleErrorCmd(err))
+				}
+
+				cmds = append(cmds, commands.CopyToClipboardCmd(selectedFile.Name()))
+
+			}
+		case "E":
+			if m.IsActive {
+				selectedFile, err := m.GetSelectedFile()
+				if err != nil {
+					cmds = append(cmds, commands.HandleErrorCmd(err))
+				}
+
+				selectionPath := viper.GetString("selection-path")
+
+				if selectionPath == "" && !selectedFile.IsDir() {
+					editorPath := os.Getenv("EDITOR")
+					if editorPath == "" {
+						cmds = append(cmds, commands.HandleErrorCmd(errors.New("$EDITOR not set")))
+					}
+
+					editorCmd := exec.Command(editorPath, selectedFile.Name())
+					editorCmd.Stdin = os.Stdin
+					editorCmd.Stdout = os.Stdout
+					editorCmd.Stderr = os.Stderr
+
+					err := editorCmd.Start()
+					if err != nil {
+						cmds = append(cmds, commands.HandleErrorCmd(err))
+					}
+
+					err = editorCmd.Wait()
+					if err != nil {
+						cmds = append(cmds, commands.HandleErrorCmd(err))
+					}
+
+					cmds = append(cmds, commands.UpdateDirectoryListingCmd(dirfs.CurrentDirectory, m.ShowHidden))
+				} else {
+					cmds = append(cmds, tea.Sequentially(commands.WriteSelectionPathCmd(selectionPath, selectedFile.Name()), tea.Quit))
+				}
+
 			}
 		}
 	}

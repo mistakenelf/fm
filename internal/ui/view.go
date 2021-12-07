@@ -13,7 +13,10 @@ func (m Model) View() string {
 	)
 
 	if m.appConfig.Settings.SimpleMode {
-		horizontalView = lipgloss.JoinHorizontal(lipgloss.Top, m.fileTree.View())
+		horizontalView = lipgloss.JoinHorizontal(
+			lipgloss.Top,
+			m.fileTree.View(),
+		)
 	}
 
 	// Return the UI with the two panes side by side and

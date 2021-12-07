@@ -86,6 +86,10 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
+	case commands.ErrorMsg:
+		m.SetContent(string(msg))
+	case commands.CopyToClipboardMsg:
+		m.SetContent(string(msg))
 	case commands.ReadFileContentMsg:
 		switch {
 		case msg.Code != "":
