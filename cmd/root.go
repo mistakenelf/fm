@@ -5,10 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/knipferrc/fm/internal/config"
-	"github.com/knipferrc/fm/internal/ui"
-
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/knipferrc/fm/internal/config"
+	"github.com/knipferrc/fm/internal/tui"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +37,7 @@ var rootCmd = &cobra.Command{
 			}()
 		}
 
-		m := ui.NewBubble()
+		m := tui.NewBubble()
 		var opts []tea.ProgramOption
 
 		// Always append alt screen program option.
