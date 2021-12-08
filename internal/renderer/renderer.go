@@ -3,11 +3,12 @@ package renderer
 import (
 	"image"
 
-	"github.com/charmbracelet/bubbles/viewport"
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/knipferrc/fm/internal/commands"
 	"github.com/knipferrc/fm/internal/statusbar"
+
+	"github.com/charmbracelet/bubbles/viewport"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 // Bubble is a struct that contains all the properties of renderer.

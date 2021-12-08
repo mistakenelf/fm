@@ -8,7 +8,7 @@ import (
 func (m Bubble) View() string {
 	currentPane := m.renderer.View()
 
-	if m.showPreview {
+	if m.appState.ShowPreview {
 		currentPane = m.previewer.View()
 	}
 	horizontalView := lipgloss.JoinHorizontal(

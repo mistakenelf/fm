@@ -11,13 +11,12 @@ import (
 
 // Bubble represents the state of the UI.
 type Bubble struct {
-	fileTree    filetree.Bubble
-	previewer   previewer.Bubble
-	statusBar   statusbar.Bubble
-	renderer    renderer.Bubble
-	appConfig   config.Config
-	theme       theme.Theme
-	showPreview bool
+	fileTree  filetree.Bubble
+	previewer previewer.Bubble
+	statusBar statusbar.Bubble
+	renderer  renderer.Bubble
+	appConfig config.Config
+	theme     theme.Theme
 }
 
 // NewBubble create an instance of the entire application model.
@@ -78,12 +77,11 @@ func NewBubble() Bubble {
 	)
 
 	return Bubble{
-		fileTree:    fileTree,
-		previewer:   previewer,
-		statusBar:   statusBar,
-		renderer:    renderer,
-		appConfig:   cfg,
-		theme:       theme,
-		showPreview: false,
+		fileTree:  fileTree,
+		previewer: previewer,
+		statusBar: statusBar,
+		renderer:  renderer,
+		appConfig: cfg,
+		theme:     theme,
 	}
 }

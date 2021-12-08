@@ -23,13 +23,11 @@ type ErrorMsg string
 type CopyToClipboardMsg string
 type ConvertImageToStringMsg string
 type UpdateStatusbarMsg struct {
-	TotalFiles       int
-	Cursor           int
-	ShowCommandInput bool
-	InMoveMode       bool
-	SelectedFile     os.FileInfo
-	ItemToMove       os.FileInfo
-	FilePaths        []string
+	Files        []fs.DirEntry
+	Cursor       int
+	SelectedFile os.FileInfo
+	ItemToMove   os.FileInfo
+	FilePaths    []string
 }
 type FindFilesByNameMsg struct {
 	paths   []string
@@ -408,13 +406,11 @@ func UpdateStatusbarCmd(files []fs.DirEntry, cursor int, filePaths []string) tea
 		}
 
 		return UpdateStatusbarMsg{
-			TotalFiles:       len(files),
-			Cursor:           cursor,
-			ShowCommandInput: false,
-			InMoveMode:       false,
-			SelectedFile:     selectedFile,
-			ItemToMove:       nil,
-			FilePaths:        filePaths,
+			Files:        files,
+			Cursor:       cursor,
+			SelectedFile: selectedFile,
+			ItemToMove:   nil,
+			FilePaths:    filePaths,
 		}
 	}
 }

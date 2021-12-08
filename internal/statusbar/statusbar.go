@@ -2,7 +2,9 @@ package statusbar
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
+	"strings"
 
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/icons"
@@ -25,21 +27,25 @@ type Color struct {
 
 // Model is a struct that contains all the properties of the statusbar.
 type Bubble struct {
-	Width              int
-	TotalFiles         int
-	Cursor             int
-	ShowIcons          bool
-	ShowCommandInput   bool
-	InMoveMode         bool
-	SimpleMode         bool
-	FilePaths          []string
-	SelectedFile       os.FileInfo
-	ItemToMove         os.FileInfo
-	FirstColumnColors  Color
-	SecondColumnColors Color
-	ThirdColumnColors  Color
-	FourthColumnColors Color
-	Textinput          textinput.Model
+	Width               int
+	Files               []fs.DirEntry
+	Cursor              int
+	ShowIcons           bool
+	ShowCommandInput    bool
+	InMoveMode          bool
+	SimpleMode          bool
+	CreateFileMode      bool
+	CreateDirectoryMode bool
+	DeleteMode          bool
+	RenameMode          bool
+	FilePaths           []string
+	SelectedFile        os.FileInfo
+	ItemToMove          os.FileInfo
+	FirstColumnColors   Color
+	SecondColumnColors  Color
+	ThirdColumnColors   Color
+	FourthColumnColors  Color
+	Textinput           textinput.Model
 }
 
 // NewBubble creates an instance of a statusbar.
@@ -56,7 +62,6 @@ func NewBubble(
 	}
 
 	return Bubble{
-		TotalFiles:         0,
 		Cursor:             0,
 		ShowIcons:          showIcons,
 		ShowCommandInput:   false,
@@ -69,32 +74,13 @@ func NewBubble(
 		ThirdColumnColors:  thirdColumnColors,
 		FourthColumnColors: fourthColumnColors,
 		Textinput:          input,
+		CreateFileMode:     true,
 	}
 }
 
-// BlurCommandInput blurs the textinput used for the command input.
-func (m *Bubble) BlurCommandInput() {
-	m.Textinput.Blur()
-}
-
-// ResetCommandInput resets the textinput used for the command input.
-func (m *Bubble) ResetCommandInput() {
-	m.Textinput.Reset()
-}
-
-// CommandInputValue returns the value of the command input.
-func (m Bubble) CommandInputValue() string {
-	return m.Textinput.Value()
-}
-
-// CommandInputFocused returns true if the command input is focused.
-func (m Bubble) CommandInputFocused() bool {
-	return m.Textinput.Focused()
-}
-
-// FocusCommandInput focuses the command input.
-func (m *Bubble) FocusCommandInput() {
-	m.Textinput.Focus()
+// Init initializes the statusbar.
+func (m Bubble) Init() tea.Cmd {
+	return textinput.Blink
 }
 
 // SetCommandInputPlaceholderText sets the placeholder text of the command input.
@@ -104,14 +90,12 @@ func (m *Bubble) SetCommandInputPlaceholderText(text string) {
 
 // SetContent sets the content of the statusbar.
 func (m *Bubble) SetContent(
-	totalFiles, cursor int,
-	showCommandInput, inMoveMode bool,
+	files []fs.DirEntry,
+	cursor int,
 	selectedFile, itemToMove os.FileInfo, filePaths []string,
 ) {
-	m.TotalFiles = totalFiles
+	m.Files = files
 	m.Cursor = cursor
-	m.ShowCommandInput = showCommandInput
-	m.InMoveMode = inMoveMode
 	m.SelectedFile = selectedFile
 	m.ItemToMove = itemToMove
 	m.FilePaths = filePaths
@@ -130,16 +114,59 @@ func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 	switch msg := msg.(type) {
 	case commands.UpdateStatusbarMsg:
 		m.SetContent(
-			msg.TotalFiles,
+			msg.Files,
 			msg.Cursor,
-			msg.ShowCommandInput,
-			msg.InMoveMode,
 			msg.SelectedFile,
 			msg.ItemToMove,
 			msg.FilePaths,
 		)
 	case tea.WindowSizeMsg:
 		m.SetSize(msg.Width)
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "enter":
+			selectedFile, err := m.Files[m.Cursor].Info()
+			if err != nil {
+				cmds = append(cmds, commands.HandleErrorCmd(err))
+			}
+
+			switch {
+			case m.CreateFileMode:
+				cmds = append(cmds, tea.Sequentially(
+					commands.CreateFileCmd(m.Textinput.Value()),
+					commands.UpdateDirectoryListingCmd(dirfs.CurrentDirectory, true),
+				))
+			case m.CreateDirectoryMode:
+				cmds = append(cmds, tea.Sequentially(
+					commands.CreateDirectoryCmd(m.Textinput.Value()),
+					commands.UpdateDirectoryListingCmd(dirfs.CurrentDirectory, true),
+				))
+			case m.RenameMode:
+				cmds = append(cmds, tea.Sequentially(
+					commands.RenameDirectoryItemCmd(selectedFile.Name(), m.Textinput.Value()),
+					commands.UpdateDirectoryListingCmd(dirfs.CurrentDirectory, true),
+				))
+			case m.DeleteMode:
+				if strings.ToLower(m.Textinput.Value()) == "y" || strings.ToLower(m.Textinput.Value()) == "yes" {
+					if selectedFile.IsDir() {
+						cmds = append(cmds, tea.Sequentially(
+							commands.DeleteDirectoryCmd(selectedFile.Name()),
+							commands.UpdateDirectoryListingCmd(dirfs.CurrentDirectory, true),
+						))
+					} else {
+						cmds = append(cmds, tea.Sequentially(
+							commands.DeleteFileCmd(selectedFile.Name()),
+							commands.UpdateDirectoryListingCmd(dirfs.CurrentDirectory, true),
+						))
+					}
+				}
+
+				m.Textinput.Blur()
+				m.Textinput.Reset()
+			default:
+				return m, nil
+			}
+		}
 	}
 
 	m.Textinput, cmd = m.Textinput.Update(msg)
@@ -157,9 +184,9 @@ func (m Bubble) View() string {
 	selectedFile := "N/A"
 	fileCount := "0/0"
 
-	if m.TotalFiles > 0 && m.SelectedFile != nil {
+	if len(m.Files) > 0 && m.SelectedFile != nil {
 		selectedFile = m.SelectedFile.Name()
-		fileCount = fmt.Sprintf("%d/%d", m.Cursor+1, m.TotalFiles)
+		fileCount = fmt.Sprintf("%d/%d", m.Cursor+1, len(m.Files))
 
 		currentPath, err := dirfs.GetWorkingDirectory()
 		if err != nil {
@@ -170,8 +197,6 @@ func (m Bubble) View() string {
 			currentPath = m.FilePaths[m.Cursor]
 		}
 
-		// Display some information about the currently seleted file including
-		// its size, the mode and the current path.
 		status = fmt.Sprintf("%s %s %s",
 			m.SelectedFile.ModTime().Format("2006-01-02 15:04:05"),
 			m.SelectedFile.Mode().String(),

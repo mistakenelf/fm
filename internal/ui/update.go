@@ -1,8 +1,9 @@
 package ui
 
 import (
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/knipferrc/fm/internal/commands"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 // Update handles all UI interactions and events for updating the screen.
@@ -12,9 +13,9 @@ func (m Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case commands.PreviewDirectoryListingMsg:
-		m.showPreview = true
+		m.appState.ShowPreview = true
 	case commands.ReadFileContentMsg:
-		m.showPreview = false
+		m.appState.ShowPreview = false
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":

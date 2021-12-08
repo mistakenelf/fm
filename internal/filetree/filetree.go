@@ -44,6 +44,7 @@ type Bubble struct {
 	ShowLoading         bool
 	ShowDirectoriesOnly bool
 	ShowFilesOnly       bool
+	CreateFileMode      bool
 }
 
 // Init intializes the filetree.
@@ -277,6 +278,7 @@ func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 		m.SetFilePaths(nil)
 		m.Viewport.GotoTop()
 		m.SetContent(msg)
+		m.CreateFileMode = false
 
 		return m, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths)
 	case tea.WindowSizeMsg:
@@ -285,13 +287,13 @@ func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 	case tea.MouseMsg:
 		switch msg.Type {
 		case tea.MouseWheelUp:
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				m.GoUp()
 				m.scrollFiletree()
 				m.SetContent(m.Files)
 			}
 		case tea.MouseWheelDown:
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				m.GoDown()
 				m.scrollFiletree()
 				m.SetContent(m.Files)
@@ -300,21 +302,21 @@ func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "up", "k":
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				m.GoUp()
 				m.scrollFiletree()
 				m.SetContent(m.Files)
 				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
 			}
 		case "down", "j":
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				m.GoDown()
 				m.scrollFiletree()
 				m.SetContent(m.Files)
 				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
 			}
 		case "right", "l":
-			if m.IsActive && len(m.Files) > 0 {
+			if m.IsActive && !m.CreateFileMode && len(m.Files) > 0 {
 				selectedFile, err := m.GetSelectedFile()
 				if err != nil {
 					cmds = append(cmds, commands.HandleErrorCmd(err))
@@ -383,7 +385,7 @@ func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
 			}
 		case "left", "h":
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				m.ShowFilesOnly = false
 				m.ShowDirectoriesOnly = false
 				workingDirectory, err := dirfs.GetWorkingDirectory()
@@ -401,21 +403,21 @@ func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
 			}
 		case "ctrl+g":
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				m.GotoTop()
 				m.Viewport.GotoTop()
 				m.SetContent(m.Files)
 				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
 			}
 		case "G":
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				m.GotoBottom()
 				m.Viewport.GotoBottom()
 				m.SetContent(m.Files)
 				cmds = append(cmds, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths))
 			}
 		case "~":
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				homeDir, err := dirfs.GetHomeDirectory()
 				if err != nil {
 					cmds = append(cmds, commands.HandleErrorCmd(err))
@@ -424,11 +426,11 @@ func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 				cmds = append(cmds, commands.UpdateDirectoryListingCmd(homeDir, m.ShowHidden))
 			}
 		case "/":
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				cmds = append(cmds, commands.UpdateDirectoryListingCmd(dirfs.RootDirectory, m.ShowHidden))
 			}
 		case ".":
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				m.ShowHidden = !m.ShowHidden
 
 				switch {
@@ -441,7 +443,7 @@ func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 				}
 			}
 		case "s":
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				m.ShowFilesOnly = !m.ShowFilesOnly
 				m.ShowDirectoriesOnly = false
 
@@ -452,7 +454,7 @@ func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 				cmds = append(cmds, commands.UpdateDirectoryListingCmd(dirfs.CurrentDirectory, m.ShowHidden))
 			}
 		case "S":
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				m.ShowDirectoriesOnly = !m.ShowDirectoriesOnly
 				m.ShowFilesOnly = false
 
@@ -463,7 +465,7 @@ func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 				cmds = append(cmds, commands.UpdateDirectoryListingCmd(dirfs.CurrentDirectory, m.ShowHidden))
 			}
 		case "C":
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				selectedFile, err := m.GetSelectedFile()
 				if err != nil {
 					cmds = append(cmds, commands.HandleErrorCmd(err))
@@ -482,7 +484,7 @@ func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 				}
 			}
 		case "Z":
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				selectedFile, err := m.GetSelectedFile()
 				if err != nil {
 					cmds = append(cmds, commands.HandleErrorCmd(err))
@@ -494,7 +496,7 @@ func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 				))
 			}
 		case "U":
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				selectedFile, err := m.GetSelectedFile()
 				if err != nil {
 					cmds = append(cmds, commands.HandleErrorCmd(err))
@@ -506,7 +508,7 @@ func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 				))
 			}
 		case "Y":
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				selectedFile, err := m.GetSelectedFile()
 				if err != nil {
 					cmds = append(cmds, commands.HandleErrorCmd(err))
@@ -516,7 +518,7 @@ func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 
 			}
 		case "E":
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				selectedFile, err := m.GetSelectedFile()
 				if err != nil {
 					cmds = append(cmds, commands.HandleErrorCmd(err))
@@ -551,7 +553,7 @@ func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 				}
 			}
 		case "p":
-			if m.IsActive {
+			if m.IsActive && !m.CreateFileMode {
 				selectedFile, err := m.GetSelectedFile()
 				if err != nil {
 					cmds = append(cmds, commands.HandleErrorCmd(err))
@@ -577,6 +579,11 @@ func (m Bubble) Update(msg tea.Msg) (Bubble, tea.Cmd) {
 				default:
 					return m, nil
 				}
+			}
+		case "n":
+			if m.IsActive && !m.CreateFileMode {
+				m.CreateFileMode = true
+				return m, commands.UpdateStatusbarCmd(m.Files, m.Cursor, m.FilePaths)
 			}
 		}
 	}
