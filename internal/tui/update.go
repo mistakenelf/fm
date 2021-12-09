@@ -9,6 +9,7 @@ import (
 
 	"github.com/knipferrc/fm/dirfs"
 
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/viper"
 )
@@ -363,7 +364,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				b.textinput.Placeholder = "Enter file name"
 				b.textinput.Focus()
 
-				return b, nil
+				return b, textinput.Blink
 			}
 		case "N":
 			if !b.showCommandInput && !b.showBoxSpinner {
@@ -372,7 +373,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				b.textinput.Placeholder = "Enter directory name"
 				b.textinput.Focus()
 
-				return b, nil
+				return b, textinput.Blink
 			}
 		case "ctrl+d":
 			if !b.showCommandInput && !b.showBoxSpinner {
@@ -496,6 +497,8 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				b.showCommandInput = true
 				b.textinput.Placeholder = "Enter a search term"
 				b.textinput.Focus()
+
+				return b, textinput.Blink
 			}
 		case "esc":
 			b.showCommandInput = false
