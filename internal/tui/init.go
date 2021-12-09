@@ -6,10 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/knipferrc/fm/dirfs"
+
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/knipferrc/fm/dirfs"
 	"github.com/spf13/viper"
 )
 

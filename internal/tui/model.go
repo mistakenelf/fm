@@ -4,12 +4,13 @@ import (
 	"image"
 	"io/fs"
 
+	"github.com/knipferrc/fm/internal/config"
+	"github.com/knipferrc/fm/internal/theme"
+
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/knipferrc/fm/internal/config"
-	"github.com/knipferrc/fm/internal/theme"
 )
 
 // Bubble represents the state of the UI.
@@ -48,7 +49,7 @@ type Bubble struct {
 	errorMsg               string
 }
 
-// NewBubble create an instance of the entire application model.
+// NewBubble create an instance of the entire application.
 func NewBubble() Bubble {
 	cfg := config.GetConfig()
 	theme := theme.GetTheme(cfg.Settings.Theme)
@@ -60,7 +61,9 @@ func NewBubble() Bubble {
 	t := textinput.NewModel()
 	t.Prompt = "❯ "
 	t.CharLimit = 250
-	t.PlaceholderStyle = lipgloss.NewStyle().Background(theme.StatusBarBarBackgroundColor).Foreground(theme.StatusBarBarForegroundColor)
+	t.PlaceholderStyle = lipgloss.NewStyle().
+		Background(theme.StatusBarBarBackgroundColor).
+		Foreground(theme.StatusBarBarForegroundColor)
 
 	return Bubble{
 		appConfig:        cfg,

@@ -5,10 +5,11 @@ import (
 	"io/fs"
 	"path/filepath"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/strfmt"
+
+	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/truncate"
 )
 
@@ -258,15 +259,15 @@ func (b Bubble) View() string {
 
 	primaryBoxBorder := lipgloss.NormalBorder()
 	secondaryBoxBorder := lipgloss.NormalBorder()
-	primaryBoxBorderColor := b.theme.InactivePaneBorderColor
-	secondaryBoxBorderColor := b.theme.InactivePaneBorderColor
+	primaryBoxBorderColor := b.theme.InactiveBoxBorderColor
+	secondaryBoxBorderColor := b.theme.InactiveBoxBorderColor
 
 	if b.activeBox == 0 {
-		primaryBoxBorderColor = b.theme.ActivePaneBorderColor
+		primaryBoxBorderColor = b.theme.ActiveBoxBorderColor
 	}
 
 	if b.activeBox == 1 {
-		secondaryBoxBorderColor = b.theme.ActivePaneBorderColor
+		secondaryBoxBorderColor = b.theme.ActiveBoxBorderColor
 	}
 
 	if b.appConfig.Settings.Borderless {

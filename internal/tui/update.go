@@ -7,8 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/knipferrc/fm/dirfs"
+
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/viper"
 )
 

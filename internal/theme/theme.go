@@ -5,8 +5,8 @@ import "github.com/charmbracelet/lipgloss"
 type Theme struct {
 	SelectedTreeItemColor                lipgloss.AdaptiveColor
 	UnselectedTreeItemColor              lipgloss.AdaptiveColor
-	ActivePaneBorderColor                lipgloss.AdaptiveColor
-	InactivePaneBorderColor              lipgloss.AdaptiveColor
+	ActiveBoxBorderColor                 lipgloss.AdaptiveColor
+	InactiveBoxBorderColor               lipgloss.AdaptiveColor
 	SpinnerColor                         lipgloss.AdaptiveColor
 	StatusBarSelectedFileForegroundColor lipgloss.AdaptiveColor
 	StatusBarSelectedFileBackgroundColor lipgloss.AdaptiveColor
@@ -76,8 +76,8 @@ var themeMap = map[string]Theme{
 	"default": {
 		SelectedTreeItemColor:                lipgloss.AdaptiveColor{Dark: colors.defaultPink, Light: colors.defaultPink},
 		UnselectedTreeItemColor:              lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.black},
-		ActivePaneBorderColor:                lipgloss.AdaptiveColor{Dark: colors.defaultPink, Light: colors.defaultPink},
-		InactivePaneBorderColor:              lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.black},
+		ActiveBoxBorderColor:                 lipgloss.AdaptiveColor{Dark: colors.defaultPink, Light: colors.defaultPink},
+		InactiveBoxBorderColor:               lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.black},
 		SpinnerColor:                         lipgloss.AdaptiveColor{Dark: colors.defaultPink, Light: colors.defaultPink},
 		StatusBarSelectedFileForegroundColor: lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.white},
 		StatusBarSelectedFileBackgroundColor: lipgloss.AdaptiveColor{Dark: colors.defaultPink, Light: colors.defaultPink},
@@ -93,8 +93,8 @@ var themeMap = map[string]Theme{
 	"gruvbox": {
 		SelectedTreeItemColor:                lipgloss.AdaptiveColor{Dark: colors.gruvOrange, Light: colors.gruvOrange},
 		UnselectedTreeItemColor:              lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.black},
-		ActivePaneBorderColor:                lipgloss.AdaptiveColor{Dark: colors.gruvGreen, Light: colors.gruvGreen},
-		InactivePaneBorderColor:              lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.black},
+		ActiveBoxBorderColor:                 lipgloss.AdaptiveColor{Dark: colors.gruvGreen, Light: colors.gruvGreen},
+		InactiveBoxBorderColor:               lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.black},
 		SpinnerColor:                         lipgloss.AdaptiveColor{Dark: colors.red, Light: colors.red},
 		StatusBarSelectedFileForegroundColor: lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.white},
 		StatusBarSelectedFileBackgroundColor: lipgloss.AdaptiveColor{Dark: colors.red, Light: colors.red},
@@ -110,8 +110,8 @@ var themeMap = map[string]Theme{
 	"nord": {
 		SelectedTreeItemColor:                lipgloss.AdaptiveColor{Dark: colors.nordOrange, Light: colors.nordOrange},
 		UnselectedTreeItemColor:              lipgloss.AdaptiveColor{Dark: colors.nordWhite, Light: colors.nordBlack},
-		ActivePaneBorderColor:                lipgloss.AdaptiveColor{Dark: colors.nordGreen, Light: colors.nordGreen},
-		InactivePaneBorderColor:              lipgloss.AdaptiveColor{Dark: colors.nordWhite, Light: colors.nordBlack},
+		ActiveBoxBorderColor:                 lipgloss.AdaptiveColor{Dark: colors.nordGreen, Light: colors.nordGreen},
+		InactiveBoxBorderColor:               lipgloss.AdaptiveColor{Dark: colors.nordWhite, Light: colors.nordBlack},
 		SpinnerColor:                         lipgloss.AdaptiveColor{Dark: colors.nordRed, Light: colors.nordRed},
 		StatusBarSelectedFileForegroundColor: lipgloss.AdaptiveColor{Dark: colors.nordWhite, Light: colors.nordWhite},
 		StatusBarSelectedFileBackgroundColor: lipgloss.AdaptiveColor{Dark: colors.nordRed, Light: colors.nordRed},
@@ -127,8 +127,8 @@ var themeMap = map[string]Theme{
 	"spooky": {
 		SelectedTreeItemColor:                lipgloss.AdaptiveColor{Dark: colors.spookyOrange, Light: colors.spookyOrange},
 		UnselectedTreeItemColor:              lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.black},
-		ActivePaneBorderColor:                lipgloss.AdaptiveColor{Dark: colors.spookyOrange, Light: colors.spookyOrange},
-		InactivePaneBorderColor:              lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.black},
+		ActiveBoxBorderColor:                 lipgloss.AdaptiveColor{Dark: colors.spookyOrange, Light: colors.spookyOrange},
+		InactiveBoxBorderColor:               lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.black},
 		SpinnerColor:                         lipgloss.AdaptiveColor{Dark: colors.red, Light: colors.red},
 		StatusBarSelectedFileForegroundColor: lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.white},
 		StatusBarSelectedFileBackgroundColor: lipgloss.AdaptiveColor{Dark: colors.spookyPurple, Light: colors.spookyPurple},
