@@ -1,12 +1,15 @@
 package tui
 
 import (
+	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/knipferrc/fm/dirfs"
+	"github.com/spf13/viper"
 )
 
 // scrollFiletree moves handles wrapping of the filetree and
@@ -79,6 +82,18 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.secondaryViewport.SetContent(b.textContentView(string(msg)))
 
 		return b, nil
+	case moveDirItemMsg:
+		b.moveMode = false
+		b.treeItemToMove = nil
+
+		b.primaryViewport.SetContent(b.fileTreeView(msg))
+
+		return b, nil
+	case errorMsg:
+		b.errorMsg = string(msg)
+		b.secondaryViewport.SetContent(b.errorView(string(msg)))
+
+		return b, nil
 	case tea.WindowSizeMsg:
 		b.width = msg.Width
 		b.height = msg.Height
@@ -94,6 +109,8 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.secondaryViewport.SetContent(b.fileTreePreviewView(b.treePreviewFiles))
 		case b.currentImage != nil:
 			return b, b.convertImageToStringCmd(b.secondaryViewport.Width - box.GetHorizontalFrameSize())
+		case b.errorMsg != "":
+			b.secondaryViewport.SetContent(b.errorView(b.errorMsg))
 		default:
 			b.secondaryViewport.SetContent(b.textContentView(b.secondaryContent))
 		}
@@ -332,50 +349,112 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				return b, nil
 			}
+		case "M":
+			if !b.showCommandInput {
+				b.moveMode = true
+				b.treeItemToMove = b.treeFiles[b.treeCursor]
+				workingDir, err := dirfs.GetWorkingDirectory()
+				if err != nil {
+					b.moveInitiatedDirectory = dirfs.CurrentDirectory
+				}
+
+				b.moveInitiatedDirectory = workingDir
+
+				return b, nil
+			}
 		case "enter":
-			if b.showCommandInput {
+			selectedFile := b.treeFiles[b.treeCursor]
+
+			switch {
+			case b.moveMode:
+				return b, b.moveDirectoryItemCmd(b.treeItemToMove.Name())
+			case b.createFileMode:
+				return b, tea.Sequentially(
+					b.createFileCmd(b.textinput.Value()),
+					b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
+				)
+			case b.createDirectoryMode:
+				return b, tea.Sequentially(
+					b.createDirectoryCmd(b.textinput.Value()),
+					b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
+				)
+			case b.renameMode:
+				return b, tea.Sequentially(
+					b.renameDirectoryItemCmd(selectedFile.Name(), b.textinput.Value()),
+					b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
+				)
+			case b.findMode:
+				b.showCommandInput = false
+				b.showSpinner = true
+
+				return b, b.findFilesByNameCmd(b.textinput.Value())
+			case b.deleteMode:
+				if strings.ToLower(b.textinput.Value()) == "y" || strings.ToLower(b.textinput.Value()) == "yes" {
+					if selectedFile.IsDir() {
+						return b, tea.Sequentially(
+							b.deleteDirectoryCmd(selectedFile.Name()),
+							b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
+						)
+					} else {
+						return b, tea.Sequentially(
+							b.deleteFileCmd(selectedFile.Name()),
+							b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
+						)
+					}
+				}
+			default:
+				return b, nil
+			}
+		case "E":
+			selectedFile := b.treeFiles[b.treeCursor]
+
+			if !b.showCommandInput && b.activeBox == 0 {
+				selectionPath := viper.GetString("selection-path")
+
+				if selectionPath == "" && !selectedFile.IsDir() {
+					editorPath := os.Getenv("EDITOR")
+					if editorPath == "" {
+						return b, b.handleErrorCmd(errors.New("$EDITOR not set"))
+					}
+
+					editorCmd := exec.Command(editorPath, selectedFile.Name())
+					editorCmd.Stdin = os.Stdin
+					editorCmd.Stdout = os.Stdout
+					editorCmd.Stderr = os.Stderr
+
+					err := editorCmd.Start()
+					if err != nil {
+						return b, b.handleErrorCmd(err)
+					}
+
+					err = editorCmd.Wait()
+					if err != nil {
+						return b, b.handleErrorCmd(err)
+					}
+
+					return b, b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
+				} else {
+					return b, tea.Sequentially(
+						b.writeSelectionPathCmd(selectionPath, selectedFile.Name()),
+						tea.Quit,
+					)
+				}
+			}
+		case "C":
+			if !b.showCommandInput && b.activeBox == 0 && len(b.treeFiles) > 0 {
 				selectedFile := b.treeFiles[b.treeCursor]
 
-				switch {
-				case b.moveMode:
-					return b, b.moveDirectoryItemCmd("")
-				case b.createFileMode:
+				if selectedFile.IsDir() {
 					return b, tea.Sequentially(
-						b.createFileCmd(b.textinput.Value()),
+						b.copyDirectoryCmd(selectedFile.Name()),
 						b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 					)
-				case b.createDirectoryMode:
-					return b, tea.Sequentially(
-						b.createDirectoryCmd(b.textinput.Value()),
-						b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-					)
-				case b.renameMode:
-					return b, tea.Sequentially(
-						b.renameDirectoryItemCmd(selectedFile.Name(), b.textinput.Value()),
-						b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-					)
-				case b.findMode:
-					b.showCommandInput = false
-					b.showSpinner = true
-
-					return b, b.findFilesByNameCmd(b.textinput.Value())
-				case b.deleteMode:
-					if strings.ToLower(b.textinput.Value()) == "y" || strings.ToLower(b.textinput.Value()) == "yes" {
-						if selectedFile.IsDir() {
-							return b, tea.Sequentially(
-								b.deleteDirectoryCmd(selectedFile.Name()),
-								b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-							)
-						} else {
-							return b, tea.Sequentially(
-								b.deleteFileCmd(selectedFile.Name()),
-								b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-							)
-						}
-					}
-				default:
-					return b, nil
 				}
+
+				return b, tea.Sequentially(
+					b.copyFileCmd(selectedFile.Name()),
+					b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
+				)
 			}
 		case "esc":
 			b.showCommandInput = false
@@ -388,6 +467,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.showDirectoriesOnly = false
 			b.findMode = false
 			b.deleteMode = false
+			b.errorMsg = ""
 
 			b.textinput.Blur()
 			b.textinput.Reset()

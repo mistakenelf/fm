@@ -23,6 +23,7 @@ type Bubble struct {
 	secondaryViewport      viewport.Model
 	treeFiles              []fs.DirEntry
 	treePreviewFiles       []fs.DirEntry
+	treeItemToMove         fs.DirEntry
 	width                  int
 	height                 int
 	activeBox              int
@@ -44,6 +45,7 @@ type Bubble struct {
 	moveInitiatedDirectory string
 	primaryContent         string
 	secondaryContent       string
+	errorMsg               string
 }
 
 // NewBubble create an instance of the entire application model.
@@ -58,7 +60,7 @@ func NewBubble() Bubble {
 	t := textinput.NewModel()
 	t.Prompt = "❯ "
 	t.CharLimit = 250
-	t.Placeholder = "Input command"
+	t.PlaceholderStyle = lipgloss.NewStyle().Background(theme.StatusBarBarBackgroundColor).Foreground(theme.StatusBarBarForegroundColor)
 
 	return Bubble{
 		appConfig:        cfg,

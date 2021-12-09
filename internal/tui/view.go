@@ -44,6 +44,10 @@ func (b Bubble) statusBarView() string {
 		status = b.textinput.View()
 	}
 
+	if b.moveMode {
+		status = fmt.Sprintf("%s %s", "Currently moving:", b.treeFiles[b.treeCursor].Name())
+	}
+
 	if b.appConfig.Settings.ShowIcons {
 		logo = fmt.Sprintf("%s %s", icons.IconDef["dir"].GetGlyph(), "FM")
 	} else {
@@ -238,12 +242,22 @@ func (b Bubble) textContentView(content string) string {
 		Render(content)
 }
 
+func (b Bubble) errorView(msg string) string {
+	return lipgloss.NewStyle().
+		Foreground(b.theme.ErrorColor).
+		Width(b.secondaryViewport.Width - box.GetHorizontalPadding()).
+		Height(b.secondaryViewport.Height - box.GetVerticalPadding()).
+		Render(msg)
+}
+
 // View returns a string representation of the entire application UI.
 func (b Bubble) View() string {
 	if !b.ready {
 		return fmt.Sprintf("%s %s", b.spinner.View(), "loading...")
 	}
 
+	primaryBoxBorder := lipgloss.NormalBorder()
+	secondaryBoxBorder := lipgloss.NormalBorder()
 	primaryBoxBorderColor := b.theme.InactivePaneBorderColor
 	secondaryBoxBorderColor := b.theme.InactivePaneBorderColor
 
@@ -255,16 +269,36 @@ func (b Bubble) View() string {
 		secondaryBoxBorderColor = b.theme.ActivePaneBorderColor
 	}
 
+	if b.appConfig.Settings.Borderless {
+		primaryBoxBorder = lipgloss.HiddenBorder()
+		secondaryBoxBorder = lipgloss.HiddenBorder()
+	}
+
+	if b.moveMode {
+		primaryBoxBorder = lipgloss.Border{
+			Top:         "-",
+			Bottom:      "-",
+			Left:        "|",
+			Right:       "|",
+			TopLeft:     "*",
+			TopRight:    "*",
+			BottomLeft:  "*",
+			BottomRight: "*",
+		}
+	}
+
 	view := lipgloss.JoinVertical(
 		lipgloss.Top,
 		lipgloss.JoinHorizontal(
 			lipgloss.Top,
 			box.Copy().
+				Border(primaryBoxBorder).
 				BorderForeground(primaryBoxBorderColor).
 				Width(b.primaryViewport.Width).
 				Height(b.primaryViewport.Height).
 				Render(b.primaryViewport.View()),
 			box.Copy().
+				Border(secondaryBoxBorder).
 				BorderForeground(secondaryBoxBorderColor).
 				Width(b.secondaryViewport.Width).
 				Height(b.secondaryViewport.Height).
