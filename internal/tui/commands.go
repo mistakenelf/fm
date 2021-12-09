@@ -1,7 +1,6 @@
-package ui
+package tui
 
 import (
-	"context"
 	"fmt"
 	"image"
 	_ "image/jpeg"
@@ -9,10 +8,9 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/knipferrc/fm/dirfs"
-	"github.com/knipferrc/fm/internal/renderer"
+	"github.com/knipferrc/fm/strfmt"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"golang.design/x/clipboard"
@@ -22,7 +20,10 @@ type updateDirectoryListingMsg []fs.DirEntry
 type previewDirectoryListingMsg []fs.DirEntry
 type moveDirItemMsg []fs.DirEntry
 type errorMsg string
-type directoryItemSizeMsg string
+type directoryItemSizeMsg struct {
+	index int
+	size  string
+}
 type copyToClipboardMsg string
 type convertImageToStringMsg string
 type findFilesByNameMsg struct {
@@ -39,9 +40,9 @@ type readFileContentMsg struct {
 }
 
 // updateDirectoryListingCmd updates the directory listing based on the name of the directory provided.
-func (m Model) updateDirectoryListingCmd(name string) tea.Cmd {
+func (b Bubble) updateDirectoryListingCmd(name string) tea.Cmd {
 	return func() tea.Msg {
-		files, err := dirfs.GetDirectoryListing(name, m.dirTree.ShowHidden)
+		files, err := dirfs.GetDirectoryListing(name, b.showHiddenFiles)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
@@ -56,14 +57,14 @@ func (m Model) updateDirectoryListingCmd(name string) tea.Cmd {
 }
 
 // previewDirectoryListingCmd updates the directory listing based on the name of the directory provided.
-func (m Model) previewDirectoryListingCmd(name string) tea.Cmd {
+func (b Bubble) previewDirectoryListingCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		currentDir, err := dirfs.GetWorkingDirectory()
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		files, err := dirfs.GetDirectoryListing(filepath.Join(currentDir, name), m.dirTree.ShowHidden)
+		files, err := dirfs.GetDirectoryListing(filepath.Join(currentDir, name), b.showHiddenFiles)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
@@ -73,7 +74,7 @@ func (m Model) previewDirectoryListingCmd(name string) tea.Cmd {
 }
 
 // renameDirectoryItemCmd renames a file or directory based on the name and value provided.
-func (m Model) renameDirectoryItemCmd(name, value string) tea.Cmd {
+func (b Bubble) renameDirectoryItemCmd(name, value string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.RenameDirectoryItem(name, value); err != nil {
 			return errorMsg(err.Error())
@@ -84,16 +85,16 @@ func (m Model) renameDirectoryItemCmd(name, value string) tea.Cmd {
 }
 
 // moveDirectoryItemCmd moves a file to the current working directory.
-func (m Model) moveDirectoryItemCmd(name string) tea.Cmd {
+func (b Bubble) moveDirectoryItemCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		workingDir, err := dirfs.GetWorkingDirectory()
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		// Get the directory from which the move was intiated from
+		// Get the directory frob which the move was intiated from
 		// and give it the same file name.
-		src := filepath.Join(m.initialMoveDirectory, name)
+		src := filepath.Join(b.moveInitiatedDirectory, name)
 
 		// Destination is the current working directory with
 		// the same file name that it had.
@@ -103,12 +104,12 @@ func (m Model) moveDirectoryItemCmd(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		files, err := dirfs.GetDirectoryListing(m.initialMoveDirectory, m.dirTree.ShowHidden)
+		files, err := dirfs.GetDirectoryListing(b.moveInitiatedDirectory, b.showHiddenFiles)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		err = os.Chdir(m.initialMoveDirectory)
+		err = os.Chdir(b.moveInitiatedDirectory)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
@@ -117,17 +118,17 @@ func (m Model) moveDirectoryItemCmd(name string) tea.Cmd {
 	}
 }
 
-// redrawImageCmd redraws the image based on the width provided.
-func (m Model) redrawImageCmd(width int) tea.Cmd {
+// convertImageToStringCmd redraws the image based on the width provided.
+func (b Bubble) convertImageToStringCmd(width int) tea.Cmd {
 	return func() tea.Msg {
-		imageString := renderer.ImageToString(width, m.renderer.Image)
+		imageString := strfmt.ImageToString(width, b.currentImage)
 
 		return convertImageToStringMsg(imageString)
 	}
 }
 
 // deleteDirectoryCmd deletes a directory based on the name provided.
-func (m Model) deleteDirectoryCmd(name string) tea.Cmd {
+func (b Bubble) deleteDirectoryCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.DeleteDirectory(name); err != nil {
 			return errorMsg(err.Error())
@@ -138,7 +139,7 @@ func (m Model) deleteDirectoryCmd(name string) tea.Cmd {
 }
 
 // deleteFileCmd deletes a file based on the name provided.
-func (m Model) deleteFileCmd(name string) tea.Cmd {
+func (b Bubble) deleteFileCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.DeleteFile(name); err != nil {
 			return errorMsg(err.Error())
@@ -149,7 +150,7 @@ func (m Model) deleteFileCmd(name string) tea.Cmd {
 }
 
 // readFileContentCmd reads the content of a file and returns it.
-func (m Model) readFileContentCmd(fileName string, width int) tea.Cmd {
+func (b Bubble) readFileContentCmd(fileName string, width int) tea.Cmd {
 	return func() tea.Msg {
 		content, err := dirfs.ReadFileContent(fileName)
 		if err != nil {
@@ -157,8 +158,8 @@ func (m Model) readFileContentCmd(fileName string, width int) tea.Cmd {
 		}
 
 		switch {
-		case filepath.Ext(fileName) == ".md" && m.appConfig.Settings.PrettyMarkdown:
-			markdownContent, err := renderer.RenderMarkdown(width, content)
+		case filepath.Ext(fileName) == ".md" && b.appConfig.Settings.PrettyMarkdown:
+			markdownContent, err := strfmt.RenderMarkdown(width, content)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
@@ -182,7 +183,7 @@ func (m Model) readFileContentCmd(fileName string, width int) tea.Cmd {
 				return errorMsg(err.Error())
 			}
 
-			imageString := renderer.ImageToString(width, img)
+			imageString := strfmt.ImageToString(width, img)
 
 			return readFileContentMsg{
 				rawContent:  content,
@@ -193,7 +194,7 @@ func (m Model) readFileContentCmd(fileName string, width int) tea.Cmd {
 				image:       img,
 			}
 		case filepath.Ext(fileName) == ".pdf":
-			pdfContent, err := renderer.ReadPdf(fileName)
+			pdfContent, err := strfmt.ReadPdf(fileName)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
@@ -207,7 +208,7 @@ func (m Model) readFileContentCmd(fileName string, width int) tea.Cmd {
 				image:       nil,
 			}
 		default:
-			code, err := renderer.Highlight(content, filepath.Ext(fileName), m.appConfig.Settings.SyntaxTheme)
+			code, err := strfmt.Highlight(content, filepath.Ext(fileName), b.appConfig.Settings.SyntaxTheme)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
@@ -225,7 +226,7 @@ func (m Model) readFileContentCmd(fileName string, width int) tea.Cmd {
 }
 
 // createDirectoryCmd creates a directory based on the name provided.
-func (m Model) createDirectoryCmd(name string) tea.Cmd {
+func (b Bubble) createDirectoryCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.CreateDirectory(name); err != nil {
 			return errorMsg(err.Error())
@@ -236,7 +237,7 @@ func (m Model) createDirectoryCmd(name string) tea.Cmd {
 }
 
 // createFileCmd creates a file based on the name provided.
-func (m Model) createFileCmd(name string) tea.Cmd {
+func (b Bubble) createFileCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.CreateFile(name); err != nil {
 			return errorMsg(err.Error())
@@ -247,7 +248,7 @@ func (m Model) createFileCmd(name string) tea.Cmd {
 }
 
 // zipDirectoryCmd zips a directory based on the name provided.
-func (m Model) zipDirectoryCmd(name string) tea.Cmd {
+func (b Bubble) zipDirectoryCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		currentDir, err := dirfs.GetWorkingDirectory()
 		if err != nil {
@@ -264,7 +265,7 @@ func (m Model) zipDirectoryCmd(name string) tea.Cmd {
 }
 
 // unzipDirectoryCmd unzips a directory based on the name provided.
-func (m Model) unzipDirectoryCmd(name string) tea.Cmd {
+func (b Bubble) unzipDirectoryCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		currentDir, err := dirfs.GetWorkingDirectory()
 		if err != nil {
@@ -281,7 +282,7 @@ func (m Model) unzipDirectoryCmd(name string) tea.Cmd {
 }
 
 // copyFileCmd copies a file based on the name provided.
-func (m Model) copyFileCmd(name string) tea.Cmd {
+func (b Bubble) copyFileCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.CopyFile(name); err != nil {
 			return errorMsg(err.Error())
@@ -292,7 +293,7 @@ func (m Model) copyFileCmd(name string) tea.Cmd {
 }
 
 // copyDirectoryCmd copies a directory based on the name provided.
-func (m Model) copyDirectoryCmd(name string) tea.Cmd {
+func (b Bubble) copyDirectoryCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.CopyDirectory(name); err != nil {
 			return errorMsg(err.Error())
@@ -303,41 +304,31 @@ func (m Model) copyDirectoryCmd(name string) tea.Cmd {
 }
 
 // getDirectoryItemSizeCmd calculates the size of a directory or file.
-func (m Model) getDirectoryItemSizeCmd(name string) tea.Cmd {
-	if m.directoryItemSizeCtx != nil && m.directoryItemSizeCtx.cancel != nil {
-		m.directoryItemSizeCtx.cancel()
-	}
-
-	ctx, cancel := context.WithTimeout(m.directoryItemSizeCtx.ctx, 300*time.Millisecond)
-	m.directoryItemSizeCtx.cancel = cancel
-
+func (b Bubble) getDirectoryItemSizeCmd(name string, i int) tea.Cmd {
 	return func() tea.Msg {
-		defer cancel()
-		<-ctx.Done()
-		if ctx.Err() == context.DeadlineExceeded {
-			size, err := dirfs.GetDirectoryItemSize(name)
-			if err != nil {
-				return directoryItemSizeMsg("N/A")
-			}
-
-			sizeString := renderer.ConvertBytesToSizeString(size)
-
-			return directoryItemSizeMsg(sizeString)
+		size, err := dirfs.GetDirectoryItemSize(name)
+		if err != nil {
+			return directoryItemSizeMsg{size: "N/A", index: i}
 		}
 
-		return nil
+		sizeString := strfmt.ConvertBytesToSizeString(size)
+
+		return directoryItemSizeMsg{
+			size:  sizeString,
+			index: i,
+		}
 	}
 }
 
 // handleErrorCmd returns an error message to the UI.
-func (m Model) handleErrorCmd(err error) tea.Cmd {
+func (b Bubble) handleErrorCmd(err error) tea.Cmd {
 	return func() tea.Msg {
 		return errorMsg(err.Error())
 	}
 }
 
 // copyToClipboardCmd copies the provided string to the clipboard.
-func (m Model) copyToClipboardCmd(name string) tea.Cmd {
+func (b Bubble) copyToClipboardCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		workingDir, err := dirfs.GetWorkingDirectory()
 		if err != nil {
@@ -352,14 +343,14 @@ func (m Model) copyToClipboardCmd(name string) tea.Cmd {
 }
 
 // getDirectoryListingByTypeCmd returns only directories in the current directory.
-func (m Model) getDirectoryListingByTypeCmd(listType string, showHidden bool) tea.Cmd {
+func (b Bubble) getDirectoryListingByTypeCmd(listType string) tea.Cmd {
 	return func() tea.Msg {
 		workingDir, err := dirfs.GetWorkingDirectory()
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		directories, err := dirfs.GetDirectoryListingByType(workingDir, listType, showHidden)
+		directories, err := dirfs.GetDirectoryListingByType(workingDir, listType, b.showHiddenFiles)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
@@ -369,7 +360,7 @@ func (m Model) getDirectoryListingByTypeCmd(listType string, showHidden bool) te
 }
 
 // findFilesByNameCmd finds files based on name.
-func (m Model) findFilesByNameCmd(name string) tea.Cmd {
+func (b Bubble) findFilesByNameCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		workingDir, err := dirfs.GetWorkingDirectory()
 		if err != nil {
@@ -389,7 +380,7 @@ func (m Model) findFilesByNameCmd(name string) tea.Cmd {
 }
 
 // writeSelectionPathCmd writes content to the file specified.
-func (m Model) writeSelectionPathCmd(selectionPath, filePath string) tea.Cmd {
+func (b Bubble) writeSelectionPathCmd(selectionPath, filePath string) tea.Cmd {
 	return func() tea.Msg {
 		if err := dirfs.WriteToFile(selectionPath, filePath); err != nil {
 			return errorMsg(err.Error())

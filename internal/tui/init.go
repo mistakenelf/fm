@@ -1,4 +1,4 @@
-package ui
+package tui
 
 import (
 	"log"
@@ -7,14 +7,15 @@ import (
 	"strings"
 
 	"github.com/knipferrc/fm/dirfs"
-	"github.com/spf13/viper"
 
 	"github.com/charmbracelet/bubbles/spinner"
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/spf13/viper"
 )
 
 // Init initializes the UI and sets up initial data.
-func (m Model) Init() tea.Cmd {
+func (b Bubble) Init() tea.Cmd {
 	var cmds []tea.Cmd
 	startDir := viper.GetString("start-dir")
 
@@ -26,7 +27,7 @@ func (m Model) Init() tea.Cmd {
 		}
 
 		if strings.HasPrefix(startDir, "/") {
-			cmds = append(cmds, m.updateDirectoryListingCmd(startDir))
+			cmds = append(cmds, b.updateDirectoryListingCmd(startDir))
 		} else {
 			path, err := os.Getwd()
 			if err != nil {
@@ -35,20 +36,21 @@ func (m Model) Init() tea.Cmd {
 
 			filePath := filepath.Join(path, startDir)
 
-			cmds = append(cmds, m.updateDirectoryListingCmd(filePath))
+			cmds = append(cmds, b.updateDirectoryListingCmd(filePath))
 		}
-	case m.appConfig.Settings.StartDir == dirfs.HomeDirectory:
+	case b.appConfig.Settings.StartDir == dirfs.HomeDirectory:
 		homeDir, err := dirfs.GetHomeDirectory()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		cmds = append(cmds, m.updateDirectoryListingCmd(homeDir))
+		cmds = append(cmds, b.updateDirectoryListingCmd(homeDir))
 	default:
-		cmds = append(cmds, m.updateDirectoryListingCmd(m.appConfig.Settings.StartDir))
+		cmds = append(cmds, b.updateDirectoryListingCmd(b.appConfig.Settings.StartDir))
 	}
 
 	cmds = append(cmds, spinner.Tick)
+	cmds = append(cmds, textinput.Blink)
 
 	return tea.Batch(cmds...)
 }

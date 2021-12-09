@@ -1,4 +1,4 @@
-package renderer
+package strfmt
 
 import (
 	"bytes"
@@ -14,34 +14,39 @@ import (
 	"github.com/lucasb-eyer/go-colorful"
 )
 
-// Model is a struct that contains all the properties of renderer.
-type Model struct {
-	Image   image.Image
-	Content string
-	Width   int
-}
-
 // ConvertTabsToSpaces converts tabs to spaces.
 func ConvertTabsToSpaces(input string) string {
 	return strings.ReplaceAll(input, "\t", "    ")
 }
 
 // ConvertByesToSizeString converts a byte count to a human readable string.
-func ConvertBytesToSizeString(b int64) string {
-	const unit = 1000
-
-	if b < unit {
-		return fmt.Sprintf("%d B", b)
+func ConvertBytesToSizeString(size int64) string {
+	if size < 1000 {
+		return fmt.Sprintf("%dB", size)
 	}
 
-	div, exp := int64(unit), 0
-	for n := b / unit; n >= unit; n /= unit {
-		div *= unit
-		exp++
+	suffix := []string{
+		"K", // kilo
+		"M", // mega
+		"G", // giga
+		"T", // tera
+		"P", // peta
+		"E", // exa
+		"Z", // zeta
+		"Y", // yotta
 	}
 
-	return fmt.Sprintf("%.1f %cB",
-		float64(b)/float64(div), "kMGTPE"[exp])
+	curr := float64(size) / 1000
+	for _, s := range suffix {
+		if curr < 10 {
+			return fmt.Sprintf("%.1f%s", curr-0.0499, s)
+		} else if curr < 1000 {
+			return fmt.Sprintf("%d%s", int(curr), s)
+		}
+		curr /= 1000
+	}
+
+	return ""
 }
 
 // ImageToString converts an image to a string representation of an image.
@@ -125,39 +130,4 @@ func Highlight(content, extension, syntaxTheme string) (string, error) {
 	}
 
 	return buf.String(), nil
-}
-
-// SetSize sets the size of the renderer.
-func (m *Model) SetSize(width int) {
-	m.Width = width
-}
-
-// GetImage returns the currently set image.
-func (m Model) GetImage() image.Image {
-	return m.Image
-}
-
-// SetContent sets the content of the renderer.
-func (m *Model) SetContent(content string) {
-	m.Content = content
-}
-
-// SetImage sets the image of the renderer.
-func (m *Model) SetImage(img image.Image) {
-	m.Image = img
-}
-
-// GetWidth returns the width of the renderer.
-func (m Model) GetWidth() int {
-	return m.Width
-}
-
-// GetContent returns the content of the renderer.
-func (m Model) GetContent() string {
-	return m.Content
-}
-
-// View returns a string representation of a renderer.
-func (m Model) View() string {
-	return lipgloss.NewStyle().Width(m.Width).Render(m.Content)
 }

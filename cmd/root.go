@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/knipferrc/fm/internal/config"
-	"github.com/knipferrc/fm/internal/ui"
+	"github.com/knipferrc/fm/internal/tui"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
@@ -29,18 +29,16 @@ var rootCmd = &cobra.Command{
 			f, err := tea.LogToFile("debug.log", "debug")
 			if err != nil {
 				log.Fatal(err)
-				os.Exit(1)
 			}
 
 			defer func() {
 				if err = f.Close(); err != nil {
 					log.Fatal(err)
-					os.Exit(1)
 				}
 			}()
 		}
 
-		m := ui.NewModel()
+		m := tui.NewBubble()
 		var opts []tea.ProgramOption
 
 		// Always append alt screen program option.
@@ -55,7 +53,6 @@ var rootCmd = &cobra.Command{
 		p := tea.NewProgram(m, opts...)
 		if err := p.Start(); err != nil {
 			log.Fatal("Failed to start fm", err)
-			os.Exit(1)
 		}
 	},
 }
