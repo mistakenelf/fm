@@ -279,7 +279,7 @@ func (b Bubble) helpView() string {
 		{"h/left", "Go back a directory"},
 		{"l/right", "Read file or enter directory"},
 		{"p", "Preview directory"},
-		{"ctrl+g", "Go to top of filetree or box"},
+		{"gg", "Go to top of filetree or box"},
 		{"G", "Go to bottom of filetree or box"},
 		{"~", "Go to home directory"},
 		{"/", "Go to root directory"},
