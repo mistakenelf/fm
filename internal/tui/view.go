@@ -35,6 +35,10 @@ func (b Bubble) statusBarView() string {
 			currentPath = dirfs.CurrentDirectory
 		}
 
+		if len(b.foundFilesPaths) > 0 {
+			currentPath = b.foundFilesPaths[b.treeCursor]
+		}
+
 		status = fmt.Sprintf("%s %s %s",
 			selectedFile.ModTime().Format("2006-01-02 15:04:05"),
 			selectedFile.Mode().String(),
@@ -50,7 +54,7 @@ func (b Bubble) statusBarView() string {
 		status = fmt.Sprintf("%s %s", "Currently moving:", b.treeFiles[b.treeCursor].Name())
 	}
 
-	if b.appConfig.Settings.ShowIcons {
+	if b.appConfig.Settings.ShowIcons && !b.appConfig.Settings.SimpleMode {
 		logo = fmt.Sprintf("%s %s", icons.IconDef["dir"].GetGlyph(), "FM")
 	} else {
 		logo = "FM"
@@ -61,7 +65,7 @@ func (b Bubble) statusBarView() string {
 		Foreground(b.theme.StatusBarSelectedFileForegroundColor).
 		Background(b.theme.StatusBarSelectedFileBackgroundColor)
 
-	if b.simpleMode {
+	if b.appConfig.Settings.SimpleMode {
 		selectedFileStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
 	}
@@ -76,7 +80,7 @@ func (b Bubble) statusBarView() string {
 		Foreground(b.theme.StatusBarTotalFilesForegroundColor).
 		Background(b.theme.StatusBarTotalFilesBackgroundColor)
 
-	if b.simpleMode {
+	if b.appConfig.Settings.SimpleMode {
 		fileCountStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
 	}
@@ -92,7 +96,7 @@ func (b Bubble) statusBarView() string {
 		Foreground(b.theme.StatusBarLogoForegroundColor).
 		Background(b.theme.StatusBarLogoBackgroundColor)
 
-	if b.simpleMode {
+	if b.appConfig.Settings.SimpleMode {
 		logoStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
 	}
@@ -107,7 +111,7 @@ func (b Bubble) statusBarView() string {
 		Foreground(b.theme.StatusBarBarForegroundColor).
 		Background(b.theme.StatusBarBarBackgroundColor)
 
-	if b.simpleMode {
+	if b.appConfig.Settings.SimpleMode {
 		statusStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
 	}
@@ -152,6 +156,10 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 
 		icon, color := icons.GetIcon(fileInfo.Name(), filepath.Ext(fileInfo.Name()), icons.GetIndicator(fileInfo.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
+
+		if !b.appConfig.Settings.ShowIcons || b.appConfig.Settings.SimpleMode {
+			fileIcon = ""
+		}
 
 		switch {
 		case b.appConfig.Settings.ShowIcons && b.treeCursor == i:
@@ -293,13 +301,29 @@ func (b Bubble) helpView() string {
 	}
 
 	for _, content := range helpContent {
-		helpScreen += fmt.Sprintf("%s %s\n", content.key, content.description)
+		keyText := lipgloss.NewStyle().Width(12).Bold(true).Render(content.key)
+		descriptionText := lipgloss.NewStyle().Render(content.description)
+		row := lipgloss.JoinHorizontal(lipgloss.Top, keyText, descriptionText)
+		helpScreen += fmt.Sprintf("%s\n", row)
 	}
 
-	return lipgloss.NewStyle().
-		Width(b.secondaryViewport.Width - box.GetHorizontalPadding()).
-		Height(b.secondaryViewport.Height - box.GetVerticalPadding()).
-		Render(helpScreen)
+	welcomeText := lipgloss.NewStyle().
+		Border(lipgloss.NormalBorder()).
+		Bold(true).
+		Italic(true).
+		BorderBottom(true).
+		BorderTop(false).
+		BorderRight(false).
+		BorderLeft(false).
+		Render("Welcome to FM!")
+
+	return lipgloss.JoinVertical(
+		lipgloss.Top,
+		welcomeText,
+		lipgloss.NewStyle().
+			Width(b.secondaryViewport.Width-box.GetHorizontalPadding()).
+			Height(b.secondaryViewport.Height-box.GetVerticalPadding()).
+			Render(helpScreen))
 }
 
 // View returns a string representation of the entire application UI.
@@ -308,6 +332,8 @@ func (b Bubble) View() string {
 		return fmt.Sprintf("%s %s", b.spinner.View(), "loading...")
 	}
 
+	var primaryBox string
+	var secondaryBox string
 	primaryBoxBorder := lipgloss.NormalBorder()
 	secondaryBoxBorder := lipgloss.NormalBorder()
 	primaryBoxBorderColor := b.theme.InactiveBoxBorderColor
@@ -326,7 +352,12 @@ func (b Bubble) View() string {
 		secondaryBoxBorder = lipgloss.HiddenBorder()
 	}
 
-	if b.moveMode {
+	if b.appConfig.Settings.SimpleMode {
+		primaryBoxBorder = lipgloss.HiddenBorder()
+		secondaryBoxBorder = lipgloss.HiddenBorder()
+	}
+
+	if b.moveMode && !b.appConfig.Settings.SimpleMode && !b.appConfig.Settings.Borderless {
 		primaryBoxBorder = lipgloss.Border{
 			Top:         "-",
 			Bottom:      "-",
@@ -339,22 +370,37 @@ func (b Bubble) View() string {
 		}
 	}
 
+	primaryBox = box.Copy().
+		Border(primaryBoxBorder).
+		BorderForeground(primaryBoxBorderColor).
+		Width(b.primaryViewport.Width).
+		Height(b.primaryViewport.Height).
+		Render(b.primaryViewport.View())
+
+	if b.showBoxSpinner {
+		primaryBox = box.Copy().
+			Border(primaryBoxBorder).
+			BorderForeground(primaryBoxBorderColor).
+			Width(b.primaryViewport.Width).
+			Height(b.primaryViewport.Height).
+			Render(fmt.Sprintf("%s loading...", b.spinner.View()))
+	}
+
+	if !b.appConfig.Settings.SimpleMode {
+		secondaryBox = box.Copy().
+			Border(secondaryBoxBorder).
+			BorderForeground(secondaryBoxBorderColor).
+			Width(b.secondaryViewport.Width).
+			Height(b.secondaryViewport.Height).
+			Render(b.secondaryViewport.View())
+	}
+
 	view := lipgloss.JoinVertical(
 		lipgloss.Top,
 		lipgloss.JoinHorizontal(
 			lipgloss.Top,
-			box.Copy().
-				Border(primaryBoxBorder).
-				BorderForeground(primaryBoxBorderColor).
-				Width(b.primaryViewport.Width).
-				Height(b.primaryViewport.Height).
-				Render(b.primaryViewport.View()),
-			box.Copy().
-				Border(secondaryBoxBorder).
-				BorderForeground(secondaryBoxBorderColor).
-				Width(b.secondaryViewport.Width).
-				Height(b.secondaryViewport.Height).
-				Render(b.secondaryViewport.View()),
+			primaryBox,
+			secondaryBox,
 		),
 		b.statusBarView(),
 	)

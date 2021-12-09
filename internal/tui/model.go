@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -25,11 +26,11 @@ type Bubble struct {
 	treeFiles              []fs.DirEntry
 	treePreviewFiles       []fs.DirEntry
 	treeItemToMove         fs.DirEntry
+	previousKey            tea.KeyMsg
 	width                  int
 	height                 int
 	activeBox              int
 	treeCursor             int
-	simpleMode             bool
 	showHiddenFiles        bool
 	ready                  bool
 	showCommandInput       bool
@@ -42,8 +43,9 @@ type Bubble struct {
 	moveMode               bool
 	findMode               bool
 	deleteMode             bool
-	showSpinner            bool
+	showBoxSpinner         bool
 	showHelp               bool
+	foundFilesPaths        []string
 	moveInitiatedDirectory string
 	primaryContent         string
 	secondaryContent       string
