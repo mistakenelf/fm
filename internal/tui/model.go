@@ -43,6 +43,7 @@ type Bubble struct {
 	findMode               bool
 	deleteMode             bool
 	showSpinner            bool
+	showHelp               bool
 	moveInitiatedDirectory string
 	primaryContent         string
 	secondaryContent       string
@@ -66,11 +67,11 @@ func NewBubble() Bubble {
 		Foreground(theme.StatusBarBarForegroundColor)
 
 	return Bubble{
-		appConfig:        cfg,
-		theme:            theme,
-		showHiddenFiles:  true,
-		spinner:          s,
-		textinput:        t,
-		secondaryContent: "Welcome to FM",
+		appConfig:       cfg,
+		theme:           theme,
+		showHiddenFiles: true,
+		spinner:         s,
+		textinput:       t,
+		showHelp:        true,
 	}
 }

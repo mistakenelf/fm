@@ -256,6 +256,52 @@ func (b Bubble) errorView(msg string) string {
 		Render(msg)
 }
 
+type helpEntry struct {
+	key         string
+	description string
+}
+
+// helpView returns help text.
+func (b Bubble) helpView() string {
+	helpScreen := ""
+	helpContent := []helpEntry{
+		{"ctrl+c", "Exit FM"},
+		{"j/up", "Move up"},
+		{"k/down", "Move down"},
+		{"h/left", "Go back a directory"},
+		{"l/right", "Read file or enter directory"},
+		{"p", "Preview directory"},
+		{"ctrl+g", "Go to top of filetree or box"},
+		{"G", "Go to bottom of filetree or box"},
+		{"~", "Go to home directory"},
+		{"/", "Go to root directory"},
+		{".", "Toggle hidden files"},
+		{"S", "Only show directories"},
+		{"s", "Only show files"},
+		{"y", "Copy file path to clipboard"},
+		{"Z", "Zip currently selected tree item"},
+		{"U", "Unzip currently selected tree item"},
+		{"n", "Create new file"},
+		{"N", "Create new directory"},
+		{"ctrl+d", "Delete currently selected tree item"},
+		{"M", "Move currently selected tree item"},
+		{"enter", "Process command"},
+		{"E", "Edit currently selected tree item"},
+		{"C", "Copy currently selected tree item"},
+		{"esc", "Reset FM to initial state"},
+		{"tab", "Toggle between boxes"},
+	}
+
+	for _, content := range helpContent {
+		helpScreen += fmt.Sprintf("%s %s\n", content.key, content.description)
+	}
+
+	return lipgloss.NewStyle().
+		Width(b.secondaryViewport.Width - box.GetHorizontalPadding()).
+		Height(b.secondaryViewport.Height - box.GetVerticalPadding()).
+		Render(helpScreen)
+}
+
 // View returns a string representation of the entire application UI.
 func (b Bubble) View() string {
 	if !b.ready {

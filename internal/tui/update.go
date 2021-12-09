@@ -55,6 +55,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return b, nil
 	case readFileContentMsg:
 		b.showFileTreePreview = false
+		b.showHelp = false
 
 		switch {
 		case msg.code != "":
@@ -75,11 +76,13 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return b, nil
 	case previewDirectoryListingMsg:
 		b.showFileTreePreview = true
+		b.showHelp = false
 		b.treePreviewFiles = msg
 		b.secondaryViewport.SetContent(b.fileTreePreviewView(msg))
 
 		return b, nil
 	case convertImageToStringMsg:
+		b.showHelp = false
 		b.secondaryViewport.SetContent(b.textContentView(string(msg)))
 
 		return b, nil
@@ -91,6 +94,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return b, nil
 	case errorMsg:
+		b.showHelp = false
 		b.errorMsg = string(msg)
 		b.secondaryViewport.SetContent(b.errorView(string(msg)))
 
@@ -112,6 +116,8 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return b, b.convertImageToStringCmd(b.secondaryViewport.Width - box.GetHorizontalFrameSize())
 		case b.errorMsg != "":
 			b.secondaryViewport.SetContent(b.errorView(b.errorMsg))
+		case b.showHelp:
+			b.secondaryViewport.SetContent(b.helpView())
 		default:
 			b.secondaryViewport.SetContent(b.textContentView(b.secondaryContent))
 		}
@@ -469,6 +475,9 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.findMode = false
 			b.deleteMode = false
 			b.errorMsg = ""
+			b.showHelp = true
+
+			b.secondaryViewport.SetContent(b.helpView())
 
 			b.textinput.Blur()
 			b.textinput.Reset()
