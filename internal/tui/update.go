@@ -46,6 +46,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.createFileMode = false
 		b.createDirectoryMode = false
 		b.deleteMode = false
+		b.renameMode = false
 		b.treeCursor = 0
 		b.treeFiles = msg
 		b.primaryContent = b.fileTreeView(msg)
@@ -499,6 +500,19 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				b.textinput.Focus()
 
 				return b, textinput.Blink
+			}
+		case "R":
+			if b.activeBox == 0 && !b.showBoxSpinner && len(b.treeFiles) > 0 {
+				selectedFile := b.treeFiles
+
+				if selectedFile != nil {
+					b.renameMode = true
+					b.showCommandInput = true
+					b.textinput.Placeholder = "Enter new name"
+					b.textinput.Focus()
+
+					return b, textinput.Blink
+				}
 			}
 		case "esc":
 			b.showCommandInput = false
