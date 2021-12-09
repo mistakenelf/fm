@@ -13,6 +13,7 @@ import (
 	"github.com/muesli/reflow/truncate"
 )
 
+// statusBarView returns the status bar.
 func (b Bubble) statusBarView() string {
 	var logo string
 	var status string
@@ -129,6 +130,7 @@ func (b Bubble) statusBarView() string {
 	)
 }
 
+// fileView returns the filetree view.
 func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 	var directoryItem string
 	curFiles := ""
@@ -188,6 +190,7 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 	return curFiles
 }
 
+// fileTreePreviewView returns a preview of a filetree.
 func (b Bubble) fileTreePreviewView(files []fs.DirEntry) string {
 	var directoryItem string
 	curFiles := ""
@@ -236,6 +239,7 @@ func (b Bubble) fileTreePreviewView(files []fs.DirEntry) string {
 	return curFiles
 }
 
+// textContentView returns some text content.
 func (b Bubble) textContentView(content string) string {
 	return lipgloss.NewStyle().
 		Width(b.secondaryViewport.Width - box.GetHorizontalPadding()).
@@ -243,6 +247,7 @@ func (b Bubble) textContentView(content string) string {
 		Render(content)
 }
 
+// errorView returns an error message.
 func (b Bubble) errorView(msg string) string {
 	return lipgloss.NewStyle().
 		Foreground(b.theme.ErrorColor).
