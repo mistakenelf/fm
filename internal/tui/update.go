@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/viper"
 )
 
@@ -43,6 +44,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case updateDirectoryListingMsg:
+		b.fileSizes = nil
 		b.showCommandInput = false
 		b.createFileMode = false
 		b.createDirectoryMode = false
@@ -50,10 +52,9 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.renameMode = false
 		b.treeCursor = 0
 		b.treeFiles = msg
-		b.primaryContent = b.fileTreeView(msg)
 		b.textinput.Blur()
 		b.textinput.Reset()
-		b.primaryViewport.SetContent(b.primaryContent)
+		b.primaryViewport.SetContent(b.fileTreeView(msg))
 
 		b.spinners = make([]spinner.Model, len(msg))
 		b.fileSizes = make([]string, len(msg))
@@ -61,6 +62,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		for i, file := range msg {
 			s := spinner.NewModel()
 			s.Spinner = spinner.Dot
+			s.Style = lipgloss.NewStyle().Foreground(b.theme.SpinnerColor)
 			b.spinners[i] = s
 			cmds = append(cmds, tea.Batch(spinner.Tick, b.getDirectoryItemSizeCmd(file.Name(), i)))
 		}
@@ -68,7 +70,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return b, tea.Batch(cmds...)
 	case directoryItemSizeMsg:
 		b.fileSizes[msg.index] = msg.size
-		b.primaryViewport.SetContent(b.primaryContent)
+		b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 
 		return b, nil
 	case readFileContentMsg:
@@ -77,19 +79,19 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		switch {
 		case msg.code != "":
-			b.secondaryContent = msg.code
+			b.secondaryBoxContent = msg.code
 		case msg.pdfContent != "":
-			b.secondaryContent = msg.pdfContent
+			b.secondaryBoxContent = msg.pdfContent
 		case msg.markdown != "":
-			b.secondaryContent = msg.markdown
+			b.secondaryBoxContent = msg.markdown
 		case msg.image != nil:
 			b.currentImage = msg.image
-			b.secondaryContent = msg.imageString
+			b.secondaryBoxContent = msg.imageString
 		default:
-			b.secondaryContent = msg.rawContent
+			b.secondaryBoxContent = msg.rawContent
 		}
 
-		b.secondaryViewport.SetContent(b.textContentView(b.secondaryContent))
+		b.secondaryViewport.SetContent(b.textContentView(b.secondaryBoxContent))
 
 		return b, nil
 	case previewDirectoryListingMsg:
@@ -122,8 +124,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.textinput.Reset()
 		b.treeFiles = msg.entries
 		b.foundFilesPaths = msg.paths
-		b.primaryContent = b.fileTreeView(msg.entries)
-		b.primaryViewport.SetContent(b.primaryContent)
+		b.primaryViewport.SetContent(b.fileTreeView(msg.entries))
 		b.showBoxSpinner = false
 
 		return b, nil
@@ -153,7 +154,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case b.showHelp:
 			b.secondaryViewport.SetContent(b.helpView())
 		default:
-			b.secondaryViewport.SetContent(b.textContentView(b.secondaryContent))
+			b.secondaryViewport.SetContent(b.textContentView(b.secondaryBoxContent))
 		}
 
 		if !b.ready {
@@ -559,6 +560,11 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if b.activeBox != 0 {
 		b.secondaryViewport, cmd = b.secondaryViewport.Update(msg)
+		cmds = append(cmds, cmd)
+	}
+
+	for i := range b.spinners {
+		b.spinners[i], cmd = b.spinners[i].Update(msg)
 		cmds = append(cmds, cmd)
 	}
 

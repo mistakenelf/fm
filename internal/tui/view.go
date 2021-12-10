@@ -150,9 +150,9 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 
 		fileInfo, _ := file.Info()
 
-		fileSize := "2"
+		fileSize := ""
 
-		if len(b.fileSizes) > 0 && len(b.spinners) > 0 {
+		if len(b.fileSizes) > 0 {
 			if b.fileSizes[i] != "" {
 				fileSize = lipgloss.NewStyle().Foreground(fileSizeColor).Render(b.fileSizes[i])
 			} else {

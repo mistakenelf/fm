@@ -49,8 +49,7 @@ type Bubble struct {
 	foundFilesPaths        []string
 	fileSizes              []string
 	moveInitiatedDirectory string
-	primaryContent         string
-	secondaryContent       string
+	secondaryBoxContent    string
 	errorMsg               string
 }
 
