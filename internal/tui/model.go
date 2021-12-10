@@ -20,6 +20,7 @@ type Bubble struct {
 	theme                  theme.Theme
 	currentImage           image.Image
 	spinner                spinner.Model
+	spinners               []spinner.Model
 	textinput              textinput.Model
 	primaryViewport        viewport.Model
 	secondaryViewport      viewport.Model
@@ -46,6 +47,7 @@ type Bubble struct {
 	showBoxSpinner         bool
 	showHelp               bool
 	foundFilesPaths        []string
+	fileSizes              []string
 	moveInitiatedDirectory string
 	primaryContent         string
 	secondaryContent       string

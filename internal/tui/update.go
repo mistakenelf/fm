@@ -9,6 +9,7 @@ import (
 
 	"github.com/knipferrc/fm/dirfs"
 
+	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/viper"
@@ -52,6 +53,21 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.primaryContent = b.fileTreeView(msg)
 		b.textinput.Blur()
 		b.textinput.Reset()
+		b.primaryViewport.SetContent(b.primaryContent)
+
+		b.spinners = make([]spinner.Model, len(msg))
+		b.fileSizes = make([]string, len(msg))
+
+		for i, file := range msg {
+			s := spinner.NewModel()
+			s.Spinner = spinner.Dot
+			b.spinners[i] = s
+			cmds = append(cmds, tea.Batch(spinner.Tick, b.getDirectoryItemSizeCmd(file.Name(), i)))
+		}
+
+		return b, tea.Batch(cmds...)
+	case directoryItemSizeMsg:
+		b.fileSizes[msg.index] = msg.size
 		b.primaryViewport.SetContent(b.primaryContent)
 
 		return b, nil

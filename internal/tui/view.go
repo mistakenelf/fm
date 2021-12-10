@@ -150,9 +150,17 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 
 		fileInfo, _ := file.Info()
 
-		fileSize := lipgloss.NewStyle().
-			Foreground(fileSizeColor).
-			Render(strfmt.ConvertBytesToSizeString(fileInfo.Size()))
+		fileSize := "2"
+
+		if len(b.fileSizes) > 0 && len(b.spinners) > 0 {
+			if b.fileSizes[i] != "" {
+				fileSize = lipgloss.NewStyle().Foreground(fileSizeColor).Render(b.fileSizes[i])
+			} else {
+				fileSize = lipgloss.NewStyle().
+					Foreground(fileSizeColor).
+					Render(b.spinners[i].View())
+			}
+		}
 
 		icon, color := icons.GetIcon(fileInfo.Name(), filepath.Ext(fileInfo.Name()), icons.GetIndicator(fileInfo.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
