@@ -18,7 +18,7 @@ require (
 )
 
 require (
-	golang.org/x/exp v0.0.0-20211207001050-4f2595aad9e7 // indirect
+	golang.org/x/exp v0.0.0-20211209182145-6e94b45d164d // indirect
 	golang.org/x/mobile v0.0.0-20211207041440-4e6c2922fdee // indirect
 )
 
@@ -49,8 +49,8 @@ require (
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
 	golang.design/x/clipboard v0.5.3
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
-	golang.org/x/net v0.0.0-20211208012354-db4efeb81f4b // indirect
-	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
+	golang.org/x/net v0.0.0-20211209124913-491a49abca63 // indirect
+	golang.org/x/sys v0.0.0-20211209171907-798191bca915 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
