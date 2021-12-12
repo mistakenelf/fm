@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// scrollFiletree moves handles wrapping of the filetree and
+// scrollFiletree handles wrapping of the filetree and
 // scrolling of the viewport.
 func (b *Bubble) scrollFileTree() {
 	top := b.primaryViewport.YOffset
