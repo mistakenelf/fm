@@ -155,6 +155,31 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		return b, nil
+	case tea.MouseMsg:
+		switch msg.Type {
+		case tea.MouseWheelUp:
+			if b.activeBox == 0 {
+				b.treeCursor--
+				b.scrollFileTree()
+				b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			}
+
+			if b.activeBox == 1 {
+				b.secondaryViewport.LineUp(1)
+				b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			}
+		case tea.MouseWheelDown:
+			if b.activeBox == 0 {
+				b.treeCursor++
+				b.scrollFileTree()
+				b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			}
+
+			if b.activeBox == 1 {
+				b.secondaryViewport.LineDown(1)
+				b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			}
+		}
 	case tea.KeyMsg:
 		if msg.String() == "g" && b.previousKey.String() == "g" {
 			if !b.showCommandInput && b.activeBox == 0 && !b.showBoxSpinner {
