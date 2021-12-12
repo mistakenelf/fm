@@ -203,6 +203,10 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 		curFiles += fmt.Sprintf("%s\n", row)
 	}
 
+	if len(b.treeFiles) == 0 {
+		curFiles = "Directory is empty"
+	}
+
 	return curFiles
 }
 
