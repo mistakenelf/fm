@@ -158,7 +158,7 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 			} else {
 				fileSize = lipgloss.NewStyle().
 					Foreground(fileSizeColor).
-					Render(b.spinners[i].View())
+					Render("---")
 			}
 		}
 

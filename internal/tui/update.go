@@ -9,10 +9,8 @@ import (
 
 	"github.com/knipferrc/fm/dirfs"
 
-	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/viper"
 )
 
@@ -44,7 +42,6 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case updateDirectoryListingMsg:
-		b.fileSizes = nil
 		b.showCommandInput = false
 		b.createFileMode = false
 		b.createDirectoryMode = false
@@ -52,25 +49,22 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.renameMode = false
 		b.treeCursor = 0
 		b.treeFiles = msg
-		b.textinput.Blur()
-		b.textinput.Reset()
-		b.primaryViewport.SetContent(b.fileTreeView(msg))
-
-		b.spinners = make([]spinner.Model, len(msg))
 		b.fileSizes = make([]string, len(msg))
 
 		for i, file := range msg {
-			s := spinner.NewModel()
-			s.Spinner = spinner.Dot
-			s.Style = lipgloss.NewStyle().Foreground(b.theme.SpinnerColor)
-			b.spinners[i] = s
-			cmds = append(cmds, tea.Batch(spinner.Tick, b.getDirectoryItemSizeCmd(file.Name(), i)))
+			cmds = append(cmds, b.getDirectoryItemSizeCmd(file.Name(), i))
 		}
+
+		b.primaryViewport.SetContent(b.fileTreeView(msg))
+		b.textinput.Blur()
+		b.textinput.Reset()
 
 		return b, tea.Batch(cmds...)
 	case directoryItemSizeMsg:
-		b.fileSizes[msg.index] = msg.size
-		b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+		if len(b.fileSizes) > 0 && msg.index < len(b.fileSizes) {
+			b.fileSizes[msg.index] = msg.size
+			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+		}
 
 		return b, nil
 	case readFileContentMsg:
@@ -305,6 +299,8 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "~":
 			if b.activeBox == 0 && !b.showCommandInput && !b.showBoxSpinner {
+				b.treeCursor = 0
+				b.fileSizes = nil
 				homeDir, err := dirfs.GetHomeDirectory()
 				if err != nil {
 					return b, b.handleErrorCmd(err)
@@ -314,6 +310,8 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "/":
 			if b.activeBox == 0 && !b.showCommandInput && !b.showBoxSpinner {
+				b.treeCursor = 0
+				b.fileSizes = nil
 				return b, b.updateDirectoryListingCmd(dirfs.RootDirectory)
 			}
 		case ".":
@@ -560,11 +558,6 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if b.activeBox != 0 {
 		b.secondaryViewport, cmd = b.secondaryViewport.Update(msg)
-		cmds = append(cmds, cmd)
-	}
-
-	for i := range b.spinners {
-		b.spinners[i], cmd = b.spinners[i].Update(msg)
 		cmds = append(cmds, cmd)
 	}
 

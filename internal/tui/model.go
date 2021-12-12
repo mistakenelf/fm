@@ -20,7 +20,6 @@ type Bubble struct {
 	theme                  theme.Theme
 	currentImage           image.Image
 	spinner                spinner.Model
-	spinners               []spinner.Model
 	textinput              textinput.Model
 	primaryViewport        viewport.Model
 	secondaryViewport      viewport.Model
