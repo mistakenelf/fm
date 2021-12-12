@@ -150,9 +150,17 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 
 		fileInfo, _ := file.Info()
 
-		fileSize := lipgloss.NewStyle().
-			Foreground(fileSizeColor).
-			Render(strfmt.ConvertBytesToSizeString(fileInfo.Size()))
+		fileSize := ""
+
+		if len(b.fileSizes) > 0 {
+			if b.fileSizes[i] != "" {
+				fileSize = lipgloss.NewStyle().Foreground(fileSizeColor).Render(b.fileSizes[i])
+			} else {
+				fileSize = lipgloss.NewStyle().
+					Foreground(fileSizeColor).
+					Render("---")
+			}
+		}
 
 		icon, color := icons.GetIcon(fileInfo.Name(), filepath.Ext(fileInfo.Name()), icons.GetIndicator(fileInfo.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
@@ -193,6 +201,10 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 		row := lipgloss.JoinHorizontal(lipgloss.Top, dirItem, fileSize)
 
 		curFiles += fmt.Sprintf("%s\n", row)
+	}
+
+	if len(files) == 0 {
+		curFiles = "Directory is empty"
 	}
 
 	return curFiles
@@ -242,6 +254,10 @@ func (b Bubble) fileTreePreviewView(files []fs.DirEntry) string {
 		row := lipgloss.JoinHorizontal(lipgloss.Top, dirItem, fileSize)
 
 		curFiles += fmt.Sprintf("%s\n", row)
+	}
+
+	if len(files) == 0 {
+		curFiles = "Directory is empty"
 	}
 
 	return curFiles

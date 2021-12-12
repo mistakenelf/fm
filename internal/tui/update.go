@@ -49,10 +49,22 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.renameMode = false
 		b.treeCursor = 0
 		b.treeFiles = msg
-		b.primaryContent = b.fileTreeView(msg)
+		b.fileSizes = make([]string, len(msg))
+
+		for i, file := range msg {
+			cmds = append(cmds, b.getDirectoryItemSizeCmd(file.Name(), i))
+		}
+
+		b.primaryViewport.SetContent(b.fileTreeView(msg))
 		b.textinput.Blur()
 		b.textinput.Reset()
-		b.primaryViewport.SetContent(b.primaryContent)
+
+		return b, tea.Batch(cmds...)
+	case directoryItemSizeMsg:
+		if len(b.fileSizes) > 0 && msg.index < len(b.fileSizes) {
+			b.fileSizes[msg.index] = msg.size
+			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+		}
 
 		return b, nil
 	case readFileContentMsg:
@@ -61,19 +73,19 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		switch {
 		case msg.code != "":
-			b.secondaryContent = msg.code
+			b.secondaryBoxContent = msg.code
 		case msg.pdfContent != "":
-			b.secondaryContent = msg.pdfContent
+			b.secondaryBoxContent = msg.pdfContent
 		case msg.markdown != "":
-			b.secondaryContent = msg.markdown
+			b.secondaryBoxContent = msg.markdown
 		case msg.image != nil:
 			b.currentImage = msg.image
-			b.secondaryContent = msg.imageString
+			b.secondaryBoxContent = msg.imageString
 		default:
-			b.secondaryContent = msg.rawContent
+			b.secondaryBoxContent = msg.rawContent
 		}
 
-		b.secondaryViewport.SetContent(b.textContentView(b.secondaryContent))
+		b.secondaryViewport.SetContent(b.textContentView(b.secondaryBoxContent))
 
 		return b, nil
 	case previewDirectoryListingMsg:
@@ -91,7 +103,6 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case moveDirItemMsg:
 		b.moveMode = false
 		b.treeItemToMove = nil
-
 		b.primaryViewport.SetContent(b.fileTreeView(msg))
 
 		return b, nil
@@ -102,13 +113,12 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.renameMode = false
 		b.findMode = false
 		b.treeCursor = 0
-		b.textinput.Blur()
-		b.textinput.Reset()
 		b.treeFiles = msg.entries
 		b.foundFilesPaths = msg.paths
-		b.primaryContent = b.fileTreeView(msg.entries)
-		b.primaryViewport.SetContent(b.primaryContent)
 		b.showBoxSpinner = false
+		b.textinput.Blur()
+		b.textinput.Reset()
+		b.primaryViewport.SetContent(b.fileTreeView(msg.entries))
 
 		return b, nil
 	case errorMsg:
@@ -137,7 +147,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case b.showHelp:
 			b.secondaryViewport.SetContent(b.helpView())
 		default:
-			b.secondaryViewport.SetContent(b.textContentView(b.secondaryContent))
+			b.secondaryViewport.SetContent(b.textContentView(b.secondaryBoxContent))
 		}
 
 		if !b.ready {
@@ -145,6 +155,31 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		return b, nil
+	case tea.MouseMsg:
+		switch msg.Type {
+		case tea.MouseWheelUp:
+			if b.activeBox == 0 {
+				b.treeCursor--
+				b.scrollFileTree()
+				b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			}
+
+			if b.activeBox == 1 {
+				b.secondaryViewport.LineUp(1)
+				b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			}
+		case tea.MouseWheelDown:
+			if b.activeBox == 0 {
+				b.treeCursor++
+				b.scrollFileTree()
+				b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			}
+
+			if b.activeBox == 1 {
+				b.secondaryViewport.LineDown(1)
+				b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			}
+		}
 	case tea.KeyMsg:
 		if msg.String() == "g" && b.previousKey.String() == "g" {
 			if !b.showCommandInput && b.activeBox == 0 && !b.showBoxSpinner {
@@ -288,6 +323,8 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "~":
 			if b.activeBox == 0 && !b.showCommandInput && !b.showBoxSpinner {
+				b.treeCursor = 0
+				b.fileSizes = nil
 				homeDir, err := dirfs.GetHomeDirectory()
 				if err != nil {
 					return b, b.handleErrorCmd(err)
@@ -297,6 +334,8 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "/":
 			if b.activeBox == 0 && !b.showCommandInput && !b.showBoxSpinner {
+				b.treeCursor = 0
+				b.fileSizes = nil
 				return b, b.updateDirectoryListingCmd(dirfs.RootDirectory)
 			}
 		case ".":
@@ -399,8 +438,6 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return b, nil
 			}
 		case "enter":
-			selectedFile := b.treeFiles[b.treeCursor]
-
 			switch {
 			case b.moveMode:
 				return b, b.moveDirectoryItemCmd(b.treeItemToMove.Name())
@@ -415,6 +452,8 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
 			case b.renameMode:
+				selectedFile := b.treeFiles[b.treeCursor]
+
 				return b, tea.Sequentially(
 					b.renameDirectoryItemCmd(selectedFile.Name(), b.textinput.Value()),
 					b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
@@ -425,6 +464,8 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				return b, b.findFilesByNameCmd(b.textinput.Value())
 			case b.deleteMode:
+				selectedFile := b.treeFiles[b.treeCursor]
+
 				if strings.ToLower(b.textinput.Value()) == "y" || strings.ToLower(b.textinput.Value()) == "yes" {
 					if selectedFile.IsDir() {
 						return b, tea.Sequentially(

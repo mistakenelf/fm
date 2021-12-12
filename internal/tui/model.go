@@ -46,9 +46,9 @@ type Bubble struct {
 	showBoxSpinner         bool
 	showHelp               bool
 	foundFilesPaths        []string
+	fileSizes              []string
 	moveInitiatedDirectory string
-	primaryContent         string
-	secondaryContent       string
+	secondaryBoxContent    string
 	errorMsg               string
 }
 
