@@ -203,7 +203,7 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 		curFiles += fmt.Sprintf("%s\n", row)
 	}
 
-	if len(b.treeFiles) == 0 {
+	if len(files) == 0 {
 		curFiles = "Directory is empty"
 	}
 
@@ -254,6 +254,10 @@ func (b Bubble) fileTreePreviewView(files []fs.DirEntry) string {
 		row := lipgloss.JoinHorizontal(lipgloss.Top, dirItem, fileSize)
 
 		curFiles += fmt.Sprintf("%s\n", row)
+	}
+
+	if len(files) == 0 {
+		curFiles = "Directory is empty"
 	}
 
 	return curFiles
