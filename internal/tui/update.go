@@ -103,7 +103,6 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case moveDirItemMsg:
 		b.moveMode = false
 		b.treeItemToMove = nil
-
 		b.primaryViewport.SetContent(b.fileTreeView(msg))
 
 		return b, nil
@@ -114,12 +113,12 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.renameMode = false
 		b.findMode = false
 		b.treeCursor = 0
-		b.textinput.Blur()
-		b.textinput.Reset()
 		b.treeFiles = msg.entries
 		b.foundFilesPaths = msg.paths
-		b.primaryViewport.SetContent(b.fileTreeView(msg.entries))
 		b.showBoxSpinner = false
+		b.textinput.Blur()
+		b.textinput.Reset()
+		b.primaryViewport.SetContent(b.fileTreeView(msg.entries))
 
 		return b, nil
 	case errorMsg:
@@ -414,8 +413,6 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return b, nil
 			}
 		case "enter":
-			selectedFile := b.treeFiles[b.treeCursor]
-
 			switch {
 			case b.moveMode:
 				return b, b.moveDirectoryItemCmd(b.treeItemToMove.Name())
@@ -430,6 +427,8 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
 			case b.renameMode:
+				selectedFile := b.treeFiles[b.treeCursor]
+
 				return b, tea.Sequentially(
 					b.renameDirectoryItemCmd(selectedFile.Name(), b.textinput.Value()),
 					b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
@@ -440,6 +439,8 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				return b, b.findFilesByNameCmd(b.textinput.Value())
 			case b.deleteMode:
+				selectedFile := b.treeFiles[b.treeCursor]
+
 				if strings.ToLower(b.textinput.Value()) == "y" || strings.ToLower(b.textinput.Value()) == "yes" {
 					if selectedFile.IsDir() {
 						return b, tea.Sequentially(
