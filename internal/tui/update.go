@@ -130,10 +130,10 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		b.width = msg.Width
 		b.height = msg.Height
-		b.primaryViewport.Width = (msg.Width / 2) - box.GetHorizontalBorderSize()
-		b.primaryViewport.Height = msg.Height - StatusBarHeight - box.GetVerticalBorderSize()
-		b.secondaryViewport.Width = (msg.Width / 2) - box.GetHorizontalBorderSize()
-		b.secondaryViewport.Height = msg.Height - StatusBarHeight - box.GetVerticalBorderSize()
+		b.primaryViewport.Width = (msg.Width / 2) - boxStyle.GetHorizontalBorderSize()
+		b.primaryViewport.Height = msg.Height - StatusBarHeight - boxStyle.GetVerticalBorderSize()
+		b.secondaryViewport.Width = (msg.Width / 2) - boxStyle.GetHorizontalBorderSize()
+		b.secondaryViewport.Height = msg.Height - StatusBarHeight - boxStyle.GetVerticalBorderSize()
 
 		b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 
@@ -141,7 +141,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case b.showFileTreePreview:
 			b.secondaryViewport.SetContent(b.fileTreePreviewView(b.treePreviewFiles))
 		case b.currentImage != nil:
-			return b, b.convertImageToStringCmd(b.secondaryViewport.Width - box.GetHorizontalFrameSize())
+			return b, b.convertImageToStringCmd(b.secondaryViewport.Width - boxStyle.GetHorizontalFrameSize())
 		case b.errorMsg != "":
 			b.secondaryViewport.SetContent(b.errorView(b.errorMsg))
 		case b.showHelp:
@@ -267,7 +267,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 					return b, b.readFileContentCmd(
 						fileInfo.Name(),
-						b.secondaryViewport.Width-box.GetHorizontalFrameSize(),
+						b.secondaryViewport.Width-boxStyle.GetHorizontalFrameSize(),
 					)
 
 				default:
@@ -279,7 +279,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 					return b, b.readFileContentCmd(
 						fileToRead,
-						b.secondaryViewport.Width-box.GetHorizontalFrameSize(),
+						b.secondaryViewport.Width-boxStyle.GetHorizontalFrameSize(),
 					)
 				}
 			}
