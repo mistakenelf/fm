@@ -44,6 +44,9 @@ type appColors struct {
 	spookyPurple       string
 	spookyOrange       string
 	spookyYellow       string
+	holidayRed         string
+	holidayGreen       string
+	holidayGold        string
 }
 
 // Colors contains the different kinds of colors and their values.
@@ -70,8 +73,12 @@ var colors = appColors{
 	spookyPurple:       "#881EE4",
 	spookyOrange:       "#F75F1C",
 	spookyYellow:       "#FF9A00",
+	holidayRed:         "#B70D00",
+	holidayGreen:       "#005C01",
+	holidayGold:        "#CC9901",
 }
 
+// themeMap represents the mapping of different themes.
 var themeMap = map[string]Theme{
 	"default": {
 		SelectedTreeItemColor:                lipgloss.AdaptiveColor{Dark: colors.defaultPink, Light: colors.defaultPink},
@@ -141,6 +148,23 @@ var themeMap = map[string]Theme{
 		ErrorColor:                           lipgloss.AdaptiveColor{Dark: colors.red, Light: colors.red},
 		DefaultTextColor:                     lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.black},
 	},
+	"holiday": {
+		SelectedTreeItemColor:                lipgloss.AdaptiveColor{Dark: colors.holidayRed, Light: colors.holidayRed},
+		UnselectedTreeItemColor:              lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.black},
+		ActiveBoxBorderColor:                 lipgloss.AdaptiveColor{Dark: colors.holidayGold, Light: colors.holidayGold},
+		InactiveBoxBorderColor:               lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.black},
+		SpinnerColor:                         lipgloss.AdaptiveColor{Dark: colors.holidayGreen, Light: colors.holidayGreen},
+		StatusBarSelectedFileForegroundColor: lipgloss.AdaptiveColor{Dark: colors.holidayGold, Light: colors.holidayGold},
+		StatusBarSelectedFileBackgroundColor: lipgloss.AdaptiveColor{Dark: colors.holidayGreen, Light: colors.holidayGreen},
+		StatusBarBarForegroundColor:          lipgloss.AdaptiveColor{Dark: colors.holidayGreen, Light: colors.holidayGreen},
+		StatusBarBarBackgroundColor:          lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.white},
+		StatusBarTotalFilesForegroundColor:   lipgloss.AdaptiveColor{Dark: colors.holidayGold, Light: colors.holidayGold},
+		StatusBarTotalFilesBackgroundColor:   lipgloss.AdaptiveColor{Dark: colors.holidayRed, Light: colors.holidayRed},
+		StatusBarLogoForegroundColor:         lipgloss.AdaptiveColor{Dark: colors.holidayGreen, Light: colors.holidayGreen},
+		StatusBarLogoBackgroundColor:         lipgloss.AdaptiveColor{Dark: colors.holidayGold, Light: colors.holidayGold},
+		ErrorColor:                           lipgloss.AdaptiveColor{Dark: colors.red, Light: colors.red},
+		DefaultTextColor:                     lipgloss.AdaptiveColor{Dark: colors.white, Light: colors.black},
+	},
 }
 
 // GetTheme returns a theme based on the given name.
@@ -154,6 +178,8 @@ func GetTheme(theme string) Theme {
 		return themeMap["nord"]
 	case "spooky":
 		return themeMap["spooky"]
+	case "holiday":
+		return themeMap["holiday"]
 	default:
 		return themeMap["default"]
 	}
