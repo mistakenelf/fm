@@ -318,8 +318,8 @@ func (b Bubble) helpView() string {
 	}
 
 	for _, content := range helpContent {
-		keyText := boldTextStyle.Copy().Width(12).Render(content.key)
-		descriptionText := lipgloss.NewStyle().Render(content.description)
+		keyText := boldTextStyle.Copy().Foreground(b.theme.DefaultTextColor).Width(12).Render(content.key)
+		descriptionText := lipgloss.NewStyle().Foreground(b.theme.DefaultTextColor).Render(content.description)
 		row := lipgloss.JoinHorizontal(lipgloss.Top, keyText, descriptionText)
 		helpScreen += fmt.Sprintf("%s\n", row)
 	}
@@ -331,6 +331,7 @@ func (b Bubble) helpView() string {
 		BorderTop(false).
 		BorderRight(false).
 		BorderLeft(false).
+		Foreground(b.theme.DefaultTextColor).
 		Render("Welcome to FM!")
 
 	return lipgloss.JoinVertical(
