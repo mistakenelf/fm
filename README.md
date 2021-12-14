@@ -11,7 +11,7 @@
 </p>
 
 <p align="center" style="margin-top: 30px; margin-bottom: 20px;">
-  <img src="./assets/default_dark.png" width="450" alt="default screenshot">
+  <img src="./assets/default.png" width="450" alt="default screenshot">
 </p>
 
 ## About The Project
@@ -65,23 +65,23 @@ go install github.com/knipferrc/fm@latest
 
 ### Default
 
-<img src="./assets/default_dark.png" width="350" alt="default dark">
-<img src="./assets/default_light.png" width="350" alt="default light">
+<img src="./assets/default.png" width="350" alt="default">
 
 ### Gruvbox
 
-<img src="./assets/gruvbox_dark.png" width="350" alt="gruvbox dark">
-<img src="./assets/gruvbox_light.png" width="350" alt="gruvbox light">
+<img src="./assets/gruvbox.png" width="350" alt="gruvbox">
 
 ### Spooky
 
-<img src="./assets/spooky_dark.png" width="350" alt="spooky dark">
-<img src="./assets/spooky_light.png" width="350" alt="spooky light">
+<img src="./assets/spooky.png" width="350" alt="spooky">
 
 ### Nord
 
-<img src="./assets/nord_dark.png" width="350" alt="nord dark">
-<img src="./assets/nord_light.png" width="350" alt="nord light">
+<img src="./assets/nord.png" width="350" alt="nord">
+
+### Holiday
+
+<img src="./assets/holiday.png" width="350" alt="holiday">
 
 ## Simple Mode
 
