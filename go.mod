@@ -12,9 +12,9 @@ require (
 	github.com/ledongthuc/pdf v0.0.0-20210621053716-e28cb8259002
 	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/muesli/reflow v0.3.0
-	github.com/spf13/cobra v1.2.1
+	github.com/spf13/cobra v1.3.0
 	github.com/spf13/pflag v1.0.5
-	github.com/spf13/viper v1.10.0
+	github.com/spf13/viper v1.10.1
 )
 
 require (
@@ -38,7 +38,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
-	golang.org/x/exp v0.0.0-20211213173848-79cd87713b62 // indirect
+	golang.org/x/exp v0.0.0-20211214223157-bafe2e20209a // indirect
 	golang.org/x/mobile v0.0.0-20211207041440-4e6c2922fdee // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
@@ -54,7 +54,7 @@ require (
 	github.com/yuin/goldmark v1.4.4 // indirect
 	golang.design/x/clipboard v0.5.3
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
-	golang.org/x/net v0.0.0-20211209124913-491a49abca63 // indirect
-	golang.org/x/sys v0.0.0-20211213223007-03aa0b5f6827 // indirect
+	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f // indirect
+	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 )
