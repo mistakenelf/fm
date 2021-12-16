@@ -1,9 +1,7 @@
 package tui
 
 import (
-	"errors"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -14,9 +12,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-// scrollFiletree handles wrapping of the filetree and
+// checkPrimaryViewportBounds handles wrapping of the filetree and
 // scrolling of the viewport.
-func (b *Bubble) scrollFileTree() {
+func (b *Bubble) checkPrimaryViewportBounds() {
 	top := b.primaryViewport.YOffset
 	bottom := b.primaryViewport.Height + b.primaryViewport.YOffset - 1
 
@@ -118,9 +116,17 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.showBoxSpinner = false
 		b.textinput.Blur()
 		b.textinput.Reset()
+		b.fileSizes = make([]string, len(msg.entries))
+
+		for i, file := range msg.entries {
+			cmds = append(cmds, b.getDirectoryItemSizeCmd(file.Name(), i))
+		}
+
 		b.primaryViewport.SetContent(b.fileTreeView(msg.entries))
 
-		return b, nil
+		return b, tea.Batch(cmds...)
+	case openInEditorMsg:
+		return b, b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 	case errorMsg:
 		b.showHelp = false
 		b.errorMsg = string(msg)
@@ -160,7 +166,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.MouseWheelUp:
 			if b.activeBox == 0 {
 				b.treeCursor--
-				b.scrollFileTree()
+				b.checkPrimaryViewportBounds()
 				b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 			}
 
@@ -171,7 +177,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.MouseWheelDown:
 			if b.activeBox == 0 {
 				b.treeCursor++
-				b.scrollFileTree()
+				b.checkPrimaryViewportBounds()
 				b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 			}
 
@@ -201,13 +207,13 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "j", "up":
 			if b.activeBox == 0 && !b.showCommandInput && !b.showBoxSpinner {
 				b.treeCursor++
-				b.scrollFileTree()
+				b.checkPrimaryViewportBounds()
 				b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 			}
 		case "k", "down":
 			if b.activeBox == 0 && !b.showCommandInput && !b.showBoxSpinner {
 				b.treeCursor--
-				b.scrollFileTree()
+				b.checkPrimaryViewportBounds()
 				b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 			}
 		case "h", "left":
@@ -215,6 +221,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				b.treeCursor = 0
 				b.showFilesOnly = false
 				b.showDirectoriesOnly = false
+				b.foundFilesPaths = nil
 				workingDirectory, err := dirfs.GetWorkingDirectory()
 				if err != nil {
 					return b, b.handleErrorCmd(err)
@@ -489,27 +496,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				selectionPath := viper.GetString("selection-path")
 
 				if selectionPath == "" && !selectedFile.IsDir() {
-					editorPath := os.Getenv("EDITOR")
-					if editorPath == "" {
-						return b, b.handleErrorCmd(errors.New("$EDITOR not set"))
-					}
-
-					editorCmd := exec.Command(editorPath, selectedFile.Name())
-					editorCmd.Stdin = os.Stdin
-					editorCmd.Stdout = os.Stdout
-					editorCmd.Stderr = os.Stderr
-
-					err := editorCmd.Start()
-					if err != nil {
-						return b, b.handleErrorCmd(err)
-					}
-
-					err = editorCmd.Wait()
-					if err != nil {
-						return b, b.handleErrorCmd(err)
-					}
-
-					return b, b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
+					return b, tea.Batch(tea.HideCursor, b.openInEditorCmd(selectedFile.Name()))
 				} else {
 					return b, tea.Sequentially(
 						b.writeSelectionPathCmd(selectionPath, selectedFile.Name()),
