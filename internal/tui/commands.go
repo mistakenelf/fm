@@ -1,12 +1,14 @@
 package tui
 
 import (
+	"errors"
 	"fmt"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
 	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/knipferrc/fm/dirfs"
@@ -20,12 +22,13 @@ type updateDirectoryListingMsg []fs.DirEntry
 type previewDirectoryListingMsg []fs.DirEntry
 type moveDirItemMsg []fs.DirEntry
 type errorMsg string
+type copyToClipboardMsg string
+type convertImageToStringMsg string
+type openInEditorMsg struct{}
 type directoryItemSizeMsg struct {
 	index int
 	size  string
 }
-type copyToClipboardMsg string
-type convertImageToStringMsg string
 type findFilesByNameMsg struct {
 	paths   []string
 	entries []fs.DirEntry
@@ -387,5 +390,26 @@ func (b Bubble) writeSelectionPathCmd(selectionPath, filePath string) tea.Cmd {
 		}
 
 		return nil
+	}
+}
+
+// openInEditorCmd opens the file in the editor specified.
+func (b Bubble) openInEditorCmd(fileName string) tea.Cmd {
+	return func() tea.Msg {
+		editorPath := os.Getenv("EDITOR")
+		if editorPath == "" {
+			return errorMsg(errors.New("$EDITOR not set").Error())
+		}
+
+		editorCmd := exec.Command(editorPath, fileName)
+		editorCmd.Stdin = os.Stdin
+		editorCmd.Stdout = os.Stdout
+
+		err := editorCmd.Run()
+		if err != nil {
+			return errorMsg(err.Error())
+		}
+
+		return openInEditorMsg{}
 	}
 }

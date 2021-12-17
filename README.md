@@ -125,6 +125,7 @@ go install github.com/knipferrc/fm@latest
 | <kbd>y</kbd>          | Copy selected directory items path to the clipboard                                                                                                                                                                                                              |
 | <kbd>ctrl+f</kbd>     | Find files and directories in working directory                                                                                                                                                                                                                  |
 | <kbd>?</kbd>          | Toggle help screen in simple mode                                                                                                                                                                                                                                |
+| <kbd>O</kbd>          | Open logger when logging is enabled                                                                                                                                                                                                                              |
 
 ## Configuration
 

@@ -45,8 +45,10 @@ type Bubble struct {
 	deleteMode             bool
 	showBoxSpinner         bool
 	showHelp               bool
+	showLogs               bool
 	foundFilesPaths        []string
 	fileSizes              []string
+	logs                   []string
 	moveInitiatedDirectory string
 	secondaryBoxContent    string
 	errorMsg               string

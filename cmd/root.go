@@ -24,20 +24,6 @@ var rootCmd = &cobra.Command{
 		config.LoadConfig(startDir, selectionPath)
 		cfg := config.GetConfig()
 
-		// If logging is enabled, logs will be output to debug.log.
-		if cfg.Settings.EnableLogging {
-			f, err := tea.LogToFile("debug.log", "debug")
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			defer func() {
-				if err = f.Close(); err != nil {
-					log.Fatal(err)
-				}
-			}()
-		}
-
 		m := tui.NewBubble()
 		var opts []tea.ProgramOption
 
