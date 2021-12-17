@@ -281,13 +281,33 @@ func (b Bubble) errorView(msg string) string {
 		Render(msg)
 }
 
-type helpEntry struct {
-	key         string
-	description string
+// logView shows a list of logs.
+func (b Bubble) logView() string {
+	logList := ""
+	title := boldTextStyle.Copy().
+		Border(lipgloss.NormalBorder()).
+		Italic(true).
+		BorderBottom(true).
+		BorderTop(false).
+		BorderRight(false).
+		BorderLeft(false).
+		Foreground(b.theme.DefaultTextColor).
+		Render("Application logs")
+
+	for _, log := range b.logs {
+		logList += fmt.Sprintf("%s\n", log)
+	}
+
+	return lipgloss.JoinVertical(lipgloss.Top, title, logList)
 }
 
 // helpView returns help text.
 func (b Bubble) helpView() string {
+	type helpEntry struct {
+		key         string
+		description string
+	}
+
 	helpScreen := ""
 	helpContent := []helpEntry{
 		{"ctrl+c", "Exit FM"},
@@ -314,6 +334,7 @@ func (b Bubble) helpView() string {
 		{"E", "Edit currently selected tree item"},
 		{"C", "Copy currently selected tree item"},
 		{"esc", "Reset FM to initial state"},
+		{"O", "Show logs if debugging enabled"},
 		{"tab", "Toggle between boxes"},
 	}
 
