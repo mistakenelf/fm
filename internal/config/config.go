@@ -3,7 +3,9 @@ package config
 import (
 	"log"
 	"os"
+	"path/filepath"
 
+	"github.com/knipferrc/fm/dirfs"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -27,10 +29,20 @@ type Config struct {
 }
 
 // LoadConfig loads a users config and creates the config if it does not exist
-// located at ~/.fm.yml.
+// located at ~/.config/fm.yml.
 func LoadConfig(startDir, selectionPath *pflag.Flag) {
-	viper.AddConfigPath("$HOME")
-	viper.SetConfigName(".fm")
+	homeDir, err := dirfs.GetHomeDirectory()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = dirfs.CreateDirectory(filepath.Join(homeDir, ".config", "fm"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	viper.AddConfigPath("$HOME/.config/fm")
+	viper.SetConfigName("fm")
 	viper.SetConfigType("yml")
 
 	// Setup config defaults.
@@ -60,7 +72,7 @@ func LoadConfig(startDir, selectionPath *pflag.Flag) {
 	}
 
 	// Setup flags.
-	err := viper.BindPFlag("start-dir", startDir)
+	err = viper.BindPFlag("start-dir", startDir)
 	if err != nil {
 		log.Fatal(err)
 	}
