@@ -67,7 +67,7 @@ func (b Bubble) statusBarView() string {
 
 	if b.appConfig.Settings.SimpleMode {
 		selectedFileStyle = boldTextStyle.Copy().
-			Foreground(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
+			Foreground(b.theme.DefaultTextColor)
 	}
 
 	selectedFileColumn := selectedFileStyle.
@@ -82,7 +82,7 @@ func (b Bubble) statusBarView() string {
 
 	if b.appConfig.Settings.SimpleMode {
 		fileCountStyle = boldTextStyle.Copy().
-			Foreground(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
+			Foreground(b.theme.DefaultTextColor)
 	}
 
 	fileCountColumn := fileCountStyle.
@@ -98,7 +98,7 @@ func (b Bubble) statusBarView() string {
 
 	if b.appConfig.Settings.SimpleMode {
 		logoStyle = boldTextStyle.Copy().
-			Foreground(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
+			Foreground(b.theme.DefaultTextColor)
 	}
 
 	logoColumn := logoStyle.
@@ -113,7 +113,7 @@ func (b Bubble) statusBarView() string {
 
 	if b.appConfig.Settings.SimpleMode {
 		statusStyle = boldTextStyle.Copy().
-			Foreground(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
+			Foreground(b.theme.DefaultTextColor)
 	}
 
 	statusColumn := statusStyle.
@@ -156,7 +156,7 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 		}
 
 		if b.appConfig.Settings.SimpleMode {
-			selectedItemColor = lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"}
+			selectedItemColor = b.theme.DefaultTextColor
 		}
 
 		if b.treeCursor == i {
@@ -180,7 +180,7 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 				Foreground(lipgloss.Color("#000000")).
 				Render(
 					truncate.StringWithTail(
-						fileInfo.Name(), uint(b.primaryViewport.Width-lipgloss.Width(fileSize)), "...",
+						fileInfo.Name(), uint(b.primaryViewport.Width-lipgloss.Width(fileSize)), ellipsisStyle,
 					),
 				)
 		} else {
@@ -192,7 +192,7 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 				} else {
 					fileSize = boldTextStyle.Copy().
 						Foreground(unselectedItemColor).
-						Render("---")
+						Render(fileSizeLoadingStyle)
 				}
 			}
 
@@ -201,7 +201,7 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 				Foreground(unselectedItemColor).
 				Render(
 					truncate.StringWithTail(
-						fileInfo.Name(), uint(b.primaryViewport.Width-lipgloss.Width(fileSize)), "...",
+						fileInfo.Name(), uint(b.primaryViewport.Width-lipgloss.Width(fileSize)), ellipsisStyle,
 					),
 				)
 		}
@@ -248,7 +248,7 @@ func (b Bubble) fileTreePreviewView(files []fs.DirEntry) string {
 
 		dirItem := lipgloss.NewStyle().Width(b.secondaryViewport.Width - lipgloss.Width(fileSize) - boxStyle.GetHorizontalPadding()).Render(
 			truncate.StringWithTail(
-				directoryItem, uint(b.secondaryViewport.Width-lipgloss.Width(fileSize)), "...",
+				directoryItem, uint(b.secondaryViewport.Width-lipgloss.Width(fileSize)), ellipsisStyle,
 			),
 		)
 
