@@ -15,7 +15,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:     "fm",
 	Short:   "FM is a simple, configurable, and fun to use file manager",
-	Version: "0.11.1",
+	Version: "0.11.2",
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		startDir := cmd.Flags().Lookup("start-dir")
