@@ -163,12 +163,12 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 			if len(b.fileSizes) > 0 {
 				if b.fileSizes[i] != "" {
 					fileSize = boldTextStyle.Copy().
-						Foreground(lipgloss.Color("#000000")).
+						Foreground(colors["black"]).
 						Background(selectedItemColor).
 						Render(b.fileSizes[i])
 				} else {
 					fileSize = boldTextStyle.Copy().
-						Foreground(lipgloss.Color("#000000")).
+						Foreground(colors["black"]).
 						Background(selectedItemColor).
 						Render("---")
 				}
@@ -177,7 +177,7 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 			directoryItem = boldTextStyle.Copy().
 				Background(selectedItemColor).
 				Width(b.primaryViewport.Width - lipgloss.Width(fileSize) - boxStyle.GetHorizontalPadding() - lipgloss.Width(fileIcon)).
-				Foreground(lipgloss.Color("#000000")).
+				Foreground(colors["black"]).
 				Render(
 					truncate.StringWithTail(
 						fileInfo.Name(), uint(b.primaryViewport.Width-lipgloss.Width(fileSize)), ellipsisStyle,
