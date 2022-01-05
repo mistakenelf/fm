@@ -229,13 +229,13 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c":
 			return b, tea.Quit
-		case "j", "up":
+		case "j", "down":
 			if b.activeBox == 0 && !b.showCommandInput && !b.showBoxSpinner {
 				b.treeCursor++
 				b.checkPrimaryViewportBounds()
 				b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 			}
-		case "k", "down":
+		case "k", "up":
 			if b.activeBox == 0 && !b.showCommandInput && !b.showBoxSpinner {
 				b.treeCursor--
 				b.checkPrimaryViewportBounds()
