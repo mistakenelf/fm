@@ -1,11 +1,13 @@
 package tui
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/knipferrc/fm/dirfs"
+	"github.com/knipferrc/fm/internal/config"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -212,6 +214,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	case tea.KeyMsg:
+		// Jump to top of box.
 		if msg.String() == "g" && b.previousKey.String() == "g" {
 			if !b.showCommandInput && b.activeBox == 0 && !b.showBoxSpinner {
 				b.treeCursor = 0
@@ -221,6 +224,22 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			if !b.showCommandInput && b.activeBox == 1 {
 				b.secondaryViewport.GotoTop()
+			}
+
+			return b, nil
+		}
+
+		// Reload config file.
+		if msg.String() == "c" && b.previousKey.String() == "r" {
+			if !b.showCommandInput && b.activeBox == 0 && !b.showBoxSpinner {
+				if err := viper.ReadInConfig(); err != nil {
+					if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+						log.Fatal(err)
+					}
+				}
+
+				b.appConfig = config.GetConfig()
+				b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 			}
 
 			return b, nil

@@ -51,7 +51,7 @@ go install github.com/knipferrc/fm@latest
 - Syntax highlighting for source code with customizable themes using styles from [chroma](https://swapoff.org/chroma/playground/) (dracula, monokai etc.)
 - Render pretty markdown
 - Mouse support
-- Themes (`default`, `gruvbox`, `spooky`, `nord`)
+- Themes (`default`, `gruvbox`, `spooky`, `nord`, `holiday`)
 - Render PNG, JPG and JPEG as strings
 - Colors adapt to terminal background
 - Open selected file in editor set in EDITOR environment variable (currently only supports GUI editors)
@@ -59,7 +59,7 @@ go install github.com/knipferrc/fm@latest
 - Copy selected directory items path to the clipboard
 - Read PDF files
 - Experimental find files/directories (might be a little buggy)
-- Simple mode
+- Simple mode (removes secondary box, hides borders, hide file icons and no colors)
 
 ## Themes
 
@@ -126,6 +126,7 @@ go install github.com/knipferrc/fm@latest
 | <kbd>ctrl+f</kbd>     | Find files and directories in working directory                                                                                                                                                                                                                  |
 | <kbd>?</kbd>          | Toggle help screen in simple mode                                                                                                                                                                                                                                |
 | <kbd>O</kbd>          | Open logger when logging is enabled                                                                                                                                                                                                                              |
+| <kbd>rc</kbd>         | Reload config                                                                                                                                                                                                                                                    |
 
 ## Configuration
 
