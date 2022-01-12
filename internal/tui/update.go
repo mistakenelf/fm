@@ -1,8 +1,10 @@
 package tui
 
 import (
+	"errors"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -12,6 +14,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/termenv"
 	"github.com/spf13/viper"
 )
 
@@ -149,8 +152,6 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.primaryViewport.SetContent(b.fileTreeView(msg.entries))
 
 		return b, tea.Batch(cmds...)
-	case openInEditorMsg:
-		return b, b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 	case errorMsg:
 		b.showHelp = false
 		b.showLogs = false
@@ -538,7 +539,24 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				selectionPath := viper.GetString("selection-path")
 
 				if selectionPath == "" && !selectedFile.IsDir() {
-					cmds = append(cmds, tea.Batch(tea.HideCursor, b.openInEditorCmd(selectedFile.Name())))
+					editorPath := os.Getenv("EDITOR")
+					if editorPath == "" {
+						return b, b.handleErrorCmd(errors.New("$EDITOR not set"))
+					}
+
+					editorCmd := exec.Command(editorPath, selectedFile.Name())
+					editorCmd.Stdin = os.Stdin
+					editorCmd.Stdout = os.Stdout
+					editorCmd.Stderr = os.Stderr
+
+					err := editorCmd.Run()
+					termenv.AltScreen()
+
+					if err != nil {
+						return b, b.handleErrorCmd(err)
+					}
+
+					return b, tea.Batch(b.redrawCmd(), tea.HideCursor)
 				} else {
 					cmds = append(cmds, tea.Sequentially(
 						b.writeSelectionPathCmd(selectionPath, selectedFile.Name()),
