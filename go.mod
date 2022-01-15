@@ -3,10 +3,10 @@ module github.com/knipferrc/fm
 go 1.17
 
 require (
-	github.com/alecthomas/chroma v0.9.4
-	github.com/charmbracelet/bubbles v0.9.0
+	github.com/alecthomas/chroma v0.10.0
+	github.com/charmbracelet/bubbles v0.10.0
 	github.com/charmbracelet/bubbletea v0.19.3
-	github.com/charmbracelet/glamour v0.3.0
+	github.com/charmbracelet/glamour v0.4.0
 	github.com/charmbracelet/lipgloss v0.4.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/ledongthuc/pdf v0.0.0-20210621053716-e28cb8259002
@@ -38,7 +38,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
-	golang.org/x/exp v0.0.0-20220104160115-025e73f80486 // indirect
+	golang.org/x/exp v0.0.0-20220114162006-9d54fb35363c // indirect
 	golang.org/x/mobile v0.0.0-20220112015953-858099ff7816 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
@@ -54,7 +54,7 @@ require (
 	github.com/yuin/goldmark v1.4.4 // indirect
 	golang.design/x/clipboard v0.5.3
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
-	golang.org/x/net v0.0.0-20220111093109-d55c255bac03 // indirect
-	golang.org/x/sys v0.0.0-20220111092808-5a964db01320 // indirect
+	golang.org/x/net v0.0.0-20220114011407-0dd24b26b47d // indirect
+	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 )
