@@ -24,7 +24,7 @@ var rootCmd = &cobra.Command{
 		config.LoadConfig(startDir, selectionPath)
 		cfg := config.GetConfig()
 
-		m := tui.NewBubble()
+		m := tui.New()
 		var opts []tea.ProgramOption
 
 		// Always append alt screen program option.

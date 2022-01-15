@@ -54,16 +54,16 @@ type Bubble struct {
 	errorMsg               string
 }
 
-// NewBubble create an instance of the entire application.
-func NewBubble() Bubble {
+// New create an instance of the entire application.
+func New() Bubble {
 	cfg := config.GetConfig()
 	theme := theme.GetTheme(cfg.Settings.Theme)
 
-	s := spinner.NewModel()
+	s := spinner.New()
 	s.Spinner = spinner.Dot
 	s.Style = lipgloss.NewStyle().Foreground(theme.SpinnerColor)
 
-	t := textinput.NewModel()
+	t := textinput.New()
 	t.Prompt = "❯ "
 	t.CharLimit = 250
 	t.PlaceholderStyle = lipgloss.NewStyle().
