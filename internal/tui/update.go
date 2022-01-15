@@ -12,6 +12,7 @@ import (
 	"github.com/knipferrc/fm/internal/config"
 
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
@@ -34,8 +35,8 @@ func (b *Bubble) checkPrimaryViewportBounds() {
 		b.treeCursor = 0
 		b.primaryViewport.GotoTop()
 	} else if b.treeCursor < top {
-		b.treeCursor = len(b.treeFiles) - 1
 		b.primaryViewport.GotoBottom()
+		b.treeCursor = len(b.treeFiles) - 1
 	}
 }
 
@@ -162,10 +163,14 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		b.width = msg.Width
 		b.height = msg.Height
-		b.primaryViewport.Width = (msg.Width / 2) - boxStyle.GetHorizontalBorderSize()
-		b.primaryViewport.Height = msg.Height - StatusBarHeight - boxStyle.GetVerticalBorderSize()
-		b.secondaryViewport.Width = (msg.Width / 2) - boxStyle.GetHorizontalBorderSize()
-		b.secondaryViewport.Height = msg.Height - StatusBarHeight - boxStyle.GetVerticalBorderSize()
+		b.primaryViewport = viewport.New(
+			(msg.Width/2)-b.primaryViewport.Style.GetHorizontalFrameSize(),
+			msg.Height-StatusBarHeight-b.primaryViewport.Style.GetVerticalFrameSize(),
+		)
+		b.secondaryViewport = viewport.New(
+			(msg.Width/2)-b.secondaryViewport.Style.GetHorizontalFrameSize(),
+			msg.Height-StatusBarHeight-b.secondaryViewport.Style.GetVerticalFrameSize(),
+		)
 
 		b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 
@@ -173,7 +178,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case b.showFileTreePreview && !b.showLogs:
 			b.secondaryViewport.SetContent(b.fileTreePreviewView(b.treePreviewFiles))
 		case b.currentImage != nil && !b.showLogs:
-			return b, b.convertImageToStringCmd(b.secondaryViewport.Width - boxStyle.GetHorizontalFrameSize())
+			return b, b.convertImageToStringCmd(b.secondaryViewport.Width - b.secondaryViewport.Style.GetHorizontalFrameSize())
 		case b.errorMsg != "":
 			b.secondaryViewport.SetContent(b.errorView(b.errorMsg))
 		case b.showHelp && !b.showLogs:
@@ -319,7 +324,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 					cmds = append(cmds, b.readFileContentCmd(
 						fileInfo.Name(),
-						b.secondaryViewport.Width-boxStyle.GetHorizontalFrameSize(),
+						b.secondaryViewport.Width-b.secondaryViewport.Style.GetHorizontalFrameSize(),
 					))
 
 				default:
@@ -331,7 +336,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 					cmds = append(cmds, b.readFileContentCmd(
 						fileToRead,
-						b.secondaryViewport.Width-boxStyle.GetHorizontalFrameSize(),
+						b.secondaryViewport.Width-b.secondaryViewport.Style.GetHorizontalFrameSize(),
 					))
 				}
 			}
