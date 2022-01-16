@@ -126,6 +126,10 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.secondaryViewport.SetContent(b.textContentView(string(msg)))
 
 		return b, nil
+	case copyToClipboardMsg:
+		b.secondaryViewport.SetContent(b.textContentView(string(msg)))
+
+		return b, nil
 	case moveDirItemMsg:
 		b.moveMode = false
 		b.treeItemToMove = nil

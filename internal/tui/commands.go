@@ -12,8 +12,8 @@ import (
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/strfmt"
 
+	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
-	"golang.design/x/clipboard"
 )
 
 type updateDirectoryListingMsg []fs.DirEntry
@@ -336,7 +336,10 @@ func (b Bubble) copyToClipboardCmd(name string) tea.Cmd {
 		}
 
 		filePath := filepath.Join(workingDir, name)
-		clipboard.Write(clipboard.FmtText, []byte(filePath))
+		err = clipboard.WriteAll(filePath)
+		if err != nil {
+			return errorMsg(err.Error())
+		}
 
 		return copyToClipboardMsg(fmt.Sprintf("%s %s %s", "Successfully copied", filePath, "to clipboard"))
 	}
