@@ -54,13 +54,31 @@ type Bubble struct {
 	errorMsg               string
 }
 
-// New create an instance of the entire application.
+// New creates an instance of the entire application.
 func New() Bubble {
 	cfg := config.GetConfig()
 	theme := theme.GetTheme(cfg.Settings.Theme)
 
-	vp := viewport.New(0, 0)
-	vp.Style = lipgloss.NewStyle().PaddingLeft(1).PaddingRight(1).Border(lipgloss.NormalBorder())
+	primaryBoxBorder := lipgloss.NormalBorder()
+	secondaryBoxBorder := lipgloss.NormalBorder()
+	primaryBoxBorderColor := theme.ActiveBoxBorderColor
+	secondaryBoxBorderColor := theme.InactiveBoxBorderColor
+
+	if cfg.Settings.Borderless {
+		primaryBoxBorder = lipgloss.HiddenBorder()
+		secondaryBoxBorder = lipgloss.HiddenBorder()
+	}
+
+	if cfg.Settings.SimpleMode {
+		primaryBoxBorder = lipgloss.HiddenBorder()
+		secondaryBoxBorder = lipgloss.HiddenBorder()
+	}
+
+	pvp := viewport.New(0, 0)
+	pvp.Style = lipgloss.NewStyle().PaddingLeft(1).PaddingRight(1).Border(primaryBoxBorder).BorderForeground(primaryBoxBorderColor)
+
+	svp := viewport.New(0, 0)
+	svp.Style = lipgloss.NewStyle().PaddingLeft(1).PaddingRight(1).Border(secondaryBoxBorder).BorderForeground(secondaryBoxBorderColor)
 
 	s := spinner.New()
 	s.Spinner = spinner.Dot
@@ -80,7 +98,7 @@ func New() Bubble {
 		spinner:           s,
 		textinput:         t,
 		showHelp:          true,
-		primaryViewport:   vp,
-		secondaryViewport: vp,
+		primaryViewport:   pvp,
+		secondaryViewport: svp,
 	}
 }

@@ -12,7 +12,6 @@ import (
 	"github.com/knipferrc/fm/internal/config"
 
 	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
@@ -168,22 +167,10 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.width = msg.Width
 		b.height = msg.Height
 
-		if !b.ready {
-			b.ready = true
-			b.primaryViewport = viewport.New(
-				(msg.Width/2)-b.primaryViewport.Style.GetHorizontalFrameSize(),
-				msg.Height-StatusBarHeight-b.primaryViewport.Style.GetVerticalFrameSize(),
-			)
-			b.secondaryViewport = viewport.New(
-				(msg.Width/2)-b.secondaryViewport.Style.GetHorizontalFrameSize(),
-				msg.Height-StatusBarHeight-b.secondaryViewport.Style.GetVerticalFrameSize(),
-			)
-		} else {
-			b.primaryViewport.Width = (msg.Width / 2) - b.primaryViewport.Style.GetHorizontalFrameSize()
-			b.primaryViewport.Height = msg.Height - StatusBarHeight - b.primaryViewport.Style.GetVerticalFrameSize()
-			b.secondaryViewport.Width = (msg.Width / 2) - b.secondaryViewport.Style.GetHorizontalFrameSize()
-			b.secondaryViewport.Height = msg.Height - StatusBarHeight - b.secondaryViewport.Style.GetVerticalFrameSize()
-		}
+		b.primaryViewport.Width = (msg.Width / 2) - b.primaryViewport.Style.GetHorizontalFrameSize()
+		b.primaryViewport.Height = msg.Height - StatusBarHeight - b.primaryViewport.Style.GetVerticalFrameSize()
+		b.secondaryViewport.Width = (msg.Width / 2) - b.secondaryViewport.Style.GetHorizontalFrameSize()
+		b.secondaryViewport.Height = msg.Height - StatusBarHeight - b.secondaryViewport.Style.GetVerticalFrameSize()
 
 		b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 
@@ -200,6 +187,10 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.secondaryViewport.SetContent(b.logView())
 		default:
 			b.secondaryViewport.SetContent(b.textContentView(b.secondaryBoxContent))
+		}
+
+		if !b.ready {
+			b.ready = true
 		}
 
 		return b, nil
@@ -583,8 +574,13 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				selectedFile := b.treeFiles[b.treeCursor]
 
 				if selectedFile.IsDir() {
+					workingDirectory, err := dirfs.GetWorkingDirectory()
+					if err != nil {
+						return b, b.handleErrorCmd(err)
+					}
+
 					cmds = append(cmds, tea.Sequentially(
-						b.copyDirectoryCmd(selectedFile.Name()),
+						b.copyDirectoryCmd(filepath.Join(workingDirectory, selectedFile.Name())),
 						b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 					))
 				}
