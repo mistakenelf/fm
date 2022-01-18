@@ -170,13 +170,13 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 					fileSize = boldTextStyle.Copy().
 						Foreground(colors["black"]).
 						Background(selectedItemColor).
-						Render("---")
+						Render(fileSizeLoadingStyle)
 				}
 			}
 
 			directoryItem = boldTextStyle.Copy().
 				Background(selectedItemColor).
-				Width(b.primaryViewport.Width - lipgloss.Width(fileSize) - b.primaryViewport.Style.GetHorizontalPadding() - lipgloss.Width(fileIcon)).
+				Width(b.primaryViewport.Width - lipgloss.Width(fileSize) - b.primaryViewport.Style.GetHorizontalFrameSize() - lipgloss.Width(fileIcon)).
 				Foreground(colors["black"]).
 				Render(
 					truncate.StringWithTail(
@@ -197,7 +197,7 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 			}
 
 			directoryItem = boldTextStyle.Copy().
-				Width(b.primaryViewport.Width - lipgloss.Width(fileSize) - b.primaryViewport.Style.GetHorizontalPadding() - lipgloss.Width(fileIcon)).
+				Width(b.primaryViewport.Width - lipgloss.Width(fileSize) - b.primaryViewport.Style.GetHorizontalFrameSize() - lipgloss.Width(fileIcon)).
 				Foreground(unselectedItemColor).
 				Render(
 					truncate.StringWithTail(
@@ -270,7 +270,7 @@ func (b Bubble) fileTreePreviewView(files []fs.DirEntry) string {
 func (b Bubble) textContentView(content string) string {
 	return lipgloss.NewStyle().
 		Width(b.secondaryViewport.Width - b.secondaryViewport.Style.GetHorizontalPadding()).
-		Height(b.secondaryViewport.Height - b.secondaryViewport.Style.GetVerticalPadding()).
+		Height(b.secondaryViewport.Height - b.secondaryViewport.Style.GetVerticalPadding() - 2).
 		Render(content)
 }
 
@@ -300,7 +300,10 @@ func (b Bubble) logView() string {
 		logList += fmt.Sprintf("%s\n", log)
 	}
 
-	return lipgloss.JoinVertical(lipgloss.Top, title, logList)
+	return lipgloss.NewStyle().
+		Width(b.secondaryViewport.Width - b.secondaryViewport.Style.GetHorizontalFrameSize()).
+		Height(b.secondaryViewport.Height - b.secondaryViewport.Style.GetVerticalFrameSize()).
+		Render(lipgloss.JoinVertical(lipgloss.Top, title, logList))
 }
 
 // helpView returns help text.
@@ -361,8 +364,8 @@ func (b Bubble) helpView() string {
 		lipgloss.Top,
 		welcomeText,
 		lipgloss.NewStyle().
-			Width(b.secondaryViewport.Width-b.secondaryViewport.Style.GetHorizontalPadding()).
-			Height(b.secondaryViewport.Height-b.secondaryViewport.Style.GetVerticalPadding()).
+			Width(b.secondaryViewport.Width-b.secondaryViewport.Style.GetHorizontalFrameSize()).
+			Height(b.secondaryViewport.Height-b.secondaryViewport.Style.GetVerticalFrameSize()).
 			Render(helpScreen),
 	)
 }
@@ -380,11 +383,11 @@ func (b Bubble) View() string {
 	primaryBoxBorderColor := b.theme.InactiveBoxBorderColor
 	secondaryBoxBorderColor := b.theme.InactiveBoxBorderColor
 
-	if b.activeBox == 0 {
+	if b.activeBox == PrimaryBoxActive {
 		primaryBoxBorderColor = b.theme.ActiveBoxBorderColor
 	}
 
-	if b.activeBox == 1 {
+	if b.activeBox == PrimaryBoxActive {
 		secondaryBoxBorderColor = b.theme.ActiveBoxBorderColor
 	}
 

@@ -59,6 +59,9 @@ func New() Bubble {
 	cfg := config.GetConfig()
 	theme := theme.GetTheme(cfg.Settings.Theme)
 
+	vp := viewport.New(0, 0)
+	vp.Style = lipgloss.NewStyle().PaddingLeft(1).PaddingRight(1).Border(lipgloss.NormalBorder())
+
 	s := spinner.New()
 	s.Spinner = spinner.Dot
 	s.Style = lipgloss.NewStyle().Foreground(theme.SpinnerColor)
@@ -71,11 +74,13 @@ func New() Bubble {
 		Foreground(theme.StatusBarBarForegroundColor)
 
 	return Bubble{
-		appConfig:       cfg,
-		theme:           theme,
-		showHiddenFiles: true,
-		spinner:         s,
-		textinput:       t,
-		showHelp:        true,
+		appConfig:         cfg,
+		theme:             theme,
+		showHiddenFiles:   true,
+		spinner:           s,
+		textinput:         t,
+		showHelp:          true,
+		primaryViewport:   vp,
+		secondaryViewport: vp,
 	}
 }
