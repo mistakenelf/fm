@@ -1,25 +1,44 @@
 project_name: "fm"
 
-# before are hooks that will be run before any builds are done, so good to put install scripts and stuff that your builds need here
 before:
   hooks:
-    # Remove unused packaged from the build process
     - go mod tidy
-    # You may remove this if you don't use go modules - Downloads all modules specified in go.mod
     - go mod download
 
 builds:
   - main: ./main.go
     binary: fm
+    env:
+      - CGO_ENABLED=0
     goos:
       - linux
-      - windows
       - darwin
+      - windows
+      - freebsd
+      - openbsd
+      - netbsd
     goarch:
       - amd64
       - arm64
-    env:
-      - CGO_ENABLED=0
+      - "386"
+      - arm
+    goarm:
+      - "7"
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarm: "7"
+
+archives:
+  - format_overrides:
+      - goos: windows
+        format: zip
+    replacements:
+      windows: Windows
+      darwin: Darwin
+      386: i386
+      amd64: x86_64
 
 nfpms:
   - maintainer: Tyler Knipfer <knipferrc@gmail.com>
