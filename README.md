@@ -43,6 +43,23 @@ curl -sfL https://raw.githubusercontent.com/knipferrc/fm/main/install.sh | sh
 go install github.com/knipferrc/fm@latest
 ```
 
+### AUR
+
+Install through the Arch User Repository with your favorite AUR helper.
+There are currently two possible packages:
+
+- [fm-git](https://aur.archlinux.org/packages/fm-git/): Builds the package from the main branch
+
+```sh
+paru -S fm-git
+```
+
+- [fm-bin](https://aur.archlinux.org/packages/fm-bin/): Uses the github release package
+
+```sh
+paru -S fm-bin
+```
+
 ## Features
 
 - Double pane layout
