@@ -250,13 +250,7 @@ func (b Bubble) createFileCmd(name string) tea.Cmd {
 // zipDirectoryCmd zips a directory based on the name provided.
 func (b Bubble) zipDirectoryCmd(name string) tea.Cmd {
 	return func() tea.Msg {
-		currentDir, err := dirfs.GetWorkingDirectory()
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		dirToZip := filepath.Join(currentDir, name)
-		if err := dirfs.Zip(dirToZip); err != nil {
+		if err := dirfs.Zip(name); err != nil {
 			return errorMsg(err.Error())
 		}
 
@@ -267,13 +261,7 @@ func (b Bubble) zipDirectoryCmd(name string) tea.Cmd {
 // unzipDirectoryCmd unzips a directory based on the name provided.
 func (b Bubble) unzipDirectoryCmd(name string) tea.Cmd {
 	return func() tea.Msg {
-		currentDir, err := dirfs.GetWorkingDirectory()
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		dirToUnzip := filepath.Join(currentDir, name)
-		if err := dirfs.Unzip(dirToUnzip); err != nil {
+		if err := dirfs.Unzip(name); err != nil {
 			return errorMsg(err.Error())
 		}
 
