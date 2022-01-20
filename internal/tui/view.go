@@ -402,21 +402,12 @@ func (b Bubble) View() string {
 	}
 
 	if b.moveMode && !b.appConfig.Settings.SimpleMode && !b.appConfig.Settings.Borderless {
-		primaryBoxBorder = lipgloss.Border{
-			Top:         "-",
-			Bottom:      "-",
-			Left:        "|",
-			Right:       "|",
-			TopLeft:     "*",
-			TopRight:    "*",
-			BottomLeft:  "*",
-			BottomRight: "*",
-		}
+		primaryBoxBorder = starredBorder
 	}
 
 	b.primaryViewport.Style = lipgloss.NewStyle().
-		PaddingLeft(1).
-		PaddingRight(1).
+		PaddingLeft(BoxPadding).
+		PaddingRight(BoxPadding).
 		Border(primaryBoxBorder).
 		BorderForeground(primaryBoxBorderColor)
 
@@ -424,8 +415,8 @@ func (b Bubble) View() string {
 
 	if b.showBoxSpinner {
 		b.primaryViewport.Style = lipgloss.NewStyle().
-			PaddingLeft(1).
-			PaddingRight(1).
+			PaddingLeft(BoxPadding).
+			PaddingRight(BoxPadding).
 			Border(primaryBoxBorder).
 			BorderForeground(primaryBoxBorderColor)
 
@@ -434,8 +425,8 @@ func (b Bubble) View() string {
 
 	if !b.appConfig.Settings.SimpleMode {
 		b.secondaryViewport.Style = lipgloss.NewStyle().
-			PaddingLeft(1).
-			PaddingRight(1).
+			PaddingLeft(BoxPadding).
+			PaddingRight(BoxPadding).
 			Border(secondaryBoxBorder).
 			BorderForeground(secondaryBoxBorderColor)
 
