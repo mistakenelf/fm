@@ -75,10 +75,18 @@ func New() Bubble {
 	}
 
 	pvp := viewport.New(0, 0)
-	pvp.Style = lipgloss.NewStyle().PaddingLeft(1).PaddingRight(1).Border(primaryBoxBorder).BorderForeground(primaryBoxBorderColor)
+	pvp.Style = lipgloss.NewStyle().
+		PaddingLeft(BoxPadding).
+		PaddingRight(BoxPadding).
+		Border(primaryBoxBorder).
+		BorderForeground(primaryBoxBorderColor)
 
 	svp := viewport.New(0, 0)
-	svp.Style = lipgloss.NewStyle().PaddingLeft(1).PaddingRight(1).Border(secondaryBoxBorder).BorderForeground(secondaryBoxBorderColor)
+	svp.Style = lipgloss.NewStyle().
+		PaddingLeft(BoxPadding).
+		PaddingRight(BoxPadding).
+		Border(secondaryBoxBorder).
+		BorderForeground(secondaryBoxBorderColor)
 
 	s := spinner.New()
 	s.Spinner = spinner.Dot
