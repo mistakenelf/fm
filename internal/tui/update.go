@@ -93,6 +93,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.showHelp = false
 		b.showLogs = false
 		b.currentImage = nil
+		b.secondaryViewport.GotoTop()
 
 		switch {
 		case msg.code != "":
@@ -116,12 +117,14 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.showHelp = false
 		b.showLogs = false
 		b.treePreviewFiles = msg
+		b.secondaryViewport.GotoTop()
 		b.secondaryViewport.SetContent(b.fileTreePreviewView(msg))
 
 		return b, nil
 	case convertImageToStringMsg:
 		b.showHelp = false
 		b.showLogs = false
+		b.secondaryViewport.GotoTop()
 		b.secondaryViewport.SetContent(b.textContentView(string(msg)))
 
 		return b, nil
@@ -178,7 +181,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case b.showFileTreePreview && !b.showLogs:
 			b.secondaryViewport.SetContent(b.fileTreePreviewView(b.treePreviewFiles))
 		case b.currentImage != nil && !b.showLogs:
-			return b, b.convertImageToStringCmd(b.secondaryViewport.Width - b.secondaryViewport.Style.GetHorizontalFrameSize())
+			return b, b.convertImageToStringCmd(b.secondaryViewport.Width)
 		case b.errorMsg != "":
 			b.secondaryViewport.SetContent(b.errorView(b.errorMsg))
 		case b.showHelp && !b.showLogs:
@@ -324,7 +327,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 					cmds = append(cmds, b.readFileContentCmd(
 						fileInfo.Name(),
-						b.secondaryViewport.Width-b.secondaryViewport.Style.GetHorizontalFrameSize(),
+						b.secondaryViewport.Width,
 					))
 
 				default:
@@ -336,7 +339,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 					cmds = append(cmds, b.readFileContentCmd(
 						fileToRead,
-						b.secondaryViewport.Width-b.secondaryViewport.Style.GetHorizontalFrameSize(),
+						b.secondaryViewport.Width,
 					))
 				}
 			}
@@ -574,21 +577,16 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				selectedFile := b.treeFiles[b.treeCursor]
 
 				if selectedFile.IsDir() {
-					workingDirectory, err := dirfs.GetWorkingDirectory()
-					if err != nil {
-						return b, b.handleErrorCmd(err)
-					}
-
 					cmds = append(cmds, tea.Sequentially(
-						b.copyDirectoryCmd(filepath.Join(workingDirectory, selectedFile.Name())),
+						b.copyDirectoryCmd(selectedFile.Name()),
+						b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
+					))
+				} else {
+					cmds = append(cmds, tea.Sequentially(
+						b.copyFileCmd(selectedFile.Name()),
 						b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 					))
 				}
-
-				cmds = append(cmds, tea.Sequentially(
-					b.copyFileCmd(selectedFile.Name()),
-					b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-				))
 			}
 		case "ctrl+f":
 			if !b.showCommandInput && !b.showBoxSpinner {
