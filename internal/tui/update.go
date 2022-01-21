@@ -56,7 +56,6 @@ func (b *Bubble) writeLog(msg string) {
 
 // handleKeys handles all keypresses.
 func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
-	var cmds []tea.Cmd
 	// Jump to top of box.
 	if msg.String() == "g" && b.previousKey.String() == "g" {
 		if !b.showCommandInput && b.activeBox == PrimaryBoxActive && !b.showBoxSpinner {
@@ -114,9 +113,9 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 				return b.handleErrorCmd(err)
 			}
 
-			cmds = append(cmds, b.updateDirectoryListingCmd(
+			return b.updateDirectoryListingCmd(
 				filepath.Join(workingDirectory, dirfs.PreviousDirectory),
-			))
+			)
 		}
 	case "l", "right":
 		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
@@ -138,7 +137,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 					directoryToOpen = b.foundFilesPaths[b.treeCursor]
 				}
 
-				cmds = append(cmds, b.updateDirectoryListingCmd(directoryToOpen))
+				return b.updateDirectoryListingCmd(directoryToOpen)
 			case selectedFile.Mode()&os.ModeSymlink == os.ModeSymlink:
 				symlinkFile, err := os.Readlink(selectedFile.Name())
 				if err != nil {
@@ -156,13 +155,13 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 						return b.handleErrorCmd(err)
 					}
 
-					cmds = append(cmds, b.updateDirectoryListingCmd(filepath.Join(currentDir, fileInfo.Name())))
+					return b.updateDirectoryListingCmd(filepath.Join(currentDir, fileInfo.Name()))
 				}
 
-				cmds = append(cmds, b.readFileContentCmd(
+				return b.readFileContentCmd(
 					fileInfo.Name(),
 					b.secondaryViewport.Width,
-				))
+				)
 
 			default:
 				fileToRead := selectedFile.Name()
@@ -171,10 +170,10 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 					fileToRead = b.foundFilesPaths[b.treeCursor]
 				}
 
-				cmds = append(cmds, b.readFileContentCmd(
+				return b.readFileContentCmd(
 					fileToRead,
 					b.secondaryViewport.Width,
-				))
+				)
 			}
 		}
 	case "p":
@@ -186,7 +185,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 
 			switch {
 			case selectedFile.IsDir():
-				cmds = append(cmds, b.previewDirectoryListingCmd(selectedFile.Name()))
+				return b.previewDirectoryListingCmd(selectedFile.Name())
 			case selectedFile.Mode()&os.ModeSymlink == os.ModeSymlink:
 				symlinkFile, err := os.Readlink(selectedFile.Name())
 				if err != nil {
@@ -199,7 +198,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 				}
 
 				if fileInfo.IsDir() {
-					cmds = append(cmds, b.previewDirectoryListingCmd(fileInfo.Name()))
+					return b.previewDirectoryListingCmd(fileInfo.Name())
 				}
 			default:
 				return nil
@@ -224,13 +223,14 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 				return b.handleErrorCmd(err)
 			}
 
-			cmds = append(cmds, b.updateDirectoryListingCmd(homeDir))
+			return b.updateDirectoryListingCmd(homeDir)
 		}
 	case "/":
 		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.treeCursor = 0
 			b.fileSizes = nil
-			cmds = append(cmds, b.updateDirectoryListingCmd(dirfs.RootDirectory))
+
+			return b.updateDirectoryListingCmd(dirfs.RootDirectory)
 		}
 	case ".":
 		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
@@ -238,11 +238,11 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 
 			switch {
 			case b.showDirectoriesOnly:
-				cmds = append(cmds, b.getDirectoryListingByTypeCmd(dirfs.DirectoriesListingType))
+				return b.getDirectoryListingByTypeCmd(dirfs.DirectoriesListingType)
 			case b.showFilesOnly:
-				cmds = append(cmds, b.getDirectoryListingByTypeCmd(dirfs.FilesListingType))
+				return b.getDirectoryListingByTypeCmd(dirfs.FilesListingType)
 			default:
-				cmds = append(cmds, b.updateDirectoryListingCmd(dirfs.CurrentDirectory))
+				return b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 			}
 		}
 	case "S":
@@ -251,10 +251,10 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 			b.showFilesOnly = false
 
 			if b.showDirectoriesOnly {
-				cmds = append(cmds, b.getDirectoryListingByTypeCmd(dirfs.DirectoriesListingType))
+				return b.getDirectoryListingByTypeCmd(dirfs.DirectoriesListingType)
 			}
 
-			cmds = append(cmds, b.updateDirectoryListingCmd(dirfs.CurrentDirectory))
+			return b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 		}
 	case "s":
 		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
@@ -262,34 +262,34 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 			b.showDirectoriesOnly = false
 
 			if b.showFilesOnly {
-				cmds = append(cmds, b.getDirectoryListingByTypeCmd(dirfs.FilesListingType))
+				return b.getDirectoryListingByTypeCmd(dirfs.FilesListingType)
 			}
 
-			cmds = append(cmds, b.updateDirectoryListingCmd(dirfs.CurrentDirectory))
+			b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 		}
 	case "y":
 		if b.activeBox == PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showCommandInput && !b.showBoxSpinner {
 			selectedFile := b.treeFiles[b.treeCursor]
 
-			cmds = append(cmds, b.copyToClipboardCmd(selectedFile.Name()))
+			return b.copyToClipboardCmd(selectedFile.Name())
 		}
 	case "Z":
 		if b.activeBox == PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showCommandInput && !b.showBoxSpinner {
 			selectedFile := b.treeFiles[b.treeCursor]
 
-			cmds = append(cmds, tea.Sequentially(
+			return tea.Sequentially(
 				b.zipDirectoryCmd(selectedFile.Name()),
 				b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-			))
+			)
 		}
 	case "U":
 		if b.activeBox == PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showCommandInput && !b.showBoxSpinner {
 			selectedFile := b.treeFiles[b.treeCursor]
 
-			cmds = append(cmds, tea.Sequentially(
+			return tea.Sequentially(
 				b.unzipDirectoryCmd(selectedFile.Name()),
 				b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-			))
+			)
 		}
 	case "n":
 		if !b.showCommandInput && !b.showBoxSpinner {
@@ -332,43 +332,43 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 	case "enter":
 		switch {
 		case b.moveMode:
-			cmds = append(cmds, b.moveDirectoryItemCmd(b.treeItemToMove.Name()))
+			return b.moveDirectoryItemCmd(b.treeItemToMove.Name())
 		case b.createFileMode:
-			cmds = append(cmds, tea.Sequentially(
+			return tea.Sequentially(
 				b.createFileCmd(b.textinput.Value()),
 				b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-			))
+			)
 		case b.createDirectoryMode:
-			cmds = append(cmds, tea.Sequentially(
+			return tea.Sequentially(
 				b.createDirectoryCmd(b.textinput.Value()),
 				b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-			))
+			)
 		case b.renameMode:
 			selectedFile := b.treeFiles[b.treeCursor]
 
-			cmds = append(cmds, tea.Sequentially(
+			return tea.Sequentially(
 				b.renameDirectoryItemCmd(selectedFile.Name(), b.textinput.Value()),
 				b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-			))
+			)
 		case b.findMode:
 			b.showCommandInput = false
 			b.showBoxSpinner = true
 
-			cmds = append(cmds, b.findFilesByNameCmd(b.textinput.Value()))
+			return b.findFilesByNameCmd(b.textinput.Value())
 		case b.deleteMode:
 			selectedFile := b.treeFiles[b.treeCursor]
 
 			if strings.ToLower(b.textinput.Value()) == "y" || strings.ToLower(b.textinput.Value()) == "yes" {
 				if selectedFile.IsDir() {
-					cmds = append(cmds, tea.Sequentially(
+					return tea.Sequentially(
 						b.deleteDirectoryCmd(selectedFile.Name()),
 						b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-					))
+					)
 				} else {
-					cmds = append(cmds, tea.Sequentially(
+					return tea.Sequentially(
 						b.deleteFileCmd(selectedFile.Name()),
 						b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-					))
+					)
 				}
 			}
 		default:
@@ -400,10 +400,10 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 
 				return tea.Batch(b.redrawCmd(), tea.HideCursor)
 			} else {
-				cmds = append(cmds, tea.Sequentially(
+				return tea.Sequentially(
 					b.writeSelectionPathCmd(selectionPath, selectedFile.Name()),
 					tea.Quit,
-				))
+				)
 			}
 		}
 	case "C":
@@ -411,15 +411,15 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 			selectedFile := b.treeFiles[b.treeCursor]
 
 			if selectedFile.IsDir() {
-				cmds = append(cmds, tea.Sequentially(
+				return tea.Sequentially(
 					b.copyDirectoryCmd(selectedFile.Name()),
 					b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-				))
+				)
 			} else {
-				cmds = append(cmds, tea.Sequentially(
+				return tea.Sequentially(
 					b.copyFileCmd(selectedFile.Name()),
 					b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-				))
+				)
 			}
 		}
 	case "ctrl+f":
@@ -429,7 +429,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 			b.textinput.Placeholder = "Enter a search term"
 			b.textinput.Focus()
 
-			cmds = append(cmds, textinput.Blink)
+			return textinput.Blink
 		}
 	case "R":
 		if b.activeBox == PrimaryBoxActive && !b.showBoxSpinner && len(b.treeFiles) > 0 {
@@ -441,7 +441,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 				b.textinput.Placeholder = "Enter new name"
 				b.textinput.Focus()
 
-				cmds = append(cmds, textinput.Blink)
+				return textinput.Blink
 			}
 		}
 	case "esc":
@@ -466,7 +466,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 		b.textinput.Blur()
 		b.textinput.Reset()
 
-		cmds = append(cmds, b.updateDirectoryListingCmd(dirfs.CurrentDirectory))
+		return b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 	case "O":
 		if !b.showCommandInput && b.appConfig.Settings.EnableLogging {
 			b.showLogs = true
@@ -481,7 +481,10 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 
 	b.previousKey = msg
 
-	return tea.Batch(cmds...)
+	var cmd tea.Cmd
+	b.textinput, cmd = b.textinput.Update(msg)
+
+	return cmd
 }
 
 // handleMouse handles all mouse interaction.
@@ -660,6 +663,8 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		cmd = b.handleKeys(msg)
 		cmds = append(cmds, cmd)
+
+		return b, tea.Batch(cmds...)
 	}
 
 	if b.activeBox != 0 {
