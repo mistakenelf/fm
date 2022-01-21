@@ -14,6 +14,7 @@ import (
 
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type updateDirectoryListingMsg []fs.DirEntry
@@ -208,7 +209,12 @@ func (b Bubble) readFileContentCmd(fileName string, width int) tea.Cmd {
 				image:       nil,
 			}
 		default:
-			code, err := strfmt.Highlight(content, filepath.Ext(fileName), b.appConfig.Settings.SyntaxTheme)
+			syntaxTheme := b.appConfig.Settings.SyntaxTheme.Light
+			if lipgloss.HasDarkBackground() {
+				syntaxTheme = b.appConfig.Settings.SyntaxTheme.Dark
+			}
+
+			code, err := strfmt.Highlight(content, filepath.Ext(fileName), syntaxTheme)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
