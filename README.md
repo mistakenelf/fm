@@ -71,7 +71,7 @@ paru -S fm-bin
 - Themes (`default`, `gruvbox`, `spooky`, `nord`, `holiday`)
 - Render PNG, JPG and JPEG as strings
 - Colors adapt to terminal background
-- Open selected file in editor set in EDITOR environment variable (currently only supports GUI editors)
+- Open selected file in editor set in EDITOR environment variable
 - Preview a directory in the secondary pane
 - Copy selected directory items path to the clipboard
 - Read PDF files

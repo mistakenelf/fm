@@ -54,16 +54,45 @@ type Bubble struct {
 	errorMsg               string
 }
 
-// NewBubble create an instance of the entire application.
-func NewBubble() Bubble {
+// New creates an instance of the entire application.
+func New() Bubble {
 	cfg := config.GetConfig()
 	theme := theme.GetTheme(cfg.Settings.Theme)
 
-	s := spinner.NewModel()
+	primaryBoxBorder := lipgloss.NormalBorder()
+	secondaryBoxBorder := lipgloss.NormalBorder()
+	primaryBoxBorderColor := theme.ActiveBoxBorderColor
+	secondaryBoxBorderColor := theme.InactiveBoxBorderColor
+
+	if cfg.Settings.Borderless {
+		primaryBoxBorder = lipgloss.HiddenBorder()
+		secondaryBoxBorder = lipgloss.HiddenBorder()
+	}
+
+	if cfg.Settings.SimpleMode {
+		primaryBoxBorder = lipgloss.HiddenBorder()
+		secondaryBoxBorder = lipgloss.HiddenBorder()
+	}
+
+	pvp := viewport.New(0, 0)
+	pvp.Style = lipgloss.NewStyle().
+		PaddingLeft(BoxPadding).
+		PaddingRight(BoxPadding).
+		Border(primaryBoxBorder).
+		BorderForeground(primaryBoxBorderColor)
+
+	svp := viewport.New(0, 0)
+	svp.Style = lipgloss.NewStyle().
+		PaddingLeft(BoxPadding).
+		PaddingRight(BoxPadding).
+		Border(secondaryBoxBorder).
+		BorderForeground(secondaryBoxBorderColor)
+
+	s := spinner.New()
 	s.Spinner = spinner.Dot
 	s.Style = lipgloss.NewStyle().Foreground(theme.SpinnerColor)
 
-	t := textinput.NewModel()
+	t := textinput.New()
 	t.Prompt = "❯ "
 	t.CharLimit = 250
 	t.PlaceholderStyle = lipgloss.NewStyle().
@@ -71,11 +100,13 @@ func NewBubble() Bubble {
 		Foreground(theme.StatusBarBarForegroundColor)
 
 	return Bubble{
-		appConfig:       cfg,
-		theme:           theme,
-		showHiddenFiles: true,
-		spinner:         s,
-		textinput:       t,
-		showHelp:        true,
+		appConfig:         cfg,
+		theme:             theme,
+		showHiddenFiles:   true,
+		spinner:           s,
+		textinput:         t,
+		showHelp:          true,
+		primaryViewport:   pvp,
+		secondaryViewport: svp,
 	}
 }

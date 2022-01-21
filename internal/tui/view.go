@@ -170,13 +170,13 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 					fileSize = boldTextStyle.Copy().
 						Foreground(colors["black"]).
 						Background(selectedItemColor).
-						Render("---")
+						Render(fileSizeLoadingStyle)
 				}
 			}
 
 			directoryItem = boldTextStyle.Copy().
 				Background(selectedItemColor).
-				Width(b.primaryViewport.Width - lipgloss.Width(fileSize) - boxStyle.GetHorizontalPadding() - lipgloss.Width(fileIcon)).
+				Width(b.primaryViewport.Width - lipgloss.Width(fileSize) - lipgloss.Width(fileIcon)).
 				Foreground(colors["black"]).
 				Render(
 					truncate.StringWithTail(
@@ -197,7 +197,7 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 			}
 
 			directoryItem = boldTextStyle.Copy().
-				Width(b.primaryViewport.Width - lipgloss.Width(fileSize) - boxStyle.GetHorizontalPadding() - lipgloss.Width(fileIcon)).
+				Width(b.primaryViewport.Width - lipgloss.Width(fileSize) - lipgloss.Width(fileIcon)).
 				Foreground(unselectedItemColor).
 				Render(
 					truncate.StringWithTail(
@@ -246,7 +246,9 @@ func (b Bubble) fileTreePreviewView(files []fs.DirEntry) string {
 				Render(fileInfo.Name())
 		}
 
-		dirItem := lipgloss.NewStyle().Width(b.secondaryViewport.Width - lipgloss.Width(fileSize) - boxStyle.GetHorizontalPadding()).Render(
+		dirItem := lipgloss.NewStyle().Width(
+			b.secondaryViewport.Width - lipgloss.Width(fileSize),
+		).Render(
 			truncate.StringWithTail(
 				directoryItem, uint(b.secondaryViewport.Width-lipgloss.Width(fileSize)), ellipsisStyle,
 			),
@@ -267,8 +269,8 @@ func (b Bubble) fileTreePreviewView(files []fs.DirEntry) string {
 // textContentView returns some text content.
 func (b Bubble) textContentView(content string) string {
 	return lipgloss.NewStyle().
-		Width(b.secondaryViewport.Width - boxStyle.GetHorizontalPadding()).
-		Height(b.secondaryViewport.Height - boxStyle.GetVerticalPadding()).
+		Width(b.secondaryViewport.Width).
+		Height(b.secondaryViewport.Height).
 		Render(content)
 }
 
@@ -276,8 +278,8 @@ func (b Bubble) textContentView(content string) string {
 func (b Bubble) errorView(msg string) string {
 	return lipgloss.NewStyle().
 		Foreground(b.theme.ErrorColor).
-		Width(b.secondaryViewport.Width - boxStyle.GetHorizontalPadding()).
-		Height(b.secondaryViewport.Height - boxStyle.GetVerticalPadding()).
+		Width(b.secondaryViewport.Width).
+		Height(b.secondaryViewport.Height).
 		Render(msg)
 }
 
@@ -298,7 +300,10 @@ func (b Bubble) logView() string {
 		logList += fmt.Sprintf("%s\n", log)
 	}
 
-	return lipgloss.JoinVertical(lipgloss.Top, title, logList)
+	return lipgloss.NewStyle().
+		Width(b.secondaryViewport.Width).
+		Height(b.secondaryViewport.Height).
+		Render(lipgloss.JoinVertical(lipgloss.Top, title, logList))
 }
 
 // helpView returns help text.
@@ -359,9 +364,10 @@ func (b Bubble) helpView() string {
 		lipgloss.Top,
 		welcomeText,
 		lipgloss.NewStyle().
-			Width(b.secondaryViewport.Width-boxStyle.GetHorizontalPadding()).
-			Height(b.secondaryViewport.Height-boxStyle.GetVerticalPadding()).
-			Render(helpScreen))
+			Width(b.secondaryViewport.Width).
+			Height(b.secondaryViewport.Height).
+			Render(helpScreen),
+	)
 }
 
 // View returns a string representation of the entire application UI.
@@ -377,11 +383,11 @@ func (b Bubble) View() string {
 	primaryBoxBorderColor := b.theme.InactiveBoxBorderColor
 	secondaryBoxBorderColor := b.theme.InactiveBoxBorderColor
 
-	if b.activeBox == 0 {
+	if b.activeBox == PrimaryBoxActive {
 		primaryBoxBorderColor = b.theme.ActiveBoxBorderColor
 	}
 
-	if b.activeBox == 1 {
+	if b.activeBox == SecondaryBoxActive {
 		secondaryBoxBorderColor = b.theme.ActiveBoxBorderColor
 	}
 
@@ -396,41 +402,35 @@ func (b Bubble) View() string {
 	}
 
 	if b.moveMode && !b.appConfig.Settings.SimpleMode && !b.appConfig.Settings.Borderless {
-		primaryBoxBorder = lipgloss.Border{
-			Top:         "-",
-			Bottom:      "-",
-			Left:        "|",
-			Right:       "|",
-			TopLeft:     "*",
-			TopRight:    "*",
-			BottomLeft:  "*",
-			BottomRight: "*",
-		}
+		primaryBoxBorder = starredBorder
 	}
 
-	primaryBox = boxStyle.Copy().
+	b.primaryViewport.Style = lipgloss.NewStyle().
+		PaddingLeft(BoxPadding).
+		PaddingRight(BoxPadding).
 		Border(primaryBoxBorder).
-		BorderForeground(primaryBoxBorderColor).
-		Width(b.primaryViewport.Width).
-		Height(b.primaryViewport.Height).
-		Render(b.primaryViewport.View())
+		BorderForeground(primaryBoxBorderColor)
+
+	primaryBox = b.primaryViewport.View()
 
 	if b.showBoxSpinner {
-		primaryBox = boxStyle.Copy().
+		b.primaryViewport.Style = lipgloss.NewStyle().
+			PaddingLeft(BoxPadding).
+			PaddingRight(BoxPadding).
 			Border(primaryBoxBorder).
-			BorderForeground(primaryBoxBorderColor).
-			Width(b.primaryViewport.Width).
-			Height(b.primaryViewport.Height).
-			Render(fmt.Sprintf("%s loading...", b.spinner.View()))
+			BorderForeground(primaryBoxBorderColor)
+
+		primaryBox = b.primaryViewport.Style.Render(fmt.Sprintf("%s loading...", b.spinner.View()))
 	}
 
 	if !b.appConfig.Settings.SimpleMode {
-		secondaryBox = boxStyle.Copy().
+		b.secondaryViewport.Style = lipgloss.NewStyle().
+			PaddingLeft(BoxPadding).
+			PaddingRight(BoxPadding).
 			Border(secondaryBoxBorder).
-			BorderForeground(secondaryBoxBorderColor).
-			Width(b.secondaryViewport.Width).
-			Height(b.secondaryViewport.Height).
-			Render(b.secondaryViewport.View())
+			BorderForeground(secondaryBoxBorderColor)
+
+		secondaryBox = b.secondaryViewport.View()
 	}
 
 	view := lipgloss.JoinVertical(

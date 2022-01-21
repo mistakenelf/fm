@@ -172,9 +172,32 @@ func CreateFile(name string) error {
 
 // Zip zips a directory given a name.
 func Zip(name string) error {
-	// Generate output name based on the directories current name along
-	// with a timestamp to make names unique.
-	output := fmt.Sprintf("%s_%d.zip", strings.Split(name, ".")[0], time.Now().Unix())
+	var splitName []string
+	var output string
+
+	srcFile, err := os.Open(name)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		err = srcFile.Close()
+	}()
+
+	fileExtension := filepath.Ext(name)
+	switch {
+	case strings.HasPrefix(name, ".") && fileExtension != "" && fileExtension == name:
+		output = fmt.Sprintf("%s_%d.zip", name, time.Now().Unix())
+	case strings.HasPrefix(name, ".") && fileExtension != "" && fileExtension != name:
+		splitName = strings.Split(name, ".")
+		output = fmt.Sprintf(".%s_%d.zip", splitName[1], time.Now().Unix())
+	case fileExtension != "":
+		splitName = strings.Split(name, ".")
+		output = fmt.Sprintf("%s_%d.zip", splitName[0], time.Now().Unix())
+	default:
+		output = fmt.Sprintf("%s_%d.zip", name, time.Now().Unix())
+	}
+
 	newfile, err := os.Create(output)
 	if err != nil {
 		return err
@@ -282,6 +305,8 @@ func Zip(name string) error {
 
 // Unzip unzips a directory given a name.
 func Unzip(name string) error {
+	var output string
+
 	r, err := zip.OpenReader(name)
 	if err != nil {
 		return err
@@ -291,9 +316,11 @@ func Unzip(name string) error {
 		err = r.Close()
 	}()
 
-	// Generate the name to unzip to based on its current name
-	// minus the extension.
-	output := strings.Split(name, ".")[0]
+	if strings.HasPrefix(name, ".") {
+		output = strings.Split(name, ".")[1]
+	} else {
+		output = strings.Split(name, ".")[0]
+	}
 
 	for _, f := range r.File {
 		archiveFile := f.Name
