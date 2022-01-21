@@ -209,9 +209,9 @@ func (b Bubble) readFileContentCmd(fileName string, width int) tea.Cmd {
 				image:       nil,
 			}
 		default:
-			syntaxTheme := b.appConfig.Settings.SyntaxTheme.Light
+			syntaxTheme := b.appConfig.Theme.SyntaxTheme.Light
 			if lipgloss.HasDarkBackground() {
-				syntaxTheme = b.appConfig.Settings.SyntaxTheme.Dark
+				syntaxTheme = b.appConfig.Theme.SyntaxTheme.Dark
 			}
 
 			code, err := strfmt.Highlight(content, filepath.Ext(fileName), syntaxTheme)

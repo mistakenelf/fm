@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// SyntaxThemeConfig represents light and dark syntax themes.
 type SyntaxThemeConfig struct {
 	Light string `mapstructure:"light"`
 	Dark  string `mapstructure:"dark"`
@@ -19,20 +20,25 @@ type SyntaxThemeConfig struct {
 
 // SettingsConfig struct represents the config for the settings.
 type SettingsConfig struct {
-	StartDir         string            `mapstructure:"start_dir"`
-	ShowIcons        bool              `mapstructure:"show_icons"`
-	EnableLogging    bool              `mapstructure:"enable_logging"`
-	EnableMouseWheel bool              `mapstructure:"enable_mousewheel"`
-	PrettyMarkdown   bool              `mapstructure:"pretty_markdown"`
-	Borderless       bool              `mapstructure:"borderless"`
-	Theme            string            `mapstructure:"theme"`
-	SyntaxTheme      SyntaxThemeConfig `mapstructure:"syntax_theme"`
-	SimpleMode       bool              `mapstructure:"simple_mode"`
+	StartDir         string `mapstructure:"start_dir"`
+	ShowIcons        bool   `mapstructure:"show_icons"`
+	EnableLogging    bool   `mapstructure:"enable_logging"`
+	EnableMouseWheel bool   `mapstructure:"enable_mousewheel"`
+	PrettyMarkdown   bool   `mapstructure:"pretty_markdown"`
+	Borderless       bool   `mapstructure:"borderless"`
+	SimpleMode       bool   `mapstructure:"simple_mode"`
+}
+
+// ThemeConfig represents the config for themes.
+type ThemeConfig struct {
+	AppTheme    string            `mapstructure:"app_theme"`
+	SyntaxTheme SyntaxThemeConfig `mapstructure:"syntax_theme"`
 }
 
 // Config represents the main config for the application.
 type Config struct {
 	Settings SettingsConfig `mapstructure:"settings"`
+	Theme    ThemeConfig    `mapstructure:"theme"`
 }
 
 // LoadConfig loads a users config and creates the config if it does not exist
@@ -66,9 +72,10 @@ func LoadConfig(startDir, selectionPath *pflag.Flag) {
 	viper.SetDefault("settings.enable_mousewheel", true)
 	viper.SetDefault("settings.pretty_markdown", true)
 	viper.SetDefault("settings.borderless", false)
-	viper.SetDefault("settings.theme", "default")
-	viper.SetDefault("settings.syntax_theme.light", "pygments")
-	viper.SetDefault("settings.syntax_theme.dark", "dracula")
+	viper.SetDefault("settings.syntax_theme", "default")
+	viper.SetDefault("theme.app_theme", "default")
+	viper.SetDefault("theme.syntax_theme.light", "pygments")
+	viper.SetDefault("theme.syntax_theme.dark", "dracula")
 	viper.SetDefault("settings.simple_mode", false)
 
 	if err := viper.SafeWriteConfig(); err != nil {
