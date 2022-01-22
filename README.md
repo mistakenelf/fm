@@ -158,8 +158,12 @@ settings:
   show_icons: true
   simple_mode: false
   start_dir: .
-  syntax_theme: dracula
-  theme: default
+  syntax_theme: default
+theme:
+  app_theme: default
+  syntax_theme:
+    dark: dracula
+    light: pygments
 ```
 
 ## Local Development

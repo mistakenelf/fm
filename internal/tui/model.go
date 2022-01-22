@@ -57,7 +57,7 @@ type Bubble struct {
 // New creates an instance of the entire application.
 func New() Bubble {
 	cfg := config.GetConfig()
-	theme := theme.GetTheme(cfg.Settings.Theme)
+	theme := theme.GetTheme(cfg.Theme.AppTheme)
 
 	primaryBoxBorder := lipgloss.NormalBorder()
 	secondaryBoxBorder := lipgloss.NormalBorder()

@@ -93,7 +93,7 @@ func (b Bubble) moveDirectoryItemCmd(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		// Get the directory frob which the move was intiated from
+		// Get the directory from which the move was intiated from
 		// and give it the same file name.
 		src := filepath.Join(b.moveInitiatedDirectory, name)
 
@@ -209,9 +209,9 @@ func (b Bubble) readFileContentCmd(fileName string, width int) tea.Cmd {
 				image:       nil,
 			}
 		default:
-			syntaxTheme := b.appConfig.Settings.SyntaxTheme.Light
+			syntaxTheme := b.appConfig.Theme.SyntaxTheme.Light
 			if lipgloss.HasDarkBackground() {
-				syntaxTheme = b.appConfig.Settings.SyntaxTheme.Dark
+				syntaxTheme = b.appConfig.Theme.SyntaxTheme.Dark
 			}
 
 			code, err := strfmt.Highlight(content, filepath.Ext(fileName), syntaxTheme)
