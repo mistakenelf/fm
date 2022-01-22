@@ -93,7 +93,7 @@ func (b Bubble) moveDirectoryItemCmd(name string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		// Get the directory frob which the move was intiated from
+		// Get the directory from which the move was intiated from
 		// and give it the same file name.
 		src := filepath.Join(b.moveInitiatedDirectory, name)
 

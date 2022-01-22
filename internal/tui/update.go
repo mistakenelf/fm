@@ -596,9 +596,18 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case moveDirItemMsg:
 		b.moveMode = false
 		b.treeItemToMove = nil
+		b.moveInitiatedDirectory = ""
+		b.treeFiles = msg
+		b.treeCursor = 0
+		b.fileSizes = make([]string, len(msg))
+
+		for i, file := range msg {
+			cmds = append(cmds, b.getDirectoryItemSizeCmd(file.Name(), i))
+		}
+
 		b.primaryViewport.SetContent(b.fileTreeView(msg))
 
-		return b, nil
+		return b, tea.Batch(cmds...)
 	case findFilesByNameMsg:
 		b.showCommandInput = false
 		b.createFileMode = false
