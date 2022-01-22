@@ -51,7 +51,7 @@ func (b Bubble) statusBarView() string {
 	}
 
 	if b.moveMode {
-		status = fmt.Sprintf("%s %s", "Currently moving:", b.treeFiles[b.treeCursor].Name())
+		status = fmt.Sprintf("%s %s", "Currently moving:", b.treeItemToMove.Name())
 	}
 
 	if b.appConfig.Settings.ShowIcons && !b.appConfig.Settings.SimpleMode {
@@ -215,7 +215,10 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 		curFiles = "Directory is empty"
 	}
 
-	return curFiles
+	return lipgloss.NewStyle().
+		Width(b.primaryViewport.Width).
+		Height(b.primaryViewport.Height).
+		Render(curFiles)
 }
 
 // fileTreePreviewView returns a preview of a filetree.
@@ -263,7 +266,10 @@ func (b Bubble) fileTreePreviewView(files []fs.DirEntry) string {
 		curFiles = "Directory is empty"
 	}
 
-	return curFiles
+	return lipgloss.NewStyle().
+		Width(b.secondaryViewport.Width).
+		Height(b.secondaryViewport.Height).
+		Render(curFiles)
 }
 
 // textContentView returns some text content.
