@@ -70,7 +70,7 @@ paru -S fm-bin
 - Mouse support
 - Themes (`default`, `gruvbox`, `spooky`, `nord`, `holiday`)
 - Render PNG, JPG and JPEG as strings
-- Colors adapt to terminal background
+- Colors adapt to terminal background, for syntax highlighting to work properly on light/dark terminals, set the appropriate themes in the config file
 - Open selected file in editor set in EDITOR environment variable
 - Preview a directory in the secondary pane
 - Copy selected directory items path to the clipboard
@@ -158,7 +158,7 @@ settings:
   show_icons: true
   simple_mode: false
   start_dir: .
-  syntax_theme: default
+  syntax_theme: default # This will be removed in the next release, so please use the new theme config
 theme:
   app_theme: default
   syntax_theme:

@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 
 	"github.com/knipferrc/fm/dirfs"
-	"github.com/knipferrc/fm/strfmt"
 
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
@@ -122,7 +121,7 @@ func (b Bubble) moveDirectoryItemCmd(name string) tea.Cmd {
 // convertImageToStringCmd redraws the image based on the width provided.
 func (b Bubble) convertImageToStringCmd(width int) tea.Cmd {
 	return func() tea.Msg {
-		imageString := strfmt.ImageToString(width, b.currentImage)
+		imageString := imageToString(width, b.currentImage)
 
 		return convertImageToStringMsg(imageString)
 	}
@@ -160,7 +159,7 @@ func (b Bubble) readFileContentCmd(fileName string, width int) tea.Cmd {
 
 		switch {
 		case filepath.Ext(fileName) == ".md" && b.appConfig.Settings.PrettyMarkdown:
-			markdownContent, err := strfmt.RenderMarkdown(width, content)
+			markdownContent, err := renderMarkdown(width, content)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
@@ -184,7 +183,7 @@ func (b Bubble) readFileContentCmd(fileName string, width int) tea.Cmd {
 				return errorMsg(err.Error())
 			}
 
-			imageString := strfmt.ImageToString(width, img)
+			imageString := imageToString(width, img)
 
 			return readFileContentMsg{
 				rawContent:  content,
@@ -195,7 +194,7 @@ func (b Bubble) readFileContentCmd(fileName string, width int) tea.Cmd {
 				image:       img,
 			}
 		case filepath.Ext(fileName) == ".pdf":
-			pdfContent, err := strfmt.ReadPdf(fileName)
+			pdfContent, err := readPdf(fileName)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
@@ -214,7 +213,7 @@ func (b Bubble) readFileContentCmd(fileName string, width int) tea.Cmd {
 				syntaxTheme = b.appConfig.Theme.SyntaxTheme.Dark
 			}
 
-			code, err := strfmt.Highlight(content, filepath.Ext(fileName), syntaxTheme)
+			code, err := highlight(content, filepath.Ext(fileName), syntaxTheme)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
@@ -305,7 +304,7 @@ func (b Bubble) getDirectoryItemSizeCmd(name string, i int) tea.Cmd {
 			return directoryItemSizeMsg{size: "N/A", index: i}
 		}
 
-		sizeString := strfmt.ConvertBytesToSizeString(size)
+		sizeString := convertBytesToSizeString(size)
 
 		return directoryItemSizeMsg{
 			size:  sizeString,

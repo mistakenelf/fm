@@ -27,6 +27,7 @@ type Bubble struct {
 	treePreviewFiles       []fs.DirEntry
 	treeItemToMove         fs.DirEntry
 	previousKey            tea.KeyMsg
+	keyMap                 KeyMap
 	width                  int
 	height                 int
 	activeBox              int
@@ -108,5 +109,6 @@ func New() Bubble {
 		showHelp:          true,
 		primaryViewport:   pvp,
 		secondaryViewport: svp,
+		keyMap:            DefaultKeyMap(),
 	}
 }
