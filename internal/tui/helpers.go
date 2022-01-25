@@ -1,4 +1,4 @@
-package strfmt
+package tui
 
 import (
 	"bytes"
@@ -14,13 +14,8 @@ import (
 	"github.com/lucasb-eyer/go-colorful"
 )
 
-// ConvertTabsToSpaces converts tabs to spaces.
-func ConvertTabsToSpaces(input string) string {
-	return strings.ReplaceAll(input, "\t", "    ")
-}
-
-// ConvertByesToSizeString converts a byte count to a human readable string.
-func ConvertBytesToSizeString(size int64) string {
+// convertByesToSizeString converts a byte count to a human readable string.
+func convertBytesToSizeString(size int64) string {
 	if size < 1000 {
 		return fmt.Sprintf("%dB", size)
 	}
@@ -49,8 +44,8 @@ func ConvertBytesToSizeString(size int64) string {
 	return ""
 }
 
-// ImageToString converts an image to a string representation of an image.
-func ImageToString(width int, img image.Image) string {
+// imageToString converts an image to a string representation of an image.
+func imageToString(width int, img image.Image) string {
 	img = imaging.Resize(img, width, 0, imaging.Lanczos)
 	b := img.Bounds()
 	w := b.Max.X
@@ -77,8 +72,8 @@ func ImageToString(width int, img image.Image) string {
 	return str.String()
 }
 
-// RenderMarkdown renders the markdown content with glamour.
-func RenderMarkdown(width int, content string) (string, error) {
+// renderMarkdown renders the markdown content with glamour.
+func renderMarkdown(width int, content string) (string, error) {
 	bg := "light"
 
 	if lipgloss.HasDarkBackground() {
@@ -99,7 +94,7 @@ func RenderMarkdown(width int, content string) (string, error) {
 }
 
 // ReadPdf reads a PDF file given a name.
-func ReadPdf(name string) (string, error) {
+func readPdf(name string) (string, error) {
 	f, r, err := pdf.Open(name)
 	if err != nil {
 		return "", err
@@ -122,8 +117,8 @@ func ReadPdf(name string) (string, error) {
 	return buf.String(), nil
 }
 
-// Highlight returns a syntax highlighted string of text.
-func Highlight(content, extension, syntaxTheme string) (string, error) {
+// highlight returns a syntax highlighted string of text.
+func highlight(content, extension, syntaxTheme string) (string, error) {
 	buf := new(bytes.Buffer)
 	if err := quick.Highlight(buf, content, extension, "terminal256", syntaxTheme); err != nil {
 		return "", err
