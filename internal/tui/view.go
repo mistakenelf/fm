@@ -7,7 +7,6 @@ import (
 
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/icons"
-	"github.com/knipferrc/fm/strfmt"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/truncate"
@@ -233,7 +232,7 @@ func (b Bubble) fileTreePreviewView(files []fs.DirEntry) string {
 
 		fileSize := lipgloss.NewStyle().
 			Foreground(fileColor).
-			Render(strfmt.ConvertBytesToSizeString(fileInfo.Size()))
+			Render(convertBytesToSizeString(fileInfo.Size()))
 
 		icon, color := icons.GetIcon(fileInfo.Name(), filepath.Ext(fileInfo.Name()), icons.GetIndicator(fileInfo.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)

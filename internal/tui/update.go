@@ -11,6 +11,7 @@ import (
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/internal/config"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -56,6 +57,9 @@ func (b *Bubble) writeLog(msg string) {
 
 // handleKeys handles all keypresses.
 func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
+	var cmds []tea.Cmd
+	var cmd tea.Cmd
+
 	// Jump to top of box.
 	if msg.String() == "g" && b.previousKey.String() == "g" {
 		if !b.showCommandInput && b.activeBox == PrimaryBoxActive && !b.showBoxSpinner {
@@ -87,22 +91,22 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 		return nil
 	}
 
-	switch msg.String() {
-	case "ctrl+c":
+	switch {
+	case key.Matches(msg, b.keyMap.Quit):
 		return tea.Quit
-	case "j", "down":
+	case key.Matches(msg, b.keyMap.Down):
 		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.treeCursor++
 			b.checkPrimaryViewportBounds()
 			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 		}
-	case "k", "up":
+	case key.Matches(msg, b.keyMap.Up):
 		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.treeCursor--
 			b.checkPrimaryViewportBounds()
 			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 		}
-	case "h", "left":
+	case key.Matches(msg, b.keyMap.Left):
 		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.treeCursor = 0
 			b.showFilesOnly = false
@@ -117,7 +121,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 				filepath.Join(workingDirectory, dirfs.PreviousDirectory),
 			)
 		}
-	case "l", "right":
+	case key.Matches(msg, b.keyMap.Right):
 		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			selectedFile, err := b.treeFiles[b.treeCursor].Info()
 			if err != nil {
@@ -176,7 +180,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 				)
 			}
 		}
-	case "p":
+	case key.Matches(msg, b.keyMap.Preview):
 		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			selectedFile, err := b.treeFiles[b.treeCursor].Info()
 			if err != nil {
@@ -204,7 +208,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 				return nil
 			}
 		}
-	case "G":
+	case key.Matches(msg, b.keyMap.GotoBottom):
 		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.treeCursor = len(b.treeFiles) - 1
 			b.primaryViewport.GotoBottom()
@@ -214,7 +218,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 		if b.activeBox == SecondaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.secondaryViewport.GotoBottom()
 		}
-	case "~":
+	case key.Matches(msg, b.keyMap.HomeShortcut):
 		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.treeCursor = 0
 			b.fileSizes = nil
@@ -225,14 +229,14 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 
 			return b.updateDirectoryListingCmd(homeDir)
 		}
-	case "/":
+	case key.Matches(msg, b.keyMap.RootShortcut):
 		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.treeCursor = 0
 			b.fileSizes = nil
 
 			return b.updateDirectoryListingCmd(dirfs.RootDirectory)
 		}
-	case ".":
+	case key.Matches(msg, b.keyMap.ToggleHidden):
 		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.showHiddenFiles = !b.showHiddenFiles
 
@@ -245,7 +249,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 				return b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 			}
 		}
-	case "S":
+	case key.Matches(msg, b.keyMap.ShowDirectoriesOnly):
 		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.showDirectoriesOnly = !b.showDirectoriesOnly
 			b.showFilesOnly = false
@@ -256,7 +260,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 
 			return b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 		}
-	case "s":
+	case key.Matches(msg, b.keyMap.ShowFilesOnly):
 		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.showFilesOnly = !b.showFilesOnly
 			b.showDirectoriesOnly = false
@@ -267,13 +271,13 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 
 			b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 		}
-	case "y":
+	case key.Matches(msg, b.keyMap.CopyPathToClipboard):
 		if b.activeBox == PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showCommandInput && !b.showBoxSpinner {
 			selectedFile := b.treeFiles[b.treeCursor]
 
 			return b.copyToClipboardCmd(selectedFile.Name())
 		}
-	case "Z":
+	case key.Matches(msg, b.keyMap.Zip):
 		if b.activeBox == PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showCommandInput && !b.showBoxSpinner {
 			selectedFile := b.treeFiles[b.treeCursor]
 
@@ -282,7 +286,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 				b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 			)
 		}
-	case "U":
+	case key.Matches(msg, b.keyMap.Unzip):
 		if b.activeBox == PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showCommandInput && !b.showBoxSpinner {
 			selectedFile := b.treeFiles[b.treeCursor]
 
@@ -291,7 +295,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 				b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 			)
 		}
-	case "n":
+	case key.Matches(msg, b.keyMap.NewFile):
 		if !b.showCommandInput && !b.showBoxSpinner {
 			b.createFileMode = true
 			b.showCommandInput = true
@@ -300,7 +304,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 
 			return textinput.Blink
 		}
-	case "N":
+	case key.Matches(msg, b.keyMap.NewDirectory):
 		if !b.showCommandInput && !b.showBoxSpinner {
 			b.createDirectoryMode = true
 			b.showCommandInput = true
@@ -309,14 +313,14 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 
 			return textinput.Blink
 		}
-	case "ctrl+d":
+	case key.Matches(msg, b.keyMap.Delete):
 		if !b.showCommandInput && !b.showBoxSpinner {
 			b.deleteMode = true
 			b.showCommandInput = true
 			b.textinput.Placeholder = "Are you sure you want to delete this? (y/n)"
 			b.textinput.Focus()
 		}
-	case "M":
+	case key.Matches(msg, b.keyMap.Move):
 		if !b.showCommandInput && !b.showBoxSpinner {
 			b.moveMode = true
 			b.treeItemToMove = b.treeFiles[b.treeCursor]
@@ -329,7 +333,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 
 			return nil
 		}
-	case "enter":
+	case key.Matches(msg, b.keyMap.Enter):
 		switch {
 		case b.moveMode:
 			return b.moveDirectoryItemCmd(b.treeItemToMove.Name())
@@ -374,7 +378,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 		default:
 			return nil
 		}
-	case "E":
+	case key.Matches(msg, b.keyMap.Edit):
 		selectedFile := b.treeFiles[b.treeCursor]
 
 		if !b.showCommandInput && b.activeBox == PrimaryBoxActive && !b.showBoxSpinner {
@@ -406,7 +410,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 				)
 			}
 		}
-	case "C":
+	case key.Matches(msg, b.keyMap.Copy):
 		if !b.showCommandInput && b.activeBox == PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showBoxSpinner {
 			selectedFile := b.treeFiles[b.treeCursor]
 
@@ -422,7 +426,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 				)
 			}
 		}
-	case "ctrl+f":
+	case key.Matches(msg, b.keyMap.Find):
 		if !b.showCommandInput && !b.showBoxSpinner {
 			b.findMode = true
 			b.showCommandInput = true
@@ -431,7 +435,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 
 			return textinput.Blink
 		}
-	case "R":
+	case key.Matches(msg, b.keyMap.Rename):
 		if b.activeBox == PrimaryBoxActive && !b.showBoxSpinner && len(b.treeFiles) > 0 {
 			selectedFile := b.treeFiles
 
@@ -444,7 +448,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 				return textinput.Blink
 			}
 		}
-	case "esc":
+	case key.Matches(msg, b.keyMap.Escape):
 		b.showCommandInput = false
 		b.moveMode = false
 		b.createFileMode = false
@@ -467,24 +471,30 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 		b.textinput.Reset()
 
 		return b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
-	case "O":
+	case key.Matches(msg, b.keyMap.ShowLogs):
 		if !b.showCommandInput && b.appConfig.Settings.EnableLogging {
 			b.showLogs = true
 			b.currentImage = nil
 			b.secondaryViewport.SetContent(b.logView())
 		}
-	case "tab":
+	case key.Matches(msg, b.keyMap.ToggleBox):
 		b.activeBox = (b.activeBox + 1) % 2
 	}
 
-	b.writeLog("Key: " + msg.String())
-
 	b.previousKey = msg
 
-	var cmd tea.Cmd
-	b.textinput, cmd = b.textinput.Update(msg)
+	if b.activeBox != PrimaryBoxActive {
+		b.secondaryViewport, cmd = b.secondaryViewport.Update(msg)
+		cmds = append(cmds, cmd)
+	}
 
-	return cmd
+	b.textinput, cmd = b.textinput.Update(msg)
+	cmds = append(cmds, cmd)
+
+	b.spinner, cmd = b.spinner.Update(msg)
+	cmds = append(cmds, cmd)
+
+	return tea.Batch(cmds...)
 }
 
 // handleMouse handles all mouse interaction.
@@ -676,7 +686,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return b, tea.Batch(cmds...)
 	}
 
-	if b.activeBox != 0 {
+	if b.activeBox != PrimaryBoxActive {
 		b.secondaryViewport, cmd = b.secondaryViewport.Update(msg)
 		cmds = append(cmds, cmd)
 	}
