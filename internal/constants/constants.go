@@ -1,4 +1,4 @@
-package tui
+package constants
 
 import "github.com/charmbracelet/lipgloss"
 
@@ -9,12 +9,12 @@ const (
 const (
 	StatusBarHeight      = 1
 	BoxPadding           = 1
-	ellipsisStyle        = "..."
-	fileSizeLoadingStyle = "---"
+	EllipsisStyle        = "..."
+	FileSizeLoadingStyle = "---"
 )
 
-var boldTextStyle = lipgloss.NewStyle().Bold(true)
-var starredBorder = lipgloss.Border{
+var BoldTextStyle = lipgloss.NewStyle().Bold(true)
+var StarredBorder = lipgloss.Border{
 	Top:         "-",
 	Bottom:      "-",
 	Left:        "|",
@@ -25,6 +25,6 @@ var starredBorder = lipgloss.Border{
 	BottomRight: "*",
 }
 
-var colors = map[string]lipgloss.Color{
+var Colors = map[string]lipgloss.Color{
 	"black": "#000000",
 }

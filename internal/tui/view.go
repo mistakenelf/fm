@@ -7,6 +7,8 @@ import (
 
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/icons"
+	"github.com/knipferrc/fm/internal/constants"
+	"github.com/knipferrc/fm/renderer"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/truncate"
@@ -60,64 +62,64 @@ func (b Bubble) statusBarView() string {
 	}
 
 	// Selected file styles
-	selectedFileStyle := boldTextStyle.Copy().
+	selectedFileStyle := constants.BoldTextStyle.Copy().
 		Foreground(b.theme.StatusBarSelectedFileForegroundColor).
 		Background(b.theme.StatusBarSelectedFileBackgroundColor)
 
 	if b.appConfig.Settings.SimpleMode {
-		selectedFileStyle = boldTextStyle.Copy().
+		selectedFileStyle = constants.BoldTextStyle.Copy().
 			Foreground(b.theme.DefaultTextColor)
 	}
 
 	selectedFileColumn := selectedFileStyle.
 		Padding(0, 1).
-		Height(StatusBarHeight).
+		Height(constants.StatusBarHeight).
 		Render(truncate.StringWithTail(selectedFileName, 30, "..."))
 
 	// File count styles
-	fileCountStyle := boldTextStyle.Copy().
+	fileCountStyle := constants.BoldTextStyle.Copy().
 		Foreground(b.theme.StatusBarTotalFilesForegroundColor).
 		Background(b.theme.StatusBarTotalFilesBackgroundColor)
 
 	if b.appConfig.Settings.SimpleMode {
-		fileCountStyle = boldTextStyle.Copy().
+		fileCountStyle = constants.BoldTextStyle.Copy().
 			Foreground(b.theme.DefaultTextColor)
 	}
 
 	fileCountColumn := fileCountStyle.
 		Align(lipgloss.Right).
 		Padding(0, 1).
-		Height(StatusBarHeight).
+		Height(constants.StatusBarHeight).
 		Render(fileCount)
 
 	// Logo styles
-	logoStyle := boldTextStyle.Copy().
+	logoStyle := constants.BoldTextStyle.Copy().
 		Foreground(b.theme.StatusBarLogoForegroundColor).
 		Background(b.theme.StatusBarLogoBackgroundColor)
 
 	if b.appConfig.Settings.SimpleMode {
-		logoStyle = boldTextStyle.Copy().
+		logoStyle = constants.BoldTextStyle.Copy().
 			Foreground(b.theme.DefaultTextColor)
 	}
 
 	logoColumn := logoStyle.
 		Padding(0, 1).
-		Height(StatusBarHeight).
+		Height(constants.StatusBarHeight).
 		Render(logo)
 
 	// Status styles
-	statusStyle := boldTextStyle.Copy().
+	statusStyle := constants.BoldTextStyle.Copy().
 		Foreground(b.theme.StatusBarBarForegroundColor).
 		Background(b.theme.StatusBarBarBackgroundColor)
 
 	if b.appConfig.Settings.SimpleMode {
-		statusStyle = boldTextStyle.Copy().
+		statusStyle = constants.BoldTextStyle.Copy().
 			Foreground(b.theme.DefaultTextColor)
 	}
 
 	statusColumn := statusStyle.
 		Padding(0, 1).
-		Height(StatusBarHeight).
+		Height(constants.StatusBarHeight).
 		Width(b.width - width(selectedFileColumn) - width(fileCountColumn) - width(logoColumn)).
 		Render(truncate.StringWithTail(
 			status,
@@ -148,10 +150,10 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 		}
 
 		icon, color := icons.GetIcon(fileInfo.Name(), filepath.Ext(fileInfo.Name()), icons.GetIndicator(fileInfo.Mode()))
-		fileIcon := boldTextStyle.Copy().Width(2).Render(fmt.Sprintf("%s%s ", color, icon))
+		fileIcon := constants.BoldTextStyle.Copy().Width(2).Render(fmt.Sprintf("%s%s ", color, icon))
 
 		if !b.appConfig.Settings.ShowIcons || b.appConfig.Settings.SimpleMode {
-			fileIcon = boldTextStyle.Copy().Render("")
+			fileIcon = constants.BoldTextStyle.Copy().Render("")
 		}
 
 		if b.appConfig.Settings.SimpleMode {
@@ -161,46 +163,46 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 		if b.treeCursor == i {
 			if len(b.fileSizes) > 0 {
 				if b.fileSizes[i] != "" {
-					fileSize = boldTextStyle.Copy().
-						Foreground(colors["black"]).
+					fileSize = constants.BoldTextStyle.Copy().
+						Foreground(constants.Colors["black"]).
 						Background(selectedItemColor).
 						Render(b.fileSizes[i])
 				} else {
-					fileSize = boldTextStyle.Copy().
-						Foreground(colors["black"]).
+					fileSize = constants.BoldTextStyle.Copy().
+						Foreground(constants.Colors["black"]).
 						Background(selectedItemColor).
-						Render(fileSizeLoadingStyle)
+						Render(constants.FileSizeLoadingStyle)
 				}
 			}
 
-			directoryItem = boldTextStyle.Copy().
+			directoryItem = constants.BoldTextStyle.Copy().
 				Background(selectedItemColor).
 				Width(b.primaryViewport.Width - lipgloss.Width(fileSize) - lipgloss.Width(fileIcon)).
-				Foreground(colors["black"]).
+				Foreground(constants.Colors["black"]).
 				Render(
 					truncate.StringWithTail(
-						fileInfo.Name(), uint(b.primaryViewport.Width-lipgloss.Width(fileSize)), ellipsisStyle,
+						fileInfo.Name(), uint(b.primaryViewport.Width-lipgloss.Width(fileSize)), constants.EllipsisStyle,
 					),
 				)
 		} else {
 			if len(b.fileSizes) > 0 {
 				if b.fileSizes[i] != "" {
-					fileSize = boldTextStyle.Copy().
+					fileSize = constants.BoldTextStyle.Copy().
 						Foreground(unselectedItemColor).
 						Render(b.fileSizes[i])
 				} else {
-					fileSize = boldTextStyle.Copy().
+					fileSize = constants.BoldTextStyle.Copy().
 						Foreground(unselectedItemColor).
-						Render(fileSizeLoadingStyle)
+						Render(constants.FileSizeLoadingStyle)
 				}
 			}
 
-			directoryItem = boldTextStyle.Copy().
+			directoryItem = constants.BoldTextStyle.Copy().
 				Width(b.primaryViewport.Width - lipgloss.Width(fileSize) - lipgloss.Width(fileIcon)).
 				Foreground(unselectedItemColor).
 				Render(
 					truncate.StringWithTail(
-						fileInfo.Name(), uint(b.primaryViewport.Width-lipgloss.Width(fileSize)), ellipsisStyle,
+						fileInfo.Name(), uint(b.primaryViewport.Width-lipgloss.Width(fileSize)), constants.EllipsisStyle,
 					),
 				)
 		}
@@ -232,18 +234,18 @@ func (b Bubble) fileTreePreviewView(files []fs.DirEntry) string {
 
 		fileSize := lipgloss.NewStyle().
 			Foreground(fileColor).
-			Render(convertBytesToSizeString(fileInfo.Size()))
+			Render(renderer.ConvertBytesToSizeString(fileInfo.Size()))
 
 		icon, color := icons.GetIcon(fileInfo.Name(), filepath.Ext(fileInfo.Name()), icons.GetIndicator(fileInfo.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
 
 		switch {
 		case b.appConfig.Settings.ShowIcons:
-			directoryItem = fmt.Sprintf("%s\033[0m %s", fileIcon, boldTextStyle.Copy().
+			directoryItem = fmt.Sprintf("%s\033[0m %s", fileIcon, constants.BoldTextStyle.Copy().
 				Foreground(fileColor).
 				Render(fileInfo.Name()))
 		default:
-			directoryItem = boldTextStyle.Copy().
+			directoryItem = constants.BoldTextStyle.Copy().
 				Foreground(fileColor).
 				Render(fileInfo.Name())
 		}
@@ -252,7 +254,7 @@ func (b Bubble) fileTreePreviewView(files []fs.DirEntry) string {
 			b.secondaryViewport.Width - lipgloss.Width(fileSize),
 		).Render(
 			truncate.StringWithTail(
-				directoryItem, uint(b.secondaryViewport.Width-lipgloss.Width(fileSize)), ellipsisStyle,
+				directoryItem, uint(b.secondaryViewport.Width-lipgloss.Width(fileSize)), constants.EllipsisStyle,
 			),
 		)
 
@@ -291,7 +293,7 @@ func (b Bubble) errorView(msg string) string {
 // logView shows a list of logs.
 func (b Bubble) logView() string {
 	logList := ""
-	title := boldTextStyle.Copy().
+	title := constants.BoldTextStyle.Copy().
 		Border(lipgloss.NormalBorder()).
 		Italic(true).
 		BorderBottom(true).
@@ -311,70 +313,6 @@ func (b Bubble) logView() string {
 		Render(lipgloss.JoinVertical(lipgloss.Top, title, logList))
 }
 
-// helpView returns help text.
-func (b Bubble) helpView() string {
-	type helpEntry struct {
-		key         string
-		description string
-	}
-
-	helpScreen := ""
-	helpContent := []helpEntry{
-		{"ctrl+c", "Exit FM"},
-		{"j/up", "Move up"},
-		{"k/down", "Move down"},
-		{"h/left", "Go back a directory"},
-		{"l/right", "Read file or enter directory"},
-		{"p", "Preview directory"},
-		{"gg", "Go to top of filetree or box"},
-		{"G", "Go to bottom of filetree or box"},
-		{"~", "Go to home directory"},
-		{"/", "Go to root directory"},
-		{".", "Toggle hidden files"},
-		{"S", "Only show directories"},
-		{"s", "Only show files"},
-		{"y", "Copy file path to clipboard"},
-		{"Z", "Zip currently selected tree item"},
-		{"U", "Unzip currently selected tree item"},
-		{"n", "Create new file"},
-		{"N", "Create new directory"},
-		{"ctrl+d", "Delete currently selected tree item"},
-		{"M", "Move currently selected tree item"},
-		{"enter", "Process command"},
-		{"E", "Edit currently selected tree item"},
-		{"C", "Copy currently selected tree item"},
-		{"esc", "Reset FM to initial state"},
-		{"O", "Show logs if debugging enabled"},
-		{"tab", "Toggle between boxes"},
-	}
-
-	for _, content := range helpContent {
-		keyText := boldTextStyle.Copy().Foreground(b.theme.DefaultTextColor).Width(12).Render(content.key)
-		descriptionText := lipgloss.NewStyle().Foreground(b.theme.DefaultTextColor).Render(content.description)
-		row := lipgloss.JoinHorizontal(lipgloss.Top, keyText, descriptionText)
-		helpScreen += fmt.Sprintf("%s\n", row)
-	}
-
-	welcomeText := boldTextStyle.Copy().
-		Border(lipgloss.NormalBorder()).
-		Italic(true).
-		BorderBottom(true).
-		BorderTop(false).
-		BorderRight(false).
-		BorderLeft(false).
-		Foreground(b.theme.DefaultTextColor).
-		Render("Welcome to FM!")
-
-	return lipgloss.JoinVertical(
-		lipgloss.Top,
-		welcomeText,
-		lipgloss.NewStyle().
-			Width(b.secondaryViewport.Width).
-			Height(b.secondaryViewport.Height).
-			Render(helpScreen),
-	)
-}
-
 // View returns a string representation of the entire application UI.
 func (b Bubble) View() string {
 	if !b.ready {
@@ -388,11 +326,11 @@ func (b Bubble) View() string {
 	primaryBoxBorderColor := b.theme.InactiveBoxBorderColor
 	secondaryBoxBorderColor := b.theme.InactiveBoxBorderColor
 
-	if b.activeBox == PrimaryBoxActive {
+	if b.activeBox == constants.PrimaryBoxActive {
 		primaryBoxBorderColor = b.theme.ActiveBoxBorderColor
 	}
 
-	if b.activeBox == SecondaryBoxActive {
+	if b.activeBox == constants.SecondaryBoxActive {
 		secondaryBoxBorderColor = b.theme.ActiveBoxBorderColor
 	}
 
@@ -407,12 +345,12 @@ func (b Bubble) View() string {
 	}
 
 	if b.moveMode && !b.appConfig.Settings.SimpleMode && !b.appConfig.Settings.Borderless {
-		primaryBoxBorder = starredBorder
+		primaryBoxBorder = constants.StarredBorder
 	}
 
 	b.primaryViewport.Style = lipgloss.NewStyle().
-		PaddingLeft(BoxPadding).
-		PaddingRight(BoxPadding).
+		PaddingLeft(constants.BoxPadding).
+		PaddingRight(constants.BoxPadding).
 		Border(primaryBoxBorder).
 		BorderForeground(primaryBoxBorderColor)
 
@@ -420,8 +358,8 @@ func (b Bubble) View() string {
 
 	if b.showBoxSpinner {
 		b.primaryViewport.Style = lipgloss.NewStyle().
-			PaddingLeft(BoxPadding).
-			PaddingRight(BoxPadding).
+			PaddingLeft(constants.BoxPadding).
+			PaddingRight(constants.BoxPadding).
 			Border(primaryBoxBorder).
 			BorderForeground(primaryBoxBorderColor)
 
@@ -430,8 +368,8 @@ func (b Bubble) View() string {
 
 	if !b.appConfig.Settings.SimpleMode {
 		b.secondaryViewport.Style = lipgloss.NewStyle().
-			PaddingLeft(BoxPadding).
-			PaddingRight(BoxPadding).
+			PaddingLeft(constants.BoxPadding).
+			PaddingRight(constants.BoxPadding).
 			Border(secondaryBoxBorder).
 			BorderForeground(secondaryBoxBorderColor)
 

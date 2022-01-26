@@ -10,6 +10,7 @@ import (
 
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/internal/config"
+	"github.com/knipferrc/fm/internal/constants"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -62,13 +63,13 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 
 	// Jump to top of box.
 	if msg.String() == "g" && b.previousKey.String() == "g" {
-		if !b.showCommandInput && b.activeBox == PrimaryBoxActive && !b.showBoxSpinner {
+		if !b.showCommandInput && b.activeBox == constants.PrimaryBoxActive && !b.showBoxSpinner {
 			b.treeCursor = 0
 			b.primaryViewport.GotoTop()
 			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 		}
 
-		if !b.showCommandInput && b.activeBox == SecondaryBoxActive {
+		if !b.showCommandInput && b.activeBox == constants.SecondaryBoxActive {
 			b.secondaryViewport.GotoTop()
 		}
 
@@ -77,7 +78,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 
 	// Reload config file.
 	if msg.String() == "c" && b.previousKey.String() == "r" {
-		if !b.showCommandInput && b.activeBox == PrimaryBoxActive && !b.showBoxSpinner {
+		if !b.showCommandInput && b.activeBox == constants.PrimaryBoxActive && !b.showBoxSpinner {
 			if err := viper.ReadInConfig(); err != nil {
 				if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 					log.Fatal(err)
@@ -95,19 +96,19 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 	case key.Matches(msg, b.keyMap.Quit):
 		return tea.Quit
 	case key.Matches(msg, b.keyMap.Down):
-		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
+		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.treeCursor++
 			b.checkPrimaryViewportBounds()
 			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 		}
 	case key.Matches(msg, b.keyMap.Up):
-		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
+		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.treeCursor--
 			b.checkPrimaryViewportBounds()
 			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 		}
 	case key.Matches(msg, b.keyMap.Left):
-		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
+		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.treeCursor = 0
 			b.showFilesOnly = false
 			b.showDirectoriesOnly = false
@@ -122,7 +123,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 			)
 		}
 	case key.Matches(msg, b.keyMap.Right):
-		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
+		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			selectedFile, err := b.treeFiles[b.treeCursor].Info()
 			if err != nil {
 				return b.handleErrorCmd(err)
@@ -181,7 +182,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 			}
 		}
 	case key.Matches(msg, b.keyMap.Preview):
-		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
+		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			selectedFile, err := b.treeFiles[b.treeCursor].Info()
 			if err != nil {
 				return b.handleErrorCmd(err)
@@ -209,17 +210,17 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 			}
 		}
 	case key.Matches(msg, b.keyMap.GotoBottom):
-		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
+		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.treeCursor = len(b.treeFiles) - 1
 			b.primaryViewport.GotoBottom()
 			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 		}
 
-		if b.activeBox == SecondaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
+		if b.activeBox == constants.SecondaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.secondaryViewport.GotoBottom()
 		}
 	case key.Matches(msg, b.keyMap.HomeShortcut):
-		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
+		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.treeCursor = 0
 			b.fileSizes = nil
 			homeDir, err := dirfs.GetHomeDirectory()
@@ -230,14 +231,14 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 			return b.updateDirectoryListingCmd(homeDir)
 		}
 	case key.Matches(msg, b.keyMap.RootShortcut):
-		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
+		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.treeCursor = 0
 			b.fileSizes = nil
 
 			return b.updateDirectoryListingCmd(dirfs.RootDirectory)
 		}
 	case key.Matches(msg, b.keyMap.ToggleHidden):
-		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
+		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.showHiddenFiles = !b.showHiddenFiles
 
 			switch {
@@ -250,7 +251,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 			}
 		}
 	case key.Matches(msg, b.keyMap.ShowDirectoriesOnly):
-		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
+		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.showDirectoriesOnly = !b.showDirectoriesOnly
 			b.showFilesOnly = false
 
@@ -261,7 +262,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 			return b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 		}
 	case key.Matches(msg, b.keyMap.ShowFilesOnly):
-		if b.activeBox == PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
+		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.showFilesOnly = !b.showFilesOnly
 			b.showDirectoriesOnly = false
 
@@ -272,13 +273,13 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 			b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
 		}
 	case key.Matches(msg, b.keyMap.CopyPathToClipboard):
-		if b.activeBox == PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showCommandInput && !b.showBoxSpinner {
+		if b.activeBox == constants.PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showCommandInput && !b.showBoxSpinner {
 			selectedFile := b.treeFiles[b.treeCursor]
 
 			return b.copyToClipboardCmd(selectedFile.Name())
 		}
 	case key.Matches(msg, b.keyMap.Zip):
-		if b.activeBox == PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showCommandInput && !b.showBoxSpinner {
+		if b.activeBox == constants.PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showCommandInput && !b.showBoxSpinner {
 			selectedFile := b.treeFiles[b.treeCursor]
 
 			return tea.Sequentially(
@@ -287,7 +288,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 			)
 		}
 	case key.Matches(msg, b.keyMap.Unzip):
-		if b.activeBox == PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showCommandInput && !b.showBoxSpinner {
+		if b.activeBox == constants.PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showCommandInput && !b.showBoxSpinner {
 			selectedFile := b.treeFiles[b.treeCursor]
 
 			return tea.Sequentially(
@@ -381,7 +382,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 	case key.Matches(msg, b.keyMap.Edit):
 		selectedFile := b.treeFiles[b.treeCursor]
 
-		if !b.showCommandInput && b.activeBox == PrimaryBoxActive && !b.showBoxSpinner {
+		if !b.showCommandInput && b.activeBox == constants.PrimaryBoxActive && !b.showBoxSpinner {
 			selectionPath := viper.GetString("selection-path")
 
 			if selectionPath == "" && !selectedFile.IsDir() {
@@ -411,7 +412,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 			}
 		}
 	case key.Matches(msg, b.keyMap.Copy):
-		if !b.showCommandInput && b.activeBox == PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showBoxSpinner {
+		if !b.showCommandInput && b.activeBox == constants.PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showBoxSpinner {
 			selectedFile := b.treeFiles[b.treeCursor]
 
 			if selectedFile.IsDir() {
@@ -436,7 +437,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 			return textinput.Blink
 		}
 	case key.Matches(msg, b.keyMap.Rename):
-		if b.activeBox == PrimaryBoxActive && !b.showBoxSpinner && len(b.treeFiles) > 0 {
+		if b.activeBox == constants.PrimaryBoxActive && !b.showBoxSpinner && len(b.treeFiles) > 0 {
 			selectedFile := b.treeFiles
 
 			if selectedFile != nil {
@@ -466,7 +467,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 		b.showBoxSpinner = false
 		b.currentImage = nil
 		b.secondaryViewport.GotoTop()
-		b.secondaryViewport.SetContent(b.helpView())
+		b.secondaryViewport.SetContent(b.help.View())
 		b.textinput.Blur()
 		b.textinput.Reset()
 
@@ -483,7 +484,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 
 	b.previousKey = msg
 
-	if b.activeBox != PrimaryBoxActive {
+	if b.activeBox != constants.PrimaryBoxActive {
 		b.secondaryViewport, cmd = b.secondaryViewport.Update(msg)
 		cmds = append(cmds, cmd)
 	}
@@ -501,24 +502,24 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 func (b *Bubble) handleMouse(msg tea.MouseMsg) {
 	switch msg.Type {
 	case tea.MouseWheelUp:
-		if b.activeBox == PrimaryBoxActive {
+		if b.activeBox == constants.PrimaryBoxActive {
 			b.treeCursor--
 			b.checkPrimaryViewportBounds()
 			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 		}
 
-		if b.activeBox == SecondaryBoxActive {
+		if b.activeBox == constants.SecondaryBoxActive {
 			b.secondaryViewport.LineUp(1)
 			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 		}
 	case tea.MouseWheelDown:
-		if b.activeBox == PrimaryBoxActive {
+		if b.activeBox == constants.PrimaryBoxActive {
 			b.treeCursor++
 			b.checkPrimaryViewportBounds()
 			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 		}
 
-		if b.activeBox == SecondaryBoxActive {
+		if b.activeBox == constants.SecondaryBoxActive {
 			b.secondaryViewport.LineDown(1)
 			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 		}
@@ -651,9 +652,10 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.height = msg.Height
 
 		b.primaryViewport.Width = (msg.Width / 2) - b.primaryViewport.Style.GetHorizontalFrameSize()
-		b.primaryViewport.Height = msg.Height - StatusBarHeight - b.primaryViewport.Style.GetVerticalFrameSize()
+		b.primaryViewport.Height = msg.Height - constants.StatusBarHeight - b.primaryViewport.Style.GetVerticalFrameSize()
 		b.secondaryViewport.Width = (msg.Width / 2) - b.secondaryViewport.Style.GetHorizontalFrameSize()
-		b.secondaryViewport.Height = msg.Height - StatusBarHeight - b.secondaryViewport.Style.GetVerticalFrameSize()
+		b.secondaryViewport.Height = msg.Height - constants.StatusBarHeight - b.secondaryViewport.Style.GetVerticalFrameSize()
+		b.help.SetSize(b.secondaryViewport.Width, b.secondaryViewport.Height)
 
 		b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
 
@@ -665,7 +667,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case b.errorMsg != "":
 			b.secondaryViewport.SetContent(b.errorView(b.errorMsg))
 		case b.showHelp && !b.showLogs:
-			b.secondaryViewport.SetContent(b.helpView())
+			b.secondaryViewport.SetContent(b.help.View())
 		case b.showLogs && b.currentImage == nil:
 			b.secondaryViewport.SetContent(b.logView())
 		default:
@@ -686,7 +688,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return b, tea.Batch(cmds...)
 	}
 
-	if b.activeBox != PrimaryBoxActive {
+	if b.activeBox != constants.PrimaryBoxActive {
 		b.secondaryViewport, cmd = b.secondaryViewport.Update(msg)
 		cmds = append(cmds, cmd)
 	}
