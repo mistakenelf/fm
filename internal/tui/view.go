@@ -5,10 +5,10 @@ import (
 	"io/fs"
 	"path/filepath"
 
+	"github.com/knipferrc/fm/convert"
 	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/icons"
 	"github.com/knipferrc/fm/internal/constants"
-	"github.com/knipferrc/fm/renderer"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/truncate"
@@ -234,7 +234,7 @@ func (b Bubble) fileTreePreviewView(files []fs.DirEntry) string {
 
 		fileSize := lipgloss.NewStyle().
 			Foreground(fileColor).
-			Render(renderer.ConvertBytesToSizeString(fileInfo.Size()))
+			Render(convert.ConvertBytesToSizeString(fileInfo.Size()))
 
 		icon, color := icons.GetIcon(fileInfo.Name(), filepath.Ext(fileInfo.Name()), icons.GetIndicator(fileInfo.Mode()))
 		fileIcon := fmt.Sprintf("%s%s", color, icon)
