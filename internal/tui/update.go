@@ -66,7 +66,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 		if !b.showCommandInput && b.activeBox == constants.PrimaryBoxActive && !b.showBoxSpinner {
 			b.treeCursor = 0
 			b.primaryViewport.GotoTop()
-			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			b.primaryViewport.SetContent(b.fileTreeView())
 		}
 
 		if !b.showCommandInput && b.activeBox == constants.SecondaryBoxActive {
@@ -86,7 +86,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 			}
 
 			b.appConfig = config.GetConfig()
-			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			b.primaryViewport.SetContent(b.fileTreeView())
 		}
 
 		return nil
@@ -99,13 +99,13 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.treeCursor++
 			b.checkPrimaryViewportBounds()
-			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			b.primaryViewport.SetContent(b.fileTreeView())
 		}
 	case key.Matches(msg, b.keyMap.Up):
 		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.treeCursor--
 			b.checkPrimaryViewportBounds()
-			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			b.primaryViewport.SetContent(b.fileTreeView())
 		}
 	case key.Matches(msg, b.keyMap.Left):
 		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
@@ -213,7 +213,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
 			b.treeCursor = len(b.treeFiles) - 1
 			b.primaryViewport.GotoBottom()
-			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			b.primaryViewport.SetContent(b.fileTreeView())
 		}
 
 		if b.activeBox == constants.SecondaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
@@ -505,23 +505,23 @@ func (b *Bubble) handleMouse(msg tea.MouseMsg) {
 		if b.activeBox == constants.PrimaryBoxActive {
 			b.treeCursor--
 			b.checkPrimaryViewportBounds()
-			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			b.primaryViewport.SetContent(b.fileTreeView())
 		}
 
 		if b.activeBox == constants.SecondaryBoxActive {
 			b.secondaryViewport.LineUp(1)
-			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			b.primaryViewport.SetContent(b.fileTreeView())
 		}
 	case tea.MouseWheelDown:
 		if b.activeBox == constants.PrimaryBoxActive {
 			b.treeCursor++
 			b.checkPrimaryViewportBounds()
-			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			b.primaryViewport.SetContent(b.fileTreeView())
 		}
 
 		if b.activeBox == constants.SecondaryBoxActive {
 			b.secondaryViewport.LineDown(1)
-			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			b.primaryViewport.SetContent(b.fileTreeView())
 		}
 	}
 }
@@ -548,7 +548,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, b.getDirectoryItemSizeCmd(file.Name(), i))
 		}
 
-		b.primaryViewport.SetContent(b.fileTreeView(msg))
+		b.primaryViewport.SetContent(b.fileTreeView())
 		b.textinput.Blur()
 		b.textinput.Reset()
 
@@ -556,7 +556,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case directoryItemSizeMsg:
 		if len(b.fileSizes) > 0 && msg.index < len(b.fileSizes) {
 			b.fileSizes[msg.index] = msg.size
-			b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+			b.primaryViewport.SetContent(b.fileTreeView())
 		}
 
 		return b, nil
@@ -616,7 +616,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, b.getDirectoryItemSizeCmd(file.Name(), i))
 		}
 
-		b.primaryViewport.SetContent(b.fileTreeView(msg))
+		b.primaryViewport.SetContent(b.fileTreeView())
 
 		return b, tea.Batch(cmds...)
 	case findFilesByNameMsg:
@@ -637,7 +637,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, b.getDirectoryItemSizeCmd(file.Name(), i))
 		}
 
-		b.primaryViewport.SetContent(b.fileTreeView(msg.entries))
+		b.primaryViewport.SetContent(b.fileTreeView())
 
 		return b, tea.Batch(cmds...)
 	case errorMsg:
@@ -657,7 +657,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.secondaryViewport.Height = msg.Height - constants.StatusBarHeight - b.secondaryViewport.Style.GetVerticalFrameSize()
 		b.help.SetSize(b.secondaryViewport.Width, b.secondaryViewport.Height)
 
-		b.primaryViewport.SetContent(b.fileTreeView(b.treeFiles))
+		b.primaryViewport.SetContent(b.fileTreeView())
 
 		switch {
 		case b.showFileTreePreview && !b.showLogs:

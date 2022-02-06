@@ -136,14 +136,14 @@ func (b Bubble) statusBarView() string {
 }
 
 // fileView returns the filetree view.
-func (b Bubble) fileTreeView(files []fs.DirEntry) string {
+func (b Bubble) fileTreeView() string {
 	var directoryItem string
 	curFiles := ""
 	fileSize := ""
 	selectedItemColor := b.theme.SelectedTreeItemColor
 	unselectedItemColor := b.theme.UnselectedTreeItemColor
 
-	for i, file := range files {
+	for i, file := range b.treeFiles {
 		fileInfo, err := file.Info()
 		if err != nil {
 			return "Error loading directory tree"
@@ -212,7 +212,7 @@ func (b Bubble) fileTreeView(files []fs.DirEntry) string {
 		curFiles += fmt.Sprintf("%s\n", row)
 	}
 
-	if len(files) == 0 {
+	if len(b.treeFiles) == 0 {
 		curFiles = "Directory is empty"
 	}
 
