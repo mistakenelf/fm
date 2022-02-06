@@ -9,15 +9,15 @@ import (
 	"github.com/knipferrc/fm/internal/tui"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/spf13/cobra"
+	"github.com/muesli/coral"
 )
 
-var rootCmd = &cobra.Command{
+var rootCmd = &coral.Command{
 	Use:     "fm",
 	Short:   "FM is a simple, configurable, and fun to use file manager",
 	Version: "0.13.1",
-	Args:    cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	Args:    coral.MaximumNArgs(1),
+	Run: func(cmd *coral.Command, args []string) {
 		startDir := cmd.Flags().Lookup("start-dir")
 		selectionPath := cmd.Flags().Lookup("selection-path")
 

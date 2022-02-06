@@ -5,14 +5,14 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/spf13/cobra"
+	"github.com/muesli/coral"
 )
 
-var updateCmd = &cobra.Command{
+var updateCmd = &coral.Command{
 	Use:   "update",
 	Short: "Update FM to the latest version",
 	Long:  `Update FM to the latest version.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *coral.Command, args []string) {
 		updateCommand := exec.Command("bash", "-c", "curl -sfL https://raw.githubusercontent.com/knipferrc/fm/main/install.sh | sh")
 		updateCommand.Stdin = os.Stdin
 		updateCommand.Stdout = os.Stdout
