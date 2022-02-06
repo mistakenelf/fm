@@ -72,7 +72,6 @@ func LoadConfig(startDir, selectionPath *pflag.Flag) {
 	viper.SetDefault("settings.enable_mousewheel", true)
 	viper.SetDefault("settings.pretty_markdown", true)
 	viper.SetDefault("settings.borderless", false)
-	viper.SetDefault("settings.syntax_theme", "default")
 	viper.SetDefault("settings.simple_mode", false)
 	viper.SetDefault("theme.app_theme", "default")
 	viper.SetDefault("theme.syntax_theme.light", "pygments")

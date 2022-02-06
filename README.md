@@ -158,7 +158,6 @@ settings:
   show_icons: true
   simple_mode: false
   start_dir: .
-  syntax_theme: default # This will be removed in the next release, so please use the new theme config
 theme:
   app_theme: default
   syntax_theme:
