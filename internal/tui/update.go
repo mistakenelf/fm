@@ -175,6 +175,11 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 					fileToRead = b.foundFilesPaths[b.treeCursor]
 				}
 
+				if selectedFile.Mode()&0111 == 0111 {
+					b.secondaryViewport.SetContent(b.textContentView("Unable to preview file"))
+					return nil
+				}
+
 				return b.readFileContentCmd(
 					fileToRead,
 					b.secondaryViewport.Width,
