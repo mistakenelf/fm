@@ -6,15 +6,15 @@ require (
 	github.com/alecthomas/chroma v0.10.0
 	github.com/atotto/clipboard v0.1.4
 	github.com/charmbracelet/bubbles v0.10.2
-	github.com/charmbracelet/bubbletea v0.19.3
+	github.com/charmbracelet/bubbletea v0.20.0
 	github.com/charmbracelet/glamour v0.5.0
-	github.com/charmbracelet/lipgloss v0.4.0
+	github.com/charmbracelet/lipgloss v0.5.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/ledongthuc/pdf v0.0.0-20210621053716-e28cb8259002
 	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/muesli/coral v1.0.0
 	github.com/muesli/reflow v0.3.0
-	github.com/muesli/termenv v0.11.0
+	github.com/muesli/termenv v0.11.1-0.20220212125758-44cd13922739
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.10.1
 )
@@ -41,14 +41,14 @@ require (
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
-	github.com/yuin/goldmark v1.4.5 // indirect
+	github.com/yuin/goldmark v1.4.6 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
-	golang.org/x/sys v0.0.0-20220207234003-57398862261d // indirect
+	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
-	gopkg.in/ini.v1 v1.66.3 // indirect
+	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
