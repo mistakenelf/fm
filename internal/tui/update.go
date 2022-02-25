@@ -62,7 +62,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 	var cmd tea.Cmd
 
 	// Jump to top of box.
-	if msg.String() == "g" && b.previousKey.String() == "g" {
+	if b.previousKey.String() == "g" && msg.String() == "g" {
 		if !b.showCommandInput && b.activeBox == constants.PrimaryBoxActive && !b.showBoxSpinner {
 			b.treeCursor = 0
 			b.primaryViewport.GotoTop()
@@ -77,7 +77,7 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 	}
 
 	// Reload config file.
-	if msg.String() == "c" && b.previousKey.String() == "r" {
+	if b.previousKey.String() == "r" && msg.String() == "c" {
 		if !b.showCommandInput && b.activeBox == constants.PrimaryBoxActive && !b.showBoxSpinner {
 			if err := viper.ReadInConfig(); err != nil {
 				if _, ok := err.(viper.ConfigFileNotFoundError); ok {
