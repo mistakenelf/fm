@@ -2,7 +2,6 @@ package tui
 
 import (
 	"fmt"
-	"io/fs"
 	"path/filepath"
 
 	"github.com/knipferrc/fm/convert"
@@ -223,11 +222,11 @@ func (b Bubble) fileTreeView() string {
 }
 
 // fileTreePreviewView returns a preview of a filetree.
-func (b Bubble) fileTreePreviewView(files []fs.DirEntry) string {
+func (b Bubble) fileTreePreviewView() string {
 	var directoryItem string
 	curFiles := ""
 
-	for _, file := range files {
+	for _, file := range b.treePreviewFiles {
 		fileColor := b.theme.UnselectedTreeItemColor
 
 		fileInfo, _ := file.Info()
@@ -263,7 +262,7 @@ func (b Bubble) fileTreePreviewView(files []fs.DirEntry) string {
 		curFiles += fmt.Sprintf("%s\n", row)
 	}
 
-	if len(files) == 0 {
+	if len(b.treePreviewFiles) == 0 {
 		curFiles = "Directory is empty"
 	}
 

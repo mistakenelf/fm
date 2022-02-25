@@ -595,7 +595,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.showLogs = false
 		b.treePreviewFiles = msg
 		b.secondaryViewport.GotoTop()
-		b.secondaryViewport.SetContent(b.fileTreePreviewView(msg))
+		b.secondaryViewport.SetContent(b.fileTreePreviewView())
 
 		return b, nil
 	case convertImageToStringMsg:
@@ -666,7 +666,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		switch {
 		case b.showFileTreePreview && !b.showLogs:
-			b.secondaryViewport.SetContent(b.fileTreePreviewView(b.treePreviewFiles))
+			b.secondaryViewport.SetContent(b.fileTreePreviewView())
 		case b.currentImage != nil && !b.showLogs:
 			return b, b.convertImageToStringCmd(b.secondaryViewport.Width)
 		case b.errorMsg != "":
