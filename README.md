@@ -152,6 +152,7 @@ paru -S fm-bin
 ```yml
 settings:
   borderless: false
+  calculated_file_sizes: false
   enable_logging: false
   enable_mousewheel: true
   pretty_markdown: true
