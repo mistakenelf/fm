@@ -20,13 +20,14 @@ type SyntaxThemeConfig struct {
 
 // SettingsConfig struct represents the config for the settings.
 type SettingsConfig struct {
-	StartDir         string `mapstructure:"start_dir"`
-	ShowIcons        bool   `mapstructure:"show_icons"`
-	EnableLogging    bool   `mapstructure:"enable_logging"`
-	EnableMouseWheel bool   `mapstructure:"enable_mousewheel"`
-	PrettyMarkdown   bool   `mapstructure:"pretty_markdown"`
-	Borderless       bool   `mapstructure:"borderless"`
-	SimpleMode       bool   `mapstructure:"simple_mode"`
+	StartDir            string `mapstructure:"start_dir"`
+	ShowIcons           bool   `mapstructure:"show_icons"`
+	EnableLogging       bool   `mapstructure:"enable_logging"`
+	EnableMouseWheel    bool   `mapstructure:"enable_mousewheel"`
+	PrettyMarkdown      bool   `mapstructure:"pretty_markdown"`
+	Borderless          bool   `mapstructure:"borderless"`
+	SimpleMode          bool   `mapstructure:"simple_mode"`
+	CalculatedFileSizes bool   `mapstructure:"calculated_file_sizes"`
 }
 
 // ThemeConfig represents the config for themes.
@@ -73,6 +74,7 @@ func LoadConfig(startDir, selectionPath *pflag.Flag) {
 	viper.SetDefault("settings.pretty_markdown", true)
 	viper.SetDefault("settings.borderless", false)
 	viper.SetDefault("settings.simple_mode", false)
+	viper.SetDefault("settings.calculated_file_sizes", false)
 	viper.SetDefault("theme.app_theme", "default")
 	viper.SetDefault("theme.syntax_theme.light", "pygments")
 	viper.SetDefault("theme.syntax_theme.dark", "dracula")

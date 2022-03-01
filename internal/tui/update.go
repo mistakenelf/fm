@@ -549,8 +549,10 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.fileSizes = make([]string, len(msg))
 		b.writeLog("Directory listing updated.")
 
-		for i, file := range msg {
-			cmds = append(cmds, b.getDirectoryItemSizeCmd(file.Name(), i))
+		if b.appConfig.Settings.CalculatedFileSizes {
+			for i, file := range msg {
+				cmds = append(cmds, b.getDirectoryItemSizeCmd(file.Name(), i))
+			}
 		}
 
 		b.primaryViewport.SetContent(b.fileTreeView())

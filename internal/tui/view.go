@@ -161,12 +161,18 @@ func (b Bubble) fileTreeView() string {
 
 		if b.treeCursor == i {
 			if len(b.fileSizes) > 0 {
-				if b.fileSizes[i] != "" {
+				switch {
+				case b.fileSizes[i] != "" && b.appConfig.Settings.CalculatedFileSizes:
 					fileSize = constants.BoldTextStyle.Copy().
 						Foreground(constants.Colors["black"]).
 						Background(selectedItemColor).
 						Render(b.fileSizes[i])
-				} else {
+				case b.fileSizes[i] == "" && !b.appConfig.Settings.CalculatedFileSizes:
+					fileSize = constants.BoldTextStyle.Copy().
+						Foreground(constants.Colors["black"]).
+						Background(selectedItemColor).
+						Render(convert.ConvertBytesToSizeString(fileInfo.Size()))
+				case b.fileSizes[i] == "" && b.appConfig.Settings.CalculatedFileSizes:
 					fileSize = constants.BoldTextStyle.Copy().
 						Foreground(constants.Colors["black"]).
 						Background(selectedItemColor).
@@ -185,11 +191,16 @@ func (b Bubble) fileTreeView() string {
 				)
 		} else {
 			if len(b.fileSizes) > 0 {
-				if b.fileSizes[i] != "" {
+				switch {
+				case b.fileSizes[i] != "" && b.appConfig.Settings.CalculatedFileSizes:
 					fileSize = constants.BoldTextStyle.Copy().
 						Foreground(unselectedItemColor).
 						Render(b.fileSizes[i])
-				} else {
+				case b.fileSizes[i] == "" && !b.appConfig.Settings.CalculatedFileSizes:
+					fileSize = constants.BoldTextStyle.Copy().
+						Foreground(unselectedItemColor).
+						Render(convert.ConvertBytesToSizeString(fileInfo.Size()))
+				case b.fileSizes[i] == "" && b.appConfig.Settings.CalculatedFileSizes:
 					fileSize = constants.BoldTextStyle.Copy().
 						Foreground(unselectedItemColor).
 						Render(constants.FileSizeLoadingStyle)
