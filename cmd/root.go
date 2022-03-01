@@ -15,7 +15,7 @@ import (
 var rootCmd = &coral.Command{
 	Use:     "fm",
 	Short:   "FM is a simple, configurable, and fun to use file manager",
-	Version: "0.13.3",
+	Version: "0.13.4",
 	Args:    coral.MaximumNArgs(1),
 	Run: func(cmd *coral.Command, args []string) {
 		startDir := cmd.Flags().Lookup("start-dir")
