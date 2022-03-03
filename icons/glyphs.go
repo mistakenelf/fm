@@ -9,7 +9,7 @@ type IconInfo struct {
 	executable bool
 }
 
-// Getglyph returns the glyph for the icon.
+// GetGlyph returns the glyph for the icon.
 func (i *IconInfo) GetGlyph() string {
 	return i.icon
 }

@@ -14,7 +14,7 @@ import (
 	"github.com/lucasb-eyer/go-colorful"
 )
 
-// ConvertByesToSizeString converts a byte count to a human readable string.
+// ConvertBytesToSizeString converts a byte count to a human readable string.
 func ConvertBytesToSizeString(size int64) string {
 	if size < 1000 {
 		return fmt.Sprintf("%dB", size)

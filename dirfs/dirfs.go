@@ -480,6 +480,7 @@ func GetDirectoryItemSize(path string) (int64, error) {
 	return size, err
 }
 
+// FindFilesByName returns files found based on a name.
 func FindFilesByName(name, dir string) ([]string, []fs.DirEntry, error) {
 	var paths []string
 	var entries []fs.DirEntry

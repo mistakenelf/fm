@@ -2,6 +2,7 @@ package theme
 
 import "github.com/charmbracelet/lipgloss"
 
+// Theme represents the properties that make up a theme.
 type Theme struct {
 	SelectedTreeItemColor                lipgloss.AdaptiveColor
 	UnselectedTreeItemColor              lipgloss.AdaptiveColor

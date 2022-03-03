@@ -374,12 +374,12 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 						b.deleteDirectoryCmd(selectedFile.Name()),
 						b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 					)
-				} else {
-					return tea.Sequentially(
-						b.deleteFileCmd(selectedFile.Name()),
-						b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-					)
 				}
+
+				return tea.Sequentially(
+					b.deleteFileCmd(selectedFile.Name()),
+					b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
+				)
 			}
 		default:
 			return nil
@@ -409,12 +409,12 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 				}
 
 				return tea.Batch(b.redrawCmd(), tea.HideCursor)
-			} else {
-				return tea.Sequentially(
-					b.writeSelectionPathCmd(selectionPath, selectedFile.Name()),
-					tea.Quit,
-				)
 			}
+
+			return tea.Sequentially(
+				b.writeSelectionPathCmd(selectionPath, selectedFile.Name()),
+				tea.Quit,
+			)
 		}
 	case key.Matches(msg, b.keyMap.Copy):
 		if !b.showCommandInput && b.activeBox == constants.PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showBoxSpinner {
@@ -425,12 +425,12 @@ func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
 					b.copyDirectoryCmd(selectedFile.Name()),
 					b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
 				)
-			} else {
-				return tea.Sequentially(
-					b.copyFileCmd(selectedFile.Name()),
-					b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-				)
 			}
+
+			return tea.Sequentially(
+				b.copyFileCmd(selectedFile.Name()),
+				b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
+			)
 		}
 	case key.Matches(msg, b.keyMap.Find):
 		if !b.showCommandInput && !b.showBoxSpinner {

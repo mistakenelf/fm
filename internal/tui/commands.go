@@ -3,8 +3,13 @@ package tui
 import (
 	"fmt"
 	"image"
+
+	// needed to read jpeg iamges.
 	_ "image/jpeg"
+
+	// needed to read png images.
 	_ "image/png"
+
 	"io/fs"
 	"os"
 	"path/filepath"
