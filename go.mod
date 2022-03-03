@@ -10,7 +10,7 @@ require (
 	github.com/charmbracelet/glamour v0.5.0
 	github.com/charmbracelet/lipgloss v0.5.0
 	github.com/disintegration/imaging v1.6.2
-	github.com/ledongthuc/pdf v0.0.0-20210621053716-e28cb8259002
+	github.com/ledongthuc/pdf v0.0.0-20220302134840-0c2507a12d80
 	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/muesli/coral v1.0.0
 	github.com/muesli/reflow v0.3.0
@@ -43,9 +43,9 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/yuin/goldmark v1.4.7 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
-	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
-	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
-	golang.org/x/sys v0.0.0-20220224120231-95c6836cb0e7 // indirect
+	golang.org/x/image v0.0.0-20220302094943-723b81ca9867 // indirect
+	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
+	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
