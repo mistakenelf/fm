@@ -45,6 +45,17 @@ type readFileContentMsg struct {
 	image       image.Image
 }
 
+// contains returns true if the slice contains the string.
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+
+	return false
+}
+
 // updateDirectoryListingCmd updates the directory listing based on the name of the directory provided.
 func (b Bubble) updateDirectoryListingCmd(name string) tea.Cmd {
 	return func() tea.Msg {
@@ -158,6 +169,21 @@ func (b Bubble) deleteFileCmd(name string) tea.Cmd {
 // readFileContentCmd reads the content of a file and returns it.
 func (b Bubble) readFileContentCmd(fileName string, width int) tea.Cmd {
 	return func() tea.Msg {
+		var forbiddenExtensions = []string{
+			".FCStd",
+			".gif",
+			".zip",
+			".rar",
+			".webm",
+			".sqlite",
+			".sqlite-shm",
+			".sqlite-wal",
+			".DS_Store",
+			".db",
+			".data",
+			".plist",
+		}
+
 		content, err := dirfs.ReadFileContent(fileName)
 		if err != nil {
 			return errorMsg(err.Error())
@@ -213,6 +239,8 @@ func (b Bubble) readFileContentCmd(fileName string, width int) tea.Cmd {
 				pdfContent:  pdfContent,
 				image:       nil,
 			}
+		case contains(forbiddenExtensions, filepath.Ext(fileName)):
+			return errorMsg("Unsupported file type")
 		default:
 			syntaxTheme := b.appConfig.Theme.SyntaxTheme.Light
 			if lipgloss.HasDarkBackground() {
