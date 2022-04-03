@@ -1,120 +1,189 @@
 package config
 
 import (
-	"log"
+	"fmt"
 	"os"
+	"path"
 	"path/filepath"
-	"runtime"
 
-	"github.com/knipferrc/fm/dirfs"
-
-	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
+
+// AppDir is the name of the directory where the config file is stored.
+const AppDir = "fm"
+
+// ConfigFileName is the name of the config file that gets created.
+const ConfigFileName = "config.yml"
 
 // SyntaxThemeConfig represents light and dark syntax themes.
 type SyntaxThemeConfig struct {
-	Light string `mapstructure:"light"`
-	Dark  string `mapstructure:"dark"`
+	Light string `yaml:"light"`
+	Dark  string `yaml:"dark"`
 }
 
 // SettingsConfig struct represents the config for the settings.
 type SettingsConfig struct {
-	StartDir            string `mapstructure:"start_dir"`
-	ShowIcons           bool   `mapstructure:"show_icons"`
-	EnableLogging       bool   `mapstructure:"enable_logging"`
-	EnableMouseWheel    bool   `mapstructure:"enable_mousewheel"`
-	PrettyMarkdown      bool   `mapstructure:"pretty_markdown"`
-	Borderless          bool   `mapstructure:"borderless"`
-	SimpleMode          bool   `mapstructure:"simple_mode"`
-	CalculatedFileSizes bool   `mapstructure:"calculated_file_sizes"`
+	StartDir            string `yaml:"start_dir"`
+	ShowIcons           bool   `yaml:"show_icons"`
+	EnableLogging       bool   `yaml:"enable_logging"`
+	EnableMouseWheel    bool   `yaml:"enable_mousewheel"`
+	PrettyMarkdown      bool   `yaml:"pretty_markdown"`
+	Borderless          bool   `yaml:"borderless"`
+	SimpleMode          bool   `yaml:"simple_mode"`
+	CalculatedFileSizes bool   `yaml:"calculated_file_sizes"`
 }
 
 // ThemeConfig represents the config for themes.
 type ThemeConfig struct {
-	AppTheme    string            `mapstructure:"app_theme"`
-	SyntaxTheme SyntaxThemeConfig `mapstructure:"syntax_theme"`
+	AppTheme    string            `yaml:"app_theme"`
+	SyntaxTheme SyntaxThemeConfig `yaml:"syntax_theme"`
 }
 
 // Config represents the main config for the application.
 type Config struct {
-	Settings SettingsConfig `mapstructure:"settings"`
-	Theme    ThemeConfig    `mapstructure:"theme"`
+	Settings SettingsConfig `yaml:"settings"`
+	Theme    ThemeConfig    `yaml:"theme"`
 }
 
-// LoadConfig loads a users config and creates the config if it does not exist
-// located at ~/.config/fm.yml.
-func LoadConfig(startDir, selectionPath *pflag.Flag) {
+// configError represents an error that occurred while parsing the config file.
+type configError struct {
+	configDir string
+	parser    ConfigParser
+	err       error
+}
+
+// ConfigParser is the parser for the config file.
+type ConfigParser struct{}
+
+// getDefaultConfig returns the default config for the application.
+func (parser ConfigParser) getDefaultConfig() Config {
+	return Config{
+		Settings: SettingsConfig{
+			EnableLogging: false,
+		},
+	}
+}
+
+// getDefaultConfigYamlContents returns the default config file contents.
+func (parser ConfigParser) getDefaultConfigYamlContents() string {
+	defaultConfig := parser.getDefaultConfig()
+	yaml, _ := yaml.Marshal(defaultConfig)
+
+	return string(yaml)
+}
+
+// Error returns the error message for when a config file is not found.
+func (e configError) Error() string {
+	return fmt.Sprintf(
+		`Couldn't find a config.yml configuration file.
+Create one under: %s
+Example of a config.yml file:
+%s
+For more info, go to https://github.com/knipferrc/fm
+press q to exit.
+Original error: %v`,
+		path.Join(e.configDir, AppDir, ConfigFileName),
+		e.parser.getDefaultConfigYamlContents(),
+		e.err,
+	)
+}
+
+// writeDefaultConfigContents writes the default config file contents to the given file.
+func (parser ConfigParser) writeDefaultConfigContents(newConfigFile *os.File) error {
+	_, err := newConfigFile.WriteString(parser.getDefaultConfigYamlContents())
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// createConfigFileIfMissing creates the config file if it doesn't exist.
+func (parser ConfigParser) createConfigFileIfMissing(configFilePath string) error {
+	if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
+		newConfigFile, err := os.OpenFile(configFilePath, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666)
+		if err != nil {
+			return err
+		}
+
+		defer newConfigFile.Close()
+		return parser.writeDefaultConfigContents(newConfigFile)
+	}
+
+	return nil
+}
+
+// getConfigFileOrCreateIfMissing returns the config file path or creates the config file if it doesn't exist.
+func (parser ConfigParser) getConfigFileOrCreateIfMissing() (*string, error) {
+	var err error
+	configDir := os.Getenv("XDG_CONFIG_HOME")
+
+	if configDir == "" {
+		configDir, err = os.UserConfigDir()
+		if err != nil {
+			return nil, configError{parser: parser, configDir: configDir, err: err}
+		}
+	}
+
+	prsConfigDir := filepath.Join(configDir, AppDir)
+	err = os.MkdirAll(prsConfigDir, os.ModePerm)
+	if err != nil {
+		return nil, configError{parser: parser, configDir: configDir, err: err}
+	}
+
+	configFilePath := filepath.Join(prsConfigDir, ConfigFileName)
+	err = parser.createConfigFileIfMissing(configFilePath)
+	if err != nil {
+		return nil, configError{parser: parser, configDir: configDir, err: err}
+	}
+
+	return &configFilePath, nil
+}
+
+// parsingError represents an error that occurred while parsing the config file.
+type parsingError struct {
+	err error
+}
+
+// Error represents an error that occurred while parsing the config file.
+func (e parsingError) Error() string {
+	return fmt.Sprintf("failed parsing config.yml: %v", e.err)
+}
+
+// readConfigFile reads the config file and returns the config.
+func (parser ConfigParser) readConfigFile(path string) (Config, error) {
+	config := parser.getDefaultConfig()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return config, configError{parser: parser, configDir: path, err: err}
+	}
+
+	err = yaml.Unmarshal((data), &config)
+	return config, err
+}
+
+// initParser initializes the parser.
+func initParser() ConfigParser {
+	return ConfigParser{}
+}
+
+// ParseConfig parses the config file and returns the config.
+func ParseConfig() (Config, error) {
+	var config Config
 	var err error
 
-	if runtime.GOOS != "windows" {
-		homeDir, err := dirfs.GetHomeDirectory()
-		if err != nil {
-			log.Fatal(err)
-		}
+	parser := initParser()
 
-		err = dirfs.CreateDirectory(filepath.Join(homeDir, ".config", "fm"))
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		viper.AddConfigPath("$HOME/.config/fm")
-	} else {
-		viper.AddConfigPath("$HOME")
-	}
-
-	viper.SetConfigName("fm")
-	viper.SetConfigType("yml")
-
-	// Setup config defaults.
-	viper.SetDefault("settings.start_dir", ".")
-	viper.SetDefault("settings.show_icons", true)
-	viper.SetDefault("settings.enable_logging", false)
-	viper.SetDefault("settings.enable_mousewheel", true)
-	viper.SetDefault("settings.pretty_markdown", true)
-	viper.SetDefault("settings.borderless", false)
-	viper.SetDefault("settings.simple_mode", false)
-	viper.SetDefault("settings.calculated_file_sizes", false)
-	viper.SetDefault("theme.app_theme", "default")
-	viper.SetDefault("theme.syntax_theme.light", "pygments")
-	viper.SetDefault("theme.syntax_theme.dark", "dracula")
-
-	if err := viper.SafeWriteConfig(); err != nil {
-		if os.IsNotExist(err) {
-			err = viper.WriteConfig()
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-	}
-
-	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			log.Fatal(err)
-		}
-	}
-
-	// Setup flags.
-	err = viper.BindPFlag("start-dir", startDir)
+	configFilePath, err := parser.getConfigFileOrCreateIfMissing()
 	if err != nil {
-		log.Fatal(err)
+		return config, parsingError{err: err}
 	}
 
-	err = viper.BindPFlag("selection-path", selectionPath)
+	config, err = parser.readConfigFile(*configFilePath)
 	if err != nil {
-		log.Fatal(err)
+		return config, parsingError{err: err}
 	}
 
-	// Setup flag defaults.
-	viper.SetDefault("start-dir", "")
-	viper.SetDefault("selection-path", "")
-}
-
-// GetConfig returns the users config.
-func GetConfig() (config Config) {
-	if err := viper.Unmarshal(&config); err != nil {
-		log.Fatal("Error parsing config", err)
-	}
-
-	return
+	return config, nil
 }
