@@ -4,9 +4,38 @@ import (
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"github.com/knipferrc/teacup/icons"
 	"github.com/knipferrc/teacup/statusbar"
 )
+
+// resetViewports goes to the top of all bubbles viewports.
+func (b *Bubble) resetViewports() {
+	b.code.GotoTop()
+	b.pdf.GotoTop()
+	b.markdown.GotoTop()
+	b.help.GotoTop()
+	b.image.GotoTop()
+}
+
+// deactivateALlBubbles sets all bubbles to inactive.
+func (b *Bubble) deactivateAllBubbles() {
+	b.filetree.SetIsActive(false)
+	b.code.SetIsActive(false)
+	b.markdown.SetIsActive(false)
+	b.image.SetIsActive(false)
+	b.pdf.SetIsActive(false)
+	b.help.SetIsActive(false)
+}
+
+// resetBorderColors resets all bubble border colors to default.
+func (b *Bubble) resetBorderColors() {
+	b.filetree.SetBorderColor(b.theme.InactiveBoxBorderColor)
+	b.help.SetBorderColor(b.theme.InactiveBoxBorderColor)
+	b.code.SetBorderColor(b.theme.InactiveBoxBorderColor)
+	b.image.SetBorderColor(b.theme.InactiveBoxBorderColor)
+	b.markdown.SetBorderColor(b.theme.InactiveBoxBorderColor)
+	b.pdf.SetBorderColor(b.theme.InactiveBoxBorderColor)
+}
 
 // Update handles all UI interactions.
 func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -40,7 +69,9 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case " ":
 			selectedFile := b.filetree.GetSelectedItem()
 			if !selectedFile.IsDirectory() {
-				if selectedFile.FileExtension() == ".png" || selectedFile.FileExtension() == ".jpg" {
+				b.resetViewports()
+
+				if selectedFile.FileExtension() == ".png" || selectedFile.FileExtension() == ".jpg" || selectedFile.FileExtension() == ".jpeg" {
 					b.state = showImageState
 					readFileCmd := b.image.SetFileName(selectedFile.FileName())
 					cmds = append(cmds, readFileCmd)
@@ -61,67 +92,37 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "tab":
 			b.activeBox = (b.activeBox + 1) % 2
 			if b.activeBox == 0 {
+				b.deactivateAllBubbles()
 				b.filetree.SetIsActive(true)
-				b.code.SetIsActive(false)
-				b.markdown.SetIsActive(false)
-				b.image.SetIsActive(false)
-				b.pdf.SetIsActive(false)
-				b.help.SetIsActive(false)
-				b.filetree.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "63"})
-				b.help.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-				b.code.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-				b.image.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-				b.markdown.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
+				b.resetBorderColors()
+				b.filetree.SetBorderColor(b.theme.ActiveBoxBorderColor)
 			} else {
 				switch b.state {
 				case idleState:
-					b.filetree.SetIsActive(false)
-					b.code.SetIsActive(false)
-					b.markdown.SetIsActive(false)
-					b.image.SetIsActive(false)
-					b.pdf.SetIsActive(false)
+					b.deactivateAllBubbles()
 					b.help.SetIsActive(true)
-					b.filetree.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-					b.help.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "63"})
-					b.code.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-					b.image.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-					b.markdown.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
+					b.resetBorderColors()
+					b.help.SetBorderColor(b.theme.ActiveBoxBorderColor)
 				case showCodeState:
-					b.filetree.SetIsActive(false)
+					b.deactivateAllBubbles()
 					b.code.SetIsActive(true)
-					b.markdown.SetIsActive(false)
-					b.image.SetIsActive(false)
-					b.pdf.SetIsActive(false)
-					b.help.SetIsActive(false)
-					b.filetree.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-					b.help.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-					b.code.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "63"})
-					b.image.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-					b.markdown.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
+					b.resetBorderColors()
+					b.code.SetBorderColor(b.theme.ActiveBoxBorderColor)
 				case showImageState:
-					b.filetree.SetIsActive(false)
-					b.code.SetIsActive(false)
-					b.markdown.SetIsActive(false)
+					b.deactivateAllBubbles()
 					b.image.SetIsActive(true)
-					b.pdf.SetIsActive(false)
-					b.help.SetIsActive(false)
-					b.filetree.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-					b.help.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-					b.code.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-					b.markdown.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-					b.image.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "63"})
+					b.resetBorderColors()
+					b.image.SetBorderColor(b.theme.ActiveBoxBorderColor)
 				case showMarkdownState:
-					b.filetree.SetIsActive(false)
-					b.code.SetIsActive(false)
+					b.deactivateAllBubbles()
 					b.markdown.SetIsActive(true)
-					b.image.SetIsActive(false)
-					b.pdf.SetIsActive(false)
-					b.help.SetIsActive(false)
-					b.filetree.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-					b.help.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-					b.code.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-					b.image.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-					b.markdown.SetBorderColor(lipgloss.AdaptiveColor{Light: "#000000", Dark: "63"})
+					b.resetBorderColors()
+					b.markdown.SetBorderColor(b.theme.ActiveBoxBorderColor)
+				case showPdfState:
+					b.deactivateAllBubbles()
+					b.markdown.SetIsActive(true)
+					b.resetBorderColors()
+					b.pdf.SetBorderColor(b.theme.ActiveBoxBorderColor)
 				}
 			}
 		}
@@ -131,7 +132,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.filetree.GetSelectedItem().ShortName(),
 		b.filetree.GetSelectedItem().CurrentDirectory(),
 		fmt.Sprintf("%d/%d", b.filetree.Cursor(), b.filetree.TotalItems()),
-		"FM",
+		fmt.Sprintf("%s %s", icons.IconDef["dir"].GetGlyph(), "FM"),
 	)
 
 	b.code, cmd = b.code.Update(msg)

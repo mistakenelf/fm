@@ -56,7 +56,7 @@ var colors = appColors{
 	darkGray:           "#3c3836",
 	red:                "#cc241d",
 	black:              "#000000",
-	defaultPink:        "#F25D94",
+	defaultPink:        "63",
 	defaultLightPurple: "#A550DF",
 	defaultDarkPurple:  "#6124DF",
 	gruvGreen:          "#b8bb26",

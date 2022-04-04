@@ -3,8 +3,8 @@ package tui
 import (
 	"log"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/knipferrc/fm/internal/config"
+	"github.com/knipferrc/fm/internal/theme"
 	"github.com/knipferrc/teacup/code"
 	"github.com/knipferrc/teacup/filetree"
 	"github.com/knipferrc/teacup/help"
@@ -34,6 +34,7 @@ type Bubble struct {
 	pdf       pdf.Bubble
 	statusbar statusbar.Bubble
 	state     sessionState
+	theme     theme.Theme
 	activeBox int
 }
 
@@ -44,13 +45,15 @@ func New() Bubble {
 		log.Fatal(err)
 	}
 
-	filetreeModel := filetree.New(true, cfg.Settings.Borderless, lipgloss.AdaptiveColor{Light: "#000000", Dark: "63"})
-	codeModel := code.New(false, cfg.Settings.Borderless, lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-	imageModel := image.New(false, cfg.Settings.Borderless, lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-	markdownModel := markdown.New(false, cfg.Settings.Borderless, lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
-	pdfModel := pdf.New(false, cfg.Settings.Borderless, lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"})
+	theme := theme.GetTheme(cfg.Theme.AppTheme)
+
+	filetreeModel := filetree.New(true, cfg.Settings.Borderless, theme.ActiveBoxBorderColor)
+	codeModel := code.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
+	imageModel := image.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
+	markdownModel := markdown.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
+	pdfModel := pdf.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
 	helpModel := help.New(
-		lipgloss.AdaptiveColor{Light: "#000000", Dark: "#ffffff"},
+		theme.InactiveBoxBorderColor,
 		"Help",
 		[]help.Entry{
 			{Key: "ctrl+c, q", Description: "Exit FM"},
@@ -85,5 +88,6 @@ func New() Bubble {
 		markdown:  markdownModel,
 		pdf:       pdfModel,
 		statusbar: statusbar.Bubble{},
+		theme:     theme,
 	}
 }
