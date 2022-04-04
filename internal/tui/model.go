@@ -36,6 +36,7 @@ type Bubble struct {
 	state     sessionState
 	theme     theme.Theme
 	activeBox int
+	keys      KeyMap
 }
 
 // New creates a new instance of the UI.
@@ -89,5 +90,6 @@ func New() Bubble {
 		pdf:       pdfModel,
 		statusbar: statusbar.Bubble{},
 		theme:     theme,
+		keys:      DefaultKeyMap(),
 	}
 }

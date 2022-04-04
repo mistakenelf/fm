@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/knipferrc/teacup/icons"
 	"github.com/knipferrc/teacup/statusbar"
@@ -59,14 +60,14 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		cmds = append(cmds, resizeImgCmd, markdownCmd)
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c":
+		switch {
+		case key.Matches(msg, b.keys.Quit):
 			return b, tea.Quit
-		case "q":
+		case key.Matches(msg, b.keys.Exit):
 			if !b.filetree.IsFiltering() {
 				return b, tea.Quit
 			}
-		case " ":
+		case key.Matches(msg, b.keys.OpenFile):
 			selectedFile := b.filetree.GetSelectedItem()
 			if !selectedFile.IsDirectory() {
 				b.resetViewports()
@@ -89,7 +90,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					cmds = append(cmds, readFileCmd)
 				}
 			}
-		case "tab":
+		case key.Matches(msg, b.keys.ToggleBox):
 			b.activeBox = (b.activeBox + 1) % 2
 			if b.activeBox == 0 {
 				b.deactivateAllBubbles()
