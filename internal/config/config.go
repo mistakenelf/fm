@@ -23,14 +23,11 @@ type SyntaxThemeConfig struct {
 
 // SettingsConfig struct represents the config for the settings.
 type SettingsConfig struct {
-	StartDir            string `yaml:"start_dir"`
-	ShowIcons           bool   `yaml:"show_icons"`
-	EnableLogging       bool   `yaml:"enable_logging"`
-	EnableMouseWheel    bool   `yaml:"enable_mousewheel"`
-	PrettyMarkdown      bool   `yaml:"pretty_markdown"`
-	Borderless          bool   `yaml:"borderless"`
-	SimpleMode          bool   `yaml:"simple_mode"`
-	CalculatedFileSizes bool   `yaml:"calculated_file_sizes"`
+	StartDir       string `yaml:"start_dir"`
+	ShowIcons      bool   `yaml:"show_icons"`
+	EnableLogging  bool   `yaml:"enable_logging"`
+	PrettyMarkdown bool   `yaml:"pretty_markdown"`
+	Borderless     bool   `yaml:"borderless"`
 }
 
 // ThemeConfig represents the config for themes.
@@ -59,7 +56,18 @@ type ConfigParser struct{}
 func (parser ConfigParser) getDefaultConfig() Config {
 	return Config{
 		Settings: SettingsConfig{
-			EnableLogging: false,
+			StartDir:       ".",
+			ShowIcons:      true,
+			EnableLogging:  false,
+			PrettyMarkdown: true,
+			Borderless:     false,
+		},
+		Theme: ThemeConfig{
+			AppTheme: "default",
+			SyntaxTheme: SyntaxThemeConfig{
+				Dark:  "dracula",
+				Light: "pygments",
+			},
 		},
 	}
 }

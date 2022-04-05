@@ -43,11 +43,6 @@ var rootCmd = &cobra.Command{
 		// Always append alt screen program option.
 		opts = append(opts, tea.WithAltScreen())
 
-		// If mousewheel is enabled, append it to the program options.
-		if cfg.Settings.EnableMouseWheel {
-			opts = append(opts, tea.WithMouseAllMotion())
-		}
-
 		// Initialize and start app.
 		p := tea.NewProgram(m, opts...)
 		if err := p.Start(); err != nil {

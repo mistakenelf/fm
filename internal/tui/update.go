@@ -76,7 +76,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					b.state = showImageState
 					readFileCmd := b.image.SetFileName(selectedFile.FileName())
 					cmds = append(cmds, readFileCmd)
-				} else if selectedFile.FileExtension() == ".md" {
+				} else if selectedFile.FileExtension() == ".md" && b.config.Settings.PrettyMarkdown {
 					b.state = showMarkdownState
 					markdownCmd := b.markdown.SetFileName(selectedFile.FileName())
 					cmds = append(cmds, markdownCmd)

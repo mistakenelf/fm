@@ -5,6 +5,7 @@ import (
 
 	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/theme"
+
 	"github.com/knipferrc/teacup/code"
 	"github.com/knipferrc/teacup/filetree"
 	"github.com/knipferrc/teacup/help"
@@ -35,8 +36,9 @@ type Bubble struct {
 	statusbar statusbar.Bubble
 	state     sessionState
 	theme     theme.Theme
-	activeBox int
+	config    config.Config
 	keys      KeyMap
+	activeBox int
 }
 
 // New creates a new instance of the UI.
@@ -90,6 +92,7 @@ func New() Bubble {
 		pdf:       pdfModel,
 		statusbar: statusbar.Bubble{},
 		theme:     theme,
+		config:    cfg,
 		keys:      DefaultKeyMap(),
 	}
 }

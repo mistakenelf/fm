@@ -68,15 +68,13 @@ paru -S fm-bin
 - Syntax highlighting for source code with customizable themes using styles from [chroma](https://swapoff.org/chroma/playground/) (dracula, monokai etc.)
 - Render pretty markdown
 - Mouse support
-- Themes (`default`, `gruvbox`, `spooky`, `nord`, `holiday`)
+- Themes (`default`, `gruvbox`, `nord`)
 - Render PNG, JPG and JPEG as strings
 - Colors adapt to terminal background, for syntax highlighting to work properly on light/dark terminals, set the appropriate themes in the config file
 - Open selected file in editor set in EDITOR environment variable
 - Preview a directory in the secondary pane
 - Copy selected directory items path to the clipboard
 - Read PDF files
-- Experimental find files/directories (might be a little buggy)
-- Simple mode (removes secondary box, hides borders, hide file icons and no colors)
 
 ## Themes
 
@@ -88,21 +86,10 @@ paru -S fm-bin
 
 <img src="./assets/gruvbox.png" width="350" alt="gruvbox">
 
-### Spooky
-
-<img src="./assets/spooky.png" width="350" alt="spooky">
-
 ### Nord
 
 <img src="./assets/nord.png" width="350" alt="nord">
 
-### Holiday
-
-<img src="./assets/holiday.png" width="350" alt="holiday">
-
-## Simple Mode
-
-<img src="./assets/simple_mode.png" width="350" alt="simple mode">
 
 ## Usage
 
@@ -147,17 +134,14 @@ paru -S fm-bin
 
 ## Configuration
 
-- A config file will be generated at `~/.config/fm.yml` when you first run `fm` (On windows it will be `C\:\\Users\\username\\fm.yml`)
+- A config file will be generated at `~/.config/fm/config.yml` when you first run `fm` (On windows it will be `C\:\\Users\\username\\fm.yml`)
 
 ```yml
 settings:
   borderless: false
-  calculated_file_sizes: false
   enable_logging: false
-  enable_mousewheel: true
   pretty_markdown: true
   show_icons: true
-  simple_mode: false
   start_dir: .
 theme:
   app_theme: default
