@@ -23,10 +23,10 @@ var themeMap = map[string]Theme{
 	"default": {
 		SelectedTreeItemColor:                lipgloss.AdaptiveColor{Dark: "63", Light: "63"},
 		UnselectedTreeItemColor:              lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#000000"},
-		ActiveBoxBorderColor:                 lipgloss.AdaptiveColor{Dark: "63", Light: "63"},
+		ActiveBoxBorderColor:                 lipgloss.AdaptiveColor{Dark: "#F25D94", Light: "#F25D94"},
 		InactiveBoxBorderColor:               lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#000000"},
 		StatusBarSelectedFileForegroundColor: lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#ffffff"},
-		StatusBarSelectedFileBackgroundColor: lipgloss.AdaptiveColor{Dark: "63", Light: "63"},
+		StatusBarSelectedFileBackgroundColor: lipgloss.AdaptiveColor{Dark: "#F25D94", Light: "#F25D94"},
 		StatusBarBarForegroundColor:          lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#ffffff"},
 		StatusBarBarBackgroundColor:          lipgloss.AdaptiveColor{Dark: "#3c3836", Light: "#3c3836"},
 		StatusBarTotalFilesForegroundColor:   lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#ffffff"},

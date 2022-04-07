@@ -50,11 +50,29 @@ func New() Bubble {
 
 	theme := theme.GetTheme(cfg.Theme.AppTheme)
 
-	filetreeModel := filetree.New(true, cfg.Settings.Borderless, theme.ActiveBoxBorderColor)
+	filetreeModel := filetree.New(true, cfg.Settings.Borderless, theme.ActiveBoxBorderColor, theme.SelectedTreeItemColor)
 	codeModel := code.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
 	imageModel := image.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
 	markdownModel := markdown.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
 	pdfModel := pdf.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
+	statusbarModel := statusbar.New(
+		statusbar.ColorConfig{
+			Foreground: theme.StatusBarSelectedFileForegroundColor,
+			Background: theme.StatusBarSelectedFileBackgroundColor,
+		},
+		statusbar.ColorConfig{
+			Foreground: theme.StatusBarBarForegroundColor,
+			Background: theme.StatusBarBarBackgroundColor,
+		},
+		statusbar.ColorConfig{
+			Foreground: theme.StatusBarTotalFilesForegroundColor,
+			Background: theme.StatusBarTotalFilesBackgroundColor,
+		},
+		statusbar.ColorConfig{
+			Foreground: theme.StatusBarLogoForegroundColor,
+			Background: theme.StatusBarLogoBackgroundColor,
+		},
+	)
 	helpModel := help.New(
 		theme.InactiveBoxBorderColor,
 		"Help",
@@ -90,7 +108,7 @@ func New() Bubble {
 		image:     imageModel,
 		markdown:  markdownModel,
 		pdf:       pdfModel,
-		statusbar: statusbar.Bubble{},
+		statusbar: statusbarModel,
 		theme:     theme,
 		config:    cfg,
 		keys:      DefaultKeyMap(),
