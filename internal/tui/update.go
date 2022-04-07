@@ -9,6 +9,22 @@ import (
 	"github.com/knipferrc/teacup/statusbar"
 )
 
+var forbiddenExtensions = []string{
+	".FCStd",
+	".gif",
+	".zip",
+	".rar",
+	".webm",
+	".sqlite",
+	".sqlite-shm",
+	".sqlite-wal",
+	".DS_Store",
+	".db",
+	".data",
+	".plist",
+	".webp",
+}
+
 // resetViewports goes to the top of all bubbles viewports.
 func (b *Bubble) resetViewports() {
 	b.code.GotoTop()
@@ -36,6 +52,17 @@ func (b *Bubble) resetBorderColors() {
 	b.image.SetBorderColor(b.theme.InactiveBoxBorderColor)
 	b.markdown.SetBorderColor(b.theme.InactiveBoxBorderColor)
 	b.pdf.SetBorderColor(b.theme.InactiveBoxBorderColor)
+}
+
+// contains returns true if the slice contains the string.
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Update handles all UI interactions.
@@ -84,6 +111,8 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					b.state = showPdfState
 					pdfCmd := b.pdf.SetFileName(selectedFile.FileName())
 					cmds = append(cmds, pdfCmd)
+				} else if contains(forbiddenExtensions, selectedFile.FileExtension()) {
+					return b, nil
 				} else {
 					b.state = showCodeState
 					readFileCmd := b.code.SetFileName(selectedFile.FileName())
