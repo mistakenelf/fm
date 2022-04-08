@@ -3,6 +3,7 @@ package tui
 import (
 	"log"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/theme"
 
@@ -42,7 +43,7 @@ type Bubble struct {
 }
 
 // New creates a new instance of the UI.
-func New() Bubble {
+func New(startDir, selectionPath string) Bubble {
 	cfg, err := config.ParseConfig()
 	if err != nil {
 		log.Fatal(err)
@@ -50,8 +51,23 @@ func New() Bubble {
 
 	theme := theme.GetTheme(cfg.Theme.AppTheme)
 
-	filetreeModel := filetree.New(true, cfg.Settings.Borderless, theme.ActiveBoxBorderColor, theme.SelectedTreeItemColor)
+	syntaxTheme := cfg.Theme.SyntaxTheme.Light
+	if lipgloss.HasDarkBackground() {
+		syntaxTheme = cfg.Theme.SyntaxTheme.Dark
+	}
+
+	filetreeModel := filetree.New(
+		true,
+		cfg.Settings.Borderless,
+		startDir,
+		selectionPath,
+		theme.ActiveBoxBorderColor,
+		theme.SelectedTreeItemColor,
+		theme.TitleBackgroundColor,
+		theme.TitleForegroundColor,
+	)
 	codeModel := code.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
+	codeModel.SetSyntaxTheme(syntaxTheme)
 	imageModel := image.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
 	markdownModel := markdown.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
 	pdfModel := pdf.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
@@ -74,12 +90,20 @@ func New() Bubble {
 		},
 	)
 	helpModel := help.New(
-		theme.InactiveBoxBorderColor,
+		false,
+		cfg.Settings.Borderless,
 		"Help",
+		help.TitleColor{
+			Background: lipgloss.AdaptiveColor{Light: "62", Dark: "62"},
+			Foreground: lipgloss.AdaptiveColor{Light: "#ffffff", Dark: "#ffffff"},
+		},
+		theme.InactiveBoxBorderColor,
 		[]help.Entry{
 			{Key: "ctrl+c, q", Description: "Exit FM"},
 			{Key: "j/up", Description: "Move up"},
 			{Key: "k/down", Description: "Move down"},
+			{Key: "h", Description: "Paginate left in current directory"},
+			{Key: "l", Description: "Paginate right in current directory"},
 			{Key: "space", Description: "Read file or enter directory"},
 			{Key: "G", Description: "Jump to bottom"},
 			{Key: "g", Description: "Jump to top"},
@@ -95,10 +119,9 @@ func New() Bubble {
 			{Key: "E", Description: "Edit currently selected tree item"},
 			{Key: "c", Description: "Copy currently selected tree item"},
 			{Key: "esc", Description: "Reset input field"},
+			{Key: "R", Description: "Go to root directory"},
 			{Key: "tab", Description: "Toggle between boxes"},
 		},
-		false,
-		cfg.Settings.Borderless,
 	)
 
 	return Bubble{

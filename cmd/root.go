@@ -18,6 +18,16 @@ var rootCmd = &cobra.Command{
 	Version: "0.14.0",
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		startDir, err := cmd.Flags().GetString("start-dir")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		selectionPath, err := cmd.Flags().GetString("selection-path")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		cfg, err := config.ParseConfig()
 		if err != nil {
 			log.Fatal(err)
@@ -37,7 +47,7 @@ var rootCmd = &cobra.Command{
 			}()
 		}
 
-		m := tui.New()
+		m := tui.New(startDir, selectionPath)
 		var opts []tea.ProgramOption
 
 		// Always append alt screen program option.

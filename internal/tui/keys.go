@@ -4,10 +4,11 @@ import "github.com/charmbracelet/bubbles/key"
 
 // KeyMap defines the keybindings for the app.
 type KeyMap struct {
-	Quit      key.Binding
-	Exit      key.Binding
-	ToggleBox key.Binding
-	OpenFile  key.Binding
+	Quit         key.Binding
+	Exit         key.Binding
+	ToggleBox    key.Binding
+	OpenFile     key.Binding
+	ReloadConfig key.Binding
 }
 
 // DefaultKeyMap returns a set of default keybindings.
@@ -24,6 +25,9 @@ func DefaultKeyMap() KeyMap {
 		),
 		OpenFile: key.NewBinding(
 			key.WithKeys(" "),
+		),
+		ReloadConfig: key.NewBinding(
+			key.WithKeys("ctrl+r"),
 		),
 	}
 }

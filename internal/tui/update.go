@@ -5,6 +5,8 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/teacup/icons"
 	"github.com/knipferrc/teacup/statusbar"
 )
@@ -94,26 +96,42 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !b.filetree.IsFiltering() {
 				return b, tea.Quit
 			}
+		case key.Matches(msg, b.keys.ReloadConfig):
+			if !b.filetree.IsFiltering() {
+				cfg, err := config.ParseConfig()
+				if err != nil {
+					return b, nil
+				}
+
+				b.config = cfg
+				syntaxTheme := cfg.Theme.SyntaxTheme.Light
+				if lipgloss.HasDarkBackground() {
+					syntaxTheme = cfg.Theme.SyntaxTheme.Dark
+				}
+
+				b.code.SetSyntaxTheme(syntaxTheme)
+			}
 		case key.Matches(msg, b.keys.OpenFile):
 			selectedFile := b.filetree.GetSelectedItem()
 			if !selectedFile.IsDirectory() {
 				b.resetViewports()
 
-				if selectedFile.FileExtension() == ".png" || selectedFile.FileExtension() == ".jpg" || selectedFile.FileExtension() == ".jpeg" {
+				switch {
+				case selectedFile.FileExtension() == ".png" || selectedFile.FileExtension() == ".jpg" || selectedFile.FileExtension() == ".jpeg":
 					b.state = showImageState
 					readFileCmd := b.image.SetFileName(selectedFile.FileName())
 					cmds = append(cmds, readFileCmd)
-				} else if selectedFile.FileExtension() == ".md" && b.config.Settings.PrettyMarkdown {
+				case selectedFile.FileExtension() == ".md" && b.config.Settings.PrettyMarkdown:
 					b.state = showMarkdownState
 					markdownCmd := b.markdown.SetFileName(selectedFile.FileName())
 					cmds = append(cmds, markdownCmd)
-				} else if selectedFile.FileExtension() == ".pdf" {
+				case selectedFile.FileExtension() == ".pdf":
 					b.state = showPdfState
 					pdfCmd := b.pdf.SetFileName(selectedFile.FileName())
 					cmds = append(cmds, pdfCmd)
-				} else if contains(forbiddenExtensions, selectedFile.FileExtension()) {
+				case contains(forbiddenExtensions, selectedFile.FileExtension()):
 					return b, nil
-				} else {
+				default:
 					b.state = showCodeState
 					readFileCmd := b.code.SetFileName(selectedFile.FileName())
 					cmds = append(cmds, readFileCmd)

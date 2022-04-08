@@ -16,6 +16,8 @@ type Theme struct {
 	StatusBarTotalFilesBackgroundColor   lipgloss.AdaptiveColor
 	StatusBarLogoForegroundColor         lipgloss.AdaptiveColor
 	StatusBarLogoBackgroundColor         lipgloss.AdaptiveColor
+	TitleBackgroundColor                 lipgloss.AdaptiveColor
+	TitleForegroundColor                 lipgloss.AdaptiveColor
 }
 
 // themeMap represents the mapping of different themes.
@@ -33,6 +35,8 @@ var themeMap = map[string]Theme{
 		StatusBarTotalFilesBackgroundColor:   lipgloss.AdaptiveColor{Dark: "#A550DF", Light: "#A550DF"},
 		StatusBarLogoForegroundColor:         lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#ffffff"},
 		StatusBarLogoBackgroundColor:         lipgloss.AdaptiveColor{Dark: "#6124DF", Light: "#6124DF"},
+		TitleBackgroundColor:                 lipgloss.AdaptiveColor{Dark: "63", Light: "63"},
+		TitleForegroundColor:                 lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#ffffff"},
 	},
 	"gruvbox": {
 		SelectedTreeItemColor:                lipgloss.AdaptiveColor{Dark: "#d65d0e", Light: "#d65d0e"},
@@ -47,6 +51,8 @@ var themeMap = map[string]Theme{
 		StatusBarTotalFilesBackgroundColor:   lipgloss.AdaptiveColor{Dark: "#ebcb8b", Light: "#ebcb8b"},
 		StatusBarLogoForegroundColor:         lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#ffffff"},
 		StatusBarLogoBackgroundColor:         lipgloss.AdaptiveColor{Dark: "#458588", Light: "#458588"},
+		TitleBackgroundColor:                 lipgloss.AdaptiveColor{Dark: "#d65d0e", Light: "#d65d0e"},
+		TitleForegroundColor:                 lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#ffffff"},
 	},
 	"nord": {
 		SelectedTreeItemColor:                lipgloss.AdaptiveColor{Dark: "#d08770", Light: "#d08770"},
@@ -61,6 +67,8 @@ var themeMap = map[string]Theme{
 		StatusBarTotalFilesBackgroundColor:   lipgloss.AdaptiveColor{Dark: "#ebcb8b", Light: "#ebcb8b"},
 		StatusBarLogoForegroundColor:         lipgloss.AdaptiveColor{Dark: "#e5e9f0", Light: "#e5e9f0"},
 		StatusBarLogoBackgroundColor:         lipgloss.AdaptiveColor{Dark: "#81a1c1", Light: "#81a1c1"},
+		TitleBackgroundColor:                 lipgloss.AdaptiveColor{Dark: "#d08770", Light: "#d08770"},
+		TitleForegroundColor:                 lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#ffffff"},
 	},
 }
 
