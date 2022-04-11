@@ -143,6 +143,14 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				b.filetree.SetTitleColors(theme.TitleForegroundColor, theme.TitleBackgroundColor)
 				b.filetree.SetSelectedItemColors(theme.SelectedTreeItemColor)
+				cmds = append(cmds, b.filetree.ToggleShowIcons(cfg.Settings.ShowIcons))
+
+				b.filetree.SetBorderless(cfg.Settings.Borderless)
+				b.code.SetBorderless(cfg.Settings.Borderless)
+				b.help.SetBorderless(cfg.Settings.Borderless)
+				b.markdown.SetBorderless(cfg.Settings.Borderless)
+				b.pdf.SetBorderless(cfg.Settings.Borderless)
+				b.image.SetBorderless(cfg.Settings.Borderless)
 
 				if b.activeBox == 0 {
 					b.deactivateAllBubbles()
@@ -244,11 +252,16 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	logoText := fmt.Sprintf("%s %s", icons.IconDef["dir"].GetGlyph(), "FM")
+	if !b.config.Settings.ShowIcons {
+		logoText = "FM"
+	}
+
 	b.statusbar.SetContent(
 		b.filetree.GetSelectedItem().ShortName(),
 		b.filetree.GetSelectedItem().CurrentDirectory(),
 		fmt.Sprintf("%d/%d", b.filetree.Cursor(), b.filetree.TotalItems()),
-		fmt.Sprintf("%s %s", icons.IconDef["dir"].GetGlyph(), "FM"),
+		logoText,
 	)
 
 	b.code, cmd = b.code.Update(msg)
