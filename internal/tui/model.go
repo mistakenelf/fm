@@ -94,8 +94,8 @@ func New(startDir, selectionPath string) Bubble {
 		cfg.Settings.Borderless,
 		"Help",
 		help.TitleColor{
-			Background: lipgloss.AdaptiveColor{Light: "62", Dark: "62"},
-			Foreground: lipgloss.AdaptiveColor{Light: "#ffffff", Dark: "#ffffff"},
+			Background: theme.TitleBackgroundColor,
+			Foreground: theme.TitleForegroundColor,
 		},
 		theme.InactiveBoxBorderColor,
 		[]help.Entry{

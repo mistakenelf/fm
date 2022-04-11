@@ -7,6 +7,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/knipferrc/fm/internal/config"
+	"github.com/knipferrc/fm/internal/theme"
+	"github.com/knipferrc/teacup/help"
 	"github.com/knipferrc/teacup/icons"
 	"github.com/knipferrc/teacup/statusbar"
 )
@@ -110,6 +112,72 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 
 				b.code.SetSyntaxTheme(syntaxTheme)
+
+				theme := theme.GetTheme(cfg.Theme.AppTheme)
+				b.theme = theme
+				b.statusbar.SetColors(
+					statusbar.ColorConfig{
+						Foreground: theme.StatusBarSelectedFileForegroundColor,
+						Background: theme.StatusBarSelectedFileBackgroundColor,
+					},
+					statusbar.ColorConfig{
+						Foreground: theme.StatusBarBarForegroundColor,
+						Background: theme.StatusBarBarBackgroundColor,
+					},
+					statusbar.ColorConfig{
+						Foreground: theme.StatusBarTotalFilesForegroundColor,
+						Background: theme.StatusBarTotalFilesBackgroundColor,
+					},
+					statusbar.ColorConfig{
+						Foreground: theme.StatusBarLogoForegroundColor,
+						Background: theme.StatusBarLogoBackgroundColor,
+					},
+				)
+
+				b.help.SetTitleColor(
+					help.TitleColor{
+						Background: theme.TitleBackgroundColor,
+						Foreground: theme.TitleForegroundColor,
+					},
+				)
+
+				b.filetree.SetTitleColors(theme.TitleForegroundColor, theme.TitleBackgroundColor)
+				b.filetree.SetSelectedItemColors(theme.SelectedTreeItemColor)
+
+				if b.activeBox == 0 {
+					b.deactivateAllBubbles()
+					b.filetree.SetIsActive(true)
+					b.resetBorderColors()
+					b.filetree.SetBorderColor(theme.ActiveBoxBorderColor)
+				} else {
+					switch b.state {
+					case idleState:
+						b.deactivateAllBubbles()
+						b.help.SetIsActive(true)
+						b.resetBorderColors()
+						b.help.SetBorderColor(theme.ActiveBoxBorderColor)
+					case showCodeState:
+						b.deactivateAllBubbles()
+						b.code.SetIsActive(true)
+						b.resetBorderColors()
+						b.code.SetBorderColor(theme.ActiveBoxBorderColor)
+					case showImageState:
+						b.deactivateAllBubbles()
+						b.image.SetIsActive(true)
+						b.resetBorderColors()
+						b.image.SetBorderColor(theme.ActiveBoxBorderColor)
+					case showMarkdownState:
+						b.deactivateAllBubbles()
+						b.markdown.SetIsActive(true)
+						b.resetBorderColors()
+						b.markdown.SetBorderColor(theme.ActiveBoxBorderColor)
+					case showPdfState:
+						b.deactivateAllBubbles()
+						b.markdown.SetIsActive(true)
+						b.resetBorderColors()
+						b.pdf.SetBorderColor(theme.ActiveBoxBorderColor)
+					}
+				}
 			}
 		case key.Matches(msg, b.keys.OpenFile):
 			selectedFile := b.filetree.GetSelectedItem()
