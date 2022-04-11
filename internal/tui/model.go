@@ -66,8 +66,11 @@ func New(startDir, selectionPath string) Bubble {
 		theme.TitleBackgroundColor,
 		theme.TitleForegroundColor,
 	)
+	filetreeModel.ToggleShowIcons(cfg.Settings.ShowIcons)
+
 	codeModel := code.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
 	codeModel.SetSyntaxTheme(syntaxTheme)
+
 	imageModel := image.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
 	markdownModel := markdown.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
 	pdfModel := pdf.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
