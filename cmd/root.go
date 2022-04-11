@@ -47,6 +47,10 @@ var rootCmd = &cobra.Command{
 			}()
 		}
 
+		if startDir == "" {
+			startDir = cfg.Settings.StartDir
+		}
+
 		m := tui.New(startDir, selectionPath)
 		var opts []tea.ProgramOption
 
