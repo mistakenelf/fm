@@ -71,7 +71,6 @@ paru -S fm-bin
 - Render PNG, JPG and JPEG as strings
 - Colors adapt to terminal background, for syntax highlighting to work properly on light/dark terminals, set the appropriate themes in the config file
 - Open selected file in editor set in EDITOR environment variable
-- Preview a directory in the secondary pane
 - Copy selected directory items path to the clipboard
 - Read PDF files
 
