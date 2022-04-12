@@ -3,11 +3,12 @@ package tui
 import (
 	"fmt"
 
+	"github.com/knipferrc/fm/internal/config"
+	"github.com/knipferrc/fm/internal/theme"
+
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/knipferrc/fm/internal/config"
-	"github.com/knipferrc/fm/internal/theme"
 	"github.com/knipferrc/teacup/help"
 	"github.com/knipferrc/teacup/icons"
 	"github.com/knipferrc/teacup/statusbar"
@@ -27,6 +28,7 @@ var forbiddenExtensions = []string{
 	".data",
 	".plist",
 	".webp",
+	".img",
 }
 
 // resetViewports goes to the top of all bubbles viewports.
@@ -56,6 +58,172 @@ func (b *Bubble) resetBorderColors() {
 	b.image.SetBorderColor(b.theme.InactiveBoxBorderColor)
 	b.markdown.SetBorderColor(b.theme.InactiveBoxBorderColor)
 	b.pdf.SetBorderColor(b.theme.InactiveBoxBorderColor)
+}
+
+// reloadConfig reloads the config file and updates the UI.
+func (b *Bubble) reloadConfig() []tea.Cmd {
+	var cmds []tea.Cmd
+
+	cfg, err := config.ParseConfig()
+	if err != nil {
+		return nil
+	}
+
+	b.config = cfg
+	syntaxTheme := cfg.Theme.SyntaxTheme.Light
+	if lipgloss.HasDarkBackground() {
+		syntaxTheme = cfg.Theme.SyntaxTheme.Dark
+	}
+
+	b.code.SetSyntaxTheme(syntaxTheme)
+
+	theme := theme.GetTheme(cfg.Theme.AppTheme)
+	b.theme = theme
+	b.statusbar.SetColors(
+		statusbar.ColorConfig{
+			Foreground: theme.StatusBarSelectedFileForegroundColor,
+			Background: theme.StatusBarSelectedFileBackgroundColor,
+		},
+		statusbar.ColorConfig{
+			Foreground: theme.StatusBarBarForegroundColor,
+			Background: theme.StatusBarBarBackgroundColor,
+		},
+		statusbar.ColorConfig{
+			Foreground: theme.StatusBarTotalFilesForegroundColor,
+			Background: theme.StatusBarTotalFilesBackgroundColor,
+		},
+		statusbar.ColorConfig{
+			Foreground: theme.StatusBarLogoForegroundColor,
+			Background: theme.StatusBarLogoBackgroundColor,
+		},
+	)
+
+	b.help.SetTitleColor(
+		help.TitleColor{
+			Background: theme.TitleBackgroundColor,
+			Foreground: theme.TitleForegroundColor,
+		},
+	)
+
+	b.filetree.SetTitleColors(theme.TitleForegroundColor, theme.TitleBackgroundColor)
+	b.filetree.SetSelectedItemColors(theme.SelectedTreeItemColor)
+	cmds = append(cmds, b.filetree.ToggleShowIcons(cfg.Settings.ShowIcons))
+
+	b.filetree.SetBorderless(cfg.Settings.Borderless)
+	b.code.SetBorderless(cfg.Settings.Borderless)
+	b.help.SetBorderless(cfg.Settings.Borderless)
+	b.markdown.SetBorderless(cfg.Settings.Borderless)
+	b.pdf.SetBorderless(cfg.Settings.Borderless)
+	b.image.SetBorderless(cfg.Settings.Borderless)
+
+	if b.activeBox == 0 {
+		b.deactivateAllBubbles()
+		b.filetree.SetIsActive(true)
+		b.resetBorderColors()
+		b.filetree.SetBorderColor(theme.ActiveBoxBorderColor)
+	} else {
+		switch b.state {
+		case idleState:
+			b.deactivateAllBubbles()
+			b.help.SetIsActive(true)
+			b.resetBorderColors()
+			b.help.SetBorderColor(theme.ActiveBoxBorderColor)
+		case showCodeState:
+			b.deactivateAllBubbles()
+			b.code.SetIsActive(true)
+			b.resetBorderColors()
+			b.code.SetBorderColor(theme.ActiveBoxBorderColor)
+		case showImageState:
+			b.deactivateAllBubbles()
+			b.image.SetIsActive(true)
+			b.resetBorderColors()
+			b.image.SetBorderColor(theme.ActiveBoxBorderColor)
+		case showMarkdownState:
+			b.deactivateAllBubbles()
+			b.markdown.SetIsActive(true)
+			b.resetBorderColors()
+			b.markdown.SetBorderColor(theme.ActiveBoxBorderColor)
+		case showPdfState:
+			b.deactivateAllBubbles()
+			b.markdown.SetIsActive(true)
+			b.resetBorderColors()
+			b.pdf.SetBorderColor(theme.ActiveBoxBorderColor)
+		}
+	}
+
+	return cmds
+}
+
+// openFile opens the currently selected file.
+func (b *Bubble) openFile() []tea.Cmd {
+	var cmds []tea.Cmd
+
+	selectedFile := b.filetree.GetSelectedItem()
+	if !selectedFile.IsDirectory() {
+		b.resetViewports()
+
+		switch {
+		case selectedFile.FileExtension() == ".png" || selectedFile.FileExtension() == ".jpg" || selectedFile.FileExtension() == ".jpeg":
+			b.state = showImageState
+			readFileCmd := b.image.SetFileName(selectedFile.FileName())
+			cmds = append(cmds, readFileCmd)
+		case selectedFile.FileExtension() == ".md" && b.config.Settings.PrettyMarkdown:
+			b.state = showMarkdownState
+			markdownCmd := b.markdown.SetFileName(selectedFile.FileName())
+			cmds = append(cmds, markdownCmd)
+		case selectedFile.FileExtension() == ".pdf":
+			b.state = showPdfState
+			pdfCmd := b.pdf.SetFileName(selectedFile.FileName())
+			cmds = append(cmds, pdfCmd)
+		case contains(forbiddenExtensions, selectedFile.FileExtension()):
+			return nil
+		default:
+			b.state = showCodeState
+			readFileCmd := b.code.SetFileName(selectedFile.FileName())
+			cmds = append(cmds, readFileCmd)
+		}
+	}
+
+	return cmds
+}
+
+// toggleBox toggles between the two boxes.
+func (b *Bubble) toggleBox() {
+	b.activeBox = (b.activeBox + 1) % 2
+	if b.activeBox == 0 {
+		b.deactivateAllBubbles()
+		b.filetree.SetIsActive(true)
+		b.resetBorderColors()
+		b.filetree.SetBorderColor(b.theme.ActiveBoxBorderColor)
+	} else {
+		switch b.state {
+		case idleState:
+			b.deactivateAllBubbles()
+			b.help.SetIsActive(true)
+			b.resetBorderColors()
+			b.help.SetBorderColor(b.theme.ActiveBoxBorderColor)
+		case showCodeState:
+			b.deactivateAllBubbles()
+			b.code.SetIsActive(true)
+			b.resetBorderColors()
+			b.code.SetBorderColor(b.theme.ActiveBoxBorderColor)
+		case showImageState:
+			b.deactivateAllBubbles()
+			b.image.SetIsActive(true)
+			b.resetBorderColors()
+			b.image.SetBorderColor(b.theme.ActiveBoxBorderColor)
+		case showMarkdownState:
+			b.deactivateAllBubbles()
+			b.markdown.SetIsActive(true)
+			b.resetBorderColors()
+			b.markdown.SetBorderColor(b.theme.ActiveBoxBorderColor)
+		case showPdfState:
+			b.deactivateAllBubbles()
+			b.markdown.SetIsActive(true)
+			b.resetBorderColors()
+			b.pdf.SetBorderColor(b.theme.ActiveBoxBorderColor)
+		}
+	}
 }
 
 // contains returns true if the slice contains the string.
@@ -100,155 +268,12 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case key.Matches(msg, b.keys.ReloadConfig):
 			if !b.filetree.IsFiltering() {
-				cfg, err := config.ParseConfig()
-				if err != nil {
-					return b, nil
-				}
-
-				b.config = cfg
-				syntaxTheme := cfg.Theme.SyntaxTheme.Light
-				if lipgloss.HasDarkBackground() {
-					syntaxTheme = cfg.Theme.SyntaxTheme.Dark
-				}
-
-				b.code.SetSyntaxTheme(syntaxTheme)
-
-				theme := theme.GetTheme(cfg.Theme.AppTheme)
-				b.theme = theme
-				b.statusbar.SetColors(
-					statusbar.ColorConfig{
-						Foreground: theme.StatusBarSelectedFileForegroundColor,
-						Background: theme.StatusBarSelectedFileBackgroundColor,
-					},
-					statusbar.ColorConfig{
-						Foreground: theme.StatusBarBarForegroundColor,
-						Background: theme.StatusBarBarBackgroundColor,
-					},
-					statusbar.ColorConfig{
-						Foreground: theme.StatusBarTotalFilesForegroundColor,
-						Background: theme.StatusBarTotalFilesBackgroundColor,
-					},
-					statusbar.ColorConfig{
-						Foreground: theme.StatusBarLogoForegroundColor,
-						Background: theme.StatusBarLogoBackgroundColor,
-					},
-				)
-
-				b.help.SetTitleColor(
-					help.TitleColor{
-						Background: theme.TitleBackgroundColor,
-						Foreground: theme.TitleForegroundColor,
-					},
-				)
-
-				b.filetree.SetTitleColors(theme.TitleForegroundColor, theme.TitleBackgroundColor)
-				b.filetree.SetSelectedItemColors(theme.SelectedTreeItemColor)
-				cmds = append(cmds, b.filetree.ToggleShowIcons(cfg.Settings.ShowIcons))
-
-				b.filetree.SetBorderless(cfg.Settings.Borderless)
-				b.code.SetBorderless(cfg.Settings.Borderless)
-				b.help.SetBorderless(cfg.Settings.Borderless)
-				b.markdown.SetBorderless(cfg.Settings.Borderless)
-				b.pdf.SetBorderless(cfg.Settings.Borderless)
-				b.image.SetBorderless(cfg.Settings.Borderless)
-
-				if b.activeBox == 0 {
-					b.deactivateAllBubbles()
-					b.filetree.SetIsActive(true)
-					b.resetBorderColors()
-					b.filetree.SetBorderColor(theme.ActiveBoxBorderColor)
-				} else {
-					switch b.state {
-					case idleState:
-						b.deactivateAllBubbles()
-						b.help.SetIsActive(true)
-						b.resetBorderColors()
-						b.help.SetBorderColor(theme.ActiveBoxBorderColor)
-					case showCodeState:
-						b.deactivateAllBubbles()
-						b.code.SetIsActive(true)
-						b.resetBorderColors()
-						b.code.SetBorderColor(theme.ActiveBoxBorderColor)
-					case showImageState:
-						b.deactivateAllBubbles()
-						b.image.SetIsActive(true)
-						b.resetBorderColors()
-						b.image.SetBorderColor(theme.ActiveBoxBorderColor)
-					case showMarkdownState:
-						b.deactivateAllBubbles()
-						b.markdown.SetIsActive(true)
-						b.resetBorderColors()
-						b.markdown.SetBorderColor(theme.ActiveBoxBorderColor)
-					case showPdfState:
-						b.deactivateAllBubbles()
-						b.markdown.SetIsActive(true)
-						b.resetBorderColors()
-						b.pdf.SetBorderColor(theme.ActiveBoxBorderColor)
-					}
-				}
+				cmds = append(cmds, tea.Batch(b.reloadConfig()...))
 			}
 		case key.Matches(msg, b.keys.OpenFile):
-			selectedFile := b.filetree.GetSelectedItem()
-			if !selectedFile.IsDirectory() {
-				b.resetViewports()
-
-				switch {
-				case selectedFile.FileExtension() == ".png" || selectedFile.FileExtension() == ".jpg" || selectedFile.FileExtension() == ".jpeg":
-					b.state = showImageState
-					readFileCmd := b.image.SetFileName(selectedFile.FileName())
-					cmds = append(cmds, readFileCmd)
-				case selectedFile.FileExtension() == ".md" && b.config.Settings.PrettyMarkdown:
-					b.state = showMarkdownState
-					markdownCmd := b.markdown.SetFileName(selectedFile.FileName())
-					cmds = append(cmds, markdownCmd)
-				case selectedFile.FileExtension() == ".pdf":
-					b.state = showPdfState
-					pdfCmd := b.pdf.SetFileName(selectedFile.FileName())
-					cmds = append(cmds, pdfCmd)
-				case contains(forbiddenExtensions, selectedFile.FileExtension()):
-					return b, nil
-				default:
-					b.state = showCodeState
-					readFileCmd := b.code.SetFileName(selectedFile.FileName())
-					cmds = append(cmds, readFileCmd)
-				}
-			}
+			cmds = append(cmds, tea.Batch(b.openFile()...))
 		case key.Matches(msg, b.keys.ToggleBox):
-			b.activeBox = (b.activeBox + 1) % 2
-			if b.activeBox == 0 {
-				b.deactivateAllBubbles()
-				b.filetree.SetIsActive(true)
-				b.resetBorderColors()
-				b.filetree.SetBorderColor(b.theme.ActiveBoxBorderColor)
-			} else {
-				switch b.state {
-				case idleState:
-					b.deactivateAllBubbles()
-					b.help.SetIsActive(true)
-					b.resetBorderColors()
-					b.help.SetBorderColor(b.theme.ActiveBoxBorderColor)
-				case showCodeState:
-					b.deactivateAllBubbles()
-					b.code.SetIsActive(true)
-					b.resetBorderColors()
-					b.code.SetBorderColor(b.theme.ActiveBoxBorderColor)
-				case showImageState:
-					b.deactivateAllBubbles()
-					b.image.SetIsActive(true)
-					b.resetBorderColors()
-					b.image.SetBorderColor(b.theme.ActiveBoxBorderColor)
-				case showMarkdownState:
-					b.deactivateAllBubbles()
-					b.markdown.SetIsActive(true)
-					b.resetBorderColors()
-					b.markdown.SetBorderColor(b.theme.ActiveBoxBorderColor)
-				case showPdfState:
-					b.deactivateAllBubbles()
-					b.markdown.SetIsActive(true)
-					b.resetBorderColors()
-					b.pdf.SetBorderColor(b.theme.ActiveBoxBorderColor)
-				}
-			}
+			b.toggleBox()
 		}
 	}
 
