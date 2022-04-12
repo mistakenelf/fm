@@ -3,10 +3,10 @@ package tui
 import (
 	"log"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/knipferrc/fm/internal/config"
 	"github.com/knipferrc/fm/internal/theme"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/knipferrc/teacup/code"
 	"github.com/knipferrc/teacup/filetree"
 	"github.com/knipferrc/teacup/help"
@@ -119,7 +119,7 @@ func New(startDir, selectionPath string) Bubble {
 			{Key: "N", Description: "Create new directory"},
 			{Key: "x", Description: "Delete currently selected tree item"},
 			{Key: "enter", Description: "Process command"},
-			{Key: "E", Description: "Edit currently selected tree item"},
+			{Key: "e", Description: "Edit currently selected tree item"},
 			{Key: "c", Description: "Copy currently selected tree item"},
 			{Key: "esc", Description: "Reset input field"},
 			{Key: "R", Description: "Go to root directory"},
