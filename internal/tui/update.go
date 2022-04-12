@@ -1,709 +1,307 @@
 package tui
 
 import (
-	"errors"
-	"log"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"strings"
+	"fmt"
 
-	"github.com/knipferrc/fm/dirfs"
 	"github.com/knipferrc/fm/internal/config"
-	"github.com/knipferrc/fm/internal/constants"
+	"github.com/knipferrc/fm/internal/theme"
 
 	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/termenv"
-	"github.com/spf13/viper"
+	"github.com/knipferrc/teacup/help"
+	"github.com/knipferrc/teacup/icons"
+	"github.com/knipferrc/teacup/statusbar"
 )
 
-// checkPrimaryViewportBounds handles wrapping of the filetree and
-// scrolling of the viewport.
-func (b *Bubble) checkPrimaryViewportBounds() {
-	top := b.primaryViewport.YOffset
-	bottom := b.primaryViewport.Height + b.primaryViewport.YOffset - 1
-
-	if b.treeCursor < top {
-		b.primaryViewport.LineUp(1)
-	} else if b.treeCursor > bottom {
-		b.primaryViewport.LineDown(1)
-	}
-
-	if b.treeCursor > len(b.treeFiles)-1 {
-		b.primaryViewport.GotoTop()
-		b.treeCursor = 0
-	} else if b.treeCursor < top {
-		b.primaryViewport.GotoBottom()
-		b.treeCursor = len(b.treeFiles) - 1
-	}
+var forbiddenExtensions = []string{
+	".FCStd",
+	".gif",
+	".zip",
+	".rar",
+	".webm",
+	".sqlite",
+	".sqlite-shm",
+	".sqlite-wal",
+	".DS_Store",
+	".db",
+	".data",
+	".plist",
+	".webp",
+	".img",
 }
 
-// writeLog writes a message to the log.
-func (b *Bubble) writeLog(msg string) {
-	if b.appConfig.Settings.EnableLogging {
-		b.logs = append(b.logs, msg)
-
-		if b.showLogs {
-			bottom := b.secondaryViewport.Height + b.secondaryViewport.YOffset - 1
-			if lipgloss.Height(b.logView()) > bottom {
-				b.secondaryViewport.GotoBottom()
-			}
-			b.secondaryViewport.SetContent(b.logView())
-		}
-	}
+// resetViewports goes to the top of all bubbles viewports.
+func (b *Bubble) resetViewports() {
+	b.code.GotoTop()
+	b.pdf.GotoTop()
+	b.markdown.GotoTop()
+	b.help.GotoTop()
+	b.image.GotoTop()
 }
 
-// handleKeys handles all keypresses.
-func (b *Bubble) handleKeys(msg tea.KeyMsg) tea.Cmd {
+// deactivateALlBubbles sets all bubbles to inactive.
+func (b *Bubble) deactivateAllBubbles() {
+	b.filetree.SetIsActive(false)
+	b.code.SetIsActive(false)
+	b.markdown.SetIsActive(false)
+	b.image.SetIsActive(false)
+	b.pdf.SetIsActive(false)
+	b.help.SetIsActive(false)
+}
+
+// resetBorderColors resets all bubble border colors to default.
+func (b *Bubble) resetBorderColors() {
+	b.filetree.SetBorderColor(b.theme.InactiveBoxBorderColor)
+	b.help.SetBorderColor(b.theme.InactiveBoxBorderColor)
+	b.code.SetBorderColor(b.theme.InactiveBoxBorderColor)
+	b.image.SetBorderColor(b.theme.InactiveBoxBorderColor)
+	b.markdown.SetBorderColor(b.theme.InactiveBoxBorderColor)
+	b.pdf.SetBorderColor(b.theme.InactiveBoxBorderColor)
+}
+
+// reloadConfig reloads the config file and updates the UI.
+func (b *Bubble) reloadConfig() []tea.Cmd {
 	var cmds []tea.Cmd
-	var cmd tea.Cmd
 
-	// Jump to top of box.
-	if b.previousKey.String() == "g" && msg.String() == "g" {
-		if !b.showCommandInput && b.activeBox == constants.PrimaryBoxActive && !b.showBoxSpinner {
-			b.treeCursor = 0
-			b.primaryViewport.GotoTop()
-			b.primaryViewport.SetContent(b.fileTreeView())
-		}
-
-		if !b.showCommandInput && b.activeBox == constants.SecondaryBoxActive {
-			b.secondaryViewport.GotoTop()
-		}
-
+	cfg, err := config.ParseConfig()
+	if err != nil {
 		return nil
 	}
 
-	// Reload config file.
-	if b.previousKey.String() == "r" && msg.String() == "c" {
-		if !b.showCommandInput && b.activeBox == constants.PrimaryBoxActive && !b.showBoxSpinner {
-			if err := viper.ReadInConfig(); err != nil {
-				if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-					log.Fatal(err)
-				}
-			}
-
-			b.appConfig = config.GetConfig()
-			b.primaryViewport.SetContent(b.fileTreeView())
-		}
-
-		return nil
+	b.config = cfg
+	syntaxTheme := cfg.Theme.SyntaxTheme.Light
+	if lipgloss.HasDarkBackground() {
+		syntaxTheme = cfg.Theme.SyntaxTheme.Dark
 	}
 
-	switch {
-	case key.Matches(msg, b.keyMap.Quit):
-		return tea.Quit
-	case key.Matches(msg, b.keyMap.Down):
-		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
-			b.treeCursor++
-			b.checkPrimaryViewportBounds()
-			b.primaryViewport.SetContent(b.fileTreeView())
+	b.code.SetSyntaxTheme(syntaxTheme)
+
+	theme := theme.GetTheme(cfg.Theme.AppTheme)
+	b.theme = theme
+	b.statusbar.SetColors(
+		statusbar.ColorConfig{
+			Foreground: theme.StatusBarSelectedFileForegroundColor,
+			Background: theme.StatusBarSelectedFileBackgroundColor,
+		},
+		statusbar.ColorConfig{
+			Foreground: theme.StatusBarBarForegroundColor,
+			Background: theme.StatusBarBarBackgroundColor,
+		},
+		statusbar.ColorConfig{
+			Foreground: theme.StatusBarTotalFilesForegroundColor,
+			Background: theme.StatusBarTotalFilesBackgroundColor,
+		},
+		statusbar.ColorConfig{
+			Foreground: theme.StatusBarLogoForegroundColor,
+			Background: theme.StatusBarLogoBackgroundColor,
+		},
+	)
+
+	b.help.SetTitleColor(
+		help.TitleColor{
+			Background: theme.TitleBackgroundColor,
+			Foreground: theme.TitleForegroundColor,
+		},
+	)
+
+	b.filetree.SetTitleColors(theme.TitleForegroundColor, theme.TitleBackgroundColor)
+	b.filetree.SetSelectedItemColors(theme.SelectedTreeItemColor)
+	cmds = append(cmds, b.filetree.ToggleShowIcons(cfg.Settings.ShowIcons))
+
+	b.filetree.SetBorderless(cfg.Settings.Borderless)
+	b.code.SetBorderless(cfg.Settings.Borderless)
+	b.help.SetBorderless(cfg.Settings.Borderless)
+	b.markdown.SetBorderless(cfg.Settings.Borderless)
+	b.pdf.SetBorderless(cfg.Settings.Borderless)
+	b.image.SetBorderless(cfg.Settings.Borderless)
+
+	if b.activeBox == 0 {
+		b.deactivateAllBubbles()
+		b.filetree.SetIsActive(true)
+		b.resetBorderColors()
+		b.filetree.SetBorderColor(theme.ActiveBoxBorderColor)
+	} else {
+		switch b.state {
+		case idleState:
+			b.deactivateAllBubbles()
+			b.help.SetIsActive(true)
+			b.resetBorderColors()
+			b.help.SetBorderColor(theme.ActiveBoxBorderColor)
+		case showCodeState:
+			b.deactivateAllBubbles()
+			b.code.SetIsActive(true)
+			b.resetBorderColors()
+			b.code.SetBorderColor(theme.ActiveBoxBorderColor)
+		case showImageState:
+			b.deactivateAllBubbles()
+			b.image.SetIsActive(true)
+			b.resetBorderColors()
+			b.image.SetBorderColor(theme.ActiveBoxBorderColor)
+		case showMarkdownState:
+			b.deactivateAllBubbles()
+			b.markdown.SetIsActive(true)
+			b.resetBorderColors()
+			b.markdown.SetBorderColor(theme.ActiveBoxBorderColor)
+		case showPdfState:
+			b.deactivateAllBubbles()
+			b.markdown.SetIsActive(true)
+			b.resetBorderColors()
+			b.pdf.SetBorderColor(theme.ActiveBoxBorderColor)
 		}
-	case key.Matches(msg, b.keyMap.Up):
-		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
-			b.treeCursor--
-			b.checkPrimaryViewportBounds()
-			b.primaryViewport.SetContent(b.fileTreeView())
-		}
-	case key.Matches(msg, b.keyMap.Left):
-		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
-			b.treeCursor = 0
-			b.showFilesOnly = false
-			b.showDirectoriesOnly = false
-			b.foundFilesPaths = nil
-			workingDirectory, err := dirfs.GetWorkingDirectory()
-			if err != nil {
-				return b.handleErrorCmd(err)
-			}
+	}
 
-			return b.updateDirectoryListingCmd(
-				filepath.Join(workingDirectory, dirfs.PreviousDirectory),
-			)
-		}
-	case key.Matches(msg, b.keyMap.Right):
-		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
-			selectedFile, err := b.treeFiles[b.treeCursor].Info()
-			if err != nil {
-				return b.handleErrorCmd(err)
-			}
+	return cmds
+}
 
-			switch {
-			case selectedFile.IsDir():
-				currentDir, err := dirfs.GetWorkingDirectory()
-				if err != nil {
-					return b.handleErrorCmd(err)
-				}
+// openFile opens the currently selected file.
+func (b *Bubble) openFile() []tea.Cmd {
+	var cmds []tea.Cmd
 
-				directoryToOpen := filepath.Join(currentDir, selectedFile.Name())
+	selectedFile := b.filetree.GetSelectedItem()
+	if !selectedFile.IsDirectory() {
+		b.resetViewports()
 
-				if len(b.foundFilesPaths) > 0 {
-					directoryToOpen = b.foundFilesPaths[b.treeCursor]
-				}
-
-				return b.updateDirectoryListingCmd(directoryToOpen)
-			case selectedFile.Mode()&os.ModeSymlink == os.ModeSymlink:
-				symlinkFile, err := os.Readlink(selectedFile.Name())
-				if err != nil {
-					return b.handleErrorCmd(err)
-				}
-
-				fileInfo, err := os.Stat(symlinkFile)
-				if err != nil {
-					return b.handleErrorCmd(err)
-				}
-
-				if fileInfo.IsDir() {
-					currentDir, err := dirfs.GetWorkingDirectory()
-					if err != nil {
-						return b.handleErrorCmd(err)
-					}
-
-					return b.updateDirectoryListingCmd(filepath.Join(currentDir, fileInfo.Name()))
-				}
-
-				return b.readFileContentCmd(
-					fileInfo.Name(),
-					b.secondaryViewport.Width,
-				)
-
-			default:
-				fileToRead := selectedFile.Name()
-
-				if len(b.foundFilesPaths) > 0 {
-					fileToRead = b.foundFilesPaths[b.treeCursor]
-				}
-
-				if selectedFile.Mode()&0111 == 0111 {
-					b.secondaryViewport.SetContent(b.textContentView("Unable to preview file"))
-					return nil
-				}
-
-				return b.readFileContentCmd(
-					fileToRead,
-					b.secondaryViewport.Width,
-				)
-			}
-		}
-	case key.Matches(msg, b.keyMap.Preview):
-		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
-			selectedFile, err := b.treeFiles[b.treeCursor].Info()
-			if err != nil {
-				return b.handleErrorCmd(err)
-			}
-
-			switch {
-			case selectedFile.IsDir():
-				return b.previewDirectoryListingCmd(selectedFile.Name())
-			case selectedFile.Mode()&os.ModeSymlink == os.ModeSymlink:
-				symlinkFile, err := os.Readlink(selectedFile.Name())
-				if err != nil {
-					return b.handleErrorCmd(err)
-				}
-
-				fileInfo, err := os.Stat(symlinkFile)
-				if err != nil {
-					return b.handleErrorCmd(err)
-				}
-
-				if fileInfo.IsDir() {
-					return b.previewDirectoryListingCmd(fileInfo.Name())
-				}
-			default:
-				return nil
-			}
-		}
-	case key.Matches(msg, b.keyMap.GotoBottom):
-		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
-			b.treeCursor = len(b.treeFiles) - 1
-			b.primaryViewport.GotoBottom()
-			b.primaryViewport.SetContent(b.fileTreeView())
-		}
-
-		if b.activeBox == constants.SecondaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
-			b.secondaryViewport.GotoBottom()
-		}
-	case key.Matches(msg, b.keyMap.HomeShortcut):
-		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
-			b.treeCursor = 0
-			b.fileSizes = nil
-			homeDir, err := dirfs.GetHomeDirectory()
-			if err != nil {
-				return b.handleErrorCmd(err)
-			}
-
-			return b.updateDirectoryListingCmd(homeDir)
-		}
-	case key.Matches(msg, b.keyMap.RootShortcut):
-		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
-			b.treeCursor = 0
-			b.fileSizes = nil
-
-			return b.updateDirectoryListingCmd(dirfs.RootDirectory)
-		}
-	case key.Matches(msg, b.keyMap.ToggleHidden):
-		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
-			b.showHiddenFiles = !b.showHiddenFiles
-
-			switch {
-			case b.showDirectoriesOnly:
-				return b.getDirectoryListingByTypeCmd(dirfs.DirectoriesListingType)
-			case b.showFilesOnly:
-				return b.getDirectoryListingByTypeCmd(dirfs.FilesListingType)
-			default:
-				return b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
-			}
-		}
-	case key.Matches(msg, b.keyMap.ShowDirectoriesOnly):
-		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
-			b.showDirectoriesOnly = !b.showDirectoriesOnly
-			b.showFilesOnly = false
-
-			if b.showDirectoriesOnly {
-				return b.getDirectoryListingByTypeCmd(dirfs.DirectoriesListingType)
-			}
-
-			return b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
-		}
-	case key.Matches(msg, b.keyMap.ShowFilesOnly):
-		if b.activeBox == constants.PrimaryBoxActive && !b.showCommandInput && !b.showBoxSpinner {
-			b.showFilesOnly = !b.showFilesOnly
-			b.showDirectoriesOnly = false
-
-			if b.showFilesOnly {
-				return b.getDirectoryListingByTypeCmd(dirfs.FilesListingType)
-			}
-
-			b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
-		}
-	case key.Matches(msg, b.keyMap.CopyPathToClipboard):
-		if b.activeBox == constants.PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showCommandInput && !b.showBoxSpinner {
-			selectedFile := b.treeFiles[b.treeCursor]
-
-			return b.copyToClipboardCmd(selectedFile.Name())
-		}
-	case key.Matches(msg, b.keyMap.Zip):
-		if b.activeBox == constants.PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showCommandInput && !b.showBoxSpinner {
-			selectedFile := b.treeFiles[b.treeCursor]
-
-			return tea.Sequentially(
-				b.zipDirectoryCmd(selectedFile.Name()),
-				b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-			)
-		}
-	case key.Matches(msg, b.keyMap.Unzip):
-		if b.activeBox == constants.PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showCommandInput && !b.showBoxSpinner {
-			selectedFile := b.treeFiles[b.treeCursor]
-
-			return tea.Sequentially(
-				b.unzipDirectoryCmd(selectedFile.Name()),
-				b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-			)
-		}
-	case key.Matches(msg, b.keyMap.NewFile):
-		if !b.showCommandInput && !b.showBoxSpinner {
-			b.createFileMode = true
-			b.showCommandInput = true
-			b.textinput.Placeholder = "Enter file name"
-			b.textinput.Focus()
-
-			return textinput.Blink
-		}
-	case key.Matches(msg, b.keyMap.NewDirectory):
-		if !b.showCommandInput && !b.showBoxSpinner {
-			b.createDirectoryMode = true
-			b.showCommandInput = true
-			b.textinput.Placeholder = "Enter directory name"
-			b.textinput.Focus()
-
-			return textinput.Blink
-		}
-	case key.Matches(msg, b.keyMap.Delete):
-		if !b.showCommandInput && !b.showBoxSpinner {
-			b.deleteMode = true
-			b.showCommandInput = true
-			b.textinput.Placeholder = "Are you sure you want to delete this? (y/n)"
-			b.textinput.Focus()
-		}
-	case key.Matches(msg, b.keyMap.Move):
-		if !b.showCommandInput && !b.showBoxSpinner {
-			b.moveMode = true
-			b.treeItemToMove = b.treeFiles[b.treeCursor]
-			workingDir, err := dirfs.GetWorkingDirectory()
-			if err != nil {
-				b.moveInitiatedDirectory = dirfs.CurrentDirectory
-			}
-
-			b.moveInitiatedDirectory = workingDir
-
-			return nil
-		}
-	case key.Matches(msg, b.keyMap.Enter):
 		switch {
-		case b.moveMode:
-			return b.moveDirectoryItemCmd(b.treeItemToMove.Name())
-		case b.createFileMode:
-			return tea.Sequentially(
-				b.createFileCmd(b.textinput.Value()),
-				b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-			)
-		case b.createDirectoryMode:
-			return tea.Sequentially(
-				b.createDirectoryCmd(b.textinput.Value()),
-				b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-			)
-		case b.renameMode:
-			selectedFile := b.treeFiles[b.treeCursor]
-
-			return tea.Sequentially(
-				b.renameDirectoryItemCmd(selectedFile.Name(), b.textinput.Value()),
-				b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-			)
-		case b.findMode:
-			b.showCommandInput = false
-			b.showBoxSpinner = true
-
-			return b.findFilesByNameCmd(b.textinput.Value())
-		case b.deleteMode:
-			selectedFile := b.treeFiles[b.treeCursor]
-
-			if strings.ToLower(b.textinput.Value()) == "y" || strings.ToLower(b.textinput.Value()) == "yes" {
-				if selectedFile.IsDir() {
-					return tea.Sequentially(
-						b.deleteDirectoryCmd(selectedFile.Name()),
-						b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-					)
-				}
-
-				return tea.Sequentially(
-					b.deleteFileCmd(selectedFile.Name()),
-					b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-				)
-			}
-		default:
+		case selectedFile.FileExtension() == ".png" || selectedFile.FileExtension() == ".jpg" || selectedFile.FileExtension() == ".jpeg":
+			b.state = showImageState
+			readFileCmd := b.image.SetFileName(selectedFile.FileName())
+			cmds = append(cmds, readFileCmd)
+		case selectedFile.FileExtension() == ".md" && b.config.Settings.PrettyMarkdown:
+			b.state = showMarkdownState
+			markdownCmd := b.markdown.SetFileName(selectedFile.FileName())
+			cmds = append(cmds, markdownCmd)
+		case selectedFile.FileExtension() == ".pdf":
+			b.state = showPdfState
+			pdfCmd := b.pdf.SetFileName(selectedFile.FileName())
+			cmds = append(cmds, pdfCmd)
+		case contains(forbiddenExtensions, selectedFile.FileExtension()):
 			return nil
+		default:
+			b.state = showCodeState
+			readFileCmd := b.code.SetFileName(selectedFile.FileName())
+			cmds = append(cmds, readFileCmd)
 		}
-	case key.Matches(msg, b.keyMap.Edit):
-		selectedFile := b.treeFiles[b.treeCursor]
-
-		if !b.showCommandInput && b.activeBox == constants.PrimaryBoxActive && !b.showBoxSpinner {
-			selectionPath := viper.GetString("selection-path")
-
-			if selectionPath == "" && !selectedFile.IsDir() {
-				editorPath := os.Getenv("EDITOR")
-				if editorPath == "" {
-					return b.handleErrorCmd(errors.New("$EDITOR not set"))
-				}
-
-				editorCmd := exec.Command(editorPath, selectedFile.Name())
-				editorCmd.Stdin = os.Stdin
-				editorCmd.Stdout = os.Stdout
-				editorCmd.Stderr = os.Stderr
-
-				err := editorCmd.Run()
-				termenv.AltScreen()
-
-				if err != nil {
-					return b.handleErrorCmd(err)
-				}
-
-				return tea.Batch(b.redrawCmd(), tea.HideCursor)
-			}
-
-			return tea.Sequentially(
-				b.writeSelectionPathCmd(selectionPath, selectedFile.Name()),
-				tea.Quit,
-			)
-		}
-	case key.Matches(msg, b.keyMap.Copy):
-		if !b.showCommandInput && b.activeBox == constants.PrimaryBoxActive && len(b.treeFiles) > 0 && !b.showBoxSpinner {
-			selectedFile := b.treeFiles[b.treeCursor]
-
-			if selectedFile.IsDir() {
-				return tea.Sequentially(
-					b.copyDirectoryCmd(selectedFile.Name()),
-					b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-				)
-			}
-
-			return tea.Sequentially(
-				b.copyFileCmd(selectedFile.Name()),
-				b.updateDirectoryListingCmd(dirfs.CurrentDirectory),
-			)
-		}
-	case key.Matches(msg, b.keyMap.Find):
-		if !b.showCommandInput && !b.showBoxSpinner {
-			b.findMode = true
-			b.showCommandInput = true
-			b.textinput.Placeholder = "Enter a search term"
-			b.textinput.Focus()
-
-			return textinput.Blink
-		}
-	case key.Matches(msg, b.keyMap.Rename):
-		if b.activeBox == constants.PrimaryBoxActive && !b.showBoxSpinner && len(b.treeFiles) > 0 {
-			selectedFile := b.treeFiles
-
-			if selectedFile != nil {
-				b.renameMode = true
-				b.showCommandInput = true
-				b.textinput.Placeholder = "Enter new name"
-				b.textinput.Focus()
-
-				return textinput.Blink
-			}
-		}
-	case key.Matches(msg, b.keyMap.Escape):
-		b.showCommandInput = false
-		b.moveMode = false
-		b.createFileMode = false
-		b.createDirectoryMode = false
-		b.renameMode = false
-		b.showFilesOnly = false
-		b.showHiddenFiles = true
-		b.showDirectoriesOnly = false
-		b.findMode = false
-		b.deleteMode = false
-		b.errorMsg = ""
-		b.showHelp = true
-		b.showLogs = false
-		b.foundFilesPaths = nil
-		b.showBoxSpinner = false
-		b.currentImage = nil
-		b.secondaryViewport.GotoTop()
-		b.secondaryViewport.SetContent(b.help.View())
-		b.textinput.Blur()
-		b.textinput.Reset()
-
-		return b.updateDirectoryListingCmd(dirfs.CurrentDirectory)
-	case key.Matches(msg, b.keyMap.ShowLogs):
-		if !b.showCommandInput && b.appConfig.Settings.EnableLogging {
-			b.showLogs = true
-			b.currentImage = nil
-			b.secondaryViewport.SetContent(b.logView())
-		}
-	case key.Matches(msg, b.keyMap.ToggleBox):
-		b.activeBox = (b.activeBox + 1) % 2
 	}
 
-	b.previousKey = msg
-
-	if b.activeBox != constants.PrimaryBoxActive {
-		b.secondaryViewport, cmd = b.secondaryViewport.Update(msg)
-		cmds = append(cmds, cmd)
-	}
-
-	b.textinput, cmd = b.textinput.Update(msg)
-	cmds = append(cmds, cmd)
-
-	b.spinner, cmd = b.spinner.Update(msg)
-	cmds = append(cmds, cmd)
-
-	return tea.Batch(cmds...)
+	return cmds
 }
 
-// handleMouse handles all mouse interaction.
-func (b *Bubble) handleMouse(msg tea.MouseMsg) {
-	switch msg.Type {
-	case tea.MouseWheelUp:
-		if b.activeBox == constants.PrimaryBoxActive {
-			b.treeCursor--
-			b.checkPrimaryViewportBounds()
-			b.primaryViewport.SetContent(b.fileTreeView())
-		}
-
-		if b.activeBox == constants.SecondaryBoxActive {
-			b.secondaryViewport.LineUp(1)
-			b.primaryViewport.SetContent(b.fileTreeView())
-		}
-	case tea.MouseWheelDown:
-		if b.activeBox == constants.PrimaryBoxActive {
-			b.treeCursor++
-			b.checkPrimaryViewportBounds()
-			b.primaryViewport.SetContent(b.fileTreeView())
-		}
-
-		if b.activeBox == constants.SecondaryBoxActive {
-			b.secondaryViewport.LineDown(1)
-			b.primaryViewport.SetContent(b.fileTreeView())
+// toggleBox toggles between the two boxes.
+func (b *Bubble) toggleBox() {
+	b.activeBox = (b.activeBox + 1) % 2
+	if b.activeBox == 0 {
+		b.deactivateAllBubbles()
+		b.filetree.SetIsActive(true)
+		b.resetBorderColors()
+		b.filetree.SetBorderColor(b.theme.ActiveBoxBorderColor)
+	} else {
+		switch b.state {
+		case idleState:
+			b.deactivateAllBubbles()
+			b.help.SetIsActive(true)
+			b.resetBorderColors()
+			b.help.SetBorderColor(b.theme.ActiveBoxBorderColor)
+		case showCodeState:
+			b.deactivateAllBubbles()
+			b.code.SetIsActive(true)
+			b.resetBorderColors()
+			b.code.SetBorderColor(b.theme.ActiveBoxBorderColor)
+		case showImageState:
+			b.deactivateAllBubbles()
+			b.image.SetIsActive(true)
+			b.resetBorderColors()
+			b.image.SetBorderColor(b.theme.ActiveBoxBorderColor)
+		case showMarkdownState:
+			b.deactivateAllBubbles()
+			b.markdown.SetIsActive(true)
+			b.resetBorderColors()
+			b.markdown.SetBorderColor(b.theme.ActiveBoxBorderColor)
+		case showPdfState:
+			b.deactivateAllBubbles()
+			b.markdown.SetIsActive(true)
+			b.resetBorderColors()
+			b.pdf.SetBorderColor(b.theme.ActiveBoxBorderColor)
 		}
 	}
 }
 
-// Update handles all UI interactions and events for updating the screen.
+// contains returns true if the slice contains the string.
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+
+	return false
+}
+
+// Update handles all UI interactions.
 func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
-	var cmd tea.Cmd
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
+
+	b.filetree, cmd = b.filetree.Update(msg)
+	cmds = append(cmds, cmd)
 
 	switch msg := msg.(type) {
-	case updateDirectoryListingMsg:
-		b.showCommandInput = false
-		b.createFileMode = false
-		b.createDirectoryMode = false
-		b.deleteMode = false
-		b.renameMode = false
-		b.treeCursor = 0
-		b.treeFiles = msg
-		b.showFileTreePreview = false
-		b.fileSizes = make([]string, len(msg))
-		b.writeLog("Directory listing updated.")
-
-		if b.appConfig.Settings.CalculatedFileSizes {
-			for i, file := range msg {
-				cmds = append(cmds, b.getDirectoryItemSizeCmd(file.Name(), i))
-			}
-		}
-
-		b.primaryViewport.SetContent(b.fileTreeView())
-		b.textinput.Blur()
-		b.textinput.Reset()
-
-		return b, tea.Batch(cmds...)
-	case directoryItemSizeMsg:
-		if len(b.fileSizes) > 0 && msg.index < len(b.fileSizes) {
-			b.fileSizes[msg.index] = msg.size
-			b.primaryViewport.SetContent(b.fileTreeView())
-		}
-
-		return b, nil
-	case readFileContentMsg:
-		b.showFileTreePreview = false
-		b.showHelp = false
-		b.showLogs = false
-		b.currentImage = nil
-		b.secondaryViewport.GotoTop()
-
-		switch {
-		case msg.code != "":
-			b.secondaryBoxContent = msg.code
-		case msg.pdfContent != "":
-			b.secondaryBoxContent = msg.pdfContent
-		case msg.markdown != "":
-			b.secondaryBoxContent = msg.markdown
-		case msg.image != nil:
-			b.currentImage = msg.image
-			b.secondaryBoxContent = msg.imageString
-		default:
-			b.secondaryBoxContent = msg.rawContent
-		}
-
-		b.secondaryViewport.SetContent(b.textContentView(b.secondaryBoxContent))
-
-		return b, nil
-	case previewDirectoryListingMsg:
-		b.showFileTreePreview = true
-		b.showHelp = false
-		b.showLogs = false
-		b.treePreviewFiles = msg
-		b.secondaryViewport.GotoTop()
-		b.secondaryViewport.SetContent(b.fileTreePreviewView())
-
-		return b, nil
-	case convertImageToStringMsg:
-		b.showHelp = false
-		b.showLogs = false
-		b.secondaryViewport.GotoTop()
-		b.secondaryViewport.SetContent(b.textContentView(string(msg)))
-
-		return b, nil
-	case copyToClipboardMsg:
-		b.secondaryViewport.SetContent(b.textContentView(string(msg)))
-
-		return b, nil
-	case moveDirItemMsg:
-		b.moveMode = false
-		b.treeItemToMove = nil
-		b.moveInitiatedDirectory = ""
-		b.treeFiles = msg
-		b.treeCursor = 0
-		b.fileSizes = make([]string, len(msg))
-
-		for i, file := range msg {
-			cmds = append(cmds, b.getDirectoryItemSizeCmd(file.Name(), i))
-		}
-
-		b.primaryViewport.SetContent(b.fileTreeView())
-
-		return b, tea.Batch(cmds...)
-	case findFilesByNameMsg:
-		b.showCommandInput = false
-		b.createFileMode = false
-		b.createDirectoryMode = false
-		b.renameMode = false
-		b.findMode = false
-		b.treeCursor = 0
-		b.treeFiles = msg.entries
-		b.foundFilesPaths = msg.paths
-		b.showBoxSpinner = false
-		b.textinput.Blur()
-		b.textinput.Reset()
-		b.fileSizes = make([]string, len(msg.entries))
-
-		for i, file := range msg.entries {
-			cmds = append(cmds, b.getDirectoryItemSizeCmd(file.Name(), i))
-		}
-
-		b.primaryViewport.SetContent(b.fileTreeView())
-
-		return b, tea.Batch(cmds...)
-	case errorMsg:
-		b.showHelp = false
-		b.showLogs = false
-		b.errorMsg = string(msg)
-		b.secondaryViewport.SetContent(b.errorView(string(msg)))
-
-		return b, nil
 	case tea.WindowSizeMsg:
-		b.width = msg.Width
-		b.height = msg.Height
+		resizeImgCmd := b.image.SetSize(msg.Width/2, msg.Height-statusbar.Height)
+		markdownCmd := b.markdown.SetSize(msg.Width/2, msg.Height-statusbar.Height)
+		b.filetree.SetSize(msg.Width/2, msg.Height-statusbar.Height)
+		b.help.SetSize(msg.Width/2, msg.Height-statusbar.Height)
+		b.code.SetSize(msg.Width/2, msg.Height-statusbar.Height)
+		b.pdf.SetSize(msg.Width/2, msg.Height-statusbar.Height)
+		b.statusbar.SetSize(msg.Width)
 
-		b.primaryViewport.Width = (msg.Width / 2) - b.primaryViewport.Style.GetHorizontalFrameSize()
-		b.primaryViewport.Height = msg.Height - constants.StatusBarHeight - b.primaryViewport.Style.GetVerticalFrameSize()
-		b.secondaryViewport.Width = (msg.Width / 2) - b.secondaryViewport.Style.GetHorizontalFrameSize()
-		b.secondaryViewport.Height = msg.Height - constants.StatusBarHeight - b.secondaryViewport.Style.GetVerticalFrameSize()
-		b.help.SetSize(b.secondaryViewport.Width, b.secondaryViewport.Height)
-
-		b.primaryViewport.SetContent(b.fileTreeView())
-
-		switch {
-		case b.showFileTreePreview && !b.showLogs:
-			b.secondaryViewport.SetContent(b.fileTreePreviewView())
-		case b.currentImage != nil && !b.showLogs:
-			return b, b.convertImageToStringCmd(b.secondaryViewport.Width)
-		case b.errorMsg != "":
-			b.secondaryViewport.SetContent(b.errorView(b.errorMsg))
-		case b.showHelp && !b.showLogs:
-			b.secondaryViewport.SetContent(b.help.View())
-		case b.showLogs && b.currentImage == nil:
-			b.secondaryViewport.SetContent(b.logView())
-		default:
-			b.secondaryViewport.SetContent(b.textContentView(b.secondaryBoxContent))
-		}
-
-		if !b.ready {
-			b.ready = true
-		}
-
-		return b, nil
-	case tea.MouseMsg:
-		b.handleMouse(msg)
+		cmds = append(cmds, resizeImgCmd, markdownCmd)
 	case tea.KeyMsg:
-		cmd = b.handleKeys(msg)
-		cmds = append(cmds, cmd)
-
-		return b, tea.Batch(cmds...)
+		switch {
+		case key.Matches(msg, b.keys.Quit):
+			return b, tea.Quit
+		case key.Matches(msg, b.keys.Exit):
+			if !b.filetree.IsFiltering() {
+				return b, tea.Quit
+			}
+		case key.Matches(msg, b.keys.ReloadConfig):
+			if !b.filetree.IsFiltering() {
+				cmds = append(cmds, tea.Batch(b.reloadConfig()...))
+			}
+		case key.Matches(msg, b.keys.OpenFile):
+			cmds = append(cmds, tea.Batch(b.openFile()...))
+		case key.Matches(msg, b.keys.ToggleBox):
+			b.toggleBox()
+		}
 	}
 
-	if b.activeBox != constants.PrimaryBoxActive {
-		b.secondaryViewport, cmd = b.secondaryViewport.Update(msg)
-		cmds = append(cmds, cmd)
+	logoText := fmt.Sprintf("%s %s", icons.IconDef["dir"].GetGlyph(), "FM")
+	if !b.config.Settings.ShowIcons {
+		logoText = "FM"
 	}
 
-	b.textinput, cmd = b.textinput.Update(msg)
+	b.statusbar.SetContent(
+		b.filetree.GetSelectedItem().ShortName(),
+		b.filetree.GetSelectedItem().CurrentDirectory(),
+		fmt.Sprintf("%d/%d", b.filetree.Cursor(), b.filetree.TotalItems()),
+		logoText,
+	)
+
+	b.code, cmd = b.code.Update(msg)
 	cmds = append(cmds, cmd)
 
-	b.spinner, cmd = b.spinner.Update(msg)
+	b.markdown, cmd = b.markdown.Update(msg)
+	cmds = append(cmds, cmd)
+
+	b.image, cmd = b.image.Update(msg)
+	cmds = append(cmds, cmd)
+
+	b.pdf, cmd = b.pdf.Update(msg)
+	cmds = append(cmds, cmd)
+
+	b.help, cmd = b.help.Update(msg)
 	cmds = append(cmds, cmd)
 
 	return b, tea.Batch(cmds...)

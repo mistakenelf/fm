@@ -9,20 +9,29 @@ import (
 	"github.com/knipferrc/fm/internal/tui"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/muesli/coral"
+	"github.com/spf13/cobra"
 )
 
-var rootCmd = &coral.Command{
+var rootCmd = &cobra.Command{
 	Use:     "fm",
 	Short:   "FM is a simple, configurable, and fun to use file manager",
-	Version: "0.13.5",
-	Args:    coral.MaximumNArgs(1),
-	Run: func(cmd *coral.Command, args []string) {
-		startDir := cmd.Flags().Lookup("start-dir")
-		selectionPath := cmd.Flags().Lookup("selection-path")
+	Version: "0.14.0",
+	Args:    cobra.MaximumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		startDir, err := cmd.Flags().GetString("start-dir")
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		config.LoadConfig(startDir, selectionPath)
-		cfg := config.GetConfig()
+		selectionPath, err := cmd.Flags().GetString("selection-path")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		cfg, err := config.ParseConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		// If logging is enabled, logs will be output to debug.log.
 		if cfg.Settings.EnableLogging {
@@ -38,16 +47,15 @@ var rootCmd = &coral.Command{
 			}()
 		}
 
-		m := tui.New()
+		if startDir == "" {
+			startDir = cfg.Settings.StartDir
+		}
+
+		m := tui.New(startDir, selectionPath)
 		var opts []tea.ProgramOption
 
 		// Always append alt screen program option.
 		opts = append(opts, tea.WithAltScreen())
-
-		// If mousewheel is enabled, append it to the program options.
-		if cfg.Settings.EnableMouseWheel {
-			opts = append(opts, tea.WithMouseAllMotion())
-		}
 
 		// Initialize and start app.
 		p := tea.NewProgram(m, opts...)
