@@ -7,5 +7,8 @@ import (
 // Init initializes the UI and sets up initial data.
 // Init intializes the UI.
 func (b Bubble) Init() tea.Cmd {
-	return b.filetree.Init()
+	initTreeCmd := b.filetree.Init()
+	toggleTreeIconsCmd := b.filetree.ToggleShowIcons(b.config.Settings.ShowIcons)
+
+	return tea.Sequentially(initTreeCmd, toggleTreeIconsCmd)
 }
