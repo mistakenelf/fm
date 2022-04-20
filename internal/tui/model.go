@@ -66,7 +66,7 @@ func New(startDir, selectionPath string) Bubble {
 		theme.TitleBackgroundColor,
 		theme.TitleForegroundColor,
 	)
-	filetreeModel.ToggleShowIcons(cfg.Settings.ShowIcons)
+	filetreeModel.ToggleHelp(false)
 
 	codeModel := code.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
 	codeModel.SetSyntaxTheme(syntaxTheme)
@@ -92,6 +92,7 @@ func New(startDir, selectionPath string) Bubble {
 			Background: theme.StatusBarLogoBackgroundColor,
 		},
 	)
+
 	helpModel := help.New(
 		false,
 		cfg.Settings.Borderless,
