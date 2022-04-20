@@ -119,6 +119,7 @@ func New(startDir, selectionPath string) Bubble {
 			{Key: "n", Description: "Create new file"},
 			{Key: "N", Description: "Create new directory"},
 			{Key: "x", Description: "Delete currently selected tree item"},
+			{Key: "m", Description: "Move currently selected tree item"},
 			{Key: "enter", Description: "Process command"},
 			{Key: "e", Description: "Edit currently selected tree item"},
 			{Key: "c", Description: "Copy currently selected tree item"},
