@@ -119,6 +119,7 @@ paru -S fm-bin
 | <kbd>n</kbd>          | Create a new file in the current directory                 |
 | <kbd>N</kbd>          | Create a new directory in the current directory            |
 | <kbd>r</kbd>          | Rename the currently selected file or directory            |
+| <kbd>m</kbd>          | Move the currently selected file or directory              |
 | <kbd>e</kbd>          | Open in editor set in EDITOR environment variable          |
 | <kbd>y</kbd>          | Copy selected directory items path to the clipboard        |
 | <kbd>/</kbd>          | Filter the current directory with a term                   |
