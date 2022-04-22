@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -109,7 +110,7 @@ func (parser ConfigParser) writeDefaultConfigContents(newConfigFile *os.File) er
 
 // createConfigFileIfMissing creates the config file if it doesn't exist.
 func (parser ConfigParser) createConfigFileIfMissing(configFilePath string) error {
-	if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
+	if _, err := os.Stat(configFilePath); errors.Is(err, os.ErrNotExist) {
 		newConfigFile, err := os.OpenFile(configFilePath, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666)
 		if err != nil {
 			return err

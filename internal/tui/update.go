@@ -226,6 +226,21 @@ func (b *Bubble) toggleBox() {
 	}
 }
 
+// updateStatusbar updates the content of the statusbar.
+func (b *Bubble) updateStatusbar() {
+	logoText := fmt.Sprintf("%s %s", icons.IconDef["dir"].GetGlyph(), "FM")
+	if !b.config.Settings.ShowIcons {
+		logoText = "FM"
+	}
+
+	b.statusbar.SetContent(
+		b.filetree.GetSelectedItem().ShortName(),
+		b.filetree.GetSelectedItem().CurrentDirectory(),
+		fmt.Sprintf("%d/%d", b.filetree.Cursor(), b.filetree.TotalItems()),
+		logoText,
+	)
+}
+
 // contains returns true if the slice contains the string.
 func contains(s []string, str string) bool {
 	for _, v := range s {
@@ -257,6 +272,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.pdf.SetSize(msg.Width/2, msg.Height-statusbar.Height)
 		b.statusbar.SetSize(msg.Width)
 
+		cmds = append(cmds, b.filetree.ToggleShowIcons(b.config.Settings.ShowIcons))
 		cmds = append(cmds, resizeImgCmd, markdownCmd)
 	case tea.KeyMsg:
 		switch {
@@ -277,17 +293,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	logoText := fmt.Sprintf("%s %s", icons.IconDef["dir"].GetGlyph(), "FM")
-	if !b.config.Settings.ShowIcons {
-		logoText = "FM"
-	}
-
-	b.statusbar.SetContent(
-		b.filetree.GetSelectedItem().ShortName(),
-		b.filetree.GetSelectedItem().CurrentDirectory(),
-		fmt.Sprintf("%d/%d", b.filetree.Cursor(), b.filetree.TotalItems()),
-		logoText,
-	)
+	b.updateStatusbar()
 
 	b.code, cmd = b.code.Update(msg)
 	cmds = append(cmds, cmd)
