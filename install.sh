@@ -54,6 +54,7 @@ get_binaries() {
   case "$PLATFORM" in
     darwin/386) BINARIES="fm" ;;
     darwin/amd64) BINARIES="fm" ;;
+    darwin/arm64) BINARIES="fm" ;;
     linux/386) BINARIES="fm" ;;
     linux/amd64) BINARIES="fm" ;;
     windows/386) BINARIES="fm" ;;
