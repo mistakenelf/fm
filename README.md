@@ -128,7 +128,13 @@ paru -S fm-bin
 
 ## Configuration
 
-- A config file will be generated at `~/.config/fm/config.yml` when you first run `fm` (On windows it will be `C\:\\Users\\username\\fm.yml`)
+A config file will be generated when you first run `fm`. Depending on your operating system it can be found in one of the following locations:
+
+* macOS: ~/Library/Application\ Support/fm/config.yml
+* Linux: ~/.config/fm/config.yml
+* Windows: C:\Users\me\AppData\Roaming\fm\config.yml
+
+It will include the following default settings:
 
 ```yml
 settings:
