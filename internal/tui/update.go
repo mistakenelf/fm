@@ -264,12 +264,15 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		resizeImgCmd := b.image.SetSize(msg.Width/2, msg.Height-statusbar.Height)
-		markdownCmd := b.markdown.SetSize(msg.Width/2, msg.Height-statusbar.Height)
-		b.filetree.SetSize(msg.Width/2, msg.Height-statusbar.Height)
-		b.help.SetSize(msg.Width/2, msg.Height-statusbar.Height)
-		b.code.SetSize(msg.Width/2, msg.Height-statusbar.Height)
-		b.pdf.SetSize(msg.Width/2, msg.Height-statusbar.Height)
+		halfSize := msg.Width / 2
+		bubbleHeight := msg.Height - statusbar.Height
+
+		resizeImgCmd := b.image.SetSize(halfSize, bubbleHeight)
+		markdownCmd := b.markdown.SetSize(halfSize, bubbleHeight)
+		b.filetree.SetSize(halfSize, bubbleHeight)
+		b.help.SetSize(halfSize, bubbleHeight)
+		b.code.SetSize(halfSize, bubbleHeight)
+		b.pdf.SetSize(halfSize, bubbleHeight)
 		b.statusbar.SetSize(msg.Width)
 
 		cmds = append(cmds, b.filetree.ToggleShowIcons(b.config.Settings.ShowIcons))
