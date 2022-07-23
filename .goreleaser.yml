@@ -44,3 +44,18 @@ nfpms:
       - deb
       - rpm
       - apk
+
+scoop:
+  bucket:
+    owner: knipferrc
+    name: fm-bucket
+    branch: main
+  commit_author:
+    name: goreleaserbot
+    email: bot@goreleaser.com
+  commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
+  description: "A terminal based file manager"
+  license: MIT
+  pre_install: ["Write-Host 'Running preinstall command'"]
+  post_install: ["Write-Host 'Running postinstall command'"]
+  goamd64: v3
