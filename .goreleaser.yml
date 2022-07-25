@@ -48,7 +48,7 @@ nfpms:
 scoop:
   bucket:
     owner: knipferrc
-    name: fm
+    name: scoop-bucket
     branch: main
   commit_author:
     name: goreleaserbot
