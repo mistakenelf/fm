@@ -1,6 +1,6 @@
 module github.com/knipferrc/fm
 
-go 1.18
+go 1.19
 
 require (
 	github.com/charmbracelet/bubbles v0.13.0
