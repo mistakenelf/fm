@@ -6,7 +6,7 @@ require (
 	github.com/charmbracelet/bubbles v0.13.0
 	github.com/charmbracelet/bubbletea v0.22.0
 	github.com/charmbracelet/lipgloss v0.5.0
-	github.com/knipferrc/teacup v0.2.0
+	github.com/knipferrc/teacup v0.2.1
 	github.com/spf13/cobra v1.5.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -20,7 +20,7 @@ require (
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/dlclark/regexp2 v1.7.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/ledongthuc/pdf v0.0.0-20220302134840-0c2507a12d80 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
@@ -32,14 +32,14 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.12.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
-	github.com/rivo/uniseg v0.3.1 // indirect
+	github.com/rivo/uniseg v0.3.4 // indirect
 	github.com/sahilm/fuzzy v0.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/yuin/goldmark v1.4.13 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
 	golang.org/x/image v0.0.0-20220722155232-062f8c9fd539 // indirect
-	golang.org/x/net v0.0.0-20220728211354-c7608f3a8462 // indirect
-	golang.org/x/sys v0.0.0-20220730100132-1609e554cd39 // indirect
+	golang.org/x/net v0.0.0-20220809012201-f428fae20770 // indirect
+	golang.org/x/sys v0.0.0-20220808155132-1c4a2a72c664 // indirect
 	golang.org/x/term v0.0.0-20220722155259-a9ba230a4035 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
