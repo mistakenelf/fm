@@ -55,8 +55,11 @@ get_binaries() {
     darwin/386) BINARIES="fm" ;;
     darwin/amd64) BINARIES="fm" ;;
     darwin/arm64) BINARIES="fm" ;;
+    freebsd/arm64) BINARIES="fm" ;;
     linux/386) BINARIES="fm" ;;
+    linux/arm64) BINARIES="fm" ;;
     linux/amd64) BINARIES="fm" ;;
+    openbsd/arm64) BINARIES="fm" ;;
     windows/386) BINARIES="fm" ;;
     windows/amd64) BINARIES="fm" ;;
     *)
