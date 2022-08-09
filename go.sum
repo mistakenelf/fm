@@ -31,8 +31,8 @@ github.com/gorilla/css v1.0.0/go.mod h1:Dn721qIggHpt4+EFCcTLTU/vk5ySda2ReITrtgBl
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/inconshreveable/mousetrap v1.0.1 h1:U3uMjPSQEBMNp1lFxmllqCPM6P5u/Xq7Pgzkat/bFNc=
 github.com/inconshreveable/mousetrap v1.0.1/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
-github.com/knipferrc/teacup v0.2.1 h1:ij5HH/xMFbflzd8EToj2vw1Thph69bFFStPvrrYJeBA=
-github.com/knipferrc/teacup v0.2.1/go.mod h1:rVLOGRrMIk0MgiReZ/cQliXPgPaFymokMlrkMR21q4Y=
+github.com/knipferrc/teacup v0.2.2 h1:pvo07NsFW6rUi7qsn7UY0mhWNqhXgMudNixsjeuBm98=
+github.com/knipferrc/teacup v0.2.2/go.mod h1:Hj/S+eb/h1e45k+/EjK7Ud6f4GDnS8JskTxJC0rw4fA=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
 github.com/kr/pretty v0.3.0 h1:WgNl7dwNpEZ6jJ9k1snq4pZsg7DOEN8hP9Xw0Tsjwk0=
