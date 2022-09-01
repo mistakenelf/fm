@@ -50,7 +50,7 @@ scoop:
     owner: knipferrc
     name: scoop-bucket
     branch: main
-    token: "{{ .Env.ACTIONS_TOKEN }}"
+    token: ${{ secrets.ACTIONS_TOKEN }}
   commit_author:
     name: goreleaserbot
     email: bot@goreleaser.com
