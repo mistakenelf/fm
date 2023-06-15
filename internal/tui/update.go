@@ -32,36 +32,36 @@ var forbiddenExtensions = []string{
 }
 
 // resetViewports goes to the top of all bubbles viewports.
-func (b *Bubble) resetViewports() {
-	b.code.GotoTop()
-	b.pdf.GotoTop()
-	b.markdown.GotoTop()
-	b.help.GotoTop()
-	b.image.GotoTop()
+func (m *model) resetViewports() {
+	m.code.GotoTop()
+	m.pdf.GotoTop()
+	m.markdown.GotoTop()
+	m.help.GotoTop()
+	m.image.GotoTop()
 }
 
 // deactivateALlBubbles sets all bubbles to inactive.
-func (b *Bubble) deactivateAllBubbles() {
-	b.filetree.SetIsActive(false)
-	b.code.SetIsActive(false)
-	b.markdown.SetIsActive(false)
-	b.image.SetIsActive(false)
-	b.pdf.SetIsActive(false)
-	b.help.SetIsActive(false)
+func (m *model) deactivateAllBubbles() {
+	m.filetree.SetIsActive(false)
+	m.code.SetIsActive(false)
+	m.markdown.SetIsActive(false)
+	m.image.SetIsActive(false)
+	m.pdf.SetIsActive(false)
+	m.help.SetIsActive(false)
 }
 
 // resetBorderColors resets all bubble border colors to default.
-func (b *Bubble) resetBorderColors() {
-	b.filetree.SetBorderColor(b.theme.InactiveBoxBorderColor)
-	b.help.SetBorderColor(b.theme.InactiveBoxBorderColor)
-	b.code.SetBorderColor(b.theme.InactiveBoxBorderColor)
-	b.image.SetBorderColor(b.theme.InactiveBoxBorderColor)
-	b.markdown.SetBorderColor(b.theme.InactiveBoxBorderColor)
-	b.pdf.SetBorderColor(b.theme.InactiveBoxBorderColor)
+func (m *model) resetBorderColors() {
+	m.filetree.SetBorderColor(m.theme.InactiveBoxBorderColor)
+	m.help.SetBorderColor(m.theme.InactiveBoxBorderColor)
+	m.code.SetBorderColor(m.theme.InactiveBoxBorderColor)
+	m.image.SetBorderColor(m.theme.InactiveBoxBorderColor)
+	m.markdown.SetBorderColor(m.theme.InactiveBoxBorderColor)
+	m.pdf.SetBorderColor(m.theme.InactiveBoxBorderColor)
 }
 
 // reloadConfig reloads the config file and updates the UI.
-func (b *Bubble) reloadConfig() []tea.Cmd {
+func (m *model) reloadConfig() []tea.Cmd {
 	var cmds []tea.Cmd
 
 	cfg, err := config.ParseConfig()
@@ -69,17 +69,17 @@ func (b *Bubble) reloadConfig() []tea.Cmd {
 		return nil
 	}
 
-	b.config = cfg
+	m.config = cfg
 	syntaxTheme := cfg.Theme.SyntaxTheme.Light
 	if lipgloss.HasDarkBackground() {
 		syntaxTheme = cfg.Theme.SyntaxTheme.Dark
 	}
 
-	b.code.SetSyntaxTheme(syntaxTheme)
+	m.code.SetSyntaxTheme(syntaxTheme)
 
 	theme := theme.GetTheme(cfg.Theme.AppTheme)
-	b.theme = theme
-	b.statusbar.SetColors(
+	m.theme = theme
+	m.statusbar.SetColors(
 		statusbar.ColorConfig{
 			Foreground: theme.StatusBarSelectedFileForegroundColor,
 			Background: theme.StatusBarSelectedFileBackgroundColor,
@@ -98,56 +98,56 @@ func (b *Bubble) reloadConfig() []tea.Cmd {
 		},
 	)
 
-	b.help.SetTitleColor(
+	m.help.SetTitleColor(
 		help.TitleColor{
 			Background: theme.TitleBackgroundColor,
 			Foreground: theme.TitleForegroundColor,
 		},
 	)
 
-	b.filetree.SetTitleColors(theme.TitleForegroundColor, theme.TitleBackgroundColor)
-	b.filetree.SetSelectedItemColors(theme.SelectedTreeItemColor)
-	cmds = append(cmds, b.filetree.ToggleShowIcons(cfg.Settings.ShowIcons))
+	m.filetree.SetTitleColors(theme.TitleForegroundColor, theme.TitleBackgroundColor)
+	m.filetree.SetSelectedItemColors(theme.SelectedTreeItemColor)
+	cmds = append(cmds, m.filetree.ToggleShowIcons(cfg.Settings.ShowIcons))
 
-	b.filetree.SetBorderless(cfg.Settings.Borderless)
-	b.code.SetBorderless(cfg.Settings.Borderless)
-	b.help.SetBorderless(cfg.Settings.Borderless)
-	b.markdown.SetBorderless(cfg.Settings.Borderless)
-	b.pdf.SetBorderless(cfg.Settings.Borderless)
-	b.image.SetBorderless(cfg.Settings.Borderless)
+	m.filetree.SetBorderless(cfg.Settings.Borderless)
+	m.code.SetBorderless(cfg.Settings.Borderless)
+	m.help.SetBorderless(cfg.Settings.Borderless)
+	m.markdown.SetBorderless(cfg.Settings.Borderless)
+	m.pdf.SetBorderless(cfg.Settings.Borderless)
+	m.image.SetBorderless(cfg.Settings.Borderless)
 
-	if b.activeBox == 0 {
-		b.deactivateAllBubbles()
-		b.filetree.SetIsActive(true)
-		b.resetBorderColors()
-		b.filetree.SetBorderColor(theme.ActiveBoxBorderColor)
+	if m.activeBox == 0 {
+		m.deactivateAllBubbles()
+		m.filetree.SetIsActive(true)
+		m.resetBorderColors()
+		m.filetree.SetBorderColor(theme.ActiveBoxBorderColor)
 	} else {
-		switch b.state {
+		switch m.state {
 		case idleState:
-			b.deactivateAllBubbles()
-			b.help.SetIsActive(true)
-			b.resetBorderColors()
-			b.help.SetBorderColor(theme.ActiveBoxBorderColor)
+			m.deactivateAllBubbles()
+			m.help.SetIsActive(true)
+			m.resetBorderColors()
+			m.help.SetBorderColor(theme.ActiveBoxBorderColor)
 		case showCodeState:
-			b.deactivateAllBubbles()
-			b.code.SetIsActive(true)
-			b.resetBorderColors()
-			b.code.SetBorderColor(theme.ActiveBoxBorderColor)
+			m.deactivateAllBubbles()
+			m.code.SetIsActive(true)
+			m.resetBorderColors()
+			m.code.SetBorderColor(theme.ActiveBoxBorderColor)
 		case showImageState:
-			b.deactivateAllBubbles()
-			b.image.SetIsActive(true)
-			b.resetBorderColors()
-			b.image.SetBorderColor(theme.ActiveBoxBorderColor)
+			m.deactivateAllBubbles()
+			m.image.SetIsActive(true)
+			m.resetBorderColors()
+			m.image.SetBorderColor(theme.ActiveBoxBorderColor)
 		case showMarkdownState:
-			b.deactivateAllBubbles()
-			b.markdown.SetIsActive(true)
-			b.resetBorderColors()
-			b.markdown.SetBorderColor(theme.ActiveBoxBorderColor)
+			m.deactivateAllBubbles()
+			m.markdown.SetIsActive(true)
+			m.resetBorderColors()
+			m.markdown.SetBorderColor(theme.ActiveBoxBorderColor)
 		case showPdfState:
-			b.deactivateAllBubbles()
-			b.markdown.SetIsActive(true)
-			b.resetBorderColors()
-			b.pdf.SetBorderColor(theme.ActiveBoxBorderColor)
+			m.deactivateAllBubbles()
+			m.markdown.SetIsActive(true)
+			m.resetBorderColors()
+			m.pdf.SetBorderColor(theme.ActiveBoxBorderColor)
 		}
 	}
 
@@ -155,31 +155,31 @@ func (b *Bubble) reloadConfig() []tea.Cmd {
 }
 
 // openFile opens the currently selected file.
-func (b *Bubble) openFile() []tea.Cmd {
+func (m *model) openFile() []tea.Cmd {
 	var cmds []tea.Cmd
 
-	selectedFile := b.filetree.GetSelectedItem()
+	selectedFile := m.filetree.GetSelectedItem()
 	if !selectedFile.IsDirectory() {
-		b.resetViewports()
+		m.resetViewports()
 
 		switch {
 		case selectedFile.FileExtension() == ".png" || selectedFile.FileExtension() == ".jpg" || selectedFile.FileExtension() == ".jpeg":
-			b.state = showImageState
-			readFileCmd := b.image.SetFileName(selectedFile.FileName())
+			m.state = showImageState
+			readFileCmd := m.image.SetFileName(selectedFile.FileName())
 			cmds = append(cmds, readFileCmd)
-		case selectedFile.FileExtension() == ".md" && b.config.Settings.PrettyMarkdown:
-			b.state = showMarkdownState
-			markdownCmd := b.markdown.SetFileName(selectedFile.FileName())
+		case selectedFile.FileExtension() == ".md" && m.config.Settings.PrettyMarkdown:
+			m.state = showMarkdownState
+			markdownCmd := m.markdown.SetFileName(selectedFile.FileName())
 			cmds = append(cmds, markdownCmd)
 		case selectedFile.FileExtension() == ".pdf":
-			b.state = showPdfState
-			pdfCmd := b.pdf.SetFileName(selectedFile.FileName())
+			m.state = showPdfState
+			pdfCmd := m.pdf.SetFileName(selectedFile.FileName())
 			cmds = append(cmds, pdfCmd)
 		case contains(forbiddenExtensions, selectedFile.FileExtension()):
 			return nil
 		default:
-			b.state = showCodeState
-			readFileCmd := b.code.SetFileName(selectedFile.FileName())
+			m.state = showCodeState
+			readFileCmd := m.code.SetFileName(selectedFile.FileName())
 			cmds = append(cmds, readFileCmd)
 		}
 	}
@@ -188,55 +188,55 @@ func (b *Bubble) openFile() []tea.Cmd {
 }
 
 // toggleBox toggles between the two boxes.
-func (b *Bubble) toggleBox() {
-	b.activeBox = (b.activeBox + 1) % 2
-	if b.activeBox == 0 {
-		b.deactivateAllBubbles()
-		b.filetree.SetIsActive(true)
-		b.resetBorderColors()
-		b.filetree.SetBorderColor(b.theme.ActiveBoxBorderColor)
+func (m *model) toggleBox() {
+	m.activeBox = (m.activeBox + 1) % 2
+	if m.activeBox == 0 {
+		m.deactivateAllBubbles()
+		m.filetree.SetIsActive(true)
+		m.resetBorderColors()
+		m.filetree.SetBorderColor(m.theme.ActiveBoxBorderColor)
 	} else {
-		switch b.state {
+		switch m.state {
 		case idleState:
-			b.deactivateAllBubbles()
-			b.help.SetIsActive(true)
-			b.resetBorderColors()
-			b.help.SetBorderColor(b.theme.ActiveBoxBorderColor)
+			m.deactivateAllBubbles()
+			m.help.SetIsActive(true)
+			m.resetBorderColors()
+			m.help.SetBorderColor(m.theme.ActiveBoxBorderColor)
 		case showCodeState:
-			b.deactivateAllBubbles()
-			b.code.SetIsActive(true)
-			b.resetBorderColors()
-			b.code.SetBorderColor(b.theme.ActiveBoxBorderColor)
+			m.deactivateAllBubbles()
+			m.code.SetIsActive(true)
+			m.resetBorderColors()
+			m.code.SetBorderColor(m.theme.ActiveBoxBorderColor)
 		case showImageState:
-			b.deactivateAllBubbles()
-			b.image.SetIsActive(true)
-			b.resetBorderColors()
-			b.image.SetBorderColor(b.theme.ActiveBoxBorderColor)
+			m.deactivateAllBubbles()
+			m.image.SetIsActive(true)
+			m.resetBorderColors()
+			m.image.SetBorderColor(m.theme.ActiveBoxBorderColor)
 		case showMarkdownState:
-			b.deactivateAllBubbles()
-			b.markdown.SetIsActive(true)
-			b.resetBorderColors()
-			b.markdown.SetBorderColor(b.theme.ActiveBoxBorderColor)
+			m.deactivateAllBubbles()
+			m.markdown.SetIsActive(true)
+			m.resetBorderColors()
+			m.markdown.SetBorderColor(m.theme.ActiveBoxBorderColor)
 		case showPdfState:
-			b.deactivateAllBubbles()
-			b.markdown.SetIsActive(true)
-			b.resetBorderColors()
-			b.pdf.SetBorderColor(b.theme.ActiveBoxBorderColor)
+			m.deactivateAllBubbles()
+			m.markdown.SetIsActive(true)
+			m.resetBorderColors()
+			m.pdf.SetBorderColor(m.theme.ActiveBoxBorderColor)
 		}
 	}
 }
 
 // updateStatusbar updates the content of the statusbar.
-func (b *Bubble) updateStatusbar() {
+func (m *model) updateStatusbar() {
 	logoText := fmt.Sprintf("%s %s", icons.IconDef["dir"].GetGlyph(), "FM")
-	if !b.config.Settings.ShowIcons {
+	if !m.config.Settings.ShowIcons {
 		logoText = "FM"
 	}
 
-	b.statusbar.SetContent(
-		b.filetree.GetSelectedItem().ShortName(),
-		b.filetree.GetSelectedItem().CurrentDirectory(),
-		fmt.Sprintf("%d/%d", b.filetree.Cursor(), b.filetree.TotalItems()),
+	m.statusbar.SetContent(
+		m.filetree.GetSelectedItem().ShortName(),
+		m.filetree.GetSelectedItem().CurrentDirectory(),
+		fmt.Sprintf("%d/%d", m.filetree.Cursor(), m.filetree.TotalItems()),
 		logoText,
 	)
 }
@@ -253,13 +253,13 @@ func contains(s []string, str string) bool {
 }
 
 // Update handles all UI interactions.
-func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
 		cmd  tea.Cmd
 		cmds []tea.Cmd
 	)
 
-	b.filetree, cmd = b.filetree.Update(msg)
+	m.filetree, cmd = m.filetree.Update(msg)
 	cmds = append(cmds, cmd)
 
 	switch msg := msg.(type) {
@@ -267,51 +267,51 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		halfSize := msg.Width / 2
 		bubbleHeight := msg.Height - statusbar.Height
 
-		resizeImgCmd := b.image.SetSize(halfSize, bubbleHeight)
-		markdownCmd := b.markdown.SetSize(halfSize, bubbleHeight)
-		b.filetree.SetSize(halfSize, bubbleHeight)
-		b.help.SetSize(halfSize, bubbleHeight)
-		b.code.SetSize(halfSize, bubbleHeight)
-		b.pdf.SetSize(halfSize, bubbleHeight)
-		b.statusbar.SetSize(msg.Width)
+		resizeImgCmd := m.image.SetSize(halfSize, bubbleHeight)
+		markdownCmd := m.markdown.SetSize(halfSize, bubbleHeight)
+		m.filetree.SetSize(halfSize, bubbleHeight)
+		m.help.SetSize(halfSize, bubbleHeight)
+		m.code.SetSize(halfSize, bubbleHeight)
+		m.pdf.SetSize(halfSize, bubbleHeight)
+		m.statusbar.SetSize(msg.Width)
 
-		cmds = append(cmds, b.filetree.ToggleShowIcons(b.config.Settings.ShowIcons))
+		cmds = append(cmds, m.filetree.ToggleShowIcons(m.config.Settings.ShowIcons))
 		cmds = append(cmds, resizeImgCmd, markdownCmd)
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, b.keys.Quit):
-			return b, tea.Quit
-		case key.Matches(msg, b.keys.Exit):
-			if !b.filetree.IsFiltering() {
-				return b, tea.Quit
+		case key.Matches(msg, m.keys.Quit):
+			return m, tea.Quit
+		case key.Matches(msg, m.keys.Exit):
+			if !m.filetree.IsFiltering() {
+				return m, tea.Quit
 			}
-		case key.Matches(msg, b.keys.ReloadConfig):
-			if !b.filetree.IsFiltering() {
-				cmds = append(cmds, tea.Batch(b.reloadConfig()...))
+		case key.Matches(msg, m.keys.ReloadConfig):
+			if !m.filetree.IsFiltering() {
+				cmds = append(cmds, tea.Batch(m.reloadConfig()...))
 			}
-		case key.Matches(msg, b.keys.OpenFile):
-			cmds = append(cmds, tea.Batch(b.openFile()...))
-		case key.Matches(msg, b.keys.ToggleBox):
-			b.toggleBox()
+		case key.Matches(msg, m.keys.OpenFile):
+			cmds = append(cmds, tea.Batch(m.openFile()...))
+		case key.Matches(msg, m.keys.ToggleBox):
+			m.toggleBox()
 		}
 	}
 
-	b.updateStatusbar()
+	m.updateStatusbar()
 
-	b.code, cmd = b.code.Update(msg)
+	m.code, cmd = m.code.Update(msg)
 	cmds = append(cmds, cmd)
 
-	b.markdown, cmd = b.markdown.Update(msg)
+	m.markdown, cmd = m.markdown.Update(msg)
 	cmds = append(cmds, cmd)
 
-	b.image, cmd = b.image.Update(msg)
+	m.image, cmd = m.image.Update(msg)
 	cmds = append(cmds, cmd)
 
-	b.pdf, cmd = b.pdf.Update(msg)
+	m.pdf, cmd = m.pdf.Update(msg)
 	cmds = append(cmds, cmd)
 
-	b.help, cmd = b.help.Update(msg)
+	m.help, cmd = m.help.Update(msg)
 	cmds = append(cmds, cmd)
 
-	return b, tea.Batch(cmds...)
+	return m, tea.Batch(cmds...)
 }

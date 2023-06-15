@@ -5,25 +5,25 @@ import (
 )
 
 // View returns a string representation of the UI.
-func (b Bubble) View() string {
-	leftBox := b.filetree.View()
-	rightBox := b.help.View()
+func (m model) View() string {
+	leftBox := m.filetree.View()
+	rightBox := m.help.View()
 
-	switch b.state {
+	switch m.state {
 	case idleState:
-		rightBox = b.help.View()
+		rightBox = m.help.View()
 	case showCodeState:
-		rightBox = b.code.View()
+		rightBox = m.code.View()
 	case showImageState:
-		rightBox = b.image.View()
+		rightBox = m.image.View()
 	case showPdfState:
-		rightBox = b.pdf.View()
+		rightBox = m.pdf.View()
 	case showMarkdownState:
-		rightBox = b.markdown.View()
+		rightBox = m.markdown.View()
 	}
 
 	return lipgloss.JoinVertical(lipgloss.Top,
 		lipgloss.JoinHorizontal(lipgloss.Top, leftBox, rightBox),
-		b.statusbar.View(),
+		m.statusbar.View(),
 	)
 }

@@ -26,15 +26,15 @@ const (
 	showPdfState
 )
 
-// Bubble represents the properties of the UI.
-type Bubble struct {
-	filetree  filetree.Bubble
-	help      help.Bubble
-	code      code.Bubble
-	image     image.Bubble
-	markdown  markdown.Bubble
-	pdf       pdf.Bubble
-	statusbar statusbar.Bubble
+// model represents the properties of the UI.
+type model struct {
+	filetree  filetree.Model
+	help      help.Model
+	code      code.Model
+	image     image.Model
+	markdown  markdown.Model
+	pdf       pdf.Model
+	statusbar statusbar.Model
 	state     sessionState
 	theme     theme.Theme
 	config    config.Config
@@ -43,7 +43,7 @@ type Bubble struct {
 }
 
 // New creates a new instance of the UI.
-func New(startDir, selectionPath string) Bubble {
+func New(startDir, selectionPath string) model {
 	cfg, err := config.ParseConfig()
 	if err != nil {
 		log.Fatal(err)
@@ -129,7 +129,7 @@ func New(startDir, selectionPath string) Bubble {
 		},
 	)
 
-	return Bubble{
+	return model{
 		filetree:  filetreeModel,
 		help:      helpModel,
 		code:      codeModel,

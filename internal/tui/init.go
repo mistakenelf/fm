@@ -5,6 +5,6 @@ import (
 )
 
 // Init intializes the UI.
-func (b Bubble) Init() tea.Cmd {
-	return b.filetree.Init()
+func (m model) Init() tea.Cmd {
+	return m.filetree.Init()
 }
