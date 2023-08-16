@@ -36,9 +36,9 @@ archives:
         format: zip
 
 nfpms:
-  - maintainer: Tyler Knipfer <knipferrc@gmail.com>
+  - maintainer: Tyler Knipfer <tyler.knipfer@icloud.com>
     description: FM is a simple, configurable, and fun to use file manager
-    homepage: https://github.com/knipferrc/fm
+    homepage: https://github.com/mistakenelf/fm
     license: MIT
     formats:
       - deb

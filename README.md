@@ -4,9 +4,9 @@
     Keep those files organized
   </p>
   <p align="center">
-    <a href="https://github.com/knipferrc/fm/releases"><img src="https://img.shields.io/github/v/release/knipferrc/fm" alt="Latest Release"></a>
-    <a href="https://pkg.go.dev/github.com/knipferrc/fm?tab=doc"><img src="https://godoc.org/github.com/golang/gddo?status.svg" alt="GoDoc"></a>
-    <a href="https://github.com/knipferrc/fm/actions"><img src="https://img.shields.io/github/workflow/status/knipferrc/fm/Release" alt="Build Status"></a>
+    <a href="https://github.com/mistakenelf/fm/releases"><img src="https://img.shields.io/github/v/release/mistakenelf/fm" alt="Latest Release"></a>
+    <a href="https://pkg.go.dev/github.com/mistakenelf/fm?tab=doc"><img src="https://godoc.org/github.com/golang/gddo?status.svg" alt="GoDoc"></a>
+    <a href="https://github.com/mistakenelf/fm/actions"><img src="https://img.shields.io/github/workflow/status/mistakenelf/fm/Release" alt="Build Status"></a>
   </p>
 </p>
 
@@ -27,19 +27,20 @@ A terminal based file manager
 - [Glamour](https://github.com/charmbracelet/glamour)
 - [Chroma](https://github.com/alecthomas/chroma)
 - [Cobra](https://github.com/spf13/cobra)
+- [Teacup](https://github.com/mistakenelf/teacup)
 
 ## Installation
 
 ### Curl
 
 ```sh
-curl -sfL https://raw.githubusercontent.com/knipferrc/fm/main/install.sh | sh
+curl -sfL https://raw.githubusercontent.com/mistakenelf/fm/main/install.sh | sh
 ```
 
 ### Go
 
 ```
-go install github.com/knipferrc/fm@latest
+go install github.com/mistakenelf/fm@latest
 ```
 
 ### AUR
@@ -130,9 +131,9 @@ paru -S fm-bin
 
 A config file will be generated when you first run `fm`. Depending on your operating system it can be found in one of the following locations:
 
-* macOS: ~/Library/Application\ Support/fm/config.yml
-* Linux: ~/.config/fm/config.yml
-* Windows: C:\Users\me\AppData\Roaming\fm\config.yml
+- macOS: ~/Library/Application\ Support/fm/config.yml
+- Linux: ~/.config/fm/config.yml
+- Windows: C:\Users\me\AppData\Roaming\fm\config.yml
 
 It will include the following default settings:
 
@@ -157,7 +158,7 @@ Follow the instructions below to get setup for local development
 1. Clone the repo
 
 ```sh
-git clone https://github.com/knipferrc/fm
+git clone https://github.com/mistakenelf/fm
 ```
 
 2. Run

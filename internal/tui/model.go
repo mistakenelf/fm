@@ -3,17 +3,17 @@ package tui
 import (
 	"log"
 
-	"github.com/knipferrc/fm/internal/config"
-	"github.com/knipferrc/fm/internal/theme"
+	"github.com/mistakenelf/fm/internal/config"
+	"github.com/mistakenelf/fm/internal/theme"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/knipferrc/teacup/code"
-	"github.com/knipferrc/teacup/filetree"
-	"github.com/knipferrc/teacup/help"
-	"github.com/knipferrc/teacup/image"
-	"github.com/knipferrc/teacup/markdown"
-	"github.com/knipferrc/teacup/pdf"
-	"github.com/knipferrc/teacup/statusbar"
+	"github.com/mistakenelf/teacup/code"
+	"github.com/mistakenelf/teacup/filetree"
+	"github.com/mistakenelf/teacup/help"
+	"github.com/mistakenelf/teacup/image"
+	"github.com/mistakenelf/teacup/markdown"
+	"github.com/mistakenelf/teacup/pdf"
+	"github.com/mistakenelf/teacup/statusbar"
 )
 
 type sessionState int

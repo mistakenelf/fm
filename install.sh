@@ -327,7 +327,7 @@ End of functions from https://github.com/client9/shlib
 EOF
 
 PROJECT_NAME="fm"
-OWNER=knipferrc
+OWNER=mistakenelf
 REPO="fm"
 BINARY=fm
 FORMAT=tar.gz

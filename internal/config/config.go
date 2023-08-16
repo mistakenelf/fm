@@ -88,7 +88,7 @@ func (e configError) Error() string {
 Create one under: %s
 Example of a config.yml file:
 %s
-For more info, go to https://github.com/knipferrc/fm
+For more info, go to https://github.com/mistakenelf/fm
 press q to exit.
 Original error: %v`,
 		path.Join(e.configDir, AppDir, ConfigFileName),

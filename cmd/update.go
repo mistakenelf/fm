@@ -13,7 +13,7 @@ var updateCmd = &cobra.Command{
 	Short: "Update FM to the latest version",
 	Long:  `Update FM to the latest version.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		updateCommand := exec.Command("bash", "-c", "curl -sfL https://raw.githubusercontent.com/knipferrc/fm/main/install.sh | sh")
+		updateCommand := exec.Command("bash", "-c", "curl -sfL https://raw.githubusercontent.com/mistakenelf/fm/main/install.sh | sh")
 		updateCommand.Stdin = os.Stdin
 		updateCommand.Stdout = os.Stdout
 		updateCommand.Stderr = os.Stderr

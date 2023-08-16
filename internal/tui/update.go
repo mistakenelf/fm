@@ -3,15 +3,15 @@ package tui
 import (
 	"fmt"
 
-	"github.com/knipferrc/fm/internal/config"
-	"github.com/knipferrc/fm/internal/theme"
+	"github.com/mistakenelf/fm/internal/config"
+	"github.com/mistakenelf/fm/internal/theme"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/knipferrc/teacup/help"
-	"github.com/knipferrc/teacup/icons"
-	"github.com/knipferrc/teacup/statusbar"
+	"github.com/mistakenelf/teacup/help"
+	"github.com/mistakenelf/teacup/icons"
+	"github.com/mistakenelf/teacup/statusbar"
 )
 
 var forbiddenExtensions = []string{

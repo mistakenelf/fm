@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/knipferrc/fm/internal/config"
-	"github.com/knipferrc/fm/internal/tui"
+	"github.com/mistakenelf/fm/internal/config"
+	"github.com/mistakenelf/fm/internal/tui"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
@@ -59,8 +59,9 @@ var rootCmd = &cobra.Command{
 
 		// Initialize and start app.
 		p := tea.NewProgram(m, opts...)
-		if err := p.Start(); err != nil {
+		if _, err := p.Run(); err != nil {
 			log.Fatal("Failed to start fm", err)
+			os.Exit(1)
 		}
 	},
 }
