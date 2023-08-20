@@ -8,6 +8,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mistakenelf/teacup/code"
+	"github.com/mistakenelf/teacup/csv"
 	"github.com/mistakenelf/teacup/filetree"
 	"github.com/mistakenelf/teacup/help"
 	"github.com/mistakenelf/teacup/image"
@@ -24,6 +25,7 @@ const (
 	showImageState
 	showMarkdownState
 	showPdfState
+	showCsvState
 )
 
 // model represents the properties of the UI.
@@ -34,6 +36,7 @@ type model struct {
 	image     image.Model
 	markdown  markdown.Model
 	pdf       pdf.Model
+	csv       csv.Model
 	statusbar statusbar.Model
 	state     sessionState
 	theme     theme.Theme
@@ -129,6 +132,8 @@ func New(startDir, selectionPath string) model {
 		},
 	)
 
+	csv := csv.New(false)
+
 	return model{
 		filetree:  filetreeModel,
 		help:      helpModel,
@@ -136,6 +141,7 @@ func New(startDir, selectionPath string) model {
 		image:     imageModel,
 		markdown:  markdownModel,
 		pdf:       pdfModel,
+		csv:       csv,
 		statusbar: statusbarModel,
 		theme:     theme,
 		config:    cfg,

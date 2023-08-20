@@ -38,6 +38,7 @@ func (m *model) resetViewports() {
 	m.markdown.GotoTop()
 	m.help.GotoTop()
 	m.image.GotoTop()
+	m.csv.Table.GotoTop()
 }
 
 // deactivateALlBubbles sets all bubbles to inactive.
@@ -48,6 +49,7 @@ func (m *model) deactivateAllBubbles() {
 	m.image.SetIsActive(false)
 	m.pdf.SetIsActive(false)
 	m.help.SetIsActive(false)
+	m.csv.SetIsActive(false)
 }
 
 // resetBorderColors resets all bubble border colors to default.
@@ -175,6 +177,10 @@ func (m *model) openFile() []tea.Cmd {
 			m.state = showPdfState
 			pdfCmd := m.pdf.SetFileName(selectedFile.FileName())
 			cmds = append(cmds, pdfCmd)
+		case selectedFile.FileExtension() == ".csv":
+			m.state = showCsvState
+			csvCmd := m.csv.SetFileName(selectedFile.FileName())
+			cmds = append(cmds, csvCmd)
 		case contains(forbiddenExtensions, selectedFile.FileExtension()):
 			return nil
 		default:
@@ -222,6 +228,9 @@ func (m *model) toggleBox() {
 			m.markdown.SetIsActive(true)
 			m.resetBorderColors()
 			m.pdf.SetBorderColor(m.theme.ActiveBoxBorderColor)
+		case showCsvState:
+			m.deactivateAllBubbles()
+			m.help.SetIsActive(true)
 		}
 	}
 }
@@ -274,6 +283,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.code.SetSize(halfSize, bubbleHeight)
 		m.pdf.SetSize(halfSize, bubbleHeight)
 		m.statusbar.SetSize(msg.Width)
+		m.csv.SetSize(msg.Width, bubbleHeight)
 
 		cmds = append(cmds, m.filetree.ToggleShowIcons(m.config.Settings.ShowIcons))
 		cmds = append(cmds, resizeImgCmd, markdownCmd)
@@ -311,6 +321,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, cmd)
 
 	m.help, cmd = m.help.Update(msg)
+	cmds = append(cmds, cmd)
+
+	m.csv, cmd = m.csv.Update(msg)
 	cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)
