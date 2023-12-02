@@ -101,7 +101,7 @@ paru -S fm-bin
 | Key                   | Description                                                |
 | --------------------- | ---------------------------------------------------------- |
 | <kbd>h or left</kbd>  | Paginate to the left                                       |
-| <kbd> or down</kbd>   | Move down in the file tree or scroll pane down             |
+| <kbd>j or down</kbd>   | Move down in the file tree or scroll pane down             |
 | <kbd>k or up</kbd>    | Move up in the file tree or scroll pane up                 |
 | <kbd>l or right</kbd> | Paginate to the right                                      |
 | <kbd>G</kbd>          | Jump to bottom of file tree or pane                        |
