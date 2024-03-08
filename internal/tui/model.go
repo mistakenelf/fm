@@ -7,14 +7,14 @@ import (
 	"github.com/mistakenelf/fm/internal/theme"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/mistakenelf/fm/help"
+	"github.com/mistakenelf/fm/statusbar"
 	"github.com/mistakenelf/teacup/code"
 	"github.com/mistakenelf/teacup/csv"
 	"github.com/mistakenelf/teacup/filetree"
-	"github.com/mistakenelf/teacup/help"
 	"github.com/mistakenelf/teacup/image"
 	"github.com/mistakenelf/teacup/markdown"
 	"github.com/mistakenelf/teacup/pdf"
-	"github.com/mistakenelf/teacup/statusbar"
 )
 
 type sessionState int
@@ -98,13 +98,11 @@ func New(startDir, selectionPath string) model {
 
 	helpModel := help.New(
 		false,
-		cfg.Settings.Borderless,
 		"Help",
 		help.TitleColor{
 			Background: theme.TitleBackgroundColor,
 			Foreground: theme.TitleForegroundColor,
 		},
-		theme.InactiveBoxBorderColor,
 		[]help.Entry{
 			{Key: "ctrl+c, q", Description: "Exit FM"},
 			{Key: "j/up", Description: "Move up"},

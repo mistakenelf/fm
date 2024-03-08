@@ -9,9 +9,9 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/mistakenelf/teacup/help"
-	"github.com/mistakenelf/teacup/icons"
-	"github.com/mistakenelf/teacup/statusbar"
+	"github.com/mistakenelf/fm/help"
+	"github.com/mistakenelf/fm/icons"
+	"github.com/mistakenelf/fm/statusbar"
 )
 
 var forbiddenExtensions = []string{
@@ -55,7 +55,6 @@ func (m *model) deactivateAllBubbles() {
 // resetBorderColors resets all bubble border colors to default.
 func (m *model) resetBorderColors() {
 	m.filetree.SetBorderColor(m.theme.InactiveBoxBorderColor)
-	m.help.SetBorderColor(m.theme.InactiveBoxBorderColor)
 	m.code.SetBorderColor(m.theme.InactiveBoxBorderColor)
 	m.image.SetBorderColor(m.theme.InactiveBoxBorderColor)
 	m.markdown.SetBorderColor(m.theme.InactiveBoxBorderColor)
@@ -113,7 +112,6 @@ func (m *model) reloadConfig() []tea.Cmd {
 
 	m.filetree.SetBorderless(cfg.Settings.Borderless)
 	m.code.SetBorderless(cfg.Settings.Borderless)
-	m.help.SetBorderless(cfg.Settings.Borderless)
 	m.markdown.SetBorderless(cfg.Settings.Borderless)
 	m.pdf.SetBorderless(cfg.Settings.Borderless)
 	m.image.SetBorderless(cfg.Settings.Borderless)
@@ -129,7 +127,6 @@ func (m *model) reloadConfig() []tea.Cmd {
 			m.deactivateAllBubbles()
 			m.help.SetIsActive(true)
 			m.resetBorderColors()
-			m.help.SetBorderColor(theme.ActiveBoxBorderColor)
 		case showCodeState:
 			m.deactivateAllBubbles()
 			m.code.SetIsActive(true)
@@ -207,7 +204,6 @@ func (m *model) toggleBox() {
 			m.deactivateAllBubbles()
 			m.help.SetIsActive(true)
 			m.resetBorderColors()
-			m.help.SetBorderColor(m.theme.ActiveBoxBorderColor)
 		case showCodeState:
 			m.deactivateAllBubbles()
 			m.code.SetIsActive(true)
