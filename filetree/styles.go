@@ -3,5 +3,6 @@ package filetree
 import "github.com/charmbracelet/lipgloss"
 
 var (
-	selectedItemStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("212")).Bold(true)
+	selectedItemStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("212")).Bold(true)
+	unselectedItemStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ffffff"))
 )

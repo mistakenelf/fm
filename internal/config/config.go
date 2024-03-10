@@ -25,10 +25,8 @@ type SyntaxThemeConfig struct {
 // SettingsConfig struct represents the config for the settings.
 type SettingsConfig struct {
 	StartDir       string `yaml:"start_dir"`
-	ShowIcons      bool   `yaml:"show_icons"`
 	EnableLogging  bool   `yaml:"enable_logging"`
 	PrettyMarkdown bool   `yaml:"pretty_markdown"`
-	Borderless     bool   `yaml:"borderless"`
 }
 
 // ThemeConfig represents the config for themes.
@@ -58,10 +56,8 @@ func (parser ConfigParser) getDefaultConfig() Config {
 	return Config{
 		Settings: SettingsConfig{
 			StartDir:       ".",
-			ShowIcons:      true,
 			EnableLogging:  false,
 			PrettyMarkdown: true,
-			Borderless:     false,
 		},
 		Theme: ThemeConfig{
 			AppTheme: "default",

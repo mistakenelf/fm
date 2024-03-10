@@ -16,20 +16,20 @@ func (m Model) View() string {
 
 		if i == m.Cursor {
 			if file.IsDirectory {
-				fileList.WriteString("🗀 ")
+				fileList.WriteString("📂 ")
 			} else {
-				fileList.WriteString("🗎 ")
+				fileList.WriteString("📄 ")
 			}
 
 			fileList.WriteString(selectedItemStyle.Render(file.Name) + "\n")
 		} else {
 			if file.IsDirectory {
-				fileList.WriteString("🗀 ")
+				fileList.WriteString("📂 ")
 			} else {
-				fileList.WriteString("🗎 ")
+				fileList.WriteString("📄 ")
 			}
 
-			fileList.WriteString(file.Name + "\n")
+			fileList.WriteString(unselectedItemStyle.Render(file.Name) + "\n")
 		}
 	}
 

@@ -43,7 +43,7 @@ func (m *Model) SetIsActive(active bool) {
 	m.active = active
 }
 
-// GetSelectedItem returns the currently selected file/dir
+// GetSelectedItem returns the currently selected file/dir.
 func (m Model) GetSelectedItem() DirectoryItem {
 	if len(m.files) > 0 {
 		return m.files[m.Cursor]
@@ -59,6 +59,7 @@ func (m Model) GetTotalItems() int {
 
 // SetSize Sets the size of the filetree.
 func (m *Model) SetSize(width, height int) {
+	m.height = height - 2
 	m.width = width
-	m.height = height
+	m.max = m.height - 1
 }

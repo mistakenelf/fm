@@ -20,10 +20,10 @@ type Model struct {
 	width  int
 }
 
-func New() Model {
+func New(active bool) Model {
 	return Model{
 		Cursor: 0,
-		active: true,
+		active: active,
 		keyMap: DefaultKeyMap(),
 		min:    0,
 		max:    0,

@@ -56,7 +56,7 @@ func New(startDir, selectionPath string) model {
 		syntaxTheme = cfg.Theme.SyntaxTheme.Dark
 	}
 
-	filetreeModel := filetree.New()
+	filetreeModel := filetree.New(true)
 
 	codeModel := code.New(false)
 	codeModel.SetSyntaxTheme(syntaxTheme)

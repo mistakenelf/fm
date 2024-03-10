@@ -105,17 +105,6 @@ func (m *model) togglePane() {
 	}
 }
 
-// updateStatusbar updates the content of the statusbar.
-func (m *model) updateStatusbar() {
-	logoText := fmt.Sprintf("%s %s", "🗀", "FM")
-	m.statusbar.SetContent(
-		m.filetree.GetSelectedItem().Name,
-		m.filetree.GetSelectedItem().CurrentDirectory,
-		fmt.Sprintf("%d/%d", m.filetree.Cursor, m.filetree.GetTotalItems()),
-		logoText,
-	)
-}
-
 // Update handles all UI interactions.
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
@@ -131,15 +120,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		halfSize := msg.Width / 2
 		bubbleHeight := msg.Height - statusbar.Height - 2
 
-		resizeImgCmd := m.image.SetSize(halfSize, bubbleHeight)
-		markdownCmd := m.markdown.SetSize(halfSize, bubbleHeight)
+		cmds = append(cmds, m.image.SetSize(halfSize, bubbleHeight))
+		cmds = append(cmds, m.markdown.SetSize(halfSize, bubbleHeight))
+
 		m.filetree.SetSize(halfSize, bubbleHeight)
 		m.help.SetSize(halfSize, bubbleHeight)
 		m.code.SetSize(halfSize, bubbleHeight)
 		m.pdf.SetSize(halfSize, bubbleHeight)
 		m.statusbar.SetSize(msg.Width)
-
-		cmds = append(cmds, resizeImgCmd, markdownCmd)
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keys.Quit):
@@ -154,7 +142,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	if m.filetree.GetSelectedItem().Name != "" {
-		m.updateStatusbar()
+		m.statusbar.SetContent(
+			m.filetree.GetSelectedItem().Name,
+			m.filetree.GetSelectedItem().CurrentDirectory,
+			fmt.Sprintf("%d/%d", m.filetree.Cursor, m.filetree.GetTotalItems()),
+			fmt.Sprintf("%s %s", "🗀", "FM"),
+		)
 	}
 
 	m.code, cmd = m.code.Update(msg)

@@ -55,10 +55,9 @@ func getDirectoryListingCmd(directoryName string, showHidden bool) tea.Cmd {
 				continue
 			}
 
-			status := fmt.Sprintf("%s %s %s",
-				fileInfo.ModTime().Format("2006-01-02 15:04:05"),
-				fileInfo.Mode().String(),
-				ConvertBytesToSizeString(fileInfo.Size()))
+			status := fmt.Sprintf("%s %s",
+				ConvertBytesToSizeString(fileInfo.Size()),
+				fileInfo.Mode().String())
 
 			directoryItems = append(directoryItems, DirectoryItem{
 				Name:             file.Name(),
