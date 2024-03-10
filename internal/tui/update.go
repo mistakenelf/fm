@@ -5,7 +5,6 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/mistakenelf/fm/icons"
 	"github.com/mistakenelf/fm/statusbar"
 )
 
@@ -108,11 +107,7 @@ func (m *model) togglePane() {
 
 // updateStatusbar updates the content of the statusbar.
 func (m *model) updateStatusbar() {
-	logoText := fmt.Sprintf("%s %s", icons.IconDef["dir"].GetGlyph(), "FM")
-	if !m.config.Settings.ShowIcons {
-		logoText = "FM"
-	}
-
+	logoText := fmt.Sprintf("%s %s", "🗀", "FM")
 	m.statusbar.SetContent(
 		m.filetree.GetSelectedItem().Name,
 		m.filetree.GetSelectedItem().CurrentDirectory,
@@ -134,7 +129,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		halfSize := msg.Width / 2
-		bubbleHeight := msg.Height - statusbar.Height
+		bubbleHeight := msg.Height - statusbar.Height - 2
 
 		resizeImgCmd := m.image.SetSize(halfSize, bubbleHeight)
 		markdownCmd := m.markdown.SetSize(halfSize, bubbleHeight)

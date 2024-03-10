@@ -12,7 +12,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.height = msg.Height
+		m.height = msg.Height - 2
 		m.width = msg.Width
 		m.max = m.height - 1
 	case getDirectoryListingMsg:
