@@ -42,3 +42,23 @@ func ConvertBytesToSizeString(size int64) string {
 func (m *Model) SetIsActive(active bool) {
 	m.active = active
 }
+
+// GetSelectedItem returns the currently selected file/dir
+func (m Model) GetSelectedItem() DirectoryItem {
+	if len(m.files) > 0 {
+		return m.files[m.Cursor]
+	}
+
+	return DirectoryItem{}
+}
+
+// GetTotalItems returns total number of tree items.
+func (m Model) GetTotalItems() int {
+	return len(m.files)
+}
+
+// SetSize Sets the size of the filetree.
+func (m *Model) SetSize(width, height int) {
+	m.width = width
+	m.height = height
+}

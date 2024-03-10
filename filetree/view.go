@@ -14,11 +14,11 @@ func (m Model) View() string {
 			continue
 		}
 
-		if i == m.cursor {
-			fileList.WriteString(selectedItemStyle.Render(file.name) + "\n")
+		if i == m.Cursor {
+			fileList.WriteString(selectedItemStyle.Render(file.Name) + "\n")
 			// fileList.WriteString(selectedItemStyle.Render(file.details) + "\n\n")
 		} else {
-			fileList.WriteString(file.name + "\n")
+			fileList.WriteString(file.Name + "\n")
 			// fileList.WriteString(file.details + "\n\n")
 		}
 	}

@@ -20,8 +20,6 @@ func (m model) View() string {
 		rightBox = m.pdf.View()
 	case showMarkdownState:
 		rightBox = m.markdown.View()
-	case showCsvState:
-		rightBox = m.csv.View()
 	}
 
 	return lipgloss.JoinVertical(lipgloss.Top,

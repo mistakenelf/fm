@@ -38,7 +38,6 @@ func (m *model) resetViewports() {
 	m.markdown.GotoTop()
 	m.help.GotoTop()
 	m.image.GotoTop()
-	m.csv.Table.GotoTop()
 }
 
 // deactivateALlBubbles sets all bubbles to inactive.
@@ -49,16 +48,6 @@ func (m *model) deactivateAllBubbles() {
 	m.image.SetIsActive(false)
 	m.pdf.SetIsActive(false)
 	m.help.SetIsActive(false)
-	m.csv.SetIsActive(false)
-}
-
-// resetBorderColors resets all bubble border colors to default.
-func (m *model) resetBorderColors() {
-	m.filetree.SetBorderColor(m.theme.InactiveBoxBorderColor)
-	m.code.SetBorderColor(m.theme.InactiveBoxBorderColor)
-	m.image.SetBorderColor(m.theme.InactiveBoxBorderColor)
-	m.markdown.SetBorderColor(m.theme.InactiveBoxBorderColor)
-	m.pdf.SetBorderColor(m.theme.InactiveBoxBorderColor)
 }
 
 // reloadConfig reloads the config file and updates the UI.
@@ -106,47 +95,26 @@ func (m *model) reloadConfig() []tea.Cmd {
 		},
 	)
 
-	m.filetree.SetTitleColors(theme.TitleForegroundColor, theme.TitleBackgroundColor)
-	m.filetree.SetSelectedItemColors(theme.SelectedTreeItemColor)
-	cmds = append(cmds, m.filetree.ToggleShowIcons(cfg.Settings.ShowIcons))
-
-	m.filetree.SetBorderless(cfg.Settings.Borderless)
-	m.code.SetBorderless(cfg.Settings.Borderless)
-	m.markdown.SetBorderless(cfg.Settings.Borderless)
-	m.pdf.SetBorderless(cfg.Settings.Borderless)
-	m.image.SetBorderless(cfg.Settings.Borderless)
-
 	if m.activeBox == 0 {
 		m.deactivateAllBubbles()
 		m.filetree.SetIsActive(true)
-		m.resetBorderColors()
-		m.filetree.SetBorderColor(theme.ActiveBoxBorderColor)
 	} else {
 		switch m.state {
 		case idleState:
 			m.deactivateAllBubbles()
 			m.help.SetIsActive(true)
-			m.resetBorderColors()
 		case showCodeState:
 			m.deactivateAllBubbles()
 			m.code.SetIsActive(true)
-			m.resetBorderColors()
-			m.code.SetBorderColor(theme.ActiveBoxBorderColor)
 		case showImageState:
 			m.deactivateAllBubbles()
 			m.image.SetIsActive(true)
-			m.resetBorderColors()
-			m.image.SetBorderColor(theme.ActiveBoxBorderColor)
 		case showMarkdownState:
 			m.deactivateAllBubbles()
 			m.markdown.SetIsActive(true)
-			m.resetBorderColors()
-			m.markdown.SetBorderColor(theme.ActiveBoxBorderColor)
 		case showPdfState:
 			m.deactivateAllBubbles()
 			m.markdown.SetIsActive(true)
-			m.resetBorderColors()
-			m.pdf.SetBorderColor(theme.ActiveBoxBorderColor)
 		}
 	}
 
@@ -158,31 +126,27 @@ func (m *model) openFile() []tea.Cmd {
 	var cmds []tea.Cmd
 
 	selectedFile := m.filetree.GetSelectedItem()
-	if !selectedFile.IsDirectory() {
+	if !selectedFile.IsDirectory {
 		m.resetViewports()
 
 		switch {
-		case selectedFile.FileExtension() == ".png" || selectedFile.FileExtension() == ".jpg" || selectedFile.FileExtension() == ".jpeg":
+		case selectedFile.Extension == ".png" || selectedFile.Extension == ".jpg" || selectedFile.Extension == ".jpeg":
 			m.state = showImageState
-			readFileCmd := m.image.SetFileName(selectedFile.FileName())
+			readFileCmd := m.image.SetFileName(selectedFile.Name)
 			cmds = append(cmds, readFileCmd)
-		case selectedFile.FileExtension() == ".md" && m.config.Settings.PrettyMarkdown:
+		case selectedFile.Extension == ".md" && m.config.Settings.PrettyMarkdown:
 			m.state = showMarkdownState
-			markdownCmd := m.markdown.SetFileName(selectedFile.FileName())
+			markdownCmd := m.markdown.SetFileName(selectedFile.Name)
 			cmds = append(cmds, markdownCmd)
-		case selectedFile.FileExtension() == ".pdf":
+		case selectedFile.Extension == ".pdf":
 			m.state = showPdfState
-			pdfCmd := m.pdf.SetFileName(selectedFile.FileName())
+			pdfCmd := m.pdf.SetFileName(selectedFile.Name)
 			cmds = append(cmds, pdfCmd)
-		case selectedFile.FileExtension() == ".csv":
-			m.state = showCsvState
-			csvCmd := m.csv.SetFileName(selectedFile.FileName())
-			cmds = append(cmds, csvCmd)
-		case contains(forbiddenExtensions, selectedFile.FileExtension()):
+		case contains(forbiddenExtensions, selectedFile.Extension):
 			return nil
 		default:
 			m.state = showCodeState
-			readFileCmd := m.code.SetFileName(selectedFile.FileName())
+			readFileCmd := m.code.SetFileName(selectedFile.Name)
 			cmds = append(cmds, readFileCmd)
 		}
 	}
@@ -196,37 +160,23 @@ func (m *model) toggleBox() {
 	if m.activeBox == 0 {
 		m.deactivateAllBubbles()
 		m.filetree.SetIsActive(true)
-		m.resetBorderColors()
-		m.filetree.SetBorderColor(m.theme.ActiveBoxBorderColor)
 	} else {
 		switch m.state {
 		case idleState:
 			m.deactivateAllBubbles()
 			m.help.SetIsActive(true)
-			m.resetBorderColors()
 		case showCodeState:
 			m.deactivateAllBubbles()
 			m.code.SetIsActive(true)
-			m.resetBorderColors()
-			m.code.SetBorderColor(m.theme.ActiveBoxBorderColor)
 		case showImageState:
 			m.deactivateAllBubbles()
 			m.image.SetIsActive(true)
-			m.resetBorderColors()
-			m.image.SetBorderColor(m.theme.ActiveBoxBorderColor)
 		case showMarkdownState:
 			m.deactivateAllBubbles()
 			m.markdown.SetIsActive(true)
-			m.resetBorderColors()
-			m.markdown.SetBorderColor(m.theme.ActiveBoxBorderColor)
 		case showPdfState:
 			m.deactivateAllBubbles()
 			m.markdown.SetIsActive(true)
-			m.resetBorderColors()
-			m.pdf.SetBorderColor(m.theme.ActiveBoxBorderColor)
-		case showCsvState:
-			m.deactivateAllBubbles()
-			m.help.SetIsActive(true)
 		}
 	}
 }
@@ -239,9 +189,9 @@ func (m *model) updateStatusbar() {
 	}
 
 	m.statusbar.SetContent(
-		m.filetree.GetSelectedItem().ShortName(),
-		m.filetree.GetSelectedItem().CurrentDirectory(),
-		fmt.Sprintf("%d/%d", m.filetree.Cursor(), m.filetree.TotalItems()),
+		m.filetree.GetSelectedItem().Name,
+		m.filetree.GetSelectedItem().CurrentDirectory,
+		fmt.Sprintf("%d/%d", m.filetree.Cursor, m.filetree.GetTotalItems()),
 		logoText,
 	)
 }
@@ -279,22 +229,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.code.SetSize(halfSize, bubbleHeight)
 		m.pdf.SetSize(halfSize, bubbleHeight)
 		m.statusbar.SetSize(msg.Width)
-		m.csv.SetSize(msg.Width, bubbleHeight)
 
-		cmds = append(cmds, m.filetree.ToggleShowIcons(m.config.Settings.ShowIcons))
 		cmds = append(cmds, resizeImgCmd, markdownCmd)
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keys.Quit):
 			return m, tea.Quit
 		case key.Matches(msg, m.keys.Exit):
-			if !m.filetree.IsFiltering() {
-				return m, tea.Quit
-			}
-		case key.Matches(msg, m.keys.ReloadConfig):
-			if !m.filetree.IsFiltering() {
-				cmds = append(cmds, tea.Batch(m.reloadConfig()...))
-			}
+			return m, tea.Quit
 		case key.Matches(msg, m.keys.OpenFile):
 			cmds = append(cmds, tea.Batch(m.openFile()...))
 		case key.Matches(msg, m.keys.ToggleBox):
@@ -302,7 +244,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	m.updateStatusbar()
+	if m.filetree.GetSelectedItem().Name != "" {
+		m.updateStatusbar()
+	}
 
 	m.code, cmd = m.code.Update(msg)
 	cmds = append(cmds, cmd)
@@ -317,9 +261,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, cmd)
 
 	m.help, cmd = m.help.Update(msg)
-	cmds = append(cmds, cmd)
-
-	m.csv, cmd = m.csv.Update(msg)
 	cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)

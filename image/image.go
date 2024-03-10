@@ -69,13 +69,12 @@ func convertImageToStringCmd(width int, filename string) tea.Cmd {
 type Model struct {
 	Viewport    viewport.Model
 	Active      bool
-	Borderless  bool
 	FileName    string
 	ImageString string
 }
 
 // New creates a new instance of code.
-func New(active, borderless bool, borderColor lipgloss.AdaptiveColor) Model {
+func New(active bool) Model {
 	viewPort := viewport.New(0, 0)
 
 	return Model{
@@ -117,11 +116,6 @@ func (m *Model) SetIsActive(active bool) {
 // GotoTop jumps to the top of the viewport.
 func (m *Model) GotoTop() {
 	m.Viewport.GotoTop()
-}
-
-// SetBorderless sets weather or not to show the border.
-func (m *Model) SetBorderless(borderless bool) {
-	m.Borderless = borderless
 }
 
 // Update handles updating the UI of a code bubble.

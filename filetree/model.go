@@ -1,16 +1,16 @@
 package filetree
 
 type DirectoryItem struct {
-	name             string
-	details          string
-	path             string
-	extension        string
-	isDirectory      bool
-	currentDirectory string
+	Name             string
+	Details          string
+	Path             string
+	Extension        string
+	IsDirectory      bool
+	CurrentDirectory string
 }
 
 type Model struct {
-	cursor int
+	Cursor int
 	files  []DirectoryItem
 	active bool
 	keyMap KeyMap
@@ -22,7 +22,7 @@ type Model struct {
 
 func New() Model {
 	return Model{
-		cursor: 0,
+		Cursor: 0,
 		active: true,
 		keyMap: DefaultKeyMap(),
 		min:    0,

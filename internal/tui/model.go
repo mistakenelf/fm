@@ -7,14 +7,13 @@ import (
 	"github.com/mistakenelf/fm/internal/theme"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/mistakenelf/fm/code"
+	"github.com/mistakenelf/fm/filetree"
 	"github.com/mistakenelf/fm/help"
+	"github.com/mistakenelf/fm/image"
+	"github.com/mistakenelf/fm/markdown"
+	"github.com/mistakenelf/fm/pdf"
 	"github.com/mistakenelf/fm/statusbar"
-	"github.com/mistakenelf/teacup/code"
-	"github.com/mistakenelf/teacup/csv"
-	"github.com/mistakenelf/teacup/filetree"
-	"github.com/mistakenelf/teacup/image"
-	"github.com/mistakenelf/teacup/markdown"
-	"github.com/mistakenelf/teacup/pdf"
 )
 
 type sessionState int
@@ -25,7 +24,6 @@ const (
 	showImageState
 	showMarkdownState
 	showPdfState
-	showCsvState
 )
 
 // model represents the properties of the UI.
@@ -36,7 +34,6 @@ type model struct {
 	image     image.Model
 	markdown  markdown.Model
 	pdf       pdf.Model
-	csv       csv.Model
 	statusbar statusbar.Model
 	state     sessionState
 	theme     theme.Theme
@@ -59,24 +56,14 @@ func New(startDir, selectionPath string) model {
 		syntaxTheme = cfg.Theme.SyntaxTheme.Dark
 	}
 
-	filetreeModel := filetree.New(
-		true,
-		cfg.Settings.Borderless,
-		startDir,
-		selectionPath,
-		theme.ActiveBoxBorderColor,
-		theme.SelectedTreeItemColor,
-		theme.TitleBackgroundColor,
-		theme.TitleForegroundColor,
-	)
-	filetreeModel.ToggleHelp(false)
+	filetreeModel := filetree.New()
 
-	codeModel := code.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
+	codeModel := code.New(false)
 	codeModel.SetSyntaxTheme(syntaxTheme)
 
-	imageModel := image.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
-	markdownModel := markdown.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
-	pdfModel := pdf.New(false, cfg.Settings.Borderless, theme.InactiveBoxBorderColor)
+	imageModel := image.New(false)
+	markdownModel := markdown.New(false)
+	pdfModel := pdf.New(false)
 	statusbarModel := statusbar.New(
 		statusbar.ColorConfig{
 			Foreground: theme.StatusBarSelectedFileForegroundColor,
@@ -130,8 +117,6 @@ func New(startDir, selectionPath string) model {
 		},
 	)
 
-	csv := csv.New(false)
-
 	return model{
 		filetree:  filetreeModel,
 		help:      helpModel,
@@ -139,7 +124,6 @@ func New(startDir, selectionPath string) model {
 		image:     imageModel,
 		markdown:  markdownModel,
 		pdf:       pdfModel,
-		csv:       csv,
 		statusbar: statusbarModel,
 		theme:     theme,
 		config:    cfg,

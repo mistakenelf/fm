@@ -61,12 +61,12 @@ func getDirectoryListingCmd(directoryName string, showHidden bool) tea.Cmd {
 				ConvertBytesToSizeString(fileInfo.Size()))
 
 			directoryItems = append(directoryItems, DirectoryItem{
-				name:             file.Name(),
-				details:          status,
-				path:             filepath.Join(workingDirectory, file.Name()),
-				extension:        filepath.Ext(fileInfo.Name()),
-				isDirectory:      fileInfo.IsDir(),
-				currentDirectory: workingDirectory,
+				Name:             file.Name(),
+				Details:          status,
+				Path:             filepath.Join(workingDirectory, file.Name()),
+				Extension:        filepath.Ext(fileInfo.Name()),
+				IsDirectory:      fileInfo.IsDir(),
+				CurrentDirectory: workingDirectory,
 			})
 		}
 

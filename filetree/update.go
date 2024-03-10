@@ -23,22 +23,22 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keyMap.Down):
-			m.cursor++
-			if m.cursor >= len(m.files) {
-				m.cursor = len(m.files) - 1
+			m.Cursor++
+			if m.Cursor >= len(m.files) {
+				m.Cursor = len(m.files) - 1
 			}
 
-			if m.cursor > m.max {
+			if m.Cursor > m.max {
 				m.min++
 				m.max++
 			}
 		case key.Matches(msg, m.keyMap.Up):
-			m.cursor--
-			if m.cursor < 0 {
-				m.cursor = 0
+			m.Cursor--
+			if m.Cursor < 0 {
+				m.Cursor = 0
 			}
 
-			if m.cursor < m.min {
+			if m.Cursor < m.min {
 				m.min--
 				m.max--
 			}
