@@ -78,8 +78,8 @@ func (m *model) openFile() []tea.Cmd {
 	return cmds
 }
 
-// toggleBox toggles between the two boxes.
-func (m *model) toggleBox() {
+// togglePane toggles between the two boxes.
+func (m *model) togglePane() {
 	m.activeBox = (m.activeBox + 1) % 2
 
 	if m.activeBox == 0 {
@@ -154,7 +154,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.OpenFile):
 			cmds = append(cmds, tea.Batch(m.openFile()...))
 		case key.Matches(msg, m.keys.TogglePane):
-			m.toggleBox()
+			m.togglePane()
 		}
 	}
 
