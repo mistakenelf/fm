@@ -3,13 +3,8 @@ package tui
 import (
 	"fmt"
 
-	"github.com/mistakenelf/fm/internal/config"
-	"github.com/mistakenelf/fm/internal/theme"
-
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/mistakenelf/fm/help"
 	"github.com/mistakenelf/fm/icons"
 	"github.com/mistakenelf/fm/statusbar"
 )
@@ -50,77 +45,6 @@ func (m *model) deactivateAllBubbles() {
 	m.help.SetIsActive(false)
 }
 
-// reloadConfig reloads the config file and updates the UI.
-func (m *model) reloadConfig() []tea.Cmd {
-	var cmds []tea.Cmd
-
-	cfg, err := config.ParseConfig()
-	if err != nil {
-		return nil
-	}
-
-	m.config = cfg
-	syntaxTheme := cfg.Theme.SyntaxTheme.Light
-	if lipgloss.HasDarkBackground() {
-		syntaxTheme = cfg.Theme.SyntaxTheme.Dark
-	}
-
-	m.code.SetSyntaxTheme(syntaxTheme)
-
-	theme := theme.GetTheme(cfg.Theme.AppTheme)
-	m.theme = theme
-	m.statusbar.SetColors(
-		statusbar.ColorConfig{
-			Foreground: theme.StatusBarSelectedFileForegroundColor,
-			Background: theme.StatusBarSelectedFileBackgroundColor,
-		},
-		statusbar.ColorConfig{
-			Foreground: theme.StatusBarBarForegroundColor,
-			Background: theme.StatusBarBarBackgroundColor,
-		},
-		statusbar.ColorConfig{
-			Foreground: theme.StatusBarTotalFilesForegroundColor,
-			Background: theme.StatusBarTotalFilesBackgroundColor,
-		},
-		statusbar.ColorConfig{
-			Foreground: theme.StatusBarLogoForegroundColor,
-			Background: theme.StatusBarLogoBackgroundColor,
-		},
-	)
-
-	m.help.SetTitleColor(
-		help.TitleColor{
-			Background: theme.TitleBackgroundColor,
-			Foreground: theme.TitleForegroundColor,
-		},
-	)
-
-	if m.activeBox == 0 {
-		m.deactivateAllBubbles()
-		m.filetree.SetIsActive(true)
-	} else {
-		switch m.state {
-		case idleState:
-			m.deactivateAllBubbles()
-			m.help.SetIsActive(true)
-		case showCodeState:
-			m.deactivateAllBubbles()
-			m.code.SetIsActive(true)
-		case showImageState:
-			m.deactivateAllBubbles()
-			m.image.SetIsActive(true)
-		case showMarkdownState:
-			m.deactivateAllBubbles()
-			m.markdown.SetIsActive(true)
-		case showPdfState:
-			m.deactivateAllBubbles()
-			m.markdown.SetIsActive(true)
-		}
-	}
-
-	return cmds
-}
-
 // openFile opens the currently selected file.
 func (m *model) openFile() []tea.Cmd {
 	var cmds []tea.Cmd
@@ -157,6 +81,7 @@ func (m *model) openFile() []tea.Cmd {
 // toggleBox toggles between the two boxes.
 func (m *model) toggleBox() {
 	m.activeBox = (m.activeBox + 1) % 2
+
 	if m.activeBox == 0 {
 		m.deactivateAllBubbles()
 		m.filetree.SetIsActive(true)
@@ -196,17 +121,6 @@ func (m *model) updateStatusbar() {
 	)
 }
 
-// contains returns true if the slice contains the string.
-func contains(s []string, str string) bool {
-	for _, v := range s {
-		if v == str {
-			return true
-		}
-	}
-
-	return false
-}
-
 // Update handles all UI interactions.
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
@@ -239,7 +153,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case key.Matches(msg, m.keys.OpenFile):
 			cmds = append(cmds, tea.Batch(m.openFile()...))
-		case key.Matches(msg, m.keys.ToggleBox):
+		case key.Matches(msg, m.keys.TogglePane):
 			m.toggleBox()
 		}
 	}
