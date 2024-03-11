@@ -16,25 +16,21 @@ func (m Model) View() string {
 
 		if i == m.Cursor {
 			if file.IsDirectory {
-				fileList.WriteString("📂 ")
+				fileList.WriteString(selectedItemStyle.Render("🗀 "))
 			} else {
-				fileList.WriteString("📄 ")
+				fileList.WriteString(selectedItemStyle.Render("🗎 "))
 			}
 
 			fileList.WriteString(selectedItemStyle.Render(file.Name) + "\n")
 		} else {
 			if file.IsDirectory {
-				fileList.WriteString("📂 ")
+				fileList.WriteString(unselectedItemStyle.Render("🗀 "))
 			} else {
-				fileList.WriteString("📄 ")
+				fileList.WriteString(unselectedItemStyle.Render("🗎 "))
 			}
 
 			fileList.WriteString(unselectedItemStyle.Render(file.Name) + "\n")
 		}
-	}
-
-	for i := lipgloss.Height(fileList.String()); i <= m.height; i++ {
-		fileList.WriteRune('\n')
 	}
 
 	return lipgloss.NewStyle().Width(m.width).Height(m.height).Render(fileList.String())

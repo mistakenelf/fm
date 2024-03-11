@@ -128,6 +128,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.code.SetSize(halfSize, bubbleHeight)
 		m.pdf.SetSize(halfSize, bubbleHeight)
 		m.statusbar.SetSize(msg.Width)
+
+		m.filetree, cmd = m.filetree.Update(msg)
+		cmds = append(cmds, cmd)
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keys.Quit):

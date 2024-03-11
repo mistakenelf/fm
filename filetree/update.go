@@ -14,7 +14,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case getDirectoryListingMsg:
 		if msg != nil {
 			m.files = msg
-			m.max = max(m.max, m.height-1)
+			m.max = max(m.max, m.height)
 		}
 	case tea.KeyMsg:
 		switch {
@@ -40,6 +40,36 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			}
 		case key.Matches(msg, m.keyMap.GoToTop):
 			m.Cursor = 0
+			m.min = 0
+			m.max = m.height
+		case key.Matches(msg, m.keyMap.GoToBottom):
+			m.Cursor = len(m.files) - 1
+			m.min = len(m.files) - m.height
+			m.max = len(m.files) - 1
+		case key.Matches(msg, m.keyMap.PageDown):
+			m.Cursor += m.height
+			if m.Cursor >= len(m.files) {
+				m.Cursor = len(m.files) - 1
+			}
+			m.min += m.height
+			m.max += m.height
+
+			if m.max >= len(m.files) {
+				m.max = len(m.files) - 1
+				m.min = m.max - m.height
+			}
+		case key.Matches(msg, m.keyMap.PageUp):
+			m.Cursor -= m.height
+			if m.Cursor < 0 {
+				m.Cursor = 0
+			}
+			m.min -= m.height
+			m.max -= m.height
+
+			if m.min < 0 {
+				m.min = 0
+				m.max = m.min + m.height
+			}
 		}
 	}
 
