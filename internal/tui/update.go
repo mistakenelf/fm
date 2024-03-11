@@ -57,7 +57,7 @@ func (m *model) openFile() []tea.Cmd {
 			m.state = showImageState
 			readFileCmd := m.image.SetFileName(selectedFile.Name)
 			cmds = append(cmds, readFileCmd)
-		case selectedFile.Extension == ".md" && m.config.Settings.PrettyMarkdown:
+		case selectedFile.Extension == ".md" && m.config.PrettyMarkdown:
 			m.state = showMarkdownState
 			markdownCmd := m.markdown.SetFileName(selectedFile.Name)
 			cmds = append(cmds, markdownCmd)
@@ -118,7 +118,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		halfSize := msg.Width / 2
-		bubbleHeight := msg.Height - statusbar.Height - 2
+		bubbleHeight := msg.Height - statusbar.Height
 
 		cmds = append(cmds, m.image.SetSize(halfSize, bubbleHeight))
 		cmds = append(cmds, m.markdown.SetSize(halfSize, bubbleHeight))

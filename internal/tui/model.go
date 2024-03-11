@@ -1,16 +1,11 @@
 package tui
 
 import (
-	"log"
-
-	"github.com/mistakenelf/fm/internal/config"
-	"github.com/mistakenelf/fm/internal/theme"
-
-	"github.com/charmbracelet/lipgloss"
 	"github.com/mistakenelf/fm/code"
 	"github.com/mistakenelf/fm/filetree"
 	"github.com/mistakenelf/fm/help"
 	"github.com/mistakenelf/fm/image"
+	"github.com/mistakenelf/fm/internal/theme"
 	"github.com/mistakenelf/fm/markdown"
 	"github.com/mistakenelf/fm/pdf"
 	"github.com/mistakenelf/fm/statusbar"
@@ -26,7 +21,14 @@ const (
 	showPdfState
 )
 
-// model represents the properties of the UI.
+type Config struct {
+	StartDir       string
+	SelectionPath  string
+	EnableLogging  bool
+	PrettyMarkdown bool
+	Theme          theme.Theme
+}
+
 type model struct {
 	filetree  filetree.Model
 	help      help.Model
@@ -36,50 +38,37 @@ type model struct {
 	pdf       pdf.Model
 	statusbar statusbar.Model
 	state     sessionState
-	theme     theme.Theme
-	config    config.Config
 	keys      KeyMap
 	activeBox int
+	config    Config
 }
 
 // New creates a new instance of the UI.
-func New(startDir, selectionPath string) model {
-	cfg, err := config.ParseConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	theme := theme.GetTheme(cfg.Theme.AppTheme)
-
-	syntaxTheme := cfg.Theme.SyntaxTheme.Light
-	if lipgloss.HasDarkBackground() {
-		syntaxTheme = cfg.Theme.SyntaxTheme.Dark
-	}
-
+func New(cfg Config) model {
 	filetreeModel := filetree.New(true)
 
 	codeModel := code.New(false)
-	codeModel.SetSyntaxTheme(syntaxTheme)
+	codeModel.SetSyntaxTheme("pygments")
 
 	imageModel := image.New(false)
 	markdownModel := markdown.New(false)
 	pdfModel := pdf.New(false)
 	statusbarModel := statusbar.New(
 		statusbar.ColorConfig{
-			Foreground: theme.StatusBarSelectedFileForegroundColor,
-			Background: theme.StatusBarSelectedFileBackgroundColor,
+			Foreground: cfg.Theme.StatusBarSelectedFileForegroundColor,
+			Background: cfg.Theme.StatusBarSelectedFileBackgroundColor,
 		},
 		statusbar.ColorConfig{
-			Foreground: theme.StatusBarBarForegroundColor,
-			Background: theme.StatusBarBarBackgroundColor,
+			Foreground: cfg.Theme.StatusBarBarForegroundColor,
+			Background: cfg.Theme.StatusBarBarBackgroundColor,
 		},
 		statusbar.ColorConfig{
-			Foreground: theme.StatusBarTotalFilesForegroundColor,
-			Background: theme.StatusBarTotalFilesBackgroundColor,
+			Foreground: cfg.Theme.StatusBarTotalFilesForegroundColor,
+			Background: cfg.Theme.StatusBarTotalFilesBackgroundColor,
 		},
 		statusbar.ColorConfig{
-			Foreground: theme.StatusBarLogoForegroundColor,
-			Background: theme.StatusBarLogoBackgroundColor,
+			Foreground: cfg.Theme.StatusBarLogoForegroundColor,
+			Background: cfg.Theme.StatusBarLogoBackgroundColor,
 		},
 	)
 
@@ -87,8 +76,8 @@ func New(startDir, selectionPath string) model {
 		false,
 		"Help",
 		help.TitleColor{
-			Background: theme.TitleBackgroundColor,
-			Foreground: theme.TitleForegroundColor,
+			Background: cfg.Theme.TitleBackgroundColor,
+			Foreground: cfg.Theme.TitleForegroundColor,
 		},
 		[]help.Entry{
 			{Key: "ctrl+c, q", Description: "Exit FM"},
@@ -125,7 +114,6 @@ func New(startDir, selectionPath string) model {
 		markdown:  markdownModel,
 		pdf:       pdfModel,
 		statusbar: statusbarModel,
-		theme:     theme,
 		config:    cfg,
 		keys:      DefaultKeyMap(),
 	}
