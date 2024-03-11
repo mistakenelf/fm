@@ -45,7 +45,7 @@ type model struct {
 
 // New creates a new instance of the UI.
 func New(cfg Config) model {
-	filetreeModel := filetree.New(true)
+	filetreeModel := filetree.New(true, cfg.StartDir)
 
 	codeModel := code.New(false)
 	codeModel.SetSyntaxTheme("pygments")
