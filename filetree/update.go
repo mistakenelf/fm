@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/mistakenelf/fm/filesystem"
 )
 
@@ -18,6 +19,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	}
 
 	switch msg := msg.(type) {
+	case errorMsg:
+		cmds = append(cmds, m.NewStatusMessage(lipgloss.NewStyle().Foreground(lipgloss.Color("#cc241d")).Bold(true).Render(string(msg))))
+	case statusMessageTimeoutMsg:
+		m.StatusMessage = ""
+	case copyToClipboardMsg:
+		m.StatusMessage = string(msg)
 	case getDirectoryListingMsg:
 		if msg != nil {
 			m.files = msg
@@ -94,6 +101,28 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			}
 		case key.Matches(msg, m.keyMap.PreviousDirectory):
 			return m, getDirectoryListingCmd(filepath.Dir(m.files[m.Cursor].CurrentDirectory), m.showHidden)
+		case key.Matches(msg, m.keyMap.CopyPathToClipboard):
+			return m, copyToClipboardCmd(m.files[m.Cursor].Name)
+		case key.Matches(msg, m.keyMap.CopyDirectoryItem):
+			return m, tea.Sequence(
+				copyDirectoryItemCmd(m.files[m.Cursor].Name, m.files[m.Cursor].IsDirectory),
+				getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden),
+			)
+		case key.Matches(msg, m.keyMap.DeleteDirectoryItem):
+			return m, tea.Sequence(
+				deleteDirectoryItemCmd(m.files[m.Cursor].Name, m.files[m.Cursor].IsDirectory),
+				getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden),
+			)
+		case key.Matches(msg, m.keyMap.ZipDirectoryItem):
+			return m, tea.Sequence(
+				zipDirectoryCmd(m.files[m.Cursor].Name),
+				getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden),
+			)
+		case key.Matches(msg, m.keyMap.UnzipDirectoryItem):
+			return m, tea.Sequence(
+				unzipDirectoryCmd(m.files[m.Cursor].Name),
+				getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden),
+			)
 		}
 	}
 

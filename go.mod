@@ -4,6 +4,7 @@ go 1.22
 
 require (
 	github.com/alecthomas/chroma v0.10.0
+	github.com/atotto/clipboard v0.1.4
 	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/glamour v0.6.0

@@ -11,7 +11,6 @@ import (
 // Height represents the height of the statusbar.
 const Height = 1
 
-// ColorConfig
 type ColorConfig struct {
 	Foreground lipgloss.AdaptiveColor
 	Background lipgloss.AdaptiveColor

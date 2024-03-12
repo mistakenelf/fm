@@ -1,6 +1,10 @@
 package filetree
 
-import "github.com/mistakenelf/fm/filesystem"
+import (
+	"time"
+
+	"github.com/mistakenelf/fm/filesystem"
+)
 
 type DirectoryItem struct {
 	Name             string
@@ -12,16 +16,19 @@ type DirectoryItem struct {
 }
 
 type Model struct {
-	Cursor     int
-	files      []DirectoryItem
-	Active     bool
-	keyMap     KeyMap
-	min        int
-	max        int
-	height     int
-	width      int
-	startDir   string
-	showHidden bool
+	Cursor                int
+	files                 []DirectoryItem
+	Active                bool
+	keyMap                KeyMap
+	min                   int
+	max                   int
+	height                int
+	width                 int
+	startDir              string
+	showHidden            bool
+	StatusMessage         string
+	StatusMessageLifetime time.Duration
+	statusMessageTimer    *time.Timer
 }
 
 func New(active bool, startDir string) Model {
@@ -32,12 +39,14 @@ func New(active bool, startDir string) Model {
 	}
 
 	return Model{
-		Cursor:     0,
-		Active:     active,
-		keyMap:     DefaultKeyMap(),
-		min:        0,
-		max:        0,
-		startDir:   startingDirectory,
-		showHidden: true,
+		Cursor:                0,
+		Active:                active,
+		keyMap:                DefaultKeyMap(),
+		min:                   0,
+		max:                   0,
+		startDir:              startingDirectory,
+		showHidden:            true,
+		StatusMessage:         "",
+		StatusMessageLifetime: time.Second,
 	}
 }

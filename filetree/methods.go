@@ -1,6 +1,8 @@
 package filetree
 
-import "fmt"
+import (
+	"fmt"
+)
 
 const (
 	thousand    = 1000
