@@ -34,12 +34,12 @@ func getDirectoryListingCmd(directoryName string, showHidden bool) tea.Cmd {
 			return nil
 		}
 
-		files, err := filesystem.GetDirectoryListing(directoryName, showHidden)
+		err = os.Chdir(directoryName)
 		if err != nil {
 			return errorMsg(err)
 		}
 
-		err = os.Chdir(directoryName)
+		files, err := filesystem.GetDirectoryListing(directoryName, showHidden)
 		if err != nil {
 			return errorMsg(err)
 		}

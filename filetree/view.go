@@ -14,7 +14,16 @@ func (m Model) View() string {
 			continue
 		}
 
-		if i == m.Cursor {
+		switch {
+		case !m.Active:
+			if file.IsDirectory {
+				fileList.WriteString(inactiveStyle.Render("🗀 "))
+			} else {
+				fileList.WriteString(inactiveStyle.Render("🗎 "))
+			}
+
+			fileList.WriteString(inactiveStyle.Render(file.Name) + "\n")
+		case i == m.Cursor && m.Active:
 			if file.IsDirectory {
 				fileList.WriteString(selectedItemStyle.Render("🗀 "))
 			} else {
@@ -22,7 +31,7 @@ func (m Model) View() string {
 			}
 
 			fileList.WriteString(selectedItemStyle.Render(file.Name) + "\n")
-		} else {
+		case i != m.Cursor && m.Active:
 			if file.IsDirectory {
 				fileList.WriteString(unselectedItemStyle.Render("🗀 "))
 			} else {

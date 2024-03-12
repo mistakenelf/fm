@@ -12,15 +12,16 @@ type DirectoryItem struct {
 }
 
 type Model struct {
-	Cursor   int
-	files    []DirectoryItem
-	active   bool
-	keyMap   KeyMap
-	min      int
-	max      int
-	height   int
-	width    int
-	startDir string
+	Cursor     int
+	files      []DirectoryItem
+	Active     bool
+	keyMap     KeyMap
+	min        int
+	max        int
+	height     int
+	width      int
+	startDir   string
+	showHidden bool
 }
 
 func New(active bool, startDir string) Model {
@@ -31,11 +32,12 @@ func New(active bool, startDir string) Model {
 	}
 
 	return Model{
-		Cursor:   0,
-		active:   active,
-		keyMap:   DefaultKeyMap(),
-		min:      0,
-		max:      0,
-		startDir: startingDirectory,
+		Cursor:     0,
+		Active:     active,
+		keyMap:     DefaultKeyMap(),
+		min:        0,
+		max:        0,
+		startDir:   startingDirectory,
+		showHidden: true,
 	}
 }

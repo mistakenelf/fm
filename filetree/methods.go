@@ -40,7 +40,7 @@ func ConvertBytesToSizeString(size int64) string {
 
 // SetIsActive sets if the bubble is currently active.
 func (m *Model) SetIsActive(active bool) {
-	m.active = active
+	m.Active = active
 }
 
 // GetSelectedItem returns the currently selected file/dir.

@@ -5,4 +5,5 @@ import "github.com/charmbracelet/lipgloss"
 var (
 	selectedItemStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("212")).Bold(true)
 	unselectedItemStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ffffff"))
+	inactiveStyle       = lipgloss.NewStyle().Foreground(lipgloss.Color("243"))
 )
