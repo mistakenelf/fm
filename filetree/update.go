@@ -14,7 +14,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		cmds []tea.Cmd
 	)
 
-	if !m.Active {
+	if m.Disabled {
 		return m, nil
 	}
 
@@ -24,7 +24,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case statusMessageTimeoutMsg:
 		m.StatusMessage = ""
 	case copyToClipboardMsg:
-		m.StatusMessage = string(msg)
+		cmds = append(cmds, m.NewStatusMessage(lipgloss.NewStyle().Bold(true).Render(string(msg))))
 	case getDirectoryListingMsg:
 		if msg != nil {
 			m.files = msg
@@ -88,41 +88,51 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.max = m.min + m.height
 			}
 		case key.Matches(msg, m.keyMap.GoToHomeDirectory):
-			return m, getDirectoryListingCmd(filesystem.HomeDirectory, m.showHidden)
+			return m, getDirectoryListingCmd(filesystem.HomeDirectory, m.showHidden, m.showDirectoriesOnly, m.showFilesOnly)
 		case key.Matches(msg, m.keyMap.GoToRootDirectory):
-			return m, getDirectoryListingCmd(filesystem.RootDirectory, m.showHidden)
+			return m, getDirectoryListingCmd(filesystem.RootDirectory, m.showHidden, m.showDirectoriesOnly, m.showFilesOnly)
 		case key.Matches(msg, m.keyMap.ToggleHidden):
 			m.showHidden = !m.showHidden
 
-			return m, getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden)
+			return m, getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden, m.showDirectoriesOnly, m.showFilesOnly)
 		case key.Matches(msg, m.keyMap.OpenDirectory):
 			if m.files[m.Cursor].IsDirectory {
-				return m, getDirectoryListingCmd(m.files[m.Cursor].Path, m.showHidden)
+				return m, getDirectoryListingCmd(m.files[m.Cursor].Path, m.showHidden, m.showDirectoriesOnly, m.showFilesOnly)
 			}
 		case key.Matches(msg, m.keyMap.PreviousDirectory):
-			return m, getDirectoryListingCmd(filepath.Dir(m.files[m.Cursor].CurrentDirectory), m.showHidden)
+			return m, getDirectoryListingCmd(filepath.Dir(m.files[m.Cursor].CurrentDirectory), m.showHidden, m.showDirectoriesOnly, m.showFilesOnly)
 		case key.Matches(msg, m.keyMap.CopyPathToClipboard):
 			return m, copyToClipboardCmd(m.files[m.Cursor].Name)
 		case key.Matches(msg, m.keyMap.CopyDirectoryItem):
 			return m, tea.Sequence(
 				copyDirectoryItemCmd(m.files[m.Cursor].Name, m.files[m.Cursor].IsDirectory),
-				getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden),
+				getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden, m.showDirectoriesOnly, m.showFilesOnly),
 			)
 		case key.Matches(msg, m.keyMap.DeleteDirectoryItem):
 			return m, tea.Sequence(
 				deleteDirectoryItemCmd(m.files[m.Cursor].Name, m.files[m.Cursor].IsDirectory),
-				getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden),
+				getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden, m.showDirectoriesOnly, m.showFilesOnly),
 			)
 		case key.Matches(msg, m.keyMap.ZipDirectoryItem):
 			return m, tea.Sequence(
 				zipDirectoryCmd(m.files[m.Cursor].Name),
-				getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden),
+				getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden, m.showDirectoriesOnly, m.showFilesOnly),
 			)
 		case key.Matches(msg, m.keyMap.UnzipDirectoryItem):
 			return m, tea.Sequence(
 				unzipDirectoryCmd(m.files[m.Cursor].Name),
-				getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden),
+				getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden, m.showDirectoriesOnly, m.showFilesOnly),
 			)
+		case key.Matches(msg, m.keyMap.ShowDirectoriesOnly):
+			m.showDirectoriesOnly = !m.showDirectoriesOnly
+			m.showFilesOnly = false
+
+			return m, getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden, m.showDirectoriesOnly, m.showFilesOnly)
+		case key.Matches(msg, m.keyMap.ShowFilesOnly):
+			m.showFilesOnly = !m.showFilesOnly
+			m.showDirectoriesOnly = false
+
+			return m, getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden, m.showDirectoriesOnly, m.showFilesOnly)
 		}
 	}
 

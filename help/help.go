@@ -34,7 +34,6 @@ type Model struct {
 	Active     bool
 }
 
-// generateHelpScreen generates the help text based on the title and entries.
 func generateHelpScreen(title string, titleColor TitleColor, entries []Entry, width, height int) string {
 	helpScreen := ""
 

@@ -2,6 +2,7 @@ package filetree
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"time"
@@ -17,10 +18,11 @@ type copyToClipboardMsg string
 type statusMessageTimeoutMsg struct{}
 
 // getDirectoryListingCmd updates the directory listing based on the name of the directory provided.
-func getDirectoryListingCmd(directoryName string, showHidden bool) tea.Cmd {
+func getDirectoryListingCmd(directoryName string, showHidden, directoriesOnly, filesOnly bool) tea.Cmd {
 	return func() tea.Msg {
 		var err error
 		var directoryItems []DirectoryItem
+		var files []fs.DirEntry
 
 		if directoryName == filesystem.HomeDirectory {
 			directoryName, err = filesystem.GetHomeDirectory()
@@ -43,9 +45,22 @@ func getDirectoryListingCmd(directoryName string, showHidden bool) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		files, err := filesystem.GetDirectoryListing(directoryName, showHidden)
-		if err != nil {
-			return errorMsg(err.Error())
+		if !directoriesOnly && !filesOnly {
+			files, err = filesystem.GetDirectoryListing(directoryName, showHidden)
+			if err != nil {
+				return errorMsg(err.Error())
+			}
+		} else {
+			listingType := filesystem.DirectoriesListingType
+
+			if filesOnly {
+				listingType = filesystem.FilesListingType
+			}
+
+			files, err = filesystem.GetDirectoryListingByType(directoryName, listingType, showHidden)
+			if err != nil {
+				return errorMsg(err.Error())
+			}
 		}
 
 		workingDirectory, err := filesystem.GetWorkingDirectory()

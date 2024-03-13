@@ -19,6 +19,7 @@ const (
 	showImageState
 	showMarkdownState
 	showPdfState
+	showHelpState
 )
 
 type Config struct {
@@ -30,24 +31,24 @@ type Config struct {
 }
 
 type model struct {
-	filetree  filetree.Model
-	help      help.Model
-	code      code.Model
-	image     image.Model
-	markdown  markdown.Model
-	pdf       pdf.Model
-	statusbar statusbar.Model
-	state     sessionState
-	keys      KeyMap
-	activeBox int
-	config    Config
+	filetree   filetree.Model
+	help       help.Model
+	code       code.Model
+	image      image.Model
+	markdown   markdown.Model
+	pdf        pdf.Model
+	statusbar  statusbar.Model
+	state      sessionState
+	keys       KeyMap
+	activePane int
+	config     Config
 }
 
 // New creates a new instance of the UI.
 func New(cfg Config) model {
-	filetreeModel := filetree.New(true, cfg.StartDir)
+	filetreeModel := filetree.New(cfg.StartDir)
 
-	codeModel := code.New(false)
+	codeModel := code.New()
 	codeModel.SetSyntaxTheme("pygments")
 
 	imageModel := image.New(false)

@@ -40,9 +40,9 @@ func ConvertBytesToSizeString(size int64) string {
 	return ""
 }
 
-// SetIsActive sets if the bubble is currently active.
-func (m *Model) SetIsActive(active bool) {
-	m.Active = active
+// SetDisabled sets if the bubble is currently active.
+func (m *Model) SetDisabled(disabled bool) {
+	m.Disabled = disabled
 }
 
 // GetSelectedItem returns the currently selected file/dir.

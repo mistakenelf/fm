@@ -18,7 +18,7 @@ type DirectoryItem struct {
 type Model struct {
 	Cursor                int
 	files                 []DirectoryItem
-	Active                bool
+	Disabled              bool
 	keyMap                KeyMap
 	min                   int
 	max                   int
@@ -26,12 +26,14 @@ type Model struct {
 	width                 int
 	startDir              string
 	showHidden            bool
+	showDirectoriesOnly   bool
+	showFilesOnly         bool
 	StatusMessage         string
 	StatusMessageLifetime time.Duration
 	statusMessageTimer    *time.Timer
 }
 
-func New(active bool, startDir string) Model {
+func New(startDir string) Model {
 	startingDirectory := filesystem.CurrentDirectory
 
 	if startDir != "" {
@@ -40,7 +42,7 @@ func New(active bool, startDir string) Model {
 
 	return Model{
 		Cursor:                0,
-		Active:                active,
+		Disabled:              false,
 		keyMap:                DefaultKeyMap(),
 		min:                   0,
 		max:                   0,
@@ -48,5 +50,7 @@ func New(active bool, startDir string) Model {
 		showHidden:            true,
 		StatusMessage:         "",
 		StatusMessageLifetime: time.Second,
+		showFilesOnly:         false,
+		showDirectoriesOnly:   false,
 	}
 }

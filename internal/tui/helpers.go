@@ -36,83 +36,51 @@ func contains(s []string, str string) bool {
 
 func (m *model) updateStatusbarContent() {
 	if m.filetree.GetSelectedItem().Name != "" {
+		statusMessage := m.filetree.GetSelectedItem().CurrentDirectory
+
 		if m.filetree.StatusMessage != "" {
-			m.statusbar.SetContent(
-				m.filetree.GetSelectedItem().Name,
-				m.filetree.StatusMessage,
-				fmt.Sprintf("%d/%d", m.filetree.Cursor, m.filetree.GetTotalItems()),
-				fmt.Sprintf("%s %s", "🗀", "FM"),
-			)
-		} else {
-			m.statusbar.SetContent(
-				m.filetree.GetSelectedItem().Name,
-				m.filetree.GetSelectedItem().CurrentDirectory,
-				fmt.Sprintf("%d/%d", m.filetree.Cursor, m.filetree.GetTotalItems()),
-				fmt.Sprintf("%s %s", "🗀", "FM"),
-			)
+			statusMessage = m.filetree.StatusMessage
 		}
-	}
-}
 
-// togglePane toggles between the two panes.
-func (m *model) togglePane() {
-	m.activeBox = (m.activeBox + 1) % 2
-
-	if m.activeBox == 0 {
-		m.deactivateAllBubbles()
-		m.filetree.SetIsActive(true)
-	} else {
-		switch m.state {
-		case idleState:
-			m.deactivateAllBubbles()
-			m.help.SetIsActive(true)
-		case showCodeState:
-			m.deactivateAllBubbles()
-			m.code.SetIsActive(true)
-		case showImageState:
-			m.deactivateAllBubbles()
-			m.image.SetIsActive(true)
-		case showMarkdownState:
-			m.deactivateAllBubbles()
-			m.markdown.SetIsActive(true)
-		case showPdfState:
-			m.deactivateAllBubbles()
-			m.markdown.SetIsActive(true)
+		if m.code.StatusMessage != "" {
+			statusMessage = m.code.StatusMessage
 		}
+
+		m.statusbar.SetContent(
+			m.filetree.GetSelectedItem().Name,
+			statusMessage,
+			fmt.Sprintf("%d/%d", m.filetree.Cursor, m.filetree.GetTotalItems()),
+			fmt.Sprintf("%s %s", "🗀", "FM"),
+		)
 	}
 }
 
 // openFile opens the currently selected file.
-func (m *model) openFile() []tea.Cmd {
-	var cmds []tea.Cmd
-
+func (m *model) openFile() tea.Cmd {
 	selectedFile := m.filetree.GetSelectedItem()
+
 	if !selectedFile.IsDirectory {
 		m.resetViewports()
 
 		switch {
 		case selectedFile.Extension == ".png" || selectedFile.Extension == ".jpg" || selectedFile.Extension == ".jpeg":
 			m.state = showImageState
-			readFileCmd := m.image.SetFileName(selectedFile.Name)
-			cmds = append(cmds, readFileCmd)
+			return m.image.SetFileName(selectedFile.Name)
 		case selectedFile.Extension == ".md" && m.config.PrettyMarkdown:
 			m.state = showMarkdownState
-			markdownCmd := m.markdown.SetFileName(selectedFile.Name)
-			cmds = append(cmds, markdownCmd)
+			return m.markdown.SetFileName(selectedFile.Name)
 		case selectedFile.Extension == ".pdf":
 			m.state = showPdfState
-			pdfCmd := m.pdf.SetFileName(selectedFile.Name)
-			cmds = append(cmds, pdfCmd)
+			return m.pdf.SetFileName(selectedFile.Name)
 		case contains(forbiddenExtensions, selectedFile.Extension):
 			return nil
 		default:
 			m.state = showCodeState
-			readFileCmd := m.code.SetFileName(selectedFile.Name)
-			cmds = append(cmds, readFileCmd)
+			return m.code.SetFileName(selectedFile.Name)
 		}
 	}
 
-	return cmds
+	return nil
 }
 
 // resetViewports goes to the top of all bubbles viewports.
@@ -122,14 +90,4 @@ func (m *model) resetViewports() {
 	m.markdown.GotoTop()
 	m.help.GotoTop()
 	m.image.GotoTop()
-}
-
-// deactivateAllBubbles sets all bubbles to inactive.
-func (m *model) deactivateAllBubbles() {
-	m.filetree.SetIsActive(false)
-	m.code.SetIsActive(false)
-	m.markdown.SetIsActive(false)
-	m.image.SetIsActive(false)
-	m.pdf.SetIsActive(false)
-	m.help.SetIsActive(false)
 }

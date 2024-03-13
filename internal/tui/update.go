@@ -3,6 +3,7 @@ package tui
 import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/mistakenelf/fm/statusbar"
 )
 
@@ -12,9 +13,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmd  tea.Cmd
 		cmds []tea.Cmd
 	)
-
-	m.filetree, cmd = m.filetree.Update(msg)
-	cmds = append(cmds, cmd)
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -38,14 +36,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case key.Matches(msg, m.keys.Exit):
 			return m, tea.Quit
-		case key.Matches(msg, m.keys.OpenFile):
-			cmds = append(cmds, tea.Batch(m.openFile()...))
 		case key.Matches(msg, m.keys.TogglePane):
-			m.togglePane()
+			m.activePane = (m.activePane + 1) % 2
+
+			if m.activePane == 0 {
+				m.filetree.SetDisabled(false)
+			} else {
+				m.filetree.SetDisabled(true)
+			}
+
+			return m, nil
 		}
 	}
 
-	m.updateStatusbarContent()
+	if m.filetree.GetSelectedItem().Name != "" {
+		cmds = append(cmds, m.openFile())
+	}
+
+	m.filetree, cmd = m.filetree.Update(msg)
+	cmds = append(cmds, cmd)
 
 	m.code, cmd = m.code.Update(msg)
 	cmds = append(cmds, cmd)
@@ -61,6 +70,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	m.help, cmd = m.help.Update(msg)
 	cmds = append(cmds, cmd)
+
+	m.updateStatusbarContent()
 
 	return m, tea.Batch(cmds...)
 }
