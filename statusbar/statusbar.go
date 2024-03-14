@@ -11,6 +11,8 @@ import (
 // Height represents the height of the statusbar.
 const Height = 1
 
+// ColorConfig represents the the foreground and background
+// color configuration.
 type ColorConfig struct {
 	Foreground lipgloss.AdaptiveColor
 	Background lipgloss.AdaptiveColor
@@ -45,7 +47,7 @@ func (m *Model) SetSize(width int) {
 	m.Width = width
 }
 
-// Update updates the size of the statusbar.
+// Update updates the UI of the statusbar.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -71,7 +73,7 @@ func (m *Model) SetColors(firstColumnColors, secondColumnColors, thirdColumnColo
 	m.FourthColumnColors = fourthColumnColors
 }
 
-// View returns a string representation of a statusbar.
+// View returns a string representation of the statusbar.
 func (m Model) View() string {
 	width := lipgloss.Width
 

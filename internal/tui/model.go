@@ -39,7 +39,7 @@ type model struct {
 	pdf        pdf.Model
 	statusbar  statusbar.Model
 	state      sessionState
-	keys       KeyMap
+	keyMap     keyMap
 	activePane int
 	config     Config
 }
@@ -50,10 +50,17 @@ func New(cfg Config) model {
 
 	codeModel := code.New()
 	codeModel.SetSyntaxTheme("pygments")
+	codeModel.SetViewportDisabled(true)
 
-	imageModel := image.New(false)
-	markdownModel := markdown.New(false)
-	pdfModel := pdf.New(false)
+	imageModel := image.New()
+	imageModel.SetViewportDisabled(true)
+
+	markdownModel := markdown.New()
+	markdownModel.SetViewportDisabled(true)
+
+	pdfModel := pdf.New()
+	pdfModel.SetViewportDisabled(true)
+
 	statusbarModel := statusbar.New(
 		statusbar.ColorConfig{
 			Foreground: cfg.Theme.StatusBarSelectedFileForegroundColor,
@@ -74,7 +81,6 @@ func New(cfg Config) model {
 	)
 
 	helpModel := help.New(
-		false,
 		"Help",
 		help.TitleColor{
 			Background: cfg.Theme.TitleBackgroundColor,
@@ -106,6 +112,7 @@ func New(cfg Config) model {
 			{Key: "tab", Description: "Toggle between boxes"},
 		},
 	)
+	helpModel.SetViewportDisabled(true)
 
 	return model{
 		filetree:  filetreeModel,
@@ -116,6 +123,6 @@ func New(cfg Config) model {
 		pdf:       pdfModel,
 		statusbar: statusbarModel,
 		config:    cfg,
-		keys:      DefaultKeyMap(),
+		keyMap:    defaultKeyMap(),
 	}
 }

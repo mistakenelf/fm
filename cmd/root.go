@@ -6,10 +6,11 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/spf13/cobra"
+
 	"github.com/mistakenelf/fm/filesystem"
 	"github.com/mistakenelf/fm/internal/theme"
 	"github.com/mistakenelf/fm/internal/tui"
-	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{

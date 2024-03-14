@@ -9,17 +9,18 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
+
 	"github.com/mistakenelf/fm/filesystem"
 )
 
 type renderMarkdownMsg string
 type errorMsg error
 
-// Model represents the properties of a code bubble.
+// Model represents the properties of a markdown bubble.
 type Model struct {
-	Viewport viewport.Model
-	Active   bool
-	FileName string
+	Viewport         viewport.Model
+	ViewportDisabled bool
+	FileName         string
 }
 
 // RenderMarkdown renders the markdown content with glamour.
@@ -43,7 +44,6 @@ func RenderMarkdown(width int, content string) (string, error) {
 	return out, nil
 }
 
-// renderMarkdownCmd renders text as pretty markdown.
 func renderMarkdownCmd(width int, filename string) tea.Cmd {
 	return func() tea.Msg {
 		content, err := filesystem.ReadFileContent(filename)
@@ -61,12 +61,12 @@ func renderMarkdownCmd(width int, filename string) tea.Cmd {
 }
 
 // New creates a new instance of markdown.
-func New(active bool) Model {
+func New() Model {
 	viewPort := viewport.New(0, 0)
 
 	return Model{
-		Viewport: viewPort,
-		Active:   active,
+		Viewport:         viewPort,
+		ViewportDisabled: false,
 	}
 }
 
@@ -100,12 +100,12 @@ func (m *Model) GotoTop() {
 	m.Viewport.GotoTop()
 }
 
-// SetIsActive sets if the bubble is currently active.
-func (m *Model) SetIsActive(active bool) {
-	m.Active = active
+// SetViewportDisabled toggles the state of the viewport.
+func (m *Model) SetViewportDisabled(disabled bool) {
+	m.ViewportDisabled = disabled
 }
 
-// Update handles updating the UI of a code bubble.
+// Update handles updating the UI of a markdown bubble.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var (
 		cmd  tea.Cmd
@@ -129,7 +129,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		return m, nil
 	}
 
-	if m.Active {
+	if !m.ViewportDisabled {
 		m.Viewport, cmd = m.Viewport.Update(msg)
 		cmds = append(cmds, cmd)
 	}

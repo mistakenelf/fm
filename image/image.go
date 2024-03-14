@@ -46,7 +46,6 @@ func ToString(width int, img image.Image) string {
 	return str.String()
 }
 
-// convertImageToStringCmd redraws the image based on the width provided.
 func convertImageToStringCmd(width int, filename string) tea.Cmd {
 	return func() tea.Msg {
 		imageContent, err := os.Open(filepath.Clean(filename))
@@ -65,31 +64,30 @@ func convertImageToStringCmd(width int, filename string) tea.Cmd {
 	}
 }
 
-// Model represents the properties of a code bubble.
+// Model represents the properties of a image bubble.
 type Model struct {
-	Viewport    viewport.Model
-	Active      bool
-	FileName    string
-	ImageString string
+	Viewport         viewport.Model
+	ViewportDisabled bool
+	FileName         string
+	ImageString      string
 }
 
-// New creates a new instance of code.
-func New(active bool) Model {
+// New creates a new instance of an image.
+func New() Model {
 	viewPort := viewport.New(0, 0)
 
 	return Model{
-		Viewport: viewPort,
-		Active:   active,
+		Viewport:         viewPort,
+		ViewportDisabled: false,
 	}
 }
 
-// Init initializes the code bubble.
+// Init initializes the image bubble.
 func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-// SetFileName sets current file to highlight, this
-// returns a cmd which will highlight the text.
+// SetFileName sets the image file and convers it to a string.
 func (m *Model) SetFileName(filename string) tea.Cmd {
 	m.FileName = filename
 
@@ -108,9 +106,9 @@ func (m *Model) SetSize(w, h int) tea.Cmd {
 	return nil
 }
 
-// SetIsActive sets if the bubble is currently active
-func (m *Model) SetIsActive(active bool) {
-	m.Active = active
+// SetViewportDisabled toggles the state of the viewport.
+func (m *Model) SetViewportDisabled(disabled bool) {
+	m.ViewportDisabled = disabled
 }
 
 // GotoTop jumps to the top of the viewport.
@@ -118,7 +116,7 @@ func (m *Model) GotoTop() {
 	m.Viewport.GotoTop()
 }
 
-// Update handles updating the UI of a code bubble.
+// Update handles updating the UI of the image bubble.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var (
 		cmd  tea.Cmd
@@ -147,7 +145,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		return m, nil
 	}
 
-	if m.Active {
+	if !m.ViewportDisabled {
 		m.Viewport, cmd = m.Viewport.Update(msg)
 		cmds = append(cmds, cmd)
 	}
@@ -155,7 +153,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-// View returns a string representation of the code bubble.
+// View returns a string representation of the image bubble.
 func (m Model) View() string {
 	return m.Viewport.View()
 }

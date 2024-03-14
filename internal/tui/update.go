@@ -32,25 +32,42 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, cmd)
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, m.keys.Quit):
+		case key.Matches(msg, m.keyMap.Quit):
 			return m, tea.Quit
-		case key.Matches(msg, m.keys.Exit):
-			return m, tea.Quit
-		case key.Matches(msg, m.keys.TogglePane):
+		case key.Matches(msg, m.keyMap.OpenFile):
+			cmds = append(cmds, m.openFile())
+		case key.Matches(msg, m.keyMap.ResetState):
+			m.state = idleState
+			m.disableAllViewports()
+			m.resetViewports()
+		case key.Matches(msg, m.keyMap.TogglePane):
 			m.activePane = (m.activePane + 1) % 2
 
 			if m.activePane == 0 {
 				m.filetree.SetDisabled(false)
+				m.disableAllViewports()
 			} else {
 				m.filetree.SetDisabled(true)
+
+				switch m.state {
+				case idleState:
+					m.disableAllViewports()
+					m.help.SetViewportDisabled(false)
+				case showCodeState:
+					m.disableAllViewports()
+					m.code.SetViewportDisabled(false)
+				case showImageState:
+					m.disableAllViewports()
+					m.image.SetViewportDisabled(false)
+				case showPdfState:
+					m.disableAllViewports()
+					m.pdf.SetViewportDisabled(false)
+				case showMarkdownState:
+					m.disableAllViewports()
+					m.markdown.SetViewportDisabled(false)
+				}
 			}
-
-			return m, nil
 		}
-	}
-
-	if m.filetree.GetSelectedItem().Name != "" {
-		cmds = append(cmds, m.openFile())
 	}
 
 	m.filetree, cmd = m.filetree.Update(msg)

@@ -17,13 +17,13 @@ type errorMsg error
 
 // Model represents the properties of a pdf bubble.
 type Model struct {
-	Viewport viewport.Model
-	Active   bool
-	FileName string
+	Viewport         viewport.Model
+	ViewportDisabled bool
+	FileName         string
 }
 
-// readPdf reads a PDF file given a name.
-func readPdf(name string) (string, error) {
+// ReadPDF reads the content of a PDF and returns it as a string.
+func ReadPDF(name string) (string, error) {
 	file, reader, err := pdf.Open(name)
 	if err != nil {
 		return "", errors.Unwrap(err)
@@ -50,10 +50,9 @@ func readPdf(name string) (string, error) {
 	return buf.String(), nil
 }
 
-// renderPDFCmd reads the content of a PDF and returns its content as a string.
 func renderPDFCmd(filename string) tea.Cmd {
 	return func() tea.Msg {
-		pdfContent, err := readPdf(filename)
+		pdfContent, err := ReadPDF(filename)
 		if err != nil {
 			return errorMsg(err)
 		}
@@ -63,12 +62,12 @@ func renderPDFCmd(filename string) tea.Cmd {
 }
 
 // New creates a new instance of a PDF.
-func New(active bool) Model {
+func New() Model {
 	viewPort := viewport.New(0, 0)
 
 	return Model{
-		Viewport: viewPort,
-		Active:   active,
+		Viewport:         viewPort,
+		ViewportDisabled: false,
 	}
 }
 
@@ -91,9 +90,9 @@ func (m *Model) SetSize(w, h int) {
 	m.Viewport.Height = h
 }
 
-// SetIsActive sets if the bubble is currently active.
-func (m *Model) SetIsActive(active bool) {
-	m.Active = active
+// SetViewportDisabled toggles the state of the viewport.
+func (m *Model) SetViewportDisabled(disabled bool) {
+	m.ViewportDisabled = disabled
 }
 
 // GotoTop jumps to the top of the viewport.
@@ -101,7 +100,7 @@ func (m *Model) GotoTop() {
 	m.Viewport.GotoTop()
 }
 
-// Update handles updating the UI of a code bubble.
+// Update handles updating the UI of the pdf bubble.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var (
 		cmd  tea.Cmd
@@ -125,7 +124,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		return m, nil
 	}
 
-	if m.Active {
+	if !m.ViewportDisabled {
 		m.Viewport, cmd = m.Viewport.Update(msg)
 		cmds = append(cmds, cmd)
 	}

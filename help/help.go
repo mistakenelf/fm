@@ -27,11 +27,11 @@ type Entry struct {
 
 // Model represents the properties of a help bubble.
 type Model struct {
-	Viewport   viewport.Model
-	Entries    []Entry
-	Title      string
-	TitleColor TitleColor
-	Active     bool
+	Viewport         viewport.Model
+	Entries          []Entry
+	Title            string
+	TitleColor       TitleColor
+	ViewportDisabled bool
 }
 
 func generateHelpScreen(title string, titleColor TitleColor, entries []Entry, width, height int) string {
@@ -71,7 +71,6 @@ func generateHelpScreen(title string, titleColor TitleColor, entries []Entry, wi
 
 // New creates a new instance of a help bubble.
 func New(
-	active bool,
 	title string,
 	titleColor TitleColor,
 	entries []Entry,
@@ -80,11 +79,11 @@ func New(
 	viewPort.SetContent(generateHelpScreen(title, titleColor, entries, 0, 0))
 
 	return Model{
-		Viewport:   viewPort,
-		Entries:    entries,
-		Title:      title,
-		Active:     active,
-		TitleColor: titleColor,
+		Viewport:         viewPort,
+		Entries:          entries,
+		Title:            title,
+		ViewportDisabled: false,
+		TitleColor:       titleColor,
 	}
 }
 
@@ -96,9 +95,9 @@ func (m *Model) SetSize(w, h int) {
 	m.Viewport.SetContent(generateHelpScreen(m.Title, m.TitleColor, m.Entries, m.Viewport.Width, m.Viewport.Height))
 }
 
-// SetIsActive sets if the bubble is currently active.
-func (m *Model) SetIsActive(active bool) {
-	m.Active = active
+// SetViewportDisabled toggles the state of the viewport.
+func (m *Model) SetViewportDisabled(disabled bool) {
+	m.ViewportDisabled = disabled
 }
 
 // GotoTop jumps to the top of the viewport.
@@ -120,7 +119,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		cmds []tea.Cmd
 	)
 
-	if m.Active {
+	if !m.ViewportDisabled {
 		m.Viewport, cmd = m.Viewport.Update(msg)
 		cmds = append(cmds, cmd)
 	}

@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/alecthomas/chroma/quick"
+	"github.com/alecthomas/chroma/v2/quick"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -120,7 +120,7 @@ func (m *Model) SetViewportDisabled(disabled bool) {
 	m.ViewportDisabled = disabled
 }
 
-// Update handles updating the UI of a code bubble.
+// Update handles updating the UI of the code bubble.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var (
 		cmd  tea.Cmd

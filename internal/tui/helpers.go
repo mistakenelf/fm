@@ -23,7 +23,6 @@ var forbiddenExtensions = []string{
 	".img",
 }
 
-// contains returns true if the slice contains the string.
 func contains(s []string, str string) bool {
 	for _, v := range s {
 		if v == str {
@@ -55,7 +54,6 @@ func (m *model) updateStatusbarContent() {
 	}
 }
 
-// openFile opens the currently selected file.
 func (m *model) openFile() tea.Cmd {
 	selectedFile := m.filetree.GetSelectedItem()
 
@@ -65,17 +63,21 @@ func (m *model) openFile() tea.Cmd {
 		switch {
 		case selectedFile.Extension == ".png" || selectedFile.Extension == ".jpg" || selectedFile.Extension == ".jpeg":
 			m.state = showImageState
+
 			return m.image.SetFileName(selectedFile.Name)
 		case selectedFile.Extension == ".md" && m.config.PrettyMarkdown:
 			m.state = showMarkdownState
+
 			return m.markdown.SetFileName(selectedFile.Name)
 		case selectedFile.Extension == ".pdf":
 			m.state = showPdfState
+
 			return m.pdf.SetFileName(selectedFile.Name)
 		case contains(forbiddenExtensions, selectedFile.Extension):
 			return nil
 		default:
 			m.state = showCodeState
+
 			return m.code.SetFileName(selectedFile.Name)
 		}
 	}
@@ -83,7 +85,14 @@ func (m *model) openFile() tea.Cmd {
 	return nil
 }
 
-// resetViewports goes to the top of all bubbles viewports.
+func (m *model) disableAllViewports() {
+	m.code.SetViewportDisabled(true)
+	m.pdf.SetViewportDisabled(true)
+	m.markdown.SetViewportDisabled(true)
+	m.help.SetViewportDisabled(true)
+	m.image.SetViewportDisabled(true)
+}
+
 func (m *model) resetViewports() {
 	m.code.GotoTop()
 	m.pdf.GotoTop()
