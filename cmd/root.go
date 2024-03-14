@@ -49,6 +49,11 @@ var rootCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		syntaxTheme, err := cmd.Flags().GetString("syntax-theme")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		// If logging is enabled, logs will be output to debug.log.
 		if enableLogging {
 			f, err := tea.LogToFile("debug.log", "debug")
@@ -72,6 +77,7 @@ var rootCmd = &cobra.Command{
 			PrettyMarkdown: prettyMarkdown,
 			Theme:          appTheme,
 			ShowIcons:      showIcons,
+			SyntaxTheme:    syntaxTheme,
 		}
 
 		m := tui.New(cfg)
@@ -93,6 +99,7 @@ func Execute() {
 	rootCmd.PersistentFlags().Bool("pretty-markdown", true, "Render markdown to look nice")
 	rootCmd.PersistentFlags().String("theme", "default", "Application theme")
 	rootCmd.PersistentFlags().Bool("show-icons", true, "Show icons")
+	rootCmd.PersistentFlags().String("syntax-theme", "dracula", "Set syntax theme for file output")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

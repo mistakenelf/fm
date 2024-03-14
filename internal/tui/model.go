@@ -29,6 +29,7 @@ type Config struct {
 	PrettyMarkdown bool
 	Theme          theme.Theme
 	ShowIcons      bool
+	SyntaxTheme    string
 }
 
 type model struct {
@@ -53,7 +54,7 @@ func New(cfg Config) model {
 	filetreeModel.SetShowIcons(cfg.ShowIcons)
 
 	codeModel := code.New()
-	codeModel.SetSyntaxTheme("pygments")
+	codeModel.SetSyntaxTheme(cfg.SyntaxTheme)
 	codeModel.SetViewportDisabled(true)
 
 	imageModel := image.New()
