@@ -28,6 +28,7 @@ type Config struct {
 	EnableLogging  bool
 	PrettyMarkdown bool
 	Theme          theme.Theme
+	ShowIcons      bool
 }
 
 type model struct {
@@ -47,6 +48,9 @@ type model struct {
 // New creates a new instance of the UI.
 func New(cfg Config) model {
 	filetreeModel := filetree.New(cfg.StartDir)
+	filetreeModel.SetTheme(cfg.Theme.SelectedTreeItemColor, cfg.Theme.UnselectedTreeItemColor)
+	filetreeModel.SetSelectionPath(cfg.SelectionPath)
+	filetreeModel.SetShowIcons(cfg.ShowIcons)
 
 	codeModel := code.New()
 	codeModel.SetSyntaxTheme("pygments")

@@ -1,5 +1,5 @@
 make:
-	go run main.go --theme=nord
+	go run main.go
 
 test:
 	go test ./... -short

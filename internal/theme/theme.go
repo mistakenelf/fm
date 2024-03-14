@@ -6,8 +6,6 @@ import "github.com/charmbracelet/lipgloss"
 type Theme struct {
 	SelectedTreeItemColor                lipgloss.AdaptiveColor
 	UnselectedTreeItemColor              lipgloss.AdaptiveColor
-	ActiveBoxBorderColor                 lipgloss.AdaptiveColor
-	InactiveBoxBorderColor               lipgloss.AdaptiveColor
 	StatusBarSelectedFileForegroundColor lipgloss.AdaptiveColor
 	StatusBarSelectedFileBackgroundColor lipgloss.AdaptiveColor
 	StatusBarBarForegroundColor          lipgloss.AdaptiveColor
@@ -20,13 +18,10 @@ type Theme struct {
 	TitleForegroundColor                 lipgloss.AdaptiveColor
 }
 
-// themeMap represents the mapping of different themes.
 var themeMap = map[string]Theme{
 	"default": {
-		SelectedTreeItemColor:                lipgloss.AdaptiveColor{Dark: "63", Light: "63"},
+		SelectedTreeItemColor:                lipgloss.AdaptiveColor{Dark: "212", Light: "212"},
 		UnselectedTreeItemColor:              lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#000000"},
-		ActiveBoxBorderColor:                 lipgloss.AdaptiveColor{Dark: "#F25D94", Light: "#F25D94"},
-		InactiveBoxBorderColor:               lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#000000"},
 		StatusBarSelectedFileForegroundColor: lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#ffffff"},
 		StatusBarSelectedFileBackgroundColor: lipgloss.AdaptiveColor{Dark: "#F25D94", Light: "#F25D94"},
 		StatusBarBarForegroundColor:          lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#ffffff"},
@@ -41,8 +36,6 @@ var themeMap = map[string]Theme{
 	"gruvbox": {
 		SelectedTreeItemColor:                lipgloss.AdaptiveColor{Dark: "#d65d0e", Light: "#d65d0e"},
 		UnselectedTreeItemColor:              lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#000000"},
-		ActiveBoxBorderColor:                 lipgloss.AdaptiveColor{Dark: "#b8bb26", Light: "#b8bb26"},
-		InactiveBoxBorderColor:               lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#000000"},
 		StatusBarSelectedFileForegroundColor: lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#ffffff"},
 		StatusBarSelectedFileBackgroundColor: lipgloss.AdaptiveColor{Dark: "#cc241d", Light: "#cc241d"},
 		StatusBarBarForegroundColor:          lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#ffffff"},
@@ -57,8 +50,6 @@ var themeMap = map[string]Theme{
 	"nord": {
 		SelectedTreeItemColor:                lipgloss.AdaptiveColor{Dark: "#d08770", Light: "#d08770"},
 		UnselectedTreeItemColor:              lipgloss.AdaptiveColor{Dark: "#e5e9f0", Light: "#3b4252"},
-		ActiveBoxBorderColor:                 lipgloss.AdaptiveColor{Dark: "#a3be8c", Light: "#a3be8c"},
-		InactiveBoxBorderColor:               lipgloss.AdaptiveColor{Dark: "#e5e9f0", Light: "#3b4252"},
 		StatusBarSelectedFileForegroundColor: lipgloss.AdaptiveColor{Dark: "#e5e9f0", Light: "#e5e9f0"},
 		StatusBarSelectedFileBackgroundColor: lipgloss.AdaptiveColor{Dark: "#bf616a", Light: "#bf616a"},
 		StatusBarBarForegroundColor:          lipgloss.AdaptiveColor{Dark: "#e5e9f0", Light: "#e5e9f0"},

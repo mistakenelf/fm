@@ -133,6 +133,11 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			m.showDirectoriesOnly = false
 
 			return m, getDirectoryListingCmd(filesystem.CurrentDirectory, m.showHidden, m.showDirectoriesOnly, m.showFilesOnly)
+		case key.Matches(msg, m.keyMap.WriteSelectionPath):
+			return m, tea.Sequence(
+				writeSelectionPathCmd(m.selectionPath, m.files[m.Cursor].Name),
+				tea.Quit,
+			)
 		}
 	}
 

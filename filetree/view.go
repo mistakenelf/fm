@@ -16,29 +16,35 @@ func (m Model) View() string {
 
 		switch {
 		case m.Disabled:
-			if file.IsDirectory {
-				fileList.WriteString(inactiveStyle.Render("🗀 "))
-			} else {
-				fileList.WriteString(inactiveStyle.Render("🗎 "))
+			if m.showIcons {
+				if file.IsDirectory {
+					fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.inactiveItemColor).Render("🗀 "))
+				} else {
+					fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.inactiveItemColor).Render("🗎 "))
+				}
 			}
 
-			fileList.WriteString(inactiveStyle.Render(file.Name) + "\n")
+			fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.inactiveItemColor).Render(file.Name) + "\n")
 		case i == m.Cursor && !m.Disabled:
-			if file.IsDirectory {
-				fileList.WriteString(selectedItemStyle.Render("🗀 "))
-			} else {
-				fileList.WriteString(selectedItemStyle.Render("🗎 "))
+			if m.showIcons {
+				if file.IsDirectory {
+					fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.selectedItemColor).Render("🗀 "))
+				} else {
+					fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.selectedItemColor).Render("🗎 "))
+				}
 			}
 
-			fileList.WriteString(selectedItemStyle.Render(file.Name) + "\n")
+			fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.selectedItemColor).Render(file.Name) + "\n")
 		case i != m.Cursor && !m.Disabled:
-			if file.IsDirectory {
-				fileList.WriteString(unselectedItemStyle.Render("🗀 "))
-			} else {
-				fileList.WriteString(unselectedItemStyle.Render("🗎 "))
+			if m.showIcons {
+				if file.IsDirectory {
+					fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.unselectedItemColor).Render("🗀 "))
+				} else {
+					fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.unselectedItemColor).Render("🗎 "))
+				}
 			}
 
-			fileList.WriteString(unselectedItemStyle.Render(file.Name) + "\n")
+			fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.unselectedItemColor).Render(file.Name) + "\n")
 		}
 	}
 

@@ -44,6 +44,11 @@ var rootCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		showIcons, err := cmd.Flags().GetBool("show-icons")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		// If logging is enabled, logs will be output to debug.log.
 		if enableLogging {
 			f, err := tea.LogToFile("debug.log", "debug")
@@ -66,6 +71,7 @@ var rootCmd = &cobra.Command{
 			EnableLogging:  enableLogging,
 			PrettyMarkdown: prettyMarkdown,
 			Theme:          appTheme,
+			ShowIcons:      showIcons,
 		}
 
 		m := tui.New(cfg)
@@ -86,6 +92,7 @@ func Execute() {
 	rootCmd.PersistentFlags().Bool("enable-logging", false, "Enable logging for FM")
 	rootCmd.PersistentFlags().Bool("pretty-markdown", true, "Render markdown to look nice")
 	rootCmd.PersistentFlags().String("theme", "default", "Application theme")
+	rootCmd.PersistentFlags().Bool("show-icons", true, "Show icons")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

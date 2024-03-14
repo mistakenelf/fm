@@ -2,6 +2,8 @@ package filetree
 
 import (
 	"fmt"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 const (
@@ -64,4 +66,20 @@ func (m *Model) SetSize(width, height int) {
 	m.height = height - 2
 	m.width = width
 	m.max = m.height - 1
+}
+
+// SetTheme sets the theme of the tree.
+func (m *Model) SetTheme(selectedItemColor, unselectedItemColor lipgloss.AdaptiveColor) {
+	m.selectedItemColor = selectedItemColor
+	m.unselectedItemColor = unselectedItemColor
+}
+
+// SetSelectionPath sets the selection path to be written.
+func (m *Model) SetSelectionPath(path string) {
+	m.selectionPath = path
+}
+
+// SetShowIcons sets whether icons will show or not.
+func (m *Model) SetShowIcons(show bool) {
+	m.showIcons = show
 }

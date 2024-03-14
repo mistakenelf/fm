@@ -203,13 +203,13 @@ func writeSelectionPathCmd(selectionPath, filePath string) tea.Cmd {
 // amount of time. Note that this also returns a command.
 func (m *Model) NewStatusMessage(s string) tea.Cmd {
 	m.StatusMessage = s
+
 	if m.statusMessageTimer != nil {
 		m.statusMessageTimer.Stop()
 	}
 
 	m.statusMessageTimer = time.NewTimer(m.StatusMessageLifetime)
 
-	// Wait for timeout
 	return func() tea.Msg {
 		<-m.statusMessageTimer.C
 		return statusMessageTimeoutMsg{}
