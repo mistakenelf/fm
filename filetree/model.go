@@ -37,6 +37,7 @@ type Model struct {
 	inactiveItemColor     lipgloss.AdaptiveColor
 	selectionPath         string
 	showIcons             bool
+	err                   error
 }
 
 func New(startDir string) Model {

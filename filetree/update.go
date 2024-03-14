@@ -19,6 +19,11 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	}
 
 	switch msg := msg.(type) {
+	case editorFinishedMsg:
+		if msg.err != nil {
+			m.err = msg.err
+			return m, tea.Quit
+		}
 	case errorMsg:
 		cmds = append(cmds, m.NewStatusMessage(lipgloss.NewStyle().Foreground(lipgloss.Color("#cc241d")).Bold(true).Render(string(msg))))
 	case statusMessageTimeoutMsg:
@@ -138,6 +143,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				writeSelectionPathCmd(m.selectionPath, m.files[m.Cursor].Name),
 				tea.Quit,
 			)
+		case key.Matches(msg, m.keyMap.OpenInEditor):
+			return m, openEditorCmd(m.files[m.Cursor].Name)
 		}
 	}
 

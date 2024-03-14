@@ -22,6 +22,7 @@ type KeyMap struct {
 	ShowDirectoriesOnly key.Binding
 	ShowFilesOnly       key.Binding
 	WriteSelectionPath  key.Binding
+	OpenInEditor        key.Binding
 }
 
 func DefaultKeyMap() KeyMap {
@@ -45,5 +46,6 @@ func DefaultKeyMap() KeyMap {
 		ShowDirectoriesOnly: key.NewBinding(key.WithKeys("D"), key.WithHelp("D", "show directories only")),
 		ShowFilesOnly:       key.NewBinding(key.WithKeys("F"), key.WithHelp("F", "show files only")),
 		WriteSelectionPath:  key.NewBinding(key.WithKeys("S"), key.WithHelp("S", "write selection path")),
+		OpenInEditor:        key.NewBinding(key.WithKeys("e"), key.WithHelp("e", "open in editor")),
 	}
 }

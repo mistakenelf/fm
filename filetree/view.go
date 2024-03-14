@@ -9,6 +9,10 @@ import (
 func (m Model) View() string {
 	var fileList strings.Builder
 
+	if m.err != nil {
+		return "Error: " + m.err.Error() + "\n"
+	}
+
 	for i, file := range m.files {
 		if i < m.min || i > m.max {
 			continue

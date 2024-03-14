@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"time"
 
@@ -16,6 +17,7 @@ type getDirectoryListingMsg []DirectoryItem
 type errorMsg string
 type copyToClipboardMsg string
 type statusMessageTimeoutMsg struct{}
+type editorFinishedMsg struct{ err error }
 
 // getDirectoryListingCmd updates the directory listing based on the name of the directory provided.
 func getDirectoryListingCmd(directoryName string, showHidden, directoriesOnly, filesOnly bool) tea.Cmd {
@@ -214,4 +216,16 @@ func (m *Model) NewStatusMessage(s string) tea.Cmd {
 		<-m.statusMessageTimer.C
 		return statusMessageTimeoutMsg{}
 	}
+}
+
+func openEditorCmd(file string) tea.Cmd {
+	editor := os.Getenv("EDITOR")
+	if editor == "" {
+		editor = "vim"
+	}
+
+	c := exec.Command(editor, file)
+	return tea.ExecProcess(c, func(err error) tea.Msg {
+		return editorFinishedMsg{err}
+	})
 }
