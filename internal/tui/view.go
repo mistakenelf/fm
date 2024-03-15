@@ -1,6 +1,8 @@
 package tui
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -20,6 +22,25 @@ func (m model) View() string {
 		rightBox = m.pdf.View()
 	case showMarkdownState:
 		rightBox = m.markdown.View()
+	}
+
+	if m.filetree.GetSelectedItem().Name != "" {
+		statusMessage := m.filetree.GetSelectedItem().CurrentDirectory
+
+		if m.filetree.StatusMessage != "" {
+			statusMessage = m.filetree.StatusMessage
+		}
+
+		if m.code.StatusMessage != "" {
+			statusMessage = m.code.StatusMessage
+		}
+
+		m.statusbar.SetContent(
+			m.filetree.GetSelectedItem().Name,
+			statusMessage,
+			fmt.Sprintf("%d/%d", m.filetree.Cursor, m.filetree.GetTotalItems()),
+			fmt.Sprintf("%s %s", "🗀", "FM"),
+		)
 	}
 
 	return lipgloss.JoinVertical(lipgloss.Top,

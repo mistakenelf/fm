@@ -88,7 +88,5 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.help, cmd = m.help.Update(msg)
 	cmds = append(cmds, cmd)
 
-	m.updateStatusbarContent()
-
 	return m, tea.Batch(cmds...)
 }

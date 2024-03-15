@@ -1,8 +1,6 @@
 package tui
 
 import (
-	"fmt"
-
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -31,27 +29,6 @@ func contains(s []string, str string) bool {
 	}
 
 	return false
-}
-
-func (m *model) updateStatusbarContent() {
-	if m.filetree.GetSelectedItem().Name != "" {
-		statusMessage := m.filetree.GetSelectedItem().CurrentDirectory
-
-		if m.filetree.StatusMessage != "" {
-			statusMessage = m.filetree.StatusMessage
-		}
-
-		if m.code.StatusMessage != "" {
-			statusMessage = m.code.StatusMessage
-		}
-
-		m.statusbar.SetContent(
-			m.filetree.GetSelectedItem().Name,
-			statusMessage,
-			fmt.Sprintf("%d/%d", m.filetree.Cursor, m.filetree.GetTotalItems()),
-			fmt.Sprintf("%s %s", "🗀", "FM"),
-		)
-	}
 }
 
 func (m *model) openFile() tea.Cmd {
