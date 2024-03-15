@@ -26,11 +26,11 @@ const (
 type Config struct {
 	StartDir       string
 	SelectionPath  string
+	SyntaxTheme    string
 	EnableLogging  bool
 	PrettyMarkdown bool
-	Theme          theme.Theme
 	ShowIcons      bool
-	SyntaxTheme    string
+	Theme          theme.Theme
 }
 
 type model struct {

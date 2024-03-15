@@ -24,6 +24,7 @@ type KeyMap struct {
 	WriteSelectionPath  key.Binding
 	OpenInEditor        key.Binding
 	CreateFile          key.Binding
+	CreateDirectory     key.Binding
 }
 
 func DefaultKeyMap() KeyMap {
@@ -46,8 +47,9 @@ func DefaultKeyMap() KeyMap {
 		UnzipDirectoryItem:  key.NewBinding(key.WithKeys("U"), key.WithHelp("U", "unzip directory item")),
 		ShowDirectoriesOnly: key.NewBinding(key.WithKeys("D"), key.WithHelp("D", "show directories only")),
 		ShowFilesOnly:       key.NewBinding(key.WithKeys("F"), key.WithHelp("F", "show files only")),
-		WriteSelectionPath:  key.NewBinding(key.WithKeys("S"), key.WithHelp("S", "write selection path")),
+		WriteSelectionPath:  key.NewBinding(key.WithKeys("W"), key.WithHelp("W", "write selection path")),
 		OpenInEditor:        key.NewBinding(key.WithKeys("e"), key.WithHelp("e", "open in editor")),
-		CreateFile:          key.NewBinding(key.WithKeys("ctrl+f"), key.WithHelp("ctrl+f", "create new file")),
+		CreateFile:          key.NewBinding(key.WithKeys("N"), key.WithHelp("N", "create new file")),
+		CreateDirectory:     key.NewBinding(key.WithKeys("M"), key.WithHelp("M", "create new directory")),
 	}
 }

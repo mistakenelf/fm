@@ -50,14 +50,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.showTextInput = true
 			m.textinput.Focus()
 			m.disableAllViewports()
+
+			m.textinput, cmd = m.textinput.Update(msg)
+			cmds = append(cmds, cmd)
+
+			m.textinput.Reset()
 		case key.Matches(msg, m.keyMap.SubmitTextInput):
 			if m.filetree.CreatingNewFile {
-				m.resetViewports()
-				m.textinput.Blur()
-				m.textinput.Reset()
-				m.filetree.SetDisabled(false)
 				cmds = append(cmds, m.filetree.CreateFileCmd(m.textinput.Value()))
 			}
+
+			if m.filetree.CreatingNewDirectory {
+				cmds = append(cmds, m.filetree.CreateDirectoryCmd(m.textinput.Value()))
+			}
+
+			m.resetViewports()
+			m.textinput.Blur()
+			m.textinput.Reset()
+			m.showTextInput = false
+			m.activePane = 0
 		case key.Matches(msg, m.keyMap.TogglePane):
 			if !m.showTextInput {
 				m.activePane = (m.activePane + 1) % 2
@@ -90,6 +101,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	if m.filetree.CreatingNewDirectory || m.filetree.CreatingNewFile {
+		m.textinput, cmd = m.textinput.Update(msg)
+		cmds = append(cmds, cmd)
+	}
+
 	m.filetree, cmd = m.filetree.Update(msg)
 	cmds = append(cmds, cmd)
 
@@ -106,9 +122,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, cmd)
 
 	m.help, cmd = m.help.Update(msg)
-	cmds = append(cmds, cmd)
-
-	m.textinput, cmd = m.textinput.Update(msg)
 	cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)

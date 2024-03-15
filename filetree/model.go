@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
+
 	"github.com/mistakenelf/fm/filesystem"
 )
 
@@ -12,33 +13,34 @@ type DirectoryItem struct {
 	Details          string
 	Path             string
 	Extension        string
-	IsDirectory      bool
 	CurrentDirectory string
+	IsDirectory      bool
 }
 
 type Model struct {
-	Cursor                int
 	files                 []DirectoryItem
-	Disabled              bool
-	keyMap                KeyMap
+	Cursor                int
 	min                   int
 	max                   int
 	height                int
 	width                 int
-	startDir              string
+	Disabled              bool
 	showHidden            bool
 	showDirectoriesOnly   bool
 	showFilesOnly         bool
+	showIcons             bool
+	CreatingNewFile       bool
+	CreatingNewDirectory  bool
+	keyMap                KeyMap
+	startDir              string
 	StatusMessage         string
+	selectionPath         string
 	StatusMessageLifetime time.Duration
 	statusMessageTimer    *time.Timer
 	selectedItemColor     lipgloss.AdaptiveColor
 	unselectedItemColor   lipgloss.AdaptiveColor
 	inactiveItemColor     lipgloss.AdaptiveColor
-	selectionPath         string
-	showIcons             bool
 	err                   error
-	CreatingNewFile       bool
 }
 
 func New(startDir string) Model {
@@ -65,5 +67,6 @@ func New(startDir string) Model {
 		inactiveItemColor:     lipgloss.AdaptiveColor{Light: "243", Dark: "243"},
 		showIcons:             true,
 		CreatingNewFile:       false,
+		CreatingNewDirectory:  false,
 	}
 }

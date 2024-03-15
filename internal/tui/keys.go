@@ -17,7 +17,7 @@ func defaultKeyMap() keyMap {
 		TogglePane:      key.NewBinding(key.WithKeys("tab"), key.WithHelp("tab", "toggle pane")),
 		OpenFile:        key.NewBinding(key.WithKeys("l"), key.WithHelp("l", "open file")),
 		ResetState:      key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", "reset state")),
-		ShowTextInput:   key.NewBinding(key.WithKeys("ctrl+f"), key.WithHelp("ctrl+f", "show text input")),
+		ShowTextInput:   key.NewBinding(key.WithKeys("N", "M"), key.WithHelp("N, M", "show text input")),
 		SubmitTextInput: key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "submit text input")),
 	}
 }

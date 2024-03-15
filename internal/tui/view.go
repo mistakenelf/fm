@@ -42,7 +42,7 @@ func (m model) View() string {
 		m.statusbar.SetContent(
 			m.filetree.GetSelectedItem().Name,
 			statusMessage,
-			fmt.Sprintf("%d/%d", m.filetree.Cursor, m.filetree.GetTotalItems()),
+			fmt.Sprintf("%d/%d", m.filetree.Cursor+1, m.filetree.GetTotalItems()),
 			fmt.Sprintf("%s %s", "🗀", "FM"),
 		)
 	}

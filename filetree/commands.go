@@ -10,6 +10,7 @@ import (
 
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/mistakenelf/fm/filesystem"
 )
 
@@ -19,6 +20,7 @@ type copyToClipboardMsg string
 type statusMessageTimeoutMsg struct{}
 type editorFinishedMsg struct{ err error }
 type createFileMsg struct{}
+type createDirectoryMsg struct{}
 
 // getDirectoryListingCmd updates the directory listing based on the name of the directory provided.
 func getDirectoryListingCmd(directoryName string, showHidden, directoriesOnly, filesOnly bool) tea.Cmd {
@@ -112,18 +114,18 @@ func deleteDirectoryItemCmd(name string, isDirectory bool) tea.Cmd {
 	}
 }
 
-// createDirectoryCmd creates a directory based on the name provided.
-func createDirectoryCmd(name string) tea.Cmd {
+// CreateDirectoryCmd creates a directory based on the name provided.
+func (m *Model) CreateDirectoryCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		if err := filesystem.CreateDirectory(name); err != nil {
 			return errorMsg(err.Error())
 		}
 
-		return nil
+		return createDirectoryMsg{}
 	}
 }
 
-// createFileCmd creates a file based on the name provided.
+// CreateFileCmd creates a file based on the name provided.
 func (m *Model) CreateFileCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		if err := filesystem.CreateFile(name); err != nil {

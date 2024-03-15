@@ -51,6 +51,7 @@ func (m *model) openFile() tea.Cmd {
 
 			return m.pdf.SetFileName(selectedFile.Name)
 		case contains(forbiddenExtensions, selectedFile.Extension):
+			//TODO: Display an error status message in the statusbar.
 			return nil
 		default:
 			m.state = showCodeState

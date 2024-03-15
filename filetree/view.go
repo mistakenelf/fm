@@ -20,35 +20,37 @@ func (m Model) View() string {
 
 		switch {
 		case m.Disabled:
-			if m.showIcons {
-				if file.IsDirectory {
-					fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.inactiveItemColor).Render("🗀 "))
-				} else {
-					fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.inactiveItemColor).Render("🗎 "))
-				}
-			}
-
-			fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.inactiveItemColor).Render(file.Name) + "\n")
+			fallthrough
 		case i == m.Cursor && !m.Disabled:
-			if m.showIcons {
-				if file.IsDirectory {
-					fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.selectedItemColor).Render("🗀 "))
-				} else {
-					fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.selectedItemColor).Render("🗎 "))
-				}
+			iconColor := m.inactiveItemColor
+			textColor := m.inactiveItemColor
+			if i == m.Cursor && !m.Disabled {
+				iconColor = m.selectedItemColor
+				textColor = m.selectedItemColor
 			}
 
-			fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.selectedItemColor).Render(file.Name) + "\n")
+			if m.showIcons {
+				icon := "🗀 "
+				if !file.IsDirectory {
+					icon = "🗎 "
+				}
+				fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(iconColor).Render(icon))
+			}
+
+			fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(textColor).Render(file.Name) + "\n")
 		case i != m.Cursor && !m.Disabled:
+			iconColor := m.unselectedItemColor
+			textColor := m.unselectedItemColor
+
 			if m.showIcons {
-				if file.IsDirectory {
-					fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.unselectedItemColor).Render("🗀 "))
-				} else {
-					fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.unselectedItemColor).Render("🗎 "))
+				icon := "🗀 "
+				if !file.IsDirectory {
+					icon = "🗎 "
 				}
+				fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(iconColor).Render(icon))
 			}
 
-			fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(m.unselectedItemColor).Render(file.Name) + "\n")
+			fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(textColor).Render(file.Name) + "\n")
 		}
 	}
 
