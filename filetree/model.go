@@ -38,6 +38,7 @@ type Model struct {
 	selectionPath         string
 	showIcons             bool
 	err                   error
+	CreatingNewFile       bool
 }
 
 func New(startDir string) Model {
@@ -63,5 +64,6 @@ func New(startDir string) Model {
 		unselectedItemColor:   lipgloss.AdaptiveColor{Light: "ffffff", Dark: "#000000"},
 		inactiveItemColor:     lipgloss.AdaptiveColor{Light: "243", Dark: "243"},
 		showIcons:             true,
+		CreatingNewFile:       false,
 	}
 }

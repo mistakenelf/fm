@@ -18,6 +18,7 @@ type errorMsg string
 type copyToClipboardMsg string
 type statusMessageTimeoutMsg struct{}
 type editorFinishedMsg struct{ err error }
+type createFileMsg struct{}
 
 // getDirectoryListingCmd updates the directory listing based on the name of the directory provided.
 func getDirectoryListingCmd(directoryName string, showHidden, directoriesOnly, filesOnly bool) tea.Cmd {
@@ -123,13 +124,13 @@ func createDirectoryCmd(name string) tea.Cmd {
 }
 
 // createFileCmd creates a file based on the name provided.
-func createFileCmd(name string) tea.Cmd {
+func (m *Model) CreateFileCmd(name string) tea.Cmd {
 	return func() tea.Msg {
 		if err := filesystem.CreateFile(name); err != nil {
 			return errorMsg(err.Error())
 		}
 
-		return nil
+		return createFileMsg{}
 	}
 }
 

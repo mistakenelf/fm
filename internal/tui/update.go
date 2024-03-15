@@ -35,36 +35,56 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keyMap.Quit):
 			return m, tea.Quit
 		case key.Matches(msg, m.keyMap.OpenFile):
-			cmds = append(cmds, m.openFile())
+			if !m.showTextInput {
+				cmds = append(cmds, m.openFile())
+			}
 		case key.Matches(msg, m.keyMap.ResetState):
 			m.state = idleState
+			m.showTextInput = false
 			m.disableAllViewports()
 			m.resetViewports()
-		case key.Matches(msg, m.keyMap.TogglePane):
-			m.activePane = (m.activePane + 1) % 2
-
-			if m.activePane == 0 {
+			m.filetree.SetDisabled(false)
+			m.textinput.Blur()
+			m.textinput.Reset()
+		case key.Matches(msg, m.keyMap.ShowTextInput):
+			m.showTextInput = true
+			m.textinput.Focus()
+			m.disableAllViewports()
+		case key.Matches(msg, m.keyMap.SubmitTextInput):
+			if m.filetree.CreatingNewFile {
+				m.resetViewports()
+				m.textinput.Blur()
+				m.textinput.Reset()
 				m.filetree.SetDisabled(false)
-				m.disableAllViewports()
-			} else {
-				m.filetree.SetDisabled(true)
+				cmds = append(cmds, m.filetree.CreateFileCmd(m.textinput.Value()))
+			}
+		case key.Matches(msg, m.keyMap.TogglePane):
+			if !m.showTextInput {
+				m.activePane = (m.activePane + 1) % 2
 
-				switch m.state {
-				case idleState:
+				if m.activePane == 0 {
+					m.filetree.SetDisabled(false)
 					m.disableAllViewports()
-					m.help.SetViewportDisabled(false)
-				case showCodeState:
-					m.disableAllViewports()
-					m.code.SetViewportDisabled(false)
-				case showImageState:
-					m.disableAllViewports()
-					m.image.SetViewportDisabled(false)
-				case showPdfState:
-					m.disableAllViewports()
-					m.pdf.SetViewportDisabled(false)
-				case showMarkdownState:
-					m.disableAllViewports()
-					m.markdown.SetViewportDisabled(false)
+				} else {
+					m.filetree.SetDisabled(true)
+
+					switch m.state {
+					case idleState:
+						m.disableAllViewports()
+						m.help.SetViewportDisabled(false)
+					case showCodeState:
+						m.disableAllViewports()
+						m.code.SetViewportDisabled(false)
+					case showImageState:
+						m.disableAllViewports()
+						m.image.SetViewportDisabled(false)
+					case showPdfState:
+						m.disableAllViewports()
+						m.pdf.SetViewportDisabled(false)
+					case showMarkdownState:
+						m.disableAllViewports()
+						m.markdown.SetViewportDisabled(false)
+					}
 				}
 			}
 		}
@@ -86,6 +106,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, cmd)
 
 	m.help, cmd = m.help.Update(msg)
+	cmds = append(cmds, cmd)
+
+	m.textinput, cmd = m.textinput.Update(msg)
 	cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)

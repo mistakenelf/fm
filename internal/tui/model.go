@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/mistakenelf/fm/code"
 	"github.com/mistakenelf/fm/filetree"
 	"github.com/mistakenelf/fm/help"
@@ -33,17 +34,19 @@ type Config struct {
 }
 
 type model struct {
-	filetree   filetree.Model
-	help       help.Model
-	code       code.Model
-	image      image.Model
-	markdown   markdown.Model
-	pdf        pdf.Model
-	statusbar  statusbar.Model
-	state      sessionState
-	keyMap     keyMap
-	activePane int
-	config     Config
+	filetree      filetree.Model
+	help          help.Model
+	code          code.Model
+	image         image.Model
+	markdown      markdown.Model
+	pdf           pdf.Model
+	statusbar     statusbar.Model
+	state         sessionState
+	keyMap        keyMap
+	activePane    int
+	config        Config
+	showTextInput bool
+	textinput     textinput.Model
 }
 
 // New creates a new instance of the UI.
@@ -119,15 +122,19 @@ func New(cfg Config) model {
 	)
 	helpModel.SetViewportDisabled(true)
 
+	textInput := textinput.New()
+
 	return model{
-		filetree:  filetreeModel,
-		help:      helpModel,
-		code:      codeModel,
-		image:     imageModel,
-		markdown:  markdownModel,
-		pdf:       pdfModel,
-		statusbar: statusbarModel,
-		config:    cfg,
-		keyMap:    defaultKeyMap(),
+		filetree:      filetreeModel,
+		help:          helpModel,
+		code:          codeModel,
+		image:         imageModel,
+		markdown:      markdownModel,
+		pdf:           pdfModel,
+		statusbar:     statusbarModel,
+		config:        cfg,
+		keyMap:        defaultKeyMap(),
+		showTextInput: false,
+		textinput:     textInput,
 	}
 }

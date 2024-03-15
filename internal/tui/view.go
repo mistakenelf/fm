@@ -35,6 +35,10 @@ func (m model) View() string {
 			statusMessage = m.code.StatusMessage
 		}
 
+		if m.showTextInput {
+			statusMessage = m.textinput.View()
+		}
+
 		m.statusbar.SetContent(
 			m.filetree.GetSelectedItem().Name,
 			statusMessage,
