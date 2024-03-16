@@ -28,8 +28,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.pdf.SetSize(halfSize, bubbleHeight)
 		m.statusbar.SetSize(msg.Width)
 
-		m.filetree, cmd = m.filetree.Update(msg)
-		cmds = append(cmds, cmd)
+		return m, tea.Batch(cmds...)
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keyMap.Quit):
@@ -45,16 +44,24 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.resetViewports()
 			m.filetree.SetDisabled(false)
 			m.textinput.Blur()
-			m.textinput.Reset()
-		case key.Matches(msg, m.keyMap.ShowTextInput):
-			m.showTextInput = true
-			m.textinput.Focus()
-			m.disableAllViewports()
+			m.filetree.CreatingNewDirectory = false
+			m.filetree.CreatingNewFile = false
 
 			m.textinput, cmd = m.textinput.Update(msg)
 			cmds = append(cmds, cmd)
 
 			m.textinput.Reset()
+		case key.Matches(msg, m.keyMap.ShowTextInput):
+			if m.activePane == 0 {
+				m.showTextInput = true
+				m.textinput.Focus()
+				m.disableAllViewports()
+
+				m.textinput, cmd = m.textinput.Update(msg)
+				cmds = append(cmds, cmd)
+
+				m.textinput.Reset()
+			}
 		case key.Matches(msg, m.keyMap.SubmitTextInput):
 			if m.filetree.CreatingNewFile {
 				cmds = append(cmds, m.filetree.CreateFileCmd(m.textinput.Value()))

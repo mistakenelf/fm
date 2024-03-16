@@ -40,6 +40,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				Render(string(msg))))
 	case createFileMsg:
 		m.CreatingNewFile = false
+		m.CreatingNewDirectory = false
 
 		return m, getDirectoryListingCmd(
 			filesystem.CurrentDirectory,
@@ -49,6 +50,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		)
 	case createDirectoryMsg:
 		m.CreatingNewDirectory = false
+		m.CreatingNewFile = false
 
 		return m, getDirectoryListingCmd(
 			filesystem.CurrentDirectory,
