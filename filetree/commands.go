@@ -90,6 +90,7 @@ func getDirectoryListingCmd(directoryName string, showHidden, directoriesOnly, f
 				Extension:        filepath.Ext(fileInfo.Name()),
 				IsDirectory:      fileInfo.IsDir(),
 				CurrentDirectory: workingDirectory,
+				FileInfo:         fileInfo,
 			})
 		}
 

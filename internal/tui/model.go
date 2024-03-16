@@ -5,6 +5,7 @@ import (
 	"github.com/mistakenelf/fm/code"
 	"github.com/mistakenelf/fm/filetree"
 	"github.com/mistakenelf/fm/help"
+	"github.com/mistakenelf/fm/icons"
 	"github.com/mistakenelf/fm/image"
 	"github.com/mistakenelf/fm/internal/theme"
 	"github.com/mistakenelf/fm/markdown"
@@ -55,6 +56,10 @@ func New(cfg Config) model {
 	filetreeModel.SetTheme(cfg.Theme.SelectedTreeItemColor, cfg.Theme.UnselectedTreeItemColor)
 	filetreeModel.SetSelectionPath(cfg.SelectionPath)
 	filetreeModel.SetShowIcons(cfg.ShowIcons)
+
+	if cfg.ShowIcons {
+		icons.ParseIcons()
+	}
 
 	codeModel := code.New()
 	codeModel.SetSyntaxTheme(cfg.SyntaxTheme)

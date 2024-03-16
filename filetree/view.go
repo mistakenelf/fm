@@ -4,6 +4,8 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+
+	"github.com/mistakenelf/fm/icons"
 )
 
 func (m Model) View() string {
@@ -24,17 +26,15 @@ func (m Model) View() string {
 		case i == m.Cursor && !m.Disabled:
 			iconColor := m.inactiveItemColor
 			textColor := m.inactiveItemColor
+
 			if i == m.Cursor && !m.Disabled {
 				iconColor = m.selectedItemColor
 				textColor = m.selectedItemColor
 			}
 
 			if m.showIcons {
-				icon := "🗀 "
-				if !file.IsDirectory {
-					icon = "🗎 "
-				}
-				fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(iconColor).Render(icon))
+				icon := icons.Icons.GetIcon(file.FileInfo)
+				fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(iconColor).Render(icon) + " ")
 			}
 
 			fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(textColor).Render(file.Name) + "\n")
@@ -43,11 +43,8 @@ func (m Model) View() string {
 			textColor := m.unselectedItemColor
 
 			if m.showIcons {
-				icon := "🗀 "
-				if !file.IsDirectory {
-					icon = "🗎 "
-				}
-				fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(iconColor).Render(icon))
+				icon := icons.Icons.GetIcon(file.FileInfo)
+				fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(iconColor).Render(icon) + " ")
 			}
 
 			fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(textColor).Render(file.Name) + "\n")

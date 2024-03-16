@@ -1,6 +1,7 @@
 package filetree
 
 import (
+	"os"
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
@@ -15,6 +16,7 @@ type DirectoryItem struct {
 	Extension        string
 	CurrentDirectory string
 	IsDirectory      bool
+	FileInfo         os.FileInfo
 }
 
 type Model struct {
