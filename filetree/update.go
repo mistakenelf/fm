@@ -26,7 +26,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case errorMsg:
-		cmds = append(cmds, m.NewStatusMessage(
+		cmds = append(cmds, m.NewStatusMessageCmd(
 			lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#cc241d")).
 				Bold(true).
@@ -34,7 +34,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case statusMessageTimeoutMsg:
 		m.StatusMessage = ""
 	case copyToClipboardMsg:
-		cmds = append(cmds, m.NewStatusMessage(
+		cmds = append(cmds, m.NewStatusMessageCmd(
 			lipgloss.NewStyle().
 				Bold(true).
 				Render(string(msg))))
@@ -120,9 +120,11 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			}
 
 			m.Cursor += m.height
+
 			if m.Cursor >= len(m.files) {
 				m.Cursor = len(m.files) - 1
 			}
+
 			m.min += m.height
 			m.max += m.height
 

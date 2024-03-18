@@ -92,7 +92,15 @@ func (m *Model) SetSize(w, h int) {
 	m.Viewport.Width = w
 	m.Viewport.Height = h
 
-	m.Viewport.SetContent(generateHelpScreen(m.Title, m.TitleColor, m.Entries, m.Viewport.Width, m.Viewport.Height))
+	m.Viewport.SetContent(
+		generateHelpScreen(
+			m.Title,
+			m.TitleColor,
+			m.Entries,
+			m.Viewport.Width,
+			m.Viewport.Height,
+		),
+	)
 }
 
 // SetViewportDisabled toggles the state of the viewport.
@@ -109,7 +117,15 @@ func (m *Model) GotoTop() {
 func (m *Model) SetTitleColor(color TitleColor) {
 	m.TitleColor = color
 
-	m.Viewport.SetContent(generateHelpScreen(m.Title, m.TitleColor, m.Entries, m.Viewport.Width, m.Viewport.Height))
+	m.Viewport.SetContent(
+		generateHelpScreen(
+			m.Title,
+			m.TitleColor,
+			m.Entries,
+			m.Viewport.Width,
+			m.Viewport.Height,
+		),
+	)
 }
 
 // Update handles UI interactions with the help bubble.

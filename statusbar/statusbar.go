@@ -33,7 +33,12 @@ type Model struct {
 }
 
 // New creates a new instance of the statusbar.
-func New(firstColumnColors, secondColumnColors, thirdColumnColors, fourthColumnColors ColorConfig) Model {
+func New(
+	firstColumnColors,
+	secondColumnColors,
+	thirdColumnColors,
+	fourthColumnColors ColorConfig,
+) Model {
 	return Model{
 		FirstColumnColors:  firstColumnColors,
 		SecondColumnColors: secondColumnColors,
@@ -49,9 +54,8 @@ func (m *Model) SetSize(width int) {
 
 // Update updates the UI of the statusbar.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		m.SetSize(msg.Width)
+	if windowSizeMsg, ok := msg.(tea.WindowSizeMsg); ok {
+		m.SetSize(windowSizeMsg.Width)
 	}
 
 	return m, nil
@@ -66,7 +70,12 @@ func (m *Model) SetContent(firstColumn, secondColumn, thirdColumn, fourthColumn 
 }
 
 // SetColors sets the colors of the 4 columns.
-func (m *Model) SetColors(firstColumnColors, secondColumnColors, thirdColumnColors, fourthColumnColors ColorConfig) {
+func (m *Model) SetColors(
+	firstColumnColors,
+	secondColumnColors,
+	thirdColumnColors,
+	fourthColumnColors ColorConfig,
+) {
 	m.FirstColumnColors = firstColumnColors
 	m.SecondColumnColors = secondColumnColors
 	m.ThirdColumnColors = thirdColumnColors

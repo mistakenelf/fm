@@ -117,7 +117,9 @@ func replaceTilde(s string) string {
 // trimmed. Empty lines are skipped.
 func readPairs(r io.Reader) ([][]string, error) {
 	var pairs [][]string
+
 	s := bufio.NewScanner(r)
+
 	for s.Scan() {
 		line := s.Text()
 
@@ -162,12 +164,15 @@ func readPairs(r io.Reader) ([][]string, error) {
 					squote = !squote
 					continue
 				}
+
 				if r == '"' && !squote {
 					dquote = !dquote
 					continue
 				}
+
 				buf = append(buf, r)
 			}
+
 			pair[i] = string(buf)
 		}
 

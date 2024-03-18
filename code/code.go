@@ -59,8 +59,8 @@ func readFileContentCmd(fileName, syntaxTheme string) tea.Cmd {
 }
 
 // NewStatusMessage sets a new status message, which will show for a limited
-// amount of time. Note that this also returns a command.
-func (m *Model) NewStatusMessage(s string) tea.Cmd {
+// amount of time.
+func (m *Model) NewStatusMessageCmd(s string) tea.Cmd {
 	m.StatusMessage = s
 	if m.statusMessageTimer != nil {
 		m.statusMessageTimer.Stop()
@@ -73,6 +73,13 @@ func (m *Model) NewStatusMessage(s string) tea.Cmd {
 		<-m.statusMessageTimer.C
 		return statusMessageTimeoutMsg{}
 	}
+}
+
+// SetFileName sets current file to highlight.
+func (m *Model) SetFileNameCmd(filename string) tea.Cmd {
+	m.Filename = filename
+
+	return readFileContentCmd(filename, m.SyntaxTheme)
 }
 
 // New creates a new instance of code.
@@ -90,13 +97,6 @@ func New() Model {
 // Init initializes the code bubble.
 func (m Model) Init() tea.Cmd {
 	return nil
-}
-
-// SetFileName sets current file to highlight.
-func (m *Model) SetFileName(filename string) tea.Cmd {
-	m.Filename = filename
-
-	return readFileContentCmd(filename, m.SyntaxTheme)
 }
 
 // SetSyntaxTheme sets the syntax theme of the rendered code.
@@ -141,7 +141,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.StatusMessage = ""
 	case errorMsg:
 		m.Filename = ""
-		cmds = append(cmds, m.NewStatusMessage(lipgloss.NewStyle().Foreground(lipgloss.Color("#cc241d")).Bold(true).Render(string(msg))))
+		cmds = append(cmds, m.NewStatusMessageCmd(
+			lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#cc241d")).
+				Bold(true).
+				Render(string(msg)),
+		))
 	}
 
 	if !m.ViewportDisabled {

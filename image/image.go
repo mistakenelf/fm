@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -16,7 +17,19 @@ import (
 )
 
 type convertImageToStringMsg string
-type errorMsg error
+type errorMsg string
+type statusMessageTimeoutMsg struct{}
+
+// Model represents the properties of a image bubble.
+type Model struct {
+	Viewport              viewport.Model
+	ViewportDisabled      bool
+	FileName              string
+	ImageString           string
+	StatusMessage         string
+	StatusMessageLifetime time.Duration
+	statusMessageTimer    *time.Timer
+}
 
 // ToString converts an image to a string representation of an image.
 func ToString(width int, img image.Image) string {
@@ -46,16 +59,33 @@ func ToString(width int, img image.Image) string {
 	return str.String()
 }
 
+// NewStatusMessage sets a new status message, which will show for a limited
+// amount of time.
+func (m *Model) NewStatusMessageCmd(s string) tea.Cmd {
+	m.StatusMessage = s
+
+	if m.statusMessageTimer != nil {
+		m.statusMessageTimer.Stop()
+	}
+
+	m.statusMessageTimer = time.NewTimer(m.StatusMessageLifetime)
+
+	return func() tea.Msg {
+		<-m.statusMessageTimer.C
+		return statusMessageTimeoutMsg{}
+	}
+}
+
 func convertImageToStringCmd(width int, filename string) tea.Cmd {
 	return func() tea.Msg {
 		imageContent, err := os.Open(filepath.Clean(filename))
 		if err != nil {
-			return errorMsg(err)
+			return errorMsg(err.Error())
 		}
 
 		img, _, err := image.Decode(imageContent)
 		if err != nil {
-			return errorMsg(err)
+			return errorMsg(err.Error())
 		}
 
 		imageString := ToString(width, img)
@@ -64,38 +94,15 @@ func convertImageToStringCmd(width int, filename string) tea.Cmd {
 	}
 }
 
-// Model represents the properties of a image bubble.
-type Model struct {
-	Viewport         viewport.Model
-	ViewportDisabled bool
-	FileName         string
-	ImageString      string
-}
-
-// New creates a new instance of an image.
-func New() Model {
-	viewPort := viewport.New(0, 0)
-
-	return Model{
-		Viewport:         viewPort,
-		ViewportDisabled: false,
-	}
-}
-
-// Init initializes the image bubble.
-func (m Model) Init() tea.Cmd {
-	return nil
-}
-
-// SetFileName sets the image file and convers it to a string.
-func (m *Model) SetFileName(filename string) tea.Cmd {
+// SetFileName sets the image file and converts it to a string.
+func (m *Model) SetFileNameCmd(filename string) tea.Cmd {
 	m.FileName = filename
 
 	return convertImageToStringCmd(m.Viewport.Width, filename)
 }
 
 // SetSize sets the size of the bubble.
-func (m *Model) SetSize(w, h int) tea.Cmd {
+func (m *Model) SetSizeCmd(w, h int) tea.Cmd {
 	m.Viewport.Width = w
 	m.Viewport.Height = h
 
@@ -103,6 +110,22 @@ func (m *Model) SetSize(w, h int) tea.Cmd {
 		return convertImageToStringCmd(m.Viewport.Width, m.FileName)
 	}
 
+	return nil
+}
+
+// New creates a new instance of an image.
+func New() Model {
+	viewPort := viewport.New(0, 0)
+
+	return Model{
+		Viewport:              viewPort,
+		ViewportDisabled:      false,
+		StatusMessageLifetime: time.Second,
+	}
+}
+
+// Init initializes the image bubble.
+func (m Model) Init() tea.Cmd {
 	return nil
 }
 
@@ -134,15 +157,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 		return m, nil
 	case errorMsg:
-		m.FileName = ""
-		m.ImageString = lipgloss.NewStyle().
-			Width(m.Viewport.Width).
-			Height(m.Viewport.Height).
-			Render("Error: " + msg.Error())
-
-		m.Viewport.SetContent(m.ImageString)
-
-		return m, nil
+		cmds = append(cmds, m.NewStatusMessageCmd(
+			lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#cc241d")).
+				Bold(true).
+				Render(string(msg)),
+		))
 	}
 
 	if !m.ViewportDisabled {

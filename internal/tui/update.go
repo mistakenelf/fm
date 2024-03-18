@@ -15,12 +15,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	)
 
 	switch msg := msg.(type) {
+	case statusMessageTimeoutMsg:
+		m.statusMessage = ""
 	case tea.WindowSizeMsg:
 		halfSize := msg.Width / 2
 		bubbleHeight := msg.Height - statusbar.Height
 
-		cmds = append(cmds, m.image.SetSize(halfSize, bubbleHeight))
-		cmds = append(cmds, m.markdown.SetSize(halfSize, bubbleHeight))
+		cmds = append(cmds, m.image.SetSizeCmd(halfSize, bubbleHeight))
+		cmds = append(cmds, m.markdown.SetSizeCmd(halfSize, bubbleHeight))
 
 		m.filetree.SetSize(halfSize, bubbleHeight)
 		m.help.SetSize(halfSize, bubbleHeight)
@@ -35,7 +37,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case key.Matches(msg, m.keyMap.OpenFile):
 			if !m.showTextInput {
-				cmds = append(cmds, m.openFile())
+				cmds = append(cmds, m.openFileCmd())
 			}
 		case key.Matches(msg, m.keyMap.ResetState):
 			m.state = idleState

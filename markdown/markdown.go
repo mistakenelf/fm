@@ -4,6 +4,7 @@ package markdown
 
 import (
 	"errors"
+	"time"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -14,13 +15,17 @@ import (
 )
 
 type renderMarkdownMsg string
-type errorMsg error
+type errorMsg string
+type statusMessageTimeoutMsg struct{}
 
 // Model represents the properties of a markdown bubble.
 type Model struct {
-	Viewport         viewport.Model
-	ViewportDisabled bool
-	FileName         string
+	Viewport              viewport.Model
+	ViewportDisabled      bool
+	FileName              string
+	StatusMessage         string
+	StatusMessageLifetime time.Duration
+	statusMessageTimer    *time.Timer
 }
 
 // RenderMarkdown renders the markdown content with glamour.
@@ -48,43 +53,45 @@ func renderMarkdownCmd(width int, filename string) tea.Cmd {
 	return func() tea.Msg {
 		content, err := filesystem.ReadFileContent(filename)
 		if err != nil {
-			return errorMsg(err)
+			return errorMsg(err.Error())
 		}
 
 		markdownContent, err := RenderMarkdown(width, content)
 		if err != nil {
-			return errorMsg(err)
+			return errorMsg(err.Error())
 		}
 
 		return renderMarkdownMsg(markdownContent)
 	}
 }
 
-// New creates a new instance of markdown.
-func New() Model {
-	viewPort := viewport.New(0, 0)
+// NewStatusMessage sets a new status message, which will show for a limited
+// amount of time.
+func (m *Model) NewStatusMessageCmd(s string) tea.Cmd {
+	m.StatusMessage = s
 
-	return Model{
-		Viewport:         viewPort,
-		ViewportDisabled: false,
+	if m.statusMessageTimer != nil {
+		m.statusMessageTimer.Stop()
 	}
-}
 
-// Init initializes the code bubble.
-func (m Model) Init() tea.Cmd {
-	return nil
+	m.statusMessageTimer = time.NewTimer(m.StatusMessageLifetime)
+
+	return func() tea.Msg {
+		<-m.statusMessageTimer.C
+		return statusMessageTimeoutMsg{}
+	}
 }
 
 // SetFileName sets current file to render, this
 // returns a cmd which will render the text.
-func (m *Model) SetFileName(filename string) tea.Cmd {
+func (m *Model) SetFileNameCmd(filename string) tea.Cmd {
 	m.FileName = filename
 
 	return renderMarkdownCmd(m.Viewport.Width, filename)
 }
 
 // SetSize sets the size of the bubble.
-func (m *Model) SetSize(w, h int) tea.Cmd {
+func (m *Model) SetSizeCmd(w, h int) tea.Cmd {
 	m.Viewport.Width = w
 	m.Viewport.Height = h
 
@@ -92,6 +99,22 @@ func (m *Model) SetSize(w, h int) tea.Cmd {
 		return renderMarkdownCmd(m.Viewport.Width, m.FileName)
 	}
 
+	return nil
+}
+
+// New creates a new instance of markdown.
+func New() Model {
+	viewPort := viewport.New(0, 0)
+
+	return Model{
+		Viewport:              viewPort,
+		ViewportDisabled:      false,
+		StatusMessageLifetime: time.Second,
+	}
+}
+
+// Init initializes the code bubble.
+func (m Model) Init() tea.Cmd {
 	return nil
 }
 
@@ -124,9 +147,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		return m, nil
 	case errorMsg:
 		m.FileName = ""
-		m.Viewport.SetContent(msg.Error())
-
-		return m, nil
+		cmds = append(cmds, m.NewStatusMessageCmd(
+			lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#cc241d")).
+				Bold(true).
+				Render(string(msg)),
+		))
 	}
 
 	if !m.ViewportDisabled {

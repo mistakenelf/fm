@@ -206,8 +206,8 @@ func writeSelectionPathCmd(selectionPath, filePath string) tea.Cmd {
 }
 
 // NewStatusMessage sets a new status message, which will show for a limited
-// amount of time. Note that this also returns a command.
-func (m *Model) NewStatusMessage(s string) tea.Cmd {
+// amount of time.
+func (m *Model) NewStatusMessageCmd(s string) tea.Cmd {
 	m.StatusMessage = s
 
 	if m.statusMessageTimer != nil {
@@ -229,6 +229,7 @@ func openEditorCmd(file string) tea.Cmd {
 	}
 
 	c := exec.Command(editor, file)
+
 	return tea.ExecProcess(c, func(err error) tea.Msg {
 		return editorFinishedMsg{err}
 	})

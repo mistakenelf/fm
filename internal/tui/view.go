@@ -35,6 +35,22 @@ func (m model) View() string {
 			statusMessage = m.code.StatusMessage
 		}
 
+		if m.markdown.StatusMessage != "" {
+			statusMessage = m.markdown.StatusMessage
+		}
+
+		if m.pdf.StatusMessage != "" {
+			statusMessage = m.pdf.StatusMessage
+		}
+
+		if m.image.StatusMessage != "" {
+			statusMessage = m.image.StatusMessage
+		}
+
+		if m.statusMessage != "" {
+			statusMessage = m.statusMessage
+		}
+
 		if m.showTextInput {
 			statusMessage = m.textinput.View()
 		}

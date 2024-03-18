@@ -9,6 +9,8 @@ type keyMap struct {
 	ResetState      key.Binding
 	ShowTextInput   key.Binding
 	SubmitTextInput key.Binding
+	GotoTop         key.Binding
+	GotoBottom      key.Binding
 }
 
 func defaultKeyMap() keyMap {
@@ -19,5 +21,7 @@ func defaultKeyMap() keyMap {
 		ResetState:      key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", "reset state")),
 		ShowTextInput:   key.NewBinding(key.WithKeys("N", "M"), key.WithHelp("N, M", "show text input")),
 		SubmitTextInput: key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "submit text input")),
+		GotoTop:         key.NewBinding(key.WithKeys("g"), key.WithHelp("g", "go to top")),
+		GotoBottom:      key.NewBinding(key.WithKeys("G"), key.WithHelp("G", "go to bottom")),
 	}
 }

@@ -189,6 +189,7 @@ func Zip(name string) error {
 	fileExtension := filepath.Ext(name)
 	splitFileName := strings.Split(name, "/")
 	fileName := splitFileName[len(splitFileName)-1]
+
 	switch {
 	case strings.HasPrefix(fileName, ".") && fileExtension != "" && fileExtension == fileName:
 		output = fmt.Sprintf("%s_%d.zip", fileName, time.Now().Unix())
@@ -233,6 +234,7 @@ func Zip(name string) error {
 
 			relPath := strings.TrimPrefix(filePath, name)
 			zipFile, err := zipWriter.Create(relPath)
+
 			if err != nil {
 				return errors.Unwrap(err)
 			}
@@ -393,6 +395,7 @@ func CopyFile(name string) error {
 	fileExtension := filepath.Ext(name)
 	splitFileName := strings.Split(name, "/")
 	fileName := splitFileName[len(splitFileName)-1]
+
 	switch {
 	case strings.HasPrefix(fileName, ".") && fileExtension != "" && fileExtension == fileName:
 		output = fmt.Sprintf("%s_%d", fileName, time.Now().Unix())
@@ -452,6 +455,8 @@ func CopyDirectory(name string) error {
 
 // GetDirectoryItemSize calculates the size of a directory or file.
 func GetDirectoryItemSize(path string) (int64, error) {
+	var size int64
+
 	curFile, err := os.Stat(path)
 	if err != nil {
 		return 0, errors.Unwrap(err)
@@ -461,7 +466,6 @@ func GetDirectoryItemSize(path string) (int64, error) {
 		return curFile.Size(), nil
 	}
 
-	var size int64
 	err = filepath.WalkDir(path, func(path string, entry os.DirEntry, err error) error {
 		if err != nil {
 			return errors.Unwrap(err)

@@ -5,6 +5,7 @@ package pdf
 import (
 	"bytes"
 	"errors"
+	"time"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -13,13 +14,17 @@ import (
 )
 
 type renderPDFMsg string
-type errorMsg error
+type errorMsg string
+type statusMessageTimeoutMsg struct{}
 
 // Model represents the properties of a pdf bubble.
 type Model struct {
-	Viewport         viewport.Model
-	ViewportDisabled bool
-	FileName         string
+	Viewport              viewport.Model
+	ViewportDisabled      bool
+	FileName              string
+	StatusMessage         string
+	StatusMessageLifetime time.Duration
+	statusMessageTimer    *time.Timer
 }
 
 // ReadPDF reads the content of a PDF and returns it as a string.
@@ -54,11 +59,36 @@ func renderPDFCmd(filename string) tea.Cmd {
 	return func() tea.Msg {
 		pdfContent, err := ReadPDF(filename)
 		if err != nil {
-			return errorMsg(err)
+			return errorMsg(err.Error())
 		}
 
 		return renderPDFMsg(pdfContent)
 	}
+}
+
+// NewStatusMessage sets a new status message, which will show for a limited
+// amount of time.
+func (m *Model) NewStatusMessageCmd(s string) tea.Cmd {
+	m.StatusMessage = s
+
+	if m.statusMessageTimer != nil {
+		m.statusMessageTimer.Stop()
+	}
+
+	m.statusMessageTimer = time.NewTimer(m.StatusMessageLifetime)
+
+	return func() tea.Msg {
+		<-m.statusMessageTimer.C
+		return statusMessageTimeoutMsg{}
+	}
+}
+
+// SetFileName sets current file to render, this
+// returns a cmd which will render the pdf.
+func (m *Model) SetFileNameCmd(filename string) tea.Cmd {
+	m.FileName = filename
+
+	return renderPDFCmd(filename)
 }
 
 // New creates a new instance of a PDF.
@@ -66,22 +96,15 @@ func New() Model {
 	viewPort := viewport.New(0, 0)
 
 	return Model{
-		Viewport:         viewPort,
-		ViewportDisabled: false,
+		Viewport:              viewPort,
+		ViewportDisabled:      false,
+		StatusMessageLifetime: time.Second,
 	}
 }
 
 // Init initializes the PDF bubble.
 func (m Model) Init() tea.Cmd {
 	return nil
-}
-
-// SetFileName sets current file to render, this
-// returns a cmd which will render the pdf.
-func (m *Model) SetFileName(filename string) tea.Cmd {
-	m.FileName = filename
-
-	return renderPDFCmd(filename)
 }
 
 // SetSize sets the size of the bubble.
@@ -119,9 +142,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		return m, nil
 	case errorMsg:
 		m.FileName = ""
-		m.Viewport.SetContent(msg.Error())
-
-		return m, nil
+		cmds = append(cmds, m.NewStatusMessageCmd(
+			lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#cc241d")).
+				Bold(true).
+				Render(string(msg)),
+		))
 	}
 
 	if !m.ViewportDisabled {
