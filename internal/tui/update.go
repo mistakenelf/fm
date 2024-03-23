@@ -20,12 +20,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		halfSize := msg.Width / 2
 		height := msg.Height - statusbar.Height
+		m.height = height
 
 		cmds = append(cmds, m.image.SetSizeCmd(halfSize, height))
 		cmds = append(cmds, m.markdown.SetSizeCmd(halfSize, height))
 
 		m.filetree.SetSize(halfSize, height-3)
-		m.secondaryFiletree.SetSize(halfSize, height)
+		m.secondaryFiletree.SetSize(halfSize, height-3)
 		m.help.SetSize(halfSize, height)
 		m.code.SetSize(halfSize, height)
 		m.pdf.SetSize(halfSize, height)
@@ -37,7 +38,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keyMap.Quit):
 			return m, tea.Quit
 		case key.Matches(msg, m.keyMap.OpenFile):
-			if !m.showTextInput {
+			if !m.showTextInput && m.activePane == 0 {
 				cmds = append(cmds, m.openFileCmd())
 			}
 		case key.Matches(msg, m.keyMap.ResetState):
@@ -59,9 +60,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			m.textinput.Reset()
 		case key.Matches(msg, m.keyMap.MoveDirectoryItem):
-			m.directoryBeforeMove = m.filetree.GetSelectedItem().CurrentDirectory
-			m.state = showMoveState
-			m.filetree.SetDisabled(true)
+			if m.activePane == 0 && !m.filetree.CreatingNewDirectory && !m.filetree.CreatingNewFile {
+				m.directoryBeforeMove = m.filetree.GetSelectedItem().CurrentDirectory
+				m.state = showMoveState
+				m.filetree.SetDisabled(true)
+			}
 		case key.Matches(msg, m.keyMap.ShowTextInput):
 			if m.activePane == 0 && !m.filetree.CreatingNewDirectory && !m.filetree.CreatingNewFile {
 				m.showTextInput = true
@@ -73,13 +76,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				m.textinput.Reset()
 			}
-		case key.Matches(msg, m.keyMap.SubmitTextInput):
+		case key.Matches(msg, m.keyMap.Submit):
 			if m.filetree.CreatingNewFile {
 				cmds = append(cmds, m.filetree.CreateFileCmd(m.textinput.Value()))
-			}
-
-			if m.filetree.CreatingNewDirectory {
+			} else if m.filetree.CreatingNewDirectory {
 				cmds = append(cmds, m.filetree.CreateDirectoryCmd(m.textinput.Value()))
+			} else {
+				cmds = append(
+					cmds,
+					m.filetree.MoveDirectoryItemCmd(
+						m.filetree.GetSelectedItem().Path,
+						m.secondaryFiletree.CurrentDirectory+"/"+m.filetree.GetSelectedItem().Name,
+					),
+				)
 			}
 
 			m.resetViewports()

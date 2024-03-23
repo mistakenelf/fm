@@ -73,6 +73,5 @@ func (m Model) View() string {
 
 	return lipgloss.NewStyle().
 		Width(m.width).
-		Height(m.height).
 		Render(fileList.String())
 }

@@ -8,7 +8,7 @@ type keyMap struct {
 	OpenFile          key.Binding
 	ResetState        key.Binding
 	ShowTextInput     key.Binding
-	SubmitTextInput   key.Binding
+	Submit            key.Binding
 	GotoTop           key.Binding
 	GotoBottom        key.Binding
 	MoveDirectoryItem key.Binding
@@ -21,7 +21,7 @@ func defaultKeyMap() keyMap {
 		OpenFile:          key.NewBinding(key.WithKeys("l", "right"), key.WithHelp("l", "open file")),
 		ResetState:        key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", "reset state")),
 		ShowTextInput:     key.NewBinding(key.WithKeys("N", "M"), key.WithHelp("N, M", "show text input")),
-		SubmitTextInput:   key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "submit text input")),
+		Submit:            key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "submit text input")),
 		GotoTop:           key.NewBinding(key.WithKeys("g"), key.WithHelp("g", "go to top")),
 		GotoBottom:        key.NewBinding(key.WithKeys("G"), key.WithHelp("G", "go to bottom")),
 		MoveDirectoryItem: key.NewBinding(key.WithKeys("m"), key.WithHelp("m", "move directory item")),

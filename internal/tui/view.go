@@ -25,7 +25,7 @@ func (m model) View() string {
 	}
 
 	return lipgloss.JoinVertical(lipgloss.Top,
-		lipgloss.JoinHorizontal(lipgloss.Top, leftBox, rightBox),
+		lipgloss.NewStyle().Height(m.height).Render(lipgloss.JoinHorizontal(lipgloss.Top, leftBox, rightBox)),
 		m.statusbar.View(),
 	)
 }

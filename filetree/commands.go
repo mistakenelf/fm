@@ -24,6 +24,7 @@ type statusMessageTimeoutMsg struct{}
 type editorFinishedMsg struct{ err error }
 type createFileMsg struct{}
 type createDirectoryMsg struct{}
+type moveDirectoryItemMsg struct{}
 
 // NewStatusMessageCmd sets a new status message, which will show for a limited
 // amount of time. Note that this also returns a command.
@@ -61,6 +62,17 @@ func (m *Model) CreateFileCmd(name string) tea.Cmd {
 		}
 
 		return createFileMsg{}
+	}
+}
+
+// MoveDirectoryItemCmd moves an item from one place to another.
+func (m Model) MoveDirectoryItemCmd(source, destination string) tea.Cmd {
+	return func() tea.Msg {
+		if err := filesystem.MoveDirectoryItem(source, destination); err != nil {
+			return errorMsg(err.Error())
+		}
+
+		return moveDirectoryItemMsg{}
 	}
 }
 

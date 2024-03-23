@@ -31,6 +31,11 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				Render(string(msg))))
 	case statusMessageTimeoutMsg:
 		m.StatusMessage = ""
+	case moveDirectoryItemMsg:
+		m.CreatingNewFile = false
+		m.CreatingNewDirectory = false
+
+		return m, m.GetDirectoryListingCmd(filesystem.CurrentDirectory)
 	case copyToClipboardMsg:
 		cmds = append(cmds, m.NewStatusMessageCmd(
 			lipgloss.NewStyle().
