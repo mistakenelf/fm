@@ -34,22 +34,45 @@ func (m Model) View() string {
 
 			if m.showIcons {
 				icon := icons.Icons.GetIcon(file.FileInfo)
-				fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(iconColor).Render(icon) + " ")
+				fileList.WriteString(
+					lipgloss.NewStyle().
+						Bold(true).
+						Foreground(iconColor).
+						Render(icon) + " ",
+				)
 			}
 
-			fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(textColor).Render(file.Name) + "\n")
+			fileList.WriteString(
+				lipgloss.NewStyle().
+					Bold(true).
+					Foreground(textColor).
+					Render(file.Name) + "\n",
+			)
 		case i != m.Cursor && !m.Disabled:
 			iconColor := m.unselectedItemColor
 			textColor := m.unselectedItemColor
 
 			if m.showIcons {
 				icon := icons.Icons.GetIcon(file.FileInfo)
-				fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(iconColor).Render(icon) + " ")
+				fileList.WriteString(
+					lipgloss.NewStyle().
+						Bold(true).
+						Foreground(iconColor).
+						Render(icon) + " ",
+				)
 			}
 
-			fileList.WriteString(lipgloss.NewStyle().Bold(true).Foreground(textColor).Render(file.Name) + "\n")
+			fileList.WriteString(
+				lipgloss.NewStyle().
+					Bold(true).
+					Foreground(textColor).
+					Render(file.Name) + "\n",
+			)
 		}
 	}
 
-	return lipgloss.NewStyle().Width(m.width).Height(m.height).Render(fileList.String())
+	return lipgloss.NewStyle().
+		Width(m.width).
+		Height(m.height).
+		Render(fileList.String())
 }

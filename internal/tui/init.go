@@ -7,5 +7,9 @@ import (
 
 // Init intializes the UI.
 func (m model) Init() tea.Cmd {
-	return tea.Batch(m.filetree.Init(), textinput.Blink)
+	return tea.Batch(
+		m.filetree.Init(),
+		m.secondaryFiletree.Init(),
+		textinput.Blink,
+	)
 }

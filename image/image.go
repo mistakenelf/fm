@@ -139,6 +139,11 @@ func (m *Model) GotoTop() {
 	m.Viewport.GotoTop()
 }
 
+// GotoBottom jumps to the bottom of the viewport.
+func (m *Model) GotoBottom() {
+	m.Viewport.GotoBottom()
+}
+
 // Update handles updating the UI of the image bubble.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var (

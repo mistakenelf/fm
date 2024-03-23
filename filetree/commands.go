@@ -14,7 +14,10 @@ import (
 	"github.com/mistakenelf/fm/filesystem"
 )
 
-type getDirectoryListingMsg []DirectoryItem
+type getDirectoryListingMsg struct {
+	files            []DirectoryItem
+	workingDirectory string
+}
 type errorMsg string
 type copyToClipboardMsg string
 type statusMessageTimeoutMsg struct{}
@@ -22,8 +25,47 @@ type editorFinishedMsg struct{ err error }
 type createFileMsg struct{}
 type createDirectoryMsg struct{}
 
-// getDirectoryListingCmd updates the directory listing based on the name of the directory provided.
-func getDirectoryListingCmd(directoryName string, showHidden, directoriesOnly, filesOnly bool) tea.Cmd {
+// NewStatusMessageCmd sets a new status message, which will show for a limited
+// amount of time. Note that this also returns a command.
+func (m *Model) NewStatusMessageCmd(s string) tea.Cmd {
+	m.StatusMessage = s
+
+	if m.statusMessageTimer != nil {
+		m.statusMessageTimer.Stop()
+	}
+
+	m.statusMessageTimer = time.NewTimer(m.StatusMessageLifetime)
+
+	return func() tea.Msg {
+		<-m.statusMessageTimer.C
+		return statusMessageTimeoutMsg{}
+	}
+}
+
+// CreateDirectoryCmd creates a directory based on the name provided.
+func (m *Model) CreateDirectoryCmd(name string) tea.Cmd {
+	return func() tea.Msg {
+		if err := filesystem.CreateDirectory(name); err != nil {
+			return errorMsg(err.Error())
+		}
+
+		return createDirectoryMsg{}
+	}
+}
+
+// CreateFileCmd creates a file based on the name provided.
+func (m *Model) CreateFileCmd(name string) tea.Cmd {
+	return func() tea.Msg {
+		if err := filesystem.CreateFile(name); err != nil {
+			return errorMsg(err.Error())
+		}
+
+		return createFileMsg{}
+	}
+}
+
+// GetDirectoryListingCmd updates the directory listing based on the name of the directory provided.
+func (m Model) GetDirectoryListingCmd(directoryName string) tea.Cmd {
 	return func() tea.Msg {
 		var err error
 		var directoryItems []DirectoryItem
@@ -50,19 +92,19 @@ func getDirectoryListingCmd(directoryName string, showHidden, directoriesOnly, f
 			return errorMsg(err.Error())
 		}
 
-		if !directoriesOnly && !filesOnly {
-			files, err = filesystem.GetDirectoryListing(directoryName, showHidden)
+		if !m.showDirectoriesOnly && !m.showFilesOnly {
+			files, err = filesystem.GetDirectoryListing(directoryName, m.showHidden)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
 		} else {
 			listingType := filesystem.DirectoriesListingType
 
-			if filesOnly {
+			if m.showFilesOnly {
 				listingType = filesystem.FilesListingType
 			}
 
-			files, err = filesystem.GetDirectoryListingByType(directoryName, listingType, showHidden)
+			files, err = filesystem.GetDirectoryListingByType(directoryName, listingType, m.showHidden)
 			if err != nil {
 				return errorMsg(err.Error())
 			}
@@ -79,22 +121,24 @@ func getDirectoryListingCmd(directoryName string, showHidden, directoriesOnly, f
 				continue
 			}
 
-			status := fmt.Sprintf("%s %s",
-				ConvertBytesToSizeString(fileInfo.Size()),
-				fileInfo.Mode().String())
+			fileSize := ConvertBytesToSizeString(fileInfo.Size())
 
 			directoryItems = append(directoryItems, DirectoryItem{
 				Name:             file.Name(),
-				Details:          status,
+				Details:          fileInfo.Mode().String(),
 				Path:             filepath.Join(workingDirectory, file.Name()),
 				Extension:        filepath.Ext(fileInfo.Name()),
 				IsDirectory:      fileInfo.IsDir(),
 				CurrentDirectory: workingDirectory,
 				FileInfo:         fileInfo,
+				FileSize:         fileSize,
 			})
 		}
 
-		return getDirectoryListingMsg(directoryItems)
+		return getDirectoryListingMsg{
+			files:            directoryItems,
+			workingDirectory: workingDirectory,
+		}
 	}
 }
 
@@ -112,28 +156,6 @@ func deleteDirectoryItemCmd(name string, isDirectory bool) tea.Cmd {
 		}
 
 		return nil
-	}
-}
-
-// CreateDirectoryCmd creates a directory based on the name provided.
-func (m *Model) CreateDirectoryCmd(name string) tea.Cmd {
-	return func() tea.Msg {
-		if err := filesystem.CreateDirectory(name); err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return createDirectoryMsg{}
-	}
-}
-
-// CreateFileCmd creates a file based on the name provided.
-func (m *Model) CreateFileCmd(name string) tea.Cmd {
-	return func() tea.Msg {
-		if err := filesystem.CreateFile(name); err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return createFileMsg{}
 	}
 }
 
@@ -202,23 +224,6 @@ func writeSelectionPathCmd(selectionPath, filePath string) tea.Cmd {
 		}
 
 		return nil
-	}
-}
-
-// NewStatusMessage sets a new status message, which will show for a limited
-// amount of time.
-func (m *Model) NewStatusMessageCmd(s string) tea.Cmd {
-	m.StatusMessage = s
-
-	if m.statusMessageTimer != nil {
-		m.statusMessageTimer.Stop()
-	}
-
-	m.statusMessageTimer = time.NewTimer(m.StatusMessageLifetime)
-
-	return func() tea.Msg {
-		<-m.statusMessageTimer.C
-		return statusMessageTimeoutMsg{}
 	}
 }
 

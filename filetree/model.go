@@ -14,6 +14,7 @@ type DirectoryItem struct {
 	Details          string
 	Path             string
 	Extension        string
+	FileSize         string
 	CurrentDirectory string
 	IsDirectory      bool
 	FileInfo         os.FileInfo
@@ -43,6 +44,7 @@ type Model struct {
 	unselectedItemColor   lipgloss.AdaptiveColor
 	inactiveItemColor     lipgloss.AdaptiveColor
 	err                   error
+	CurrentDirectory      string
 }
 
 func New(startDir string) Model {

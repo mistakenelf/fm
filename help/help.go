@@ -113,6 +113,11 @@ func (m *Model) GotoTop() {
 	m.Viewport.GotoTop()
 }
 
+// GotoBottom jumps to the bottom of the viewport.
+func (m *Model) GotoBottom() {
+	m.Viewport.GotoBottom()
+}
+
 // SetTitleColor sets the color of the title.
 func (m *Model) SetTitleColor(color TitleColor) {
 	m.TitleColor = color

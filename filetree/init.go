@@ -5,5 +5,5 @@ import (
 )
 
 func (m Model) Init() tea.Cmd {
-	return getDirectoryListingCmd(m.startDir, true, false, false)
+	return m.GetDirectoryListingCmd(m.startDir)
 }

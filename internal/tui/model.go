@@ -25,6 +25,7 @@ const (
 	showMarkdownState
 	showPdfState
 	showHelpState
+	showMoveState
 )
 
 type Config struct {
@@ -39,6 +40,7 @@ type Config struct {
 
 type model struct {
 	filetree              filetree.Model
+	secondaryFiletree     filetree.Model
 	help                  help.Model
 	code                  code.Model
 	image                 image.Model
@@ -52,6 +54,7 @@ type model struct {
 	showTextInput         bool
 	textinput             textinput.Model
 	statusMessage         string
+	directoryBeforeMove   string
 	statusMessageLifetime time.Duration
 	statusMessageTimer    *time.Timer
 }
@@ -62,6 +65,11 @@ func New(cfg Config) model {
 	filetreeModel.SetTheme(cfg.Theme.SelectedTreeItemColor, cfg.Theme.UnselectedTreeItemColor)
 	filetreeModel.SetSelectionPath(cfg.SelectionPath)
 	filetreeModel.SetShowIcons(cfg.ShowIcons)
+
+	secondaryFiletree := filetree.New(cfg.StartDir)
+	secondaryFiletree.SetTheme(cfg.Theme.SelectedTreeItemColor, cfg.Theme.UnselectedTreeItemColor)
+	secondaryFiletree.SetSelectionPath(cfg.SelectionPath)
+	secondaryFiletree.SetShowIcons(cfg.ShowIcons)
 
 	if cfg.ShowIcons {
 		icons.ParseIcons()
@@ -141,6 +149,7 @@ func New(cfg Config) model {
 
 	return model{
 		filetree:              filetreeModel,
+		secondaryFiletree:     secondaryFiletree,
 		help:                  helpModel,
 		code:                  codeModel,
 		image:                 imageModel,

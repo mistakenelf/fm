@@ -123,6 +123,11 @@ func (m *Model) GotoTop() {
 	m.Viewport.GotoTop()
 }
 
+// GotoBottom jumps to the bottom of the viewport.
+func (m *Model) GotoBottom() {
+	m.Viewport.GotoBottom()
+}
+
 // SetViewportDisabled toggles the state of the viewport.
 func (m *Model) SetViewportDisabled(disabled bool) {
 	m.ViewportDisabled = disabled

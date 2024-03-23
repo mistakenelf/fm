@@ -11,9 +11,7 @@ import (
 )
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
-	var (
-		cmds []tea.Cmd
-	)
+	var cmds []tea.Cmd
 
 	if m.Disabled {
 		return m, nil
@@ -42,30 +40,23 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.CreatingNewFile = false
 		m.CreatingNewDirectory = false
 
-		return m, getDirectoryListingCmd(
-			filesystem.CurrentDirectory,
-			m.showHidden,
-			m.showDirectoriesOnly,
-			m.showFilesOnly,
-		)
+		return m, m.GetDirectoryListingCmd(filesystem.CurrentDirectory)
 	case createDirectoryMsg:
 		m.CreatingNewDirectory = false
 		m.CreatingNewFile = false
 
-		return m, getDirectoryListingCmd(
-			filesystem.CurrentDirectory,
-			m.showHidden,
-			m.showDirectoriesOnly,
-			m.showFilesOnly,
-		)
+		return m, m.GetDirectoryListingCmd(filesystem.CurrentDirectory)
 	case getDirectoryListingMsg:
-		if msg != nil {
-			m.files = msg
-			m.Cursor = 0
-			m.min = 0
-			m.max = m.height
-			m.max = max(m.max, m.height)
+		if msg.files != nil {
+			m.files = msg.files
+		} else {
+			m.files = make([]DirectoryItem, 0)
 		}
+
+		m.CurrentDirectory = msg.workingDirectory
+		m.Cursor = 0
+		m.min = 0
+		m.max = max(m.max, m.height-1)
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keyMap.Down):
@@ -155,23 +146,13 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				return m, nil
 			}
 
-			return m, getDirectoryListingCmd(
-				filesystem.HomeDirectory,
-				m.showHidden,
-				m.showDirectoriesOnly,
-				m.showFilesOnly,
-			)
+			return m, m.GetDirectoryListingCmd(filesystem.HomeDirectory)
 		case key.Matches(msg, m.keyMap.GoToRootDirectory):
 			if m.CreatingNewFile || m.CreatingNewDirectory {
 				return m, nil
 			}
 
-			return m, getDirectoryListingCmd(
-				filesystem.RootDirectory,
-				m.showHidden,
-				m.showDirectoriesOnly,
-				m.showFilesOnly,
-			)
+			return m, m.GetDirectoryListingCmd(filesystem.RootDirectory)
 		case key.Matches(msg, m.keyMap.ToggleHidden):
 			if m.CreatingNewFile || m.CreatingNewDirectory {
 				return m, nil
@@ -179,35 +160,26 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 			m.showHidden = !m.showHidden
 
-			return m, getDirectoryListingCmd(
-				filesystem.CurrentDirectory,
-				m.showHidden,
-				m.showDirectoriesOnly,
-				m.showFilesOnly,
-			)
+			return m, m.GetDirectoryListingCmd(filesystem.CurrentDirectory)
 		case key.Matches(msg, m.keyMap.OpenDirectory):
 			if m.CreatingNewFile || m.CreatingNewDirectory {
 				return m, nil
 			}
 
 			if m.files[m.Cursor].IsDirectory {
-				return m, getDirectoryListingCmd(
-					m.files[m.Cursor].Path,
-					m.showHidden,
-					m.showDirectoriesOnly,
-					m.showFilesOnly,
-				)
+				return m, m.GetDirectoryListingCmd(m.files[m.Cursor].Path)
 			}
 		case key.Matches(msg, m.keyMap.PreviousDirectory):
 			if m.CreatingNewFile || m.CreatingNewDirectory {
 				return m, nil
 			}
 
-			return m, getDirectoryListingCmd(
+			if len(m.files) == 0 {
+				return m, m.GetDirectoryListingCmd(filepath.Dir(m.CurrentDirectory))
+			}
+
+			return m, m.GetDirectoryListingCmd(
 				filepath.Dir(m.files[m.Cursor].CurrentDirectory),
-				m.showHidden,
-				m.showDirectoriesOnly,
-				m.showFilesOnly,
 			)
 		case key.Matches(msg, m.keyMap.CopyPathToClipboard):
 			if m.CreatingNewFile || m.CreatingNewDirectory {
@@ -222,12 +194,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 			return m, tea.Sequence(
 				copyDirectoryItemCmd(m.files[m.Cursor].Name, m.files[m.Cursor].IsDirectory),
-				getDirectoryListingCmd(
-					filesystem.CurrentDirectory,
-					m.showHidden,
-					m.showDirectoriesOnly,
-					m.showFilesOnly,
-				),
+				m.GetDirectoryListingCmd(filesystem.CurrentDirectory),
 			)
 		case key.Matches(msg, m.keyMap.DeleteDirectoryItem):
 			if m.CreatingNewFile || m.CreatingNewDirectory {
@@ -236,12 +203,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 			return m, tea.Sequence(
 				deleteDirectoryItemCmd(m.files[m.Cursor].Name, m.files[m.Cursor].IsDirectory),
-				getDirectoryListingCmd(
-					filesystem.CurrentDirectory,
-					m.showHidden,
-					m.showDirectoriesOnly,
-					m.showFilesOnly,
-				),
+				m.GetDirectoryListingCmd(filesystem.CurrentDirectory),
 			)
 		case key.Matches(msg, m.keyMap.ZipDirectoryItem):
 			if m.CreatingNewFile || m.CreatingNewDirectory {
@@ -250,12 +212,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 			return m, tea.Sequence(
 				zipDirectoryCmd(m.files[m.Cursor].Name),
-				getDirectoryListingCmd(
-					filesystem.CurrentDirectory,
-					m.showHidden,
-					m.showDirectoriesOnly,
-					m.showFilesOnly,
-				),
+				m.GetDirectoryListingCmd(filesystem.CurrentDirectory),
 			)
 		case key.Matches(msg, m.keyMap.UnzipDirectoryItem):
 			if m.CreatingNewFile || m.CreatingNewDirectory {
@@ -264,12 +221,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 			return m, tea.Sequence(
 				unzipDirectoryCmd(m.files[m.Cursor].Name),
-				getDirectoryListingCmd(
-					filesystem.CurrentDirectory,
-					m.showHidden,
-					m.showDirectoriesOnly,
-					m.showFilesOnly,
-				),
+				m.GetDirectoryListingCmd(filesystem.CurrentDirectory),
 			)
 		case key.Matches(msg, m.keyMap.ShowDirectoriesOnly):
 			if m.CreatingNewFile || m.CreatingNewDirectory {
@@ -279,12 +231,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			m.showDirectoriesOnly = !m.showDirectoriesOnly
 			m.showFilesOnly = false
 
-			return m, getDirectoryListingCmd(
-				filesystem.CurrentDirectory,
-				m.showHidden,
-				m.showDirectoriesOnly,
-				m.showFilesOnly,
-			)
+			return m, m.GetDirectoryListingCmd(filesystem.CurrentDirectory)
 		case key.Matches(msg, m.keyMap.ShowFilesOnly):
 			if m.CreatingNewFile || m.CreatingNewDirectory {
 				return m, nil
@@ -293,12 +240,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			m.showFilesOnly = !m.showFilesOnly
 			m.showDirectoriesOnly = false
 
-			return m, getDirectoryListingCmd(
-				filesystem.CurrentDirectory,
-				m.showHidden,
-				m.showDirectoriesOnly,
-				m.showFilesOnly,
-			)
+			return m, m.GetDirectoryListingCmd(filesystem.CurrentDirectory)
 		case key.Matches(msg, m.keyMap.WriteSelectionPath):
 			if m.CreatingNewFile || m.CreatingNewDirectory {
 				return m, nil

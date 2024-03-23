@@ -63,7 +63,7 @@ func (m Model) GetTotalItems() int {
 
 // SetSize Sets the size of the filetree.
 func (m *Model) SetSize(width, height int) {
-	m.height = height - 2
+	m.height = height
 	m.width = width
 	m.max = m.height - 1
 }

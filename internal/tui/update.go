@@ -19,15 +19,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.statusMessage = ""
 	case tea.WindowSizeMsg:
 		halfSize := msg.Width / 2
-		bubbleHeight := msg.Height - statusbar.Height
+		height := msg.Height - statusbar.Height
 
-		cmds = append(cmds, m.image.SetSizeCmd(halfSize, bubbleHeight))
-		cmds = append(cmds, m.markdown.SetSizeCmd(halfSize, bubbleHeight))
+		cmds = append(cmds, m.image.SetSizeCmd(halfSize, height))
+		cmds = append(cmds, m.markdown.SetSizeCmd(halfSize, height))
 
-		m.filetree.SetSize(halfSize, bubbleHeight)
-		m.help.SetSize(halfSize, bubbleHeight)
-		m.code.SetSize(halfSize, bubbleHeight)
-		m.pdf.SetSize(halfSize, bubbleHeight)
+		m.filetree.SetSize(halfSize, height)
+		m.secondaryFiletree.SetSize(halfSize, height)
+		m.help.SetSize(halfSize, height)
+		m.code.SetSize(halfSize, height)
+		m.pdf.SetSize(halfSize, height)
 		m.statusbar.SetSize(msg.Width)
 
 		return m, tea.Batch(cmds...)
@@ -52,9 +53,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.textinput, cmd = m.textinput.Update(msg)
 			cmds = append(cmds, cmd)
 
+			cmds = append(cmds, m.filetree.GetDirectoryListingCmd(m.directoryBeforeMove))
+
 			m.textinput.Reset()
+		case key.Matches(msg, m.keyMap.MoveDirectoryItem):
+			m.directoryBeforeMove = m.filetree.GetSelectedItem().CurrentDirectory
+			m.state = showMoveState
+			m.filetree.SetDisabled(true)
 		case key.Matches(msg, m.keyMap.ShowTextInput):
-			if m.activePane == 0 {
+			if m.activePane == 0 && !m.filetree.CreatingNewDirectory && !m.filetree.CreatingNewFile {
 				m.showTextInput = true
 				m.textinput.Focus()
 				m.disableAllViewports()
@@ -107,6 +114,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}
 				}
 			}
+		case key.Matches(msg, m.keyMap.GotoTop):
+			if m.activePane != 0 {
+				m.resetViewports()
+			}
+		case key.Matches(msg, m.keyMap.GotoBottom):
+			if m.activePane != 0 {
+				m.code.GotoBottom()
+				m.pdf.GotoBottom()
+				m.markdown.GotoBottom()
+				m.help.GotoBottom()
+				m.image.GotoBottom()
+			}
 		}
 	}
 
@@ -116,6 +135,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	m.filetree, cmd = m.filetree.Update(msg)
+	cmds = append(cmds, cmd)
+
+	m.secondaryFiletree, cmd = m.secondaryFiletree.Update(msg)
 	cmds = append(cmds, cmd)
 
 	m.code, cmd = m.code.Update(msg)
@@ -132,6 +154,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	m.help, cmd = m.help.Update(msg)
 	cmds = append(cmds, cmd)
+
+	m.updateStatusBar()
 
 	return m, tea.Batch(cmds...)
 }
