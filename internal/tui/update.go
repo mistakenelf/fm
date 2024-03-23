@@ -24,7 +24,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, m.image.SetSizeCmd(halfSize, height))
 		cmds = append(cmds, m.markdown.SetSizeCmd(halfSize, height))
 
-		m.filetree.SetSize(halfSize, height)
+		m.filetree.SetSize(halfSize, height-3)
 		m.secondaryFiletree.SetSize(halfSize, height)
 		m.help.SetSize(halfSize, height)
 		m.code.SetSize(halfSize, height)
@@ -41,6 +41,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cmds = append(cmds, m.openFileCmd())
 			}
 		case key.Matches(msg, m.keyMap.ResetState):
+			if m.state == showMoveState {
+				cmds = append(cmds, m.filetree.GetDirectoryListingCmd(m.directoryBeforeMove))
+			}
+
 			m.state = idleState
 			m.showTextInput = false
 			m.disableAllViewports()
@@ -52,8 +56,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			m.textinput, cmd = m.textinput.Update(msg)
 			cmds = append(cmds, cmd)
-
-			cmds = append(cmds, m.filetree.GetDirectoryListingCmd(m.directoryBeforeMove))
 
 			m.textinput.Reset()
 		case key.Matches(msg, m.keyMap.MoveDirectoryItem):
