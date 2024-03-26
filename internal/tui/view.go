@@ -20,12 +20,12 @@ func (m model) View() string {
 		rightBox = m.pdf.View()
 	case showMarkdownState:
 		rightBox = m.markdown.View()
-	case showCsvState:
-		rightBox = m.csv.View()
+	case showMoveState:
+		rightBox = m.secondaryFiletree.View()
 	}
 
 	return lipgloss.JoinVertical(lipgloss.Top,
-		lipgloss.JoinHorizontal(lipgloss.Top, leftBox, rightBox),
+		lipgloss.NewStyle().Height(m.height).Render(lipgloss.JoinHorizontal(lipgloss.Top, leftBox, rightBox)),
 		m.statusbar.View(),
 	)
 }

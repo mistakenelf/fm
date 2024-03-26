@@ -27,7 +27,6 @@ A terminal based file manager
 - [Glamour](https://github.com/charmbracelet/glamour)
 - [Chroma](https://github.com/alecthomas/chroma)
 - [Cobra](https://github.com/spf13/cobra)
-- [Teacup](https://github.com/mistakenelf/teacup)
 
 ## Installation
 
@@ -62,8 +61,7 @@ paru -S fm-bin
 
 ## Features
 
-- Double pane layout
-- File icons
+- File icons (requires nerd font)
 - Layout adjusts to terminal resize
 - Syntax highlighting for source code with customizable themes using styles from [chroma](https://swapoff.org/chroma/playground/) (dracula, monokai etc.)
 - Render pretty markdown
@@ -95,26 +93,32 @@ paru -S fm-bin
 - `fm update` will update fm to the latest version
 - `fm --start-dir=/some/start/dir` will start fm in the specified directory
 - `fm --selection-path=/tmp/tmpfile` will write the selected items path to the selection path when pressing <kbd>E</kbd> and exit fm
+- `fm --start-dir=/some/dir` start fm at a specific directory
+- `fm --enable-logging=true` start fm with logging enabled
+- `fm --pretty-markdown=true` render markdown using glamour to make it look nice
+- `fm --theme=default` set the theme of fm
+- `fm --show-icons=false` set whether to show icons or not
+- `fm --syntax-theme=dracula` sets the syntax theme to render code with
 
 ## Navigation
 
 | Key                   | Description                                                |
 | --------------------- | ---------------------------------------------------------- |
-| <kbd>h or left</kbd>  | Paginate to the left                                       |
-| <kbd>j or down</kbd>   | Move down in the file tree or scroll pane down             |
+| <kbd>h or left</kbd>  | Go to previous directory                                   |
+| <kbd>j or down</kbd>  | Move down in the file tree or scroll pane down             |
 | <kbd>k or up</kbd>    | Move up in the file tree or scroll pane up                 |
-| <kbd>l or right</kbd> | Paginate to the right                                      |
+| <kbd>l or right</kbd> | Open file or directory                                     |
 | <kbd>G</kbd>          | Jump to bottom of file tree or pane                        |
 | <kbd>g</kbd>          | Jump to top of file tree or pane                           |
 | <kbd>~</kbd>          | Go to home directory                                       |
-| <kbd>R</kbd>          | Go to the root directory                                   |
+| <kbd>/</kbd>          | Go to the root directory                                   |
 | <kbd>.</kbd>          | Toggle hidden files and directories                        |
 | <kbd>ctrl+c</kbd>     | Exit                                                       |
 | <kbd>q</kbd>          | Exit if command bar is not open                            |
 | <kbd>tab</kbd>        | Toggle between panes                                       |
-| <kbd>esc</kbd>        | Blur filetree input                                        |
-| <kbd>z</kbd>          | Create a zip file of the currently selected directory item |
-| <kbd>u</kbd>          | Unzip a zip file                                           |
+| <kbd>esc</kbd>        | Reset app state and show help screen                       |
+| <kbd>Z</kbd>          | Create a zip file of the currently selected directory item |
+| <kbd>U</kbd>          | Unzip a zip file                                           |
 | <kbd>c</kbd>          | Create a copy of a file or directory                       |
 | <kbd>x</kbd>          | Delete the currently selected file or directory            |
 | <kbd>n</kbd>          | Create a new file in the current directory                 |
@@ -126,30 +130,6 @@ paru -S fm-bin
 | <kbd>/</kbd>          | Filter the current directory with a term                   |
 | <kbd>?</kbd>          | Toggle filetree full help menu                             |
 | <kbd>ctrl+r</kbd>     | Reload config                                              |
-
-## Configuration
-
-A config file will be generated when you first run `fm`. Depending on your operating system it can be found in one of the following locations:
-
-- macOS: ~/Library/Application\ Support/fm/config.yml
-- Linux: ~/.config/fm/config.yml
-- Windows: C:\Users\me\AppData\Roaming\fm\config.yml
-
-It will include the following default settings:
-
-```yml
-settings:
-  borderless: false
-  enable_logging: false
-  pretty_markdown: true
-  show_icons: true
-  start_dir: .
-theme:
-  app_theme: default
-  syntax_theme:
-    dark: dracula
-    light: pygments
-```
 
 ## Local Development
 
@@ -172,7 +152,3 @@ make
 ```sh
 make build
 ```
-
-## Credit
-
-- Thank you to this repo https://github.com/Yash-Handa/logo-ls for the icons
