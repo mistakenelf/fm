@@ -54,6 +54,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.textinput.Blur()
 			m.filetree.CreatingNewDirectory = false
 			m.filetree.CreatingNewFile = false
+			m.secondaryFiletree.SetDisabled(true)
+			m.activePane = 0
 
 			m.textinput, cmd = m.textinput.Update(msg)
 			cmds = append(cmds, cmd)
