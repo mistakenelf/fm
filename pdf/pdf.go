@@ -11,6 +11,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ledongthuc/pdf"
+	"github.com/mistakenelf/fm/polish"
 )
 
 type renderPDFMsg string
@@ -149,7 +150,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.FileName = ""
 		cmds = append(cmds, m.NewStatusMessageCmd(
 			lipgloss.NewStyle().
-				Foreground(lipgloss.Color("#cc241d")).
+				Foreground(polish.Colors.Red600).
 				Bold(true).
 				Render(string(msg)),
 		))

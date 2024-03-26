@@ -14,6 +14,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/disintegration/imaging"
 	"github.com/lucasb-eyer/go-colorful"
+
+	"github.com/mistakenelf/fm/polish"
 )
 
 type convertImageToStringMsg string
@@ -164,7 +166,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case errorMsg:
 		cmds = append(cmds, m.NewStatusMessageCmd(
 			lipgloss.NewStyle().
-				Foreground(lipgloss.Color("#cc241d")).
+				Foreground(polish.Colors.Red600).
 				Bold(true).
 				Render(string(msg)),
 		))

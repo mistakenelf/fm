@@ -5,6 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/mistakenelf/fm/polish"
 )
 
 var forbiddenExtensions = []string{
@@ -47,7 +48,7 @@ func (m *model) openFileCmd() tea.Cmd {
 			return m.pdf.SetFileNameCmd(selectedFile.Path)
 		case contains(forbiddenExtensions, selectedFile.Extension):
 			return m.newStatusMessageCmd(lipgloss.NewStyle().
-				Foreground(lipgloss.Color("#cc241d")).
+				Foreground(polish.Colors.Red600).
 				Bold(true).
 				Render("Selected file type is not supported"))
 		default:

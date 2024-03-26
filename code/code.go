@@ -14,6 +14,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/mistakenelf/fm/filesystem"
+	"github.com/mistakenelf/fm/polish"
 )
 
 type syntaxMsg string
@@ -148,7 +149,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.Filename = ""
 		cmds = append(cmds, m.NewStatusMessageCmd(
 			lipgloss.NewStyle().
-				Foreground(lipgloss.Color("#cc241d")).
+				Foreground(polish.Colors.Red600).
 				Bold(true).
 				Render(string(msg)),
 		))
