@@ -36,15 +36,15 @@ func (m *model) openFileCmd() tea.Cmd {
 		case selectedFile.Extension == ".png" || selectedFile.Extension == ".jpg" || selectedFile.Extension == ".jpeg":
 			m.state = showImageState
 
-			return m.image.SetFileNameCmd(selectedFile.Name)
+			return m.image.SetFileNameCmd(selectedFile.Path)
 		case selectedFile.Extension == ".md" && m.config.PrettyMarkdown:
 			m.state = showMarkdownState
 
-			return m.markdown.SetFileNameCmd(selectedFile.Name)
+			return m.markdown.SetFileNameCmd(selectedFile.Path)
 		case selectedFile.Extension == ".pdf":
 			m.state = showPdfState
 
-			return m.pdf.SetFileNameCmd(selectedFile.Name)
+			return m.pdf.SetFileNameCmd(selectedFile.Path)
 		case contains(forbiddenExtensions, selectedFile.Extension):
 			return m.newStatusMessageCmd(lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#cc241d")).
@@ -53,7 +53,7 @@ func (m *model) openFileCmd() tea.Cmd {
 		default:
 			m.state = showCodeState
 
-			return m.code.SetFileNameCmd(selectedFile.Name)
+			return m.code.SetFileNameCmd(selectedFile.Path)
 		}
 	}
 

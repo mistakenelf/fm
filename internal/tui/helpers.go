@@ -35,7 +35,7 @@ func (m *model) resetViewports() {
 func (m *model) updateStatusBar() {
 	if m.filetree.GetSelectedItem().Name != "" {
 		statusMessage :=
-			m.filetree.GetSelectedItem().CurrentDirectory +
+			m.filetree.CurrentDirectory +
 				lipgloss.NewStyle().
 					Padding(0, 1).
 					Foreground(lipgloss.Color("#eab308")).

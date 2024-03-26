@@ -61,9 +61,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.textinput.Reset()
 		case key.Matches(msg, m.keyMap.MoveDirectoryItem):
 			if m.activePane == 0 && !m.filetree.CreatingNewDirectory && !m.filetree.CreatingNewFile {
-				m.directoryBeforeMove = m.filetree.GetSelectedItem().CurrentDirectory
+				m.activePane = (m.activePane + 1) % 2
+				m.directoryBeforeMove = m.filetree.CurrentDirectory
 				m.state = showMoveState
 				m.filetree.SetDisabled(true)
+				m.secondaryFiletree.SetDisabled(false)
+				cmds = append(cmds, m.secondaryFiletree.GetDirectoryListingCmd(m.filetree.CurrentDirectory))
 			}
 		case key.Matches(msg, m.keyMap.ShowTextInput):
 			if m.activePane == 0 && !m.filetree.CreatingNewDirectory && !m.filetree.CreatingNewFile {
@@ -77,11 +80,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.textinput.Reset()
 			}
 		case key.Matches(msg, m.keyMap.Submit):
-			if m.filetree.CreatingNewFile {
+			switch {
+			case m.filetree.CreatingNewFile:
 				cmds = append(cmds, m.filetree.CreateFileCmd(m.textinput.Value()))
-			} else if m.filetree.CreatingNewDirectory {
+			case m.filetree.CreatingNewDirectory:
 				cmds = append(cmds, m.filetree.CreateDirectoryCmd(m.textinput.Value()))
-			} else {
+			default:
 				cmds = append(
 					cmds,
 					m.filetree.MoveDirectoryItemCmd(
@@ -102,6 +106,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				if m.activePane == 0 {
 					m.filetree.SetDisabled(false)
+					m.secondaryFiletree.SetDisabled(true)
 					m.disableAllViewports()
 				} else {
 					m.filetree.SetDisabled(true)
@@ -122,6 +127,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					case showMarkdownState:
 						m.disableAllViewports()
 						m.markdown.SetViewportDisabled(false)
+					case showMoveState:
+						m.secondaryFiletree.SetDisabled(false)
+						m.disableAllViewports()
 					}
 				}
 			}

@@ -431,26 +431,45 @@ func CopyFile(name string) error {
 	return errors.Unwrap(err)
 }
 
-// CopyDirectory copies a directory given a name.
-func CopyDirectory(name string) error {
+// CopyDirectory copies a directory given a path.
+func CopyDirectory(pathname string) error {
+	name := filepath.Base(pathname)
 	output := fmt.Sprintf("%s_%d", name, time.Now().Unix())
 
-	err := filepath.Walk(name, func(path string, info os.FileInfo, err error) error {
-		relPath := strings.Replace(path, name, "", 1)
+	err := filepath.Walk(pathname, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err // Return early if there's an error walking the path
+		}
+
+		relPath, err := filepath.Rel(pathname, path)
+		if err != nil {
+			return err // Return if there's an error getting the relative path
+		}
+
+		targetPath := filepath.Join(output, relPath)
 
 		if info.IsDir() {
-			return fmt.Errorf("%w", os.Mkdir(filepath.Join(output, relPath), os.ModePerm))
+			return os.Mkdir(targetPath, os.ModePerm)
 		}
 
-		var data, err1 = os.ReadFile(filepath.Join(filepath.Clean(name), filepath.Clean(relPath)))
-		if err1 != nil {
-			return errors.Unwrap(err)
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err // Return if there's an error reading the file
 		}
 
-		return fmt.Errorf("%w", os.WriteFile(filepath.Join(output, relPath), data, os.ModePerm))
+		err = os.WriteFile(targetPath, data, os.ModePerm)
+		if err != nil {
+			return err // Return if there's an error writing the file
+		}
+
+		return nil
 	})
 
-	return errors.Unwrap(err)
+	if err != nil {
+		return err // Return the final error, if any
+	}
+
+	return nil
 }
 
 // GetDirectoryItemSize calculates the size of a directory or file.

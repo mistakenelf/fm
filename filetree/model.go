@@ -10,14 +10,13 @@ import (
 )
 
 type DirectoryItem struct {
-	Name             string
-	Details          string
-	Path             string
-	Extension        string
-	FileSize         string
-	CurrentDirectory string
-	IsDirectory      bool
-	FileInfo         os.FileInfo
+	Name        string
+	Details     string
+	Path        string
+	Extension   string
+	FileSize    string
+	IsDirectory bool
+	FileInfo    os.FileInfo
 }
 
 type Model struct {

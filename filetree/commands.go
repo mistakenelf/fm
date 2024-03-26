@@ -82,6 +82,7 @@ func (m Model) GetDirectoryListingCmd(directoryName string) tea.Cmd {
 		var err error
 		var directoryItems []DirectoryItem
 		var files []fs.DirEntry
+		var directoryPath string
 
 		if directoryName == filesystem.HomeDirectory {
 			directoryName, err = filesystem.GetHomeDirectory()
@@ -90,18 +91,23 @@ func (m Model) GetDirectoryListingCmd(directoryName string) tea.Cmd {
 			}
 		}
 
-		directoryInfo, err := os.Stat(directoryName)
+		if !filepath.IsAbs(directoryName) {
+			directoryPath, err = filepath.Abs(directoryName)
+			fmt.Println(directoryPath)
+			if err != nil {
+				return errorMsg(err.Error())
+			}
+		} else {
+			directoryPath = directoryName
+		}
+
+		directoryInfo, err := os.Stat(directoryPath)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
 		if !directoryInfo.IsDir() {
 			return nil
-		}
-
-		err = os.Chdir(directoryName)
-		if err != nil {
-			return errorMsg(err.Error())
 		}
 
 		if !m.showDirectoriesOnly && !m.showFilesOnly {
@@ -122,11 +128,6 @@ func (m Model) GetDirectoryListingCmd(directoryName string) tea.Cmd {
 			}
 		}
 
-		workingDirectory, err := filesystem.GetWorkingDirectory()
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
 		for _, file := range files {
 			fileInfo, err := file.Info()
 			if err != nil {
@@ -136,20 +137,19 @@ func (m Model) GetDirectoryListingCmd(directoryName string) tea.Cmd {
 			fileSize := ConvertBytesToSizeString(fileInfo.Size())
 
 			directoryItems = append(directoryItems, DirectoryItem{
-				Name:             file.Name(),
-				Details:          fileInfo.Mode().String(),
-				Path:             filepath.Join(workingDirectory, file.Name()),
-				Extension:        filepath.Ext(fileInfo.Name()),
-				IsDirectory:      fileInfo.IsDir(),
-				CurrentDirectory: workingDirectory,
-				FileInfo:         fileInfo,
-				FileSize:         fileSize,
+				Name:        file.Name(),
+				Details:     fileInfo.Mode().String(),
+				Path:        filepath.Join(directoryPath, file.Name()),
+				Extension:   filepath.Ext(fileInfo.Name()),
+				IsDirectory: fileInfo.IsDir(),
+				FileInfo:    fileInfo,
+				FileSize:    fileSize,
 			})
 		}
 
 		return getDirectoryListingMsg{
 			files:            directoryItems,
-			workingDirectory: workingDirectory,
+			workingDirectory: directoryPath,
 		}
 	}
 }
@@ -211,20 +211,14 @@ func copyDirectoryItemCmd(name string, isDirectory bool) tea.Cmd {
 }
 
 // copyToClipboardCmd copies the provided string to the clipboard.
-func copyToClipboardCmd(name string) tea.Cmd {
+func copyToClipboardCmd(path string) tea.Cmd {
 	return func() tea.Msg {
-		workingDir, err := filesystem.GetWorkingDirectory()
+		err := clipboard.WriteAll(path)
 		if err != nil {
 			return errorMsg(err.Error())
 		}
 
-		filePath := filepath.Join(workingDir, name)
-		err = clipboard.WriteAll(filePath)
-		if err != nil {
-			return errorMsg(err.Error())
-		}
-
-		return copyToClipboardMsg(fmt.Sprintf("%s %s %s", "Successfully copied", filePath, "to clipboard"))
+		return copyToClipboardMsg(fmt.Sprintf("%s %s %s", "Successfully copied", path, "to clipboard"))
 	}
 }
 

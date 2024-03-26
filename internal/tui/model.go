@@ -71,6 +71,7 @@ func New(cfg Config) model {
 	secondaryFiletree.SetTheme(cfg.Theme.SelectedTreeItemColor, cfg.Theme.UnselectedTreeItemColor)
 	secondaryFiletree.SetSelectionPath(cfg.SelectionPath)
 	secondaryFiletree.SetShowIcons(cfg.ShowIcons)
+	secondaryFiletree.SetDisabled(true)
 
 	if cfg.ShowIcons {
 		icons.ParseIcons()
