@@ -9,10 +9,10 @@ require (
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/glamour v0.7.0
 	github.com/charmbracelet/lipgloss v0.10.0
+	github.com/charmbracelet/x/exp/term v0.0.0-20240329185201-62a6965a9fad
 	github.com/disintegration/imaging v1.6.2
 	github.com/ledongthuc/pdf v0.0.0-20240201131950-da5b75280b06
 	github.com/lucasb-eyer/go-colorful v1.2.0
-	github.com/muesli/reflow v0.3.0
 	github.com/spf13/cobra v1.8.0
 )
 
@@ -29,6 +29,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.26 // indirect
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
+	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
