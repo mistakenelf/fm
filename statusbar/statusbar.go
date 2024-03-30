@@ -5,7 +5,7 @@ package statusbar
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/reflow/truncate"
+	"github.com/charmbracelet/x/exp/term/ansi"
 )
 
 // Height represents the height of the statusbar.
@@ -91,7 +91,7 @@ func (m Model) View() string {
 		Background(m.FirstColumnColors.Background).
 		Padding(0, 1).
 		Height(Height).
-		Render(truncate.StringWithTail(m.FirstColumn, 30, "..."))
+		Render(ansi.Truncate(m.FirstColumn, 30, "..."))
 
 	thirdColumn := lipgloss.NewStyle().
 		Foreground(m.ThirdColumnColors.Foreground).
@@ -114,9 +114,9 @@ func (m Model) View() string {
 		Padding(0, 1).
 		Height(Height).
 		Width(m.Width - width(firstColumn) - width(thirdColumn) - width(fourthColumn)).
-		Render(truncate.StringWithTail(
+		Render(ansi.Truncate(
 			m.SecondColumn,
-			uint(m.Width-width(firstColumn)-width(thirdColumn)-width(fourthColumn)-3),
+			m.Width-width(firstColumn)-width(thirdColumn)-width(fourthColumn)-3,
 			"..."),
 		)
 
