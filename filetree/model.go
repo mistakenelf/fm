@@ -7,6 +7,16 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/mistakenelf/fm/filesystem"
+	"github.com/mistakenelf/fm/keys"
+)
+
+type treeState int
+
+const (
+	IdleState treeState = iota
+	CreateFileState
+	CreateDirectoryState
+	MoveState
 )
 
 type DirectoryItem struct {
@@ -31,9 +41,7 @@ type Model struct {
 	showDirectoriesOnly   bool
 	showFilesOnly         bool
 	showIcons             bool
-	CreatingNewFile       bool
-	CreatingNewDirectory  bool
-	keyMap                KeyMap
+	keyMap                keys.KeyMap
 	startDir              string
 	StatusMessage         string
 	selectionPath         string
@@ -44,6 +52,7 @@ type Model struct {
 	inactiveItemColor     lipgloss.AdaptiveColor
 	err                   error
 	CurrentDirectory      string
+	State                 treeState
 }
 
 func New(startDir string) Model {
@@ -56,7 +65,7 @@ func New(startDir string) Model {
 	return Model{
 		Cursor:                0,
 		Disabled:              false,
-		keyMap:                DefaultKeyMap(),
+		keyMap:                keys.DefaultKeyMap(),
 		min:                   0,
 		max:                   0,
 		startDir:              startingDirectory,
@@ -69,7 +78,5 @@ func New(startDir string) Model {
 		unselectedItemColor:   lipgloss.AdaptiveColor{Light: "ffffff", Dark: "#000000"},
 		inactiveItemColor:     lipgloss.AdaptiveColor{Light: "243", Dark: "243"},
 		showIcons:             true,
-		CreatingNewFile:       false,
-		CreatingNewDirectory:  false,
 	}
 }

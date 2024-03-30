@@ -4,6 +4,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/mistakenelf/fm/filetree"
 	"github.com/mistakenelf/fm/statusbar"
 )
 
@@ -27,16 +28,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		m.filetree.SetSize(halfSize, height-3)
 		m.secondaryFiletree.SetSize(halfSize, height-3)
-		m.help.SetSize(halfSize, height)
 		m.code.SetSize(halfSize, height)
 		m.pdf.SetSize(halfSize, height)
 		m.statusbar.SetSize(msg.Width)
+		m.help.SetSize(halfSize, height)
 
 		return m, tea.Batch(cmds...)
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, m.keyMap.Quit):
+		case key.Matches(msg, m.keyMap.ForceQuit):
 			return m, tea.Quit
+		case key.Matches(msg, m.keyMap.Quit):
+			if m.filetree.State == filetree.IdleState {
+				return m, tea.Quit
+			}
 		case key.Matches(msg, m.keyMap.OpenFile):
 			if !m.showTextInput && m.activePane == 0 {
 				cmds = append(cmds, m.openFileCmd())
@@ -52,8 +57,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.resetViewports()
 			m.filetree.SetDisabled(false)
 			m.textinput.Blur()
-			m.filetree.CreatingNewDirectory = false
-			m.filetree.CreatingNewFile = false
+			m.filetree.State = filetree.IdleState
 			m.secondaryFiletree.SetDisabled(true)
 			m.activePane = 0
 
@@ -62,16 +66,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			m.textinput.Reset()
 		case key.Matches(msg, m.keyMap.MoveDirectoryItem):
-			if m.activePane == 0 && !m.filetree.CreatingNewDirectory && !m.filetree.CreatingNewFile {
+			if m.activePane == 0 && m.filetree.State == filetree.IdleState {
 				m.activePane = (m.activePane + 1) % 2
 				m.directoryBeforeMove = m.filetree.CurrentDirectory
 				m.state = showMoveState
+				m.filetree.State = filetree.MoveState
 				m.filetree.SetDisabled(true)
 				m.secondaryFiletree.SetDisabled(false)
 				cmds = append(cmds, m.secondaryFiletree.GetDirectoryListingCmd(m.filetree.CurrentDirectory))
 			}
 		case key.Matches(msg, m.keyMap.ShowTextInput):
-			if m.activePane == 0 && !m.filetree.CreatingNewDirectory && !m.filetree.CreatingNewFile {
+			if m.activePane == 0 && m.filetree.State == filetree.IdleState {
 				m.showTextInput = true
 				m.textinput.Focus()
 				m.disableAllViewports()
@@ -83,11 +88,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case key.Matches(msg, m.keyMap.Submit):
 			switch {
-			case m.filetree.CreatingNewFile:
+			case m.filetree.State == filetree.CreateFileState:
 				cmds = append(cmds, m.filetree.CreateFileCmd(m.textinput.Value()))
-			case m.filetree.CreatingNewDirectory:
+			case m.filetree.State == filetree.CreateDirectoryState:
 				cmds = append(cmds, m.filetree.CreateDirectoryCmd(m.textinput.Value()))
-			default:
+			case m.filetree.State == filetree.MoveState:
 				cmds = append(
 					cmds,
 					m.filetree.MoveDirectoryItemCmd(
@@ -95,6 +100,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.secondaryFiletree.CurrentDirectory+"/"+m.filetree.GetSelectedItem().Name,
 					),
 				)
+			default:
+				return m, nil
 			}
 
 			m.resetViewports()
@@ -150,7 +157,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	if m.filetree.CreatingNewDirectory || m.filetree.CreatingNewFile {
+	if m.filetree.State == filetree.CreateDirectoryState || m.filetree.State == filetree.CreateFileState {
 		m.textinput, cmd = m.textinput.Update(msg)
 		cmds = append(cmds, cmd)
 	}

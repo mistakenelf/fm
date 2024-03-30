@@ -33,8 +33,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case statusMessageTimeoutMsg:
 		m.StatusMessage = ""
 	case moveDirectoryItemMsg:
-		m.CreatingNewFile = false
-		m.CreatingNewDirectory = false
+		m.State = IdleState
 
 		return m, m.GetDirectoryListingCmd(m.CurrentDirectory)
 	case copyToClipboardMsg:
@@ -43,13 +42,11 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				Bold(true).
 				Render(string(msg))))
 	case createFileMsg:
-		m.CreatingNewFile = false
-		m.CreatingNewDirectory = false
+		m.State = IdleState
 
 		return m, m.GetDirectoryListingCmd(m.CurrentDirectory)
 	case createDirectoryMsg:
-		m.CreatingNewDirectory = false
-		m.CreatingNewFile = false
+		m.State = IdleState
 
 		return m, m.GetDirectoryListingCmd(m.CurrentDirectory)
 	case getDirectoryListingMsg:
@@ -66,7 +63,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keyMap.Down):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
@@ -81,7 +78,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.max++
 			}
 		case key.Matches(msg, m.keyMap.Up):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
@@ -95,16 +92,16 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.min--
 				m.max--
 			}
-		case key.Matches(msg, m.keyMap.GoToTop):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+		case key.Matches(msg, m.keyMap.GotoTop):
+			if m.State != IdleState {
 				return m, nil
 			}
 
 			m.Cursor = 0
 			m.min = 0
 			m.max = m.height
-		case key.Matches(msg, m.keyMap.GoToBottom):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+		case key.Matches(msg, m.keyMap.GotoBottom):
+			if m.State != IdleState {
 				return m, nil
 			}
 
@@ -112,7 +109,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			m.min = len(m.files) - m.height
 			m.max = len(m.files) - 1
 		case key.Matches(msg, m.keyMap.PageDown):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
@@ -130,7 +127,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.min = m.max - m.height
 			}
 		case key.Matches(msg, m.keyMap.PageUp):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
@@ -148,19 +145,19 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.max = m.min + m.height
 			}
 		case key.Matches(msg, m.keyMap.GoToHomeDirectory):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
 			return m, m.GetDirectoryListingCmd(filesystem.HomeDirectory)
 		case key.Matches(msg, m.keyMap.GoToRootDirectory):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
 			return m, m.GetDirectoryListingCmd(filesystem.RootDirectory)
 		case key.Matches(msg, m.keyMap.ToggleHidden):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
@@ -168,7 +165,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 			return m, m.GetDirectoryListingCmd(m.CurrentDirectory)
 		case key.Matches(msg, m.keyMap.OpenDirectory):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
@@ -176,7 +173,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				return m, m.GetDirectoryListingCmd(m.files[m.Cursor].Path)
 			}
 		case key.Matches(msg, m.keyMap.PreviousDirectory):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
@@ -184,13 +181,13 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				filepath.Dir(m.CurrentDirectory),
 			)
 		case key.Matches(msg, m.keyMap.CopyPathToClipboard):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
 			return m, copyToClipboardCmd(m.files[m.Cursor].Path)
 		case key.Matches(msg, m.keyMap.CopyDirectoryItem):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
@@ -199,7 +196,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.GetDirectoryListingCmd(m.CurrentDirectory),
 			)
 		case key.Matches(msg, m.keyMap.DeleteDirectoryItem):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
@@ -208,7 +205,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.GetDirectoryListingCmd(m.CurrentDirectory),
 			)
 		case key.Matches(msg, m.keyMap.ZipDirectoryItem):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
@@ -217,7 +214,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.GetDirectoryListingCmd(m.CurrentDirectory),
 			)
 		case key.Matches(msg, m.keyMap.UnzipDirectoryItem):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
@@ -226,7 +223,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.GetDirectoryListingCmd(m.CurrentDirectory),
 			)
 		case key.Matches(msg, m.keyMap.ShowDirectoriesOnly):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
@@ -235,7 +232,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 			return m, m.GetDirectoryListingCmd(m.CurrentDirectory)
 		case key.Matches(msg, m.keyMap.ShowFilesOnly):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
@@ -244,7 +241,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 			return m, m.GetDirectoryListingCmd(m.CurrentDirectory)
 		case key.Matches(msg, m.keyMap.WriteSelectionPath):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
@@ -255,27 +252,25 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				)
 			}
 		case key.Matches(msg, m.keyMap.OpenInEditor):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
 			return m, openEditorCmd(m.files[m.Cursor].Name)
 		case key.Matches(msg, m.keyMap.CreateFile):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
-			m.CreatingNewFile = true
-			m.CreatingNewDirectory = false
+			m.State = CreateFileState
 
 			return m, nil
 		case key.Matches(msg, m.keyMap.CreateDirectory):
-			if m.CreatingNewFile || m.CreatingNewDirectory {
+			if m.State != IdleState {
 				return m, nil
 			}
 
-			m.CreatingNewDirectory = true
-			m.CreatingNewFile = false
+			m.State = CreateDirectoryState
 
 			return m, nil
 		}
