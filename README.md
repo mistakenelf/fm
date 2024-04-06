@@ -68,7 +68,7 @@ paru -S fm-bin
 - Mouse support
 - Themes (`default`, `gruvbox`, `nord`)
 - Render PNG, JPG and JPEG as strings
-- Colors adapt to terminal background, for syntax highlighting to work properly on light/dark terminals, set the appropriate themes in the config file
+- Colors adapt to terminal background, for syntax highlighting to work properly on light/dark terminals, set the appropriate theme flags
 - Open selected file in editor set in EDITOR environment variable
 - Copy selected directory items path to the clipboard
 - Read PDF files
@@ -99,37 +99,6 @@ paru -S fm-bin
 - `fm --theme=default` set the theme of fm
 - `fm --show-icons=false` set whether to show icons or not
 - `fm --syntax-theme=dracula` sets the syntax theme to render code with
-
-## Navigation
-
-| Key                   | Description                                                |
-| --------------------- | ---------------------------------------------------------- |
-| <kbd>h or left</kbd>  | Go to previous directory                                   |
-| <kbd>j or down</kbd>  | Move down in the file tree or scroll pane down             |
-| <kbd>k or up</kbd>    | Move up in the file tree or scroll pane up                 |
-| <kbd>l or right</kbd> | Open file or directory                                     |
-| <kbd>G</kbd>          | Jump to bottom of file tree or pane                        |
-| <kbd>g</kbd>          | Jump to top of file tree or pane                           |
-| <kbd>~</kbd>          | Go to home directory                                       |
-| <kbd>/</kbd>          | Go to the root directory                                   |
-| <kbd>.</kbd>          | Toggle hidden files and directories                        |
-| <kbd>ctrl+c</kbd>     | Exit                                                       |
-| <kbd>q</kbd>          | Exit if command bar is not open                            |
-| <kbd>tab</kbd>        | Toggle between panes                                       |
-| <kbd>esc</kbd>        | Reset app state and show help screen                       |
-| <kbd>Z</kbd>          | Create a zip file of the currently selected directory item |
-| <kbd>U</kbd>          | Unzip a zip file                                           |
-| <kbd>c</kbd>          | Create a copy of a file or directory                       |
-| <kbd>x</kbd>          | Delete the currently selected file or directory            |
-| <kbd>n</kbd>          | Create a new file in the current directory                 |
-| <kbd>N</kbd>          | Create a new directory in the current directory            |
-| <kbd>r</kbd>          | Rename the currently selected file or directory            |
-| <kbd>m</kbd>          | Move the currently selected file or directory              |
-| <kbd>e</kbd>          | Open in editor set in EDITOR environment variable          |
-| <kbd>y</kbd>          | Copy selected directory items path to the clipboard        |
-| <kbd>/</kbd>          | Filter the current directory with a term                   |
-| <kbd>?</kbd>          | Toggle filetree full help menu                             |
-| <kbd>ctrl+r</kbd>     | Reload config                                              |
 
 ## Local Development
 
