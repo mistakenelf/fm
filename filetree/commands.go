@@ -146,14 +146,30 @@ func (m Model) GetDirectoryListingCmd(directoryName string) tea.Cmd {
 				continue
 			}
 
+			filePath := filepath.Join(directoryPath, file.Name())
+			isDirectory := fileInfo.IsDir()
+
+			isSymlink := fileInfo.Mode()&os.ModeSymlink != 0
+
+			if isSymlink {
+				symlinkPath, _ := filepath.EvalSymlinks(filepath.Join(directoryPath, file.Name()))
+				filePath = symlinkPath
+				symlinkInfo, err := os.Stat(symlinkPath)
+				if err != nil {
+					return errorMsg(err.Error())
+				}
+
+				isDirectory = symlinkInfo.IsDir()
+			}
+
 			fileSize := ConvertBytesToSizeString(fileInfo.Size())
 
 			directoryItems = append(directoryItems, DirectoryItem{
 				Name:        file.Name(),
 				Details:     fileInfo.Mode().String(),
-				Path:        filepath.Join(directoryPath, file.Name()),
+				Path:        filePath,
 				Extension:   filepath.Ext(fileInfo.Name()),
-				IsDirectory: fileInfo.IsDir(),
+				IsDirectory: isDirectory,
 				FileInfo:    fileInfo,
 				FileSize:    fileSize,
 			})
