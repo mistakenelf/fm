@@ -49,6 +49,10 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.State = IdleState
 
 		return m, m.GetDirectoryListingCmd(m.CurrentDirectory)
+	case renameDirectoryItemMsg:
+		m.State = IdleState
+
+		return m, m.GetDirectoryListingCmd(m.CurrentDirectory)
 	case getDirectoryListingMsg:
 		if msg.files != nil {
 			m.files = msg.files
@@ -273,6 +277,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			m.State = CreateDirectoryState
 
 			return m, nil
+		case key.Matches(msg, m.keyMap.RenameDirectoryItem):
+			if m.State != IdleState {
+				return m, nil
+			}
+
+			m.State = RenameState
 		}
 	}
 

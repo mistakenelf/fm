@@ -33,6 +33,7 @@ type KeyMap struct {
 	GotoTop             key.Binding
 	GotoBottom          key.Binding
 	MoveDirectoryItem   key.Binding
+	RenameDirectoryItem key.Binding
 }
 
 func DefaultKeyMap() KeyMap {
@@ -42,7 +43,7 @@ func DefaultKeyMap() KeyMap {
 		TogglePane:          key.NewBinding(key.WithKeys("tab"), key.WithHelp("tab", "Toggle between l/r panes")),
 		OpenFile:            key.NewBinding(key.WithKeys("l", "right"), key.WithHelp("l", "Preview file")),
 		ResetState:          key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", "Reset state")),
-		ShowTextInput:       key.NewBinding(key.WithKeys("N", "M"), key.WithHelp("N, M", "Show text input to create file or directory")),
+		ShowTextInput:       key.NewBinding(key.WithKeys("N", "M", "R"), key.WithHelp("N, M", "Show text input to create file or directory")),
 		Submit:              key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "Submit text input value")),
 		GotoTop:             key.NewBinding(key.WithKeys("g"), key.WithHelp("g", "Go to top of pane")),
 		GotoBottom:          key.NewBinding(key.WithKeys("G"), key.WithHelp("G", "Go to bottom of pane")),
@@ -67,5 +68,6 @@ func DefaultKeyMap() KeyMap {
 		OpenInEditor:        key.NewBinding(key.WithKeys("e"), key.WithHelp("e", "Open in $EDITOR")),
 		CreateFile:          key.NewBinding(key.WithKeys("N"), key.WithHelp("N", "Create new file")),
 		CreateDirectory:     key.NewBinding(key.WithKeys("M"), key.WithHelp("M", "Create new directory")),
+		RenameDirectoryItem: key.NewBinding(key.WithKeys("R"), key.WithHelp("R", "Rename directory items")),
 	}
 }

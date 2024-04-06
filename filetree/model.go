@@ -17,6 +17,7 @@ const (
 	CreateFileState
 	CreateDirectoryState
 	MoveState
+	RenameState
 )
 
 type DirectoryItem struct {

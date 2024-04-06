@@ -100,6 +100,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.secondaryFiletree.CurrentDirectory+"/"+m.filetree.GetSelectedItem().Name,
 					),
 				)
+			case m.filetree.State == filetree.RenameState:
+				cmds = append(cmds,
+					m.filetree.RenameDirectoryItemCmd(
+						m.filetree.GetSelectedItem().Path,
+						m.filetree.CurrentDirectory+"/"+m.textinput.Value(),
+					),
+				)
 			default:
 				return m, nil
 			}
@@ -157,7 +164,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	if m.filetree.State == filetree.CreateDirectoryState || m.filetree.State == filetree.CreateFileState {
+	if m.filetree.State == filetree.CreateDirectoryState ||
+		m.filetree.State == filetree.CreateFileState ||
+		m.filetree.State == filetree.RenameState {
 		m.textinput, cmd = m.textinput.Update(msg)
 		cmds = append(cmds, cmd)
 	}

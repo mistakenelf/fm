@@ -25,6 +25,7 @@ type editorFinishedMsg struct{ err error }
 type createFileMsg struct{}
 type createDirectoryMsg struct{}
 type moveDirectoryItemMsg struct{}
+type renameDirectoryItemMsg struct{}
 
 // NewStatusMessageCmd sets a new status message, which will show for a limited
 // amount of time. Note that this also returns a command.
@@ -62,6 +63,17 @@ func (m *Model) CreateFileCmd(name string) tea.Cmd {
 		}
 
 		return createFileMsg{}
+	}
+}
+
+// RenameDirectoryItemCmd renames a file or folder given a name.
+func (m *Model) RenameDirectoryItemCmd(originalName, newName string) tea.Cmd {
+	return func() tea.Msg {
+		if err := filesystem.RenameDirectoryItem(originalName, newName); err != nil {
+			return errorMsg(err.Error())
+		}
+
+		return renameDirectoryItemMsg{}
 	}
 }
 
