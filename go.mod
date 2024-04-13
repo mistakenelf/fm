@@ -9,7 +9,7 @@ require (
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/glamour v0.7.0
 	github.com/charmbracelet/lipgloss v0.10.0
-	github.com/charmbracelet/x/exp/term v0.0.0-20240405134957-07f093a22d1c
+	github.com/charmbracelet/x/exp/term v0.0.0-20240408110044-525ba71bb562
 	github.com/disintegration/imaging v1.6.2
 	github.com/ledongthuc/pdf v0.0.0-20240201131950-da5b75280b06
 	github.com/lucasb-eyer/go-colorful v1.2.0
