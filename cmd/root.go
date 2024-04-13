@@ -84,6 +84,7 @@ var rootCmd = &cobra.Command{
 
 		p := tea.NewProgram(m, tea.WithAltScreen())
 		p.SetWindowTitle("FM")
+
 		if _, err := p.Run(); err != nil {
 			log.Fatal("Failed to start fm", err)
 			os.Exit(1)
@@ -94,6 +95,7 @@ var rootCmd = &cobra.Command{
 // Execute runs the root command and starts the application.
 func Execute() {
 	rootCmd.AddCommand(updateCmd)
+
 	rootCmd.PersistentFlags().String("selection-path", "", "Path to write to file on open.")
 	rootCmd.PersistentFlags().String("start-dir", filesystem.CurrentDirectory, "Starting directory for FM")
 	rootCmd.PersistentFlags().Bool("enable-logging", false, "Enable logging for FM")

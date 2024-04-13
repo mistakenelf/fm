@@ -28,10 +28,12 @@ var f embed.FS
 func (im iconMap) parse() {
 	icons, _ := f.Open("icons")
 	pairs, err := readPairs(icons)
+
 	if err != nil {
 		log.Printf("reading icons file: %s", err)
 		return
 	}
+
 	for _, pair := range pairs {
 		key, val := pair[0], pair[1]
 		key = replaceTilde(key)
@@ -73,41 +75,53 @@ func (im iconMap) GetIcon(f os.FileInfo) string {
 	case f.Mode()&os.ModeSetgid != 0:
 		key = "sg"
 	}
+
 	if val, ok := im[key]; ok {
 		return val
 	}
+
 	if val, ok := im[f.Name()+"*"]; ok {
 		return val
 	}
+
 	if val, ok := im["*"+f.Name()]; ok {
 		return val
 	}
+
 	if val, ok := im[filepath.Base(f.Name())+".*"]; ok {
 		return val
 	}
+
 	ext := filepath.Ext(f.Name())
+
 	if val, ok := im["*"+strings.ToLower(ext)]; ok {
 		return val
 	}
+
 	if f.Mode()&0111 != 0 {
 		if val, ok := im["ex"]; ok {
 			return val
 		}
 	}
+
 	if val, ok := im["fi"]; ok {
 		return val
 	}
+
 	return " "
 }
 
 func replaceTilde(s string) string {
 	u, err := user.Current()
+
 	if err != nil {
 		log.Printf("user: %s", err)
 	}
+
 	if strings.HasPrefix(s, "~") {
 		s = strings.Replace(s, "~", u.HomeDir, 1)
 	}
+
 	return s
 }
 

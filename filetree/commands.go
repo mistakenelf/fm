@@ -14,10 +14,6 @@ import (
 	"github.com/mistakenelf/fm/filesystem"
 )
 
-type getDirectoryListingMsg struct {
-	files            []DirectoryItem
-	workingDirectory string
-}
 type errorMsg string
 type copyToClipboardMsg string
 type statusMessageTimeoutMsg struct{}
@@ -26,6 +22,10 @@ type createFileMsg struct{}
 type createDirectoryMsg struct{}
 type moveDirectoryItemMsg struct{}
 type renameDirectoryItemMsg struct{}
+type getDirectoryListingMsg struct {
+	files            []DirectoryItem
+	workingDirectory string
+}
 
 // NewStatusMessageCmd sets a new status message, which will show for a limited
 // amount of time. Note that this also returns a command.
@@ -162,7 +162,7 @@ func (m Model) GetDirectoryListingCmd(directoryName string) tea.Cmd {
 				isDirectory = symlinkInfo.IsDir()
 			}
 
-			fileSize := ConvertBytesToSizeString(fileInfo.Size())
+			fileSize := filesystem.ConvertBytesToSizeString(fileInfo.Size())
 
 			directoryItems = append(directoryItems, DirectoryItem{
 				Name:        file.Name(),
@@ -246,7 +246,9 @@ func copyToClipboardCmd(path string) tea.Cmd {
 			return errorMsg(err.Error())
 		}
 
-		return copyToClipboardMsg(fmt.Sprintf("%s %s %s", "Successfully copied", path, "to clipboard"))
+		return copyToClipboardMsg(
+			fmt.Sprintf("%s %s %s", "Successfully copied", path, "to clipboard"),
+		)
 	}
 }
 

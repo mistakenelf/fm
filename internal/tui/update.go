@@ -18,6 +18,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case statusMessageTimeoutMsg:
 		m.statusMessage = ""
+
+		return m, nil
 	case tea.WindowSizeMsg:
 		halfSize := msg.Width / 2
 		height := msg.Height - statusbar.Height

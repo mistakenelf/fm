@@ -8,6 +8,8 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
+	"github.com/mistakenelf/fm/polish"
 )
 
 const (
@@ -34,18 +36,23 @@ type Model struct {
 	ViewportDisabled bool
 }
 
-func generateHelpScreen(title string, titleColor TitleColor, entries []Entry, width, height int) string {
+func generateHelpScreen(
+	title string,
+	titleColor TitleColor,
+	entries []Entry,
+	width, height int,
+) string {
 	helpScreen := ""
 
 	for _, content := range entries {
 		keyText := lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#000000"}).
+			Foreground(polish.AdaptiveColors.DefaultText).
 			Width(keyWidth).
 			Render(content.Key)
 
 		descriptionText := lipgloss.NewStyle().
-			Foreground(lipgloss.AdaptiveColor{Dark: "#ffffff", Light: "#000000"}).
+			Foreground(polish.AdaptiveColors.DefaultText).
 			Render(content.Description)
 
 		row := lipgloss.JoinHorizontal(lipgloss.Top, keyText, descriptionText)

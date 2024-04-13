@@ -148,12 +148,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		return m, nil
 	case errorMsg:
 		m.FileName = ""
-		cmds = append(cmds, m.NewStatusMessageCmd(
+		return m, m.NewStatusMessageCmd(
 			lipgloss.NewStyle().
 				Foreground(polish.Colors.Red600).
 				Bold(true).
 				Render(string(msg)),
-		))
+		)
 	}
 
 	if !m.ViewportDisabled {

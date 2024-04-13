@@ -143,16 +143,18 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 		m.Viewport.SetContent(m.Content)
 
+		return m, nil
 	case statusMessageTimeoutMsg:
 		m.StatusMessage = ""
+		return m, nil
 	case errorMsg:
 		m.Filename = ""
-		cmds = append(cmds, m.NewStatusMessageCmd(
+		return m, m.NewStatusMessageCmd(
 			lipgloss.NewStyle().
 				Foreground(polish.Colors.Red600).
 				Bold(true).
 				Render(string(msg)),
-		))
+		)
 	}
 
 	if !m.ViewportDisabled {

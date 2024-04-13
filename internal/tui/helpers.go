@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/mistakenelf/fm/polish"
 )
 
 func contains(s []string, str string) bool {
@@ -38,7 +39,7 @@ func (m *model) updateStatusBar() {
 			m.filetree.CurrentDirectory +
 				lipgloss.NewStyle().
 					Padding(0, 1).
-					Foreground(lipgloss.Color("#eab308")).
+					Foreground(polish.Colors.Yellow500).
 					Render(m.filetree.GetSelectedItem().Details)
 
 		if m.filetree.StatusMessage != "" {

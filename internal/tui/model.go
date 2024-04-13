@@ -153,8 +153,6 @@ func New(cfg Config) model {
 	)
 	helpModel.SetViewportDisabled(true)
 
-	textInput := textinput.New()
-
 	return model{
 		filetree:              filetreeModel,
 		secondaryFiletree:     secondaryFiletree,
@@ -167,7 +165,7 @@ func New(cfg Config) model {
 		config:                cfg,
 		keyMap:                defaultKeyMap,
 		showTextInput:         false,
-		textinput:             textInput,
+		textinput:             textinput.New(),
 		statusMessageLifetime: time.Second,
 	}
 }
