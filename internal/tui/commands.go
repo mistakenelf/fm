@@ -34,6 +34,10 @@ func (m *model) openFileCmd() tea.Cmd {
 		m.resetViewports()
 
 		switch {
+		case selectedFile.Extension == ".csv":
+			m.state = showCsvState
+
+			return m.csv.SetFileNameCmd(selectedFile.Path)
 		case selectedFile.Extension == ".png" || selectedFile.Extension == ".jpg" || selectedFile.Extension == ".jpeg":
 			m.state = showImageState
 

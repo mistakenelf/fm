@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 
 	"github.com/mistakenelf/fm/code"
+	"github.com/mistakenelf/fm/csv"
 	"github.com/mistakenelf/fm/filetree"
 	"github.com/mistakenelf/fm/help"
 	"github.com/mistakenelf/fm/icons"
@@ -27,6 +28,7 @@ const (
 	showPdfState
 	showHelpState
 	showMoveState
+	showCsvState
 )
 
 type Config struct {
@@ -42,6 +44,7 @@ type Config struct {
 type model struct {
 	filetree              filetree.Model
 	secondaryFiletree     filetree.Model
+	csv                   csv.Model
 	help                  help.Model
 	code                  code.Model
 	image                 image.Model
@@ -167,5 +170,6 @@ func New(cfg Config) model {
 		showTextInput:         false,
 		textinput:             textinput.New(),
 		statusMessageLifetime: time.Second,
+		csv:                   csv.New(),
 	}
 }

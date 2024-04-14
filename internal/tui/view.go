@@ -22,6 +22,8 @@ func (m model) View() string {
 		rightBox = m.markdown.View()
 	case showMoveState:
 		rightBox = m.secondaryFiletree.View()
+	case showCsvState:
+		rightBox = m.csv.View()
 	}
 
 	return lipgloss.JoinVertical(lipgloss.Top,

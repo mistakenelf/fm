@@ -27,6 +27,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		cmds = append(cmds, m.image.SetSizeCmd(halfSize, height))
 		cmds = append(cmds, m.markdown.SetSizeCmd(halfSize, height))
+		cmds = append(cmds, m.csv.SetSizeCmd(halfSize, height))
 
 		m.filetree.SetSize(halfSize, height-3)
 		m.secondaryFiletree.SetSize(halfSize, height-3)
@@ -192,6 +193,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, cmd)
 
 	m.help, cmd = m.help.Update(msg)
+	cmds = append(cmds, cmd)
+
+	m.csv, cmd = m.csv.Update(msg)
 	cmds = append(cmds, cmd)
 
 	m.updateStatusBar()

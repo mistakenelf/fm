@@ -23,6 +23,7 @@ func (m *model) disableAllViewports() {
 	m.markdown.SetViewportDisabled(true)
 	m.help.SetViewportDisabled(true)
 	m.image.SetViewportDisabled(true)
+	m.csv.SetViewportDisabled(true)
 }
 
 func (m *model) resetViewports() {
@@ -31,6 +32,7 @@ func (m *model) resetViewports() {
 	m.markdown.GotoTop()
 	m.help.GotoTop()
 	m.image.GotoTop()
+	m.csv.GotoTop()
 }
 
 func (m *model) updateStatusBar() {
