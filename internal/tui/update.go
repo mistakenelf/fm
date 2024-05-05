@@ -23,7 +23,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		halfSize := msg.Width / 2
 		height := msg.Height - statusbar.Height
-		m.height = height
 
 		cmds = append(cmds, m.image.SetSizeCmd(halfSize, height))
 		cmds = append(cmds, m.markdown.SetSizeCmd(halfSize, height))

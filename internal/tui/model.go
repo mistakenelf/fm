@@ -54,7 +54,6 @@ type model struct {
 	state                 sessionState
 	keyMap                keys.KeyMap
 	activePane            int
-	height                int
 	config                Config
 	showTextInput         bool
 	textinput             textinput.Model
