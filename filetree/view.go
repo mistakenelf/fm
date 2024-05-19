@@ -24,50 +24,64 @@ func (m Model) View() string {
 		case m.Disabled:
 			fallthrough
 		case i == m.Cursor && !m.Disabled:
-			iconColor := m.inactiveItemColor
 			textColor := m.inactiveItemColor
 
 			if i == m.Cursor && !m.Disabled {
-				iconColor = m.selectedItemColor
 				textColor = m.selectedItemColor
 			}
 
 			if m.showIcons {
-				icon := icons.Icons.GetIcon(file.FileInfo)
+				icon := icons.GetElementIcon(file.Name, file.IsDirectory)
+
 				fileList.WriteString(
 					lipgloss.NewStyle().
 						Bold(true).
-						Foreground(iconColor).
-						Render(icon) + " ",
+						Foreground(textColor).
+						Render(icon.Icon) + " ",
+				)
+
+				fileList.WriteString(
+					lipgloss.NewStyle().
+						Bold(true).
+						Foreground(textColor).
+						Render(file.Name) + "\n",
+				)
+			} else {
+				fileList.WriteString(
+					lipgloss.NewStyle().
+						Bold(true).
+						Foreground(textColor).
+						Render(file.Name) + "\n",
 				)
 			}
 
-			fileList.WriteString(
-				lipgloss.NewStyle().
-					Bold(true).
-					Foreground(textColor).
-					Render(file.Name) + "\n",
-			)
 		case i != m.Cursor && !m.Disabled:
-			iconColor := m.unselectedItemColor
 			textColor := m.unselectedItemColor
 
 			if m.showIcons {
-				icon := icons.Icons.GetIcon(file.FileInfo)
+				icon := icons.GetElementIcon(file.Name, file.IsDirectory)
+
 				fileList.WriteString(
 					lipgloss.NewStyle().
 						Bold(true).
-						Foreground(iconColor).
-						Render(icon) + " ",
+						Foreground(lipgloss.Color(icon.Color)).
+						Render(icon.Icon) + " ",
+				)
+
+				fileList.WriteString(
+					lipgloss.NewStyle().
+						Bold(true).
+						Foreground(textColor).
+						Render(file.Name) + "\n",
+				)
+			} else {
+				fileList.WriteString(
+					lipgloss.NewStyle().
+						Bold(true).
+						Foreground(textColor).
+						Render(file.Name) + "\n",
 				)
 			}
-
-			fileList.WriteString(
-				lipgloss.NewStyle().
-					Bold(true).
-					Foreground(textColor).
-					Render(file.Name) + "\n",
-			)
 		}
 	}
 

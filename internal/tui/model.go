@@ -9,7 +9,6 @@ import (
 	"github.com/mistakenelf/fm/csv"
 	"github.com/mistakenelf/fm/filetree"
 	"github.com/mistakenelf/fm/help"
-	"github.com/mistakenelf/fm/icons"
 	"github.com/mistakenelf/fm/image"
 	"github.com/mistakenelf/fm/internal/theme"
 	"github.com/mistakenelf/fm/keys"
@@ -75,10 +74,6 @@ func New(cfg Config) model {
 	secondaryFiletree.SetSelectionPath(cfg.SelectionPath)
 	secondaryFiletree.SetShowIcons(cfg.ShowIcons)
 	secondaryFiletree.SetDisabled(true)
-
-	if cfg.ShowIcons {
-		icons.ParseIcons()
-	}
 
 	codeModel := code.New()
 	codeModel.SetSyntaxTheme(cfg.SyntaxTheme)
