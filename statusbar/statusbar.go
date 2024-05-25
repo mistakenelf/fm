@@ -26,10 +26,12 @@ type Model struct {
 	SecondColumn       string
 	ThirdColumn        string
 	FourthColumn       string
+	FifthColumn        string
 	FirstColumnColors  ColorConfig
 	SecondColumnColors ColorConfig
 	ThirdColumnColors  ColorConfig
 	FourthColumnColors ColorConfig
+	FifthColumnColors  ColorConfig
 }
 
 // New creates a new instance of the statusbar.
@@ -37,13 +39,15 @@ func New(
 	firstColumnColors,
 	secondColumnColors,
 	thirdColumnColors,
-	fourthColumnColors ColorConfig,
+	fourthColumnColors,
+	fifthColumnColors ColorConfig,
 ) Model {
 	return Model{
 		FirstColumnColors:  firstColumnColors,
 		SecondColumnColors: secondColumnColors,
 		ThirdColumnColors:  thirdColumnColors,
 		FourthColumnColors: fourthColumnColors,
+		FifthColumnColors:  fifthColumnColors,
 	}
 }
 
@@ -62,11 +66,18 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 // SetContent sets the content of the statusbar.
-func (m *Model) SetContent(firstColumn, secondColumn, thirdColumn, fourthColumn string) {
+func (m *Model) SetContent(
+	firstColumn,
+	secondColumn,
+	thirdColumn,
+	fourthColumn,
+	fifthColumn string,
+) {
 	m.FirstColumn = firstColumn
 	m.SecondColumn = secondColumn
 	m.ThirdColumn = thirdColumn
 	m.FourthColumn = fourthColumn
+	m.FifthColumn = fifthColumn
 }
 
 // SetColors sets the colors of the 4 columns.
@@ -74,12 +85,14 @@ func (m *Model) SetColors(
 	firstColumnColors,
 	secondColumnColors,
 	thirdColumnColors,
-	fourthColumnColors ColorConfig,
+	fourthColumnColors,
+	fifthColumnColors ColorConfig,
 ) {
 	m.FirstColumnColors = firstColumnColors
 	m.SecondColumnColors = secondColumnColors
 	m.ThirdColumnColors = thirdColumnColors
 	m.FourthColumnColors = fourthColumnColors
+	m.FifthColumnColors = fifthColumnColors
 }
 
 // View returns a string representation of the statusbar.
@@ -96,7 +109,6 @@ func (m Model) View() string {
 	thirdColumn := lipgloss.NewStyle().
 		Foreground(m.ThirdColumnColors.Foreground).
 		Background(m.ThirdColumnColors.Background).
-		Align(lipgloss.Right).
 		Padding(0, 1).
 		Height(Height).
 		Render(m.ThirdColumn)
@@ -108,15 +120,22 @@ func (m Model) View() string {
 		Height(Height).
 		Render(m.FourthColumn)
 
+	fifthColumn := lipgloss.NewStyle().
+		Foreground(m.FifthColumnColors.Foreground).
+		Background(m.FifthColumnColors.Background).
+		Padding(0, 1).
+		Height(Height).
+		Render(m.FifthColumn)
+
 	secondColumn := lipgloss.NewStyle().
 		Foreground(m.SecondColumnColors.Foreground).
 		Background(m.SecondColumnColors.Background).
 		Padding(0, 1).
 		Height(Height).
-		Width(m.Width - width(firstColumn) - width(thirdColumn) - width(fourthColumn)).
+		Width(m.Width - width(firstColumn) - width(thirdColumn) - width(fourthColumn) - width(fifthColumn)).
 		Render(ansi.Truncate(
 			m.SecondColumn,
-			m.Width-width(firstColumn)-width(thirdColumn)-width(fourthColumn)-3,
+			m.Width-width(firstColumn)-width(thirdColumn)-width(fourthColumn)-width(fifthColumn)-3,
 			"..."),
 		)
 
@@ -125,5 +144,6 @@ func (m Model) View() string {
 		secondColumn,
 		thirdColumn,
 		fourthColumn,
+		fifthColumn,
 	)
 }

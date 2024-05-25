@@ -6,7 +6,7 @@ import (
 
 // View returns a string representation of the UI.
 func (m model) View() string {
-	leftBox := m.filetree.View()
+	leftBox := m.filetree[m.activeWorkspace].View()
 	rightBox := m.help.View()
 
 	switch m.state {

@@ -41,7 +41,7 @@ type Config struct {
 }
 
 type model struct {
-	filetree              filetree.Model
+	filetree              []filetree.Model
 	secondaryFiletree     filetree.Model
 	csv                   csv.Model
 	help                  help.Model
@@ -60,6 +60,10 @@ type model struct {
 	directoryBeforeMove   string
 	statusMessageLifetime time.Duration
 	statusMessageTimer    *time.Timer
+	workspaces            []int
+	activeWorkspace       int
+	width                 int
+	height                int
 }
 
 // New creates a new instance of the UI.
@@ -95,6 +99,10 @@ func New(cfg Config) model {
 		},
 		statusbar.ColorConfig{
 			Foreground: cfg.Theme.StatusBarBarForegroundColor,
+			Background: cfg.Theme.StatusBarBarBackgroundColor,
+		},
+		statusbar.ColorConfig{
+			Foreground: cfg.Theme.StatusBarSelectedFileForegroundColor,
 			Background: cfg.Theme.StatusBarBarBackgroundColor,
 		},
 		statusbar.ColorConfig{
@@ -151,7 +159,7 @@ func New(cfg Config) model {
 	helpModel.SetViewportDisabled(true)
 
 	return model{
-		filetree:              filetreeModel,
+		filetree:              []filetree.Model{filetreeModel},
 		secondaryFiletree:     secondaryFiletree,
 		help:                  helpModel,
 		code:                  codeModel,
@@ -165,5 +173,7 @@ func New(cfg Config) model {
 		textinput:             textinput.New(),
 		statusMessageLifetime: time.Second,
 		csv:                   csv.New(),
+		workspaces:            []int{1},
+		activeWorkspace:       0,
 	}
 }

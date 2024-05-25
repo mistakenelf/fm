@@ -28,7 +28,7 @@ var forbiddenExtensions = []string{
 type statusMessageTimeoutMsg struct{}
 
 func (m *model) openFileCmd() tea.Cmd {
-	selectedFile := m.filetree.GetSelectedItem()
+	selectedFile := m.filetree[m.activeWorkspace].GetSelectedItem()
 
 	if !selectedFile.IsDirectory {
 		m.resetViewports()

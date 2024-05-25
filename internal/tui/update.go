@@ -21,6 +21,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, nil
 	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.height = msg.Height
 		halfSize := msg.Width / 2
 		height := msg.Height - statusbar.Height
 
@@ -28,7 +30,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, m.markdown.SetSizeCmd(halfSize, height))
 		cmds = append(cmds, m.csv.SetSizeCmd(halfSize, height))
 
-		m.filetree.SetSize(halfSize, height-3)
+		m.filetree[m.activeWorkspace].SetSize(halfSize, height-3)
 		m.secondaryFiletree.SetSize(halfSize, height-3)
 		m.code.SetSize(halfSize, height)
 		m.pdf.SetSize(halfSize, height)
@@ -41,7 +43,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keyMap.ForceQuit):
 			return m, tea.Quit
 		case key.Matches(msg, m.keyMap.Quit):
-			if m.filetree.State == filetree.IdleState {
+			if m.filetree[m.activeWorkspace].State == filetree.IdleState {
 				return m, tea.Quit
 			}
 		case key.Matches(msg, m.keyMap.OpenFile):
@@ -50,16 +52,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case key.Matches(msg, m.keyMap.ResetState):
 			if m.state == showMoveState {
-				cmds = append(cmds, m.filetree.GetDirectoryListingCmd(m.directoryBeforeMove))
+				cmds = append(cmds, m.filetree[m.activeWorkspace].GetDirectoryListingCmd(m.directoryBeforeMove))
 			}
 
 			m.state = idleState
 			m.showTextInput = false
 			m.disableAllViewports()
 			m.resetViewports()
-			m.filetree.SetDisabled(false)
+			m.filetree[m.activeWorkspace].SetDisabled(false)
 			m.textinput.Blur()
-			m.filetree.State = filetree.IdleState
+			m.filetree[m.activeWorkspace].State = filetree.IdleState
 			m.secondaryFiletree.SetDisabled(true)
 			m.activePane = 0
 
@@ -68,17 +70,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			m.textinput.Reset()
 		case key.Matches(msg, m.keyMap.MoveDirectoryItem):
-			if m.activePane == 0 && m.filetree.State == filetree.IdleState {
+			if m.activePane == 0 && m.filetree[m.activeWorkspace].State == filetree.IdleState {
 				m.activePane = (m.activePane + 1) % 2
-				m.directoryBeforeMove = m.filetree.CurrentDirectory
+				m.directoryBeforeMove = m.filetree[m.activeWorkspace].CurrentDirectory
 				m.state = showMoveState
-				m.filetree.State = filetree.MoveState
-				m.filetree.SetDisabled(true)
+				m.filetree[m.activeWorkspace].State = filetree.MoveState
+				m.filetree[m.activeWorkspace].SetDisabled(true)
 				m.secondaryFiletree.SetDisabled(false)
-				cmds = append(cmds, m.secondaryFiletree.GetDirectoryListingCmd(m.filetree.CurrentDirectory))
+				cmds = append(cmds, m.secondaryFiletree.GetDirectoryListingCmd(m.filetree[m.activeWorkspace].CurrentDirectory))
 			}
 		case key.Matches(msg, m.keyMap.ShowTextInput):
-			if m.activePane == 0 && m.filetree.State == filetree.IdleState {
+			if m.activePane == 0 && m.filetree[m.activeWorkspace].State == filetree.IdleState {
 				m.showTextInput = true
 				m.textinput.Focus()
 				m.disableAllViewports()
@@ -90,23 +92,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case key.Matches(msg, m.keyMap.Submit):
 			switch {
-			case m.filetree.State == filetree.CreateFileState:
-				cmds = append(cmds, m.filetree.CreateFileCmd(m.textinput.Value()))
-			case m.filetree.State == filetree.CreateDirectoryState:
-				cmds = append(cmds, m.filetree.CreateDirectoryCmd(m.textinput.Value()))
-			case m.filetree.State == filetree.MoveState:
+			case m.filetree[m.activeWorkspace].State == filetree.CreateFileState:
+				cmds = append(cmds, m.filetree[m.activeWorkspace].CreateFileCmd(m.textinput.Value()))
+			case m.filetree[m.activeWorkspace].State == filetree.CreateDirectoryState:
+				cmds = append(cmds, m.filetree[m.activeWorkspace].CreateDirectoryCmd(m.textinput.Value()))
+			case m.filetree[m.activeWorkspace].State == filetree.MoveState:
 				cmds = append(
 					cmds,
-					m.filetree.MoveDirectoryItemCmd(
-						m.filetree.GetSelectedItem().Path,
-						m.secondaryFiletree.CurrentDirectory+"/"+m.filetree.GetSelectedItem().Name,
+					m.filetree[m.activeWorkspace].MoveDirectoryItemCmd(
+						m.filetree[m.activeWorkspace].GetSelectedItem().Path,
+						m.secondaryFiletree.CurrentDirectory+"/"+m.filetree[m.activeWorkspace].GetSelectedItem().Name,
 					),
 				)
-			case m.filetree.State == filetree.RenameState:
+			case m.filetree[m.activeWorkspace].State == filetree.RenameState:
 				cmds = append(cmds,
-					m.filetree.RenameDirectoryItemCmd(
-						m.filetree.GetSelectedItem().Path,
-						m.filetree.CurrentDirectory+"/"+m.textinput.Value(),
+					m.filetree[m.activeWorkspace].RenameDirectoryItemCmd(
+						m.filetree[m.activeWorkspace].GetSelectedItem().Path,
+						m.filetree[m.activeWorkspace].CurrentDirectory+"/"+m.textinput.Value(),
 					),
 				)
 			default:
@@ -123,11 +125,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.activePane = (m.activePane + 1) % 2
 
 				if m.activePane == 0 {
-					m.filetree.SetDisabled(false)
+					m.filetree[m.activeWorkspace].SetDisabled(false)
 					m.secondaryFiletree.SetDisabled(true)
 					m.disableAllViewports()
 				} else {
-					m.filetree.SetDisabled(true)
+					m.filetree[m.activeWorkspace].SetDisabled(true)
 
 					switch m.state {
 					case idleState:
@@ -163,17 +165,35 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.help.GotoBottom()
 				m.image.GotoBottom()
 			}
+		case key.Matches(msg, m.keyMap.WorkspaceOne):
+			m.workspaces = []int{1}
+			m.activeWorkspace = 0
+
+			return m, tea.Batch(cmds...)
+		case key.Matches(msg, m.keyMap.WorkspaceTwo):
+			filetreeModel := filetree.New(m.config.StartDir)
+			filetreeModel.SetTheme(m.config.Theme.SelectedTreeItemColor, m.config.Theme.UnselectedTreeItemColor)
+			filetreeModel.SetSelectionPath(m.config.SelectionPath)
+			filetreeModel.SetShowIcons(m.config.ShowIcons)
+
+			m.workspaces = append(m.workspaces, 2)
+			m.activeWorkspace = 1
+			m.filetree = append(m.filetree, filetreeModel)
+
+			cmds = append(cmds, m.filetree[m.activeWorkspace].Init())
+			m.filetree[m.activeWorkspace].SetSize(m.width/2, m.height-3)
+			return m, tea.Batch(cmds...)
 		}
 	}
 
-	if m.filetree.State == filetree.CreateDirectoryState ||
-		m.filetree.State == filetree.CreateFileState ||
-		m.filetree.State == filetree.RenameState {
+	if m.filetree[m.activeWorkspace].State == filetree.CreateDirectoryState ||
+		m.filetree[m.activeWorkspace].State == filetree.CreateFileState ||
+		m.filetree[m.activeWorkspace].State == filetree.RenameState {
 		m.textinput, cmd = m.textinput.Update(msg)
 		cmds = append(cmds, cmd)
 	}
 
-	m.filetree, cmd = m.filetree.Update(msg)
+	m.filetree[m.activeWorkspace], cmd = m.filetree[m.activeWorkspace].Update(msg)
 	cmds = append(cmds, cmd)
 
 	m.secondaryFiletree, cmd = m.secondaryFiletree.Update(msg)

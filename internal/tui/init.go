@@ -8,7 +8,7 @@ import (
 // Init intializes the UI.
 func (m model) Init() tea.Cmd {
 	return tea.Batch(
-		m.filetree.Init(),
+		m.filetree[m.activeWorkspace].Init(),
 		m.secondaryFiletree.Init(),
 		textinput.Blink,
 		tea.SetWindowTitle("FM"),

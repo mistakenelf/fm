@@ -34,6 +34,8 @@ type KeyMap struct {
 	GotoBottom          key.Binding
 	MoveDirectoryItem   key.Binding
 	RenameDirectoryItem key.Binding
+	WorkspaceOne        key.Binding
+	WorkspaceTwo        key.Binding
 }
 
 func DefaultKeyMap() KeyMap {
@@ -69,5 +71,7 @@ func DefaultKeyMap() KeyMap {
 		CreateFile:          key.NewBinding(key.WithKeys("N"), key.WithHelp("N", "Create new file")),
 		CreateDirectory:     key.NewBinding(key.WithKeys("M"), key.WithHelp("M", "Create new directory")),
 		RenameDirectoryItem: key.NewBinding(key.WithKeys("R"), key.WithHelp("R", "Rename directory items")),
+		WorkspaceOne:        key.NewBinding(key.WithKeys("1"), key.WithHelp("1", "Switch To Workspace 1")),
+		WorkspaceTwo:        key.NewBinding(key.WithKeys("2"), key.WithHelp("2", "Switch To Workspace 2")),
 	}
 }

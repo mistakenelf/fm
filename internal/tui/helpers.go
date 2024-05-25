@@ -36,16 +36,16 @@ func (m *model) resetViewports() {
 }
 
 func (m *model) updateStatusBar() {
-	if m.filetree.GetSelectedItem().Name != "" {
+	if m.filetree[m.activeWorkspace].GetSelectedItem().Name != "" {
 		statusMessage :=
-			m.filetree.CurrentDirectory +
+			m.filetree[m.activeWorkspace].CurrentDirectory +
 				lipgloss.NewStyle().
 					Padding(0, 1).
 					Foreground(polish.Colors.Yellow500).
-					Render(m.filetree.GetSelectedItem().Details)
+					Render(m.filetree[m.activeWorkspace].GetSelectedItem().Details)
 
-		if m.filetree.StatusMessage != "" {
-			statusMessage = m.filetree.StatusMessage
+		if m.filetree[m.activeWorkspace].StatusMessage != "" {
+			statusMessage = m.filetree[m.activeWorkspace].StatusMessage
 		}
 
 		if m.code.StatusMessage != "" {
@@ -73,10 +73,11 @@ func (m *model) updateStatusBar() {
 		}
 
 		m.statusbar.SetContent(
-			m.filetree.GetSelectedItem().Name,
+			m.filetree[m.activeWorkspace].GetSelectedItem().Name,
 			statusMessage,
-			fmt.Sprintf("%d/%d", m.filetree.Cursor+1, m.filetree.GetTotalItems()),
-			fmt.Sprintf(m.filetree.GetSelectedItem().FileSize),
+			fmt.Sprintf("%d", m.activeWorkspace+1),
+			fmt.Sprintf("%d/%d", m.filetree[m.activeWorkspace].Cursor+1, m.filetree[m.activeWorkspace].GetTotalItems()),
+			fmt.Sprintf(m.filetree[m.activeWorkspace].GetSelectedItem().FileSize),
 		)
 	} else {
 		statusMessage := "Directory is empty"
@@ -88,6 +89,7 @@ func (m *model) updateStatusBar() {
 		m.statusbar.SetContent(
 			"N/A",
 			statusMessage,
+			fmt.Sprintf("%d", m.activeWorkspace+1),
 			fmt.Sprintf("%d/%d", 0, 0),
 			"FM",
 		)
