@@ -83,7 +83,6 @@ var rootCmd = &cobra.Command{
 		m := tui.New(cfg)
 
 		p := tea.NewProgram(m, tea.WithAltScreen())
-		p.SetWindowTitle("FM")
 
 		if _, err := p.Run(); err != nil {
 			log.Fatal("Failed to start fm", err)

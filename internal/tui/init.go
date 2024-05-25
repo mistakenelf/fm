@@ -11,5 +11,6 @@ func (m model) Init() tea.Cmd {
 		m.filetree.Init(),
 		m.secondaryFiletree.Init(),
 		textinput.Blink,
+		tea.SetWindowTitle("FM"),
 	)
 }
