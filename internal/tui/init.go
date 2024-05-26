@@ -6,7 +6,7 @@ import (
 )
 
 // Init intializes the UI.
-func (m model) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	return tea.Batch(
 		m.filetree[m.activeWorkspace].Init(),
 		m.secondaryFiletree.Init(),

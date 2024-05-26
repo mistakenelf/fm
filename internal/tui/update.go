@@ -5,11 +5,11 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/mistakenelf/fm/filetree"
-	"github.com/mistakenelf/fm/statusbar"
+	"github.com/mistakenelf/fm/utilities"
 )
 
 // Update handles all UI interactions.
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
 		cmd  tea.Cmd
 		cmds []tea.Cmd
@@ -21,23 +21,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, nil
 	case tea.WindowSizeMsg:
-		m.width = msg.Width
-		m.height = msg.Height
-		halfSize := msg.Width / 2
-		height := msg.Height - statusbar.Height
-
-		cmds = append(cmds, m.image.SetSizeCmd(halfSize, height))
-		cmds = append(cmds, m.markdown.SetSizeCmd(halfSize, height))
-		cmds = append(cmds, m.csv.SetSizeCmd(halfSize, height))
-
-		m.filetree[m.activeWorkspace].SetSize(halfSize, height-3)
-		m.secondaryFiletree.SetSize(halfSize, height-3)
-		m.code.SetSize(halfSize, height)
-		m.pdf.SetSize(halfSize, height)
-		m.statusbar.SetSize(msg.Width)
-		m.help.SetSize(halfSize, height)
-
-		return m, tea.Batch(cmds...)
+		return m.handleWindowResizie(msg)
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keyMap.ForceQuit):
@@ -168,21 +152,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keyMap.WorkspaceOne):
 			m.workspaces = []int{1}
 			m.activeWorkspace = 0
-
-			return m, tea.Batch(cmds...)
 		case key.Matches(msg, m.keyMap.WorkspaceTwo):
-			filetreeModel := filetree.New(m.config.StartDir)
-			filetreeModel.SetTheme(m.config.Theme.SelectedTreeItemColor, m.config.Theme.UnselectedTreeItemColor)
-			filetreeModel.SetSelectionPath(m.config.SelectionPath)
-			filetreeModel.SetShowIcons(m.config.ShowIcons)
-
-			m.workspaces = append(m.workspaces, 2)
 			m.activeWorkspace = 1
-			m.filetree = append(m.filetree, filetreeModel)
 
-			cmds = append(cmds, m.filetree[m.activeWorkspace].Init())
-			m.filetree[m.activeWorkspace].SetSize(m.width/2, m.height-3)
-			return m, tea.Batch(cmds...)
+			if !utilities.Contains(m.workspaces, 2) {
+				m.workspaces = append(m.workspaces, 2)
+			}
 		}
 	}
 

@@ -1,35 +1,30 @@
 run:
-  timeout: 5m
+  tests: false
+
+issues:
+  include:
+    - EXC0001
+    - EXC0005
+    - EXC0011
+    - EXC0012
+    - EXC0013
+
+  max-issues-per-linter: 0
+  max-same-issues: 0
 
 linters:
-  disable-all: true
   enable:
     - bodyclose
-    - dogsled
-    - errcheck
     - exportloopref
-    - gochecknoinits
-    - goconst
-    - gocritic
-    - gofmt
-    - goprintffuncname
-    - gosimple
-    - govet
-    - ineffassign
-    - misspell
-    - nakedret
-    - noctx
-    - nolintlint
+    - gofumpt
+    - goimports
+    - gosec
+    - nilerr
+    - predeclared
+    - revive
     - rowserrcheck
-    - staticcheck
-    - stylecheck
-    - typecheck
+    - sqlclosecheck
+    - tparallel
     - unconvert
     - unparam
-    - unused
     - whitespace
-    - wastedassign
-    - nilerr
-    - godot
-    - godox
-    - goimports

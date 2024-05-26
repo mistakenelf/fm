@@ -5,7 +5,7 @@ import (
 )
 
 // View returns a string representation of the UI.
-func (m model) View() string {
+func (m Model) View() string {
 	leftBox := m.filetree[m.activeWorkspace].View()
 	rightBox := m.help.View()
 
@@ -27,9 +27,7 @@ func (m model) View() string {
 	}
 
 	return lipgloss.JoinVertical(lipgloss.Top,
-		lipgloss.NewStyle().Render(
-			lipgloss.JoinHorizontal(lipgloss.Top, leftBox, rightBox),
-		),
+		lipgloss.JoinHorizontal(lipgloss.Top, leftBox, rightBox),
 		m.statusbar.View(),
 	)
 }

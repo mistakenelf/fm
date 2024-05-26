@@ -6,28 +6,12 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mistakenelf/fm/polish"
+	"github.com/mistakenelf/fm/utilities"
 )
-
-var forbiddenExtensions = []string{
-	".FCStd",
-	".gif",
-	".zip",
-	".rar",
-	".webm",
-	".sqlite",
-	".sqlite-shm",
-	".sqlite-wal",
-	".DS_Store",
-	".db",
-	".data",
-	".plist",
-	".webp",
-	".img",
-}
 
 type statusMessageTimeoutMsg struct{}
 
-func (m *model) openFileCmd() tea.Cmd {
+func (m *Model) openFileCmd() tea.Cmd {
 	selectedFile := m.filetree[m.activeWorkspace].GetSelectedItem()
 
 	if !selectedFile.IsDirectory {
@@ -50,7 +34,7 @@ func (m *model) openFileCmd() tea.Cmd {
 			m.state = showPdfState
 
 			return m.pdf.SetFileNameCmd(selectedFile.Path)
-		case contains(forbiddenExtensions, selectedFile.Extension):
+		case utilities.Contains(forbiddenExtensions, selectedFile.Extension):
 			return m.newStatusMessageCmd(lipgloss.NewStyle().
 				Foreground(polish.Colors.Red600).
 				Bold(true).
@@ -67,7 +51,7 @@ func (m *model) openFileCmd() tea.Cmd {
 
 // newStatusMessage sets a new status message, which will show for a limited
 // amount of time.
-func (m *model) newStatusMessageCmd(s string) tea.Cmd {
+func (m *Model) newStatusMessageCmd(s string) tea.Cmd {
 	m.statusMessage = s
 
 	if m.statusMessageTimer != nil {

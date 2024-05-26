@@ -30,6 +30,7 @@ const (
 	showCsvState
 )
 
+// Config represents the application configuration.
 type Config struct {
 	StartDir       string
 	SelectionPath  string
@@ -40,7 +41,8 @@ type Config struct {
 	Theme          theme.Theme
 }
 
-type model struct {
+// Model represents all properties of the TUI.
+type Model struct {
 	filetree              []filetree.Model
 	secondaryFiletree     filetree.Model
 	csv                   csv.Model
@@ -67,7 +69,7 @@ type model struct {
 }
 
 // New creates a new instance of the UI.
-func New(cfg Config) model {
+func New(cfg Config) Model {
 	filetreeModel := filetree.New(cfg.StartDir)
 	filetreeModel.SetTheme(cfg.Theme.SelectedTreeItemColor, cfg.Theme.UnselectedTreeItemColor)
 	filetreeModel.SetSelectionPath(cfg.SelectionPath)
@@ -158,7 +160,7 @@ func New(cfg Config) model {
 	)
 	helpModel.SetViewportDisabled(true)
 
-	return model{
+	return Model{
 		filetree:              []filetree.Model{filetreeModel},
 		secondaryFiletree:     secondaryFiletree,
 		help:                  helpModel,
