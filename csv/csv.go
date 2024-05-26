@@ -33,8 +33,8 @@ const (
 var (
 	HeaderStyle  = lipgloss.NewStyle().Foreground(purple).Bold(true).Align(lipgloss.Center)
 	CellStyle    = lipgloss.NewStyle().Padding(0, 1).Width(14)
-	OddRowStyle  = CellStyle.Copy().Foreground(gray)
-	EvenRowStyle = CellStyle.Copy().Foreground(lightGray)
+	OddRowStyle  = CellStyle.Foreground(gray)
+	EvenRowStyle = CellStyle.Foreground(lightGray)
 )
 
 // Model represents the properties of a code bubble.
