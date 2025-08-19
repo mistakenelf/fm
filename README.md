@@ -6,7 +6,7 @@
   <p align="center">
     <a href="https://github.com/mistakenelf/fm/releases"><img src="https://img.shields.io/github/v/release/mistakenelf/fm" alt="Latest Release"></a>
     <a href="https://pkg.go.dev/github.com/mistakenelf/fm?tab=doc"><img src="https://godoc.org/github.com/golang/gddo?status.svg" alt="GoDoc"></a>
-    <a href="https://github.com/mistakenelf/fm/actions"><img src="https://img.shields.io/github/workflow/status/mistakenelf/fm/Release" alt="Build Status"></a>
+    <a href="https://github.com/mistakenelf/fm/actions"><img src="https://img.shields.io/github/actions/workflow/status/mistakenelf/fm/build.yml?branch=main" alt="Build Status"></a>
   </p>
 </p>
 
