@@ -4,6 +4,7 @@ package help
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -42,7 +43,7 @@ func generateHelpScreen(
 	entries []Entry,
 	width, height int,
 ) string {
-	helpScreen := ""
+	var helpScreen strings.Builder
 
 	for _, content := range entries {
 		keyText := lipgloss.NewStyle().
@@ -56,7 +57,7 @@ func generateHelpScreen(
 			Render(content.Description)
 
 		row := lipgloss.JoinHorizontal(lipgloss.Top, keyText, descriptionText)
-		helpScreen += fmt.Sprintf("%s\n", row)
+		fmt.Fprintf(&helpScreen, "%s\n", row)
 	}
 
 	titleText := lipgloss.NewStyle().Bold(true).
@@ -72,7 +73,7 @@ func generateHelpScreen(
 		Render(lipgloss.JoinVertical(
 			lipgloss.Top,
 			titleText,
-			helpScreen,
+			helpScreen.String(),
 		))
 }
 

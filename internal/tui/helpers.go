@@ -2,19 +2,14 @@ package tui
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mistakenelf/fm/polish"
 )
 
 func contains(s []string, str string) bool {
-	for _, v := range s {
-		if v == str {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(s, str)
 }
 
 func (m *model) disableAllViewports() {
@@ -76,7 +71,7 @@ func (m *model) updateStatusBar() {
 			m.filetree.GetSelectedItem().Name,
 			statusMessage,
 			fmt.Sprintf("%d/%d", m.filetree.Cursor+1, m.filetree.GetTotalItems()),
-			fmt.Sprintf(m.filetree.GetSelectedItem().FileSize),
+			fmt.Sprintf("%s", m.filetree.GetSelectedItem().FileSize),
 		)
 	} else {
 		statusMessage := "Directory is empty"

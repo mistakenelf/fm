@@ -89,12 +89,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.textinput.Reset()
 			}
 		case key.Matches(msg, m.keyMap.Submit):
-			switch {
-			case m.filetree.State == filetree.CreateFileState:
+			switch m.filetree.State {
+			case filetree.CreateFileState:
 				cmds = append(cmds, m.filetree.CreateFileCmd(m.textinput.Value()))
-			case m.filetree.State == filetree.CreateDirectoryState:
+			case filetree.CreateDirectoryState:
 				cmds = append(cmds, m.filetree.CreateDirectoryCmd(m.textinput.Value()))
-			case m.filetree.State == filetree.MoveState:
+			case filetree.MoveState:
 				cmds = append(
 					cmds,
 					m.filetree.MoveDirectoryItemCmd(
@@ -102,7 +102,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.secondaryFiletree.CurrentDirectory+"/"+m.filetree.GetSelectedItem().Name,
 					),
 				)
-			case m.filetree.State == filetree.RenameState:
+			case filetree.RenameState:
 				cmds = append(cmds,
 					m.filetree.RenameDirectoryItemCmd(
 						m.filetree.GetSelectedItem().Path,
