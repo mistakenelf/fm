@@ -1,8 +1,7 @@
+version: v1.0.0
 run:
   timeout: 5m
-
 linters:
-  disable-all: true
   enable:
     - bodyclose
     - dogsled
