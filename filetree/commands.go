@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/atotto/clipboard"
@@ -178,6 +179,10 @@ func (m Model) GetDirectoryListingCmd(directoryName string) tea.Cmd {
 				FileSize:    fileSize,
 			})
 		}
+
+		sort.Slice(directoryItems, func(i, j int) bool {
+			return directoryItems[j].FileInfo.ModTime().Before(directoryItems[i].FileInfo.ModTime())
+		})
 
 		return getDirectoryListingMsg{
 			files:            directoryItems,

@@ -545,7 +545,7 @@ func WriteToFile(path, content string) error {
 		return errors.Unwrap(err)
 	}
 
-	_, err = file.WriteString(fmt.Sprintf("%s\n", filepath.Join(workingDir, content)))
+	_, err = fmt.Fprintf(file, "%s\n", filepath.Join(workingDir, content))
 	if err != nil {
 		err = file.Close()
 		if err != nil {

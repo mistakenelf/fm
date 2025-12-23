@@ -37,7 +37,13 @@ func (m *model) updateStatusBar() {
 				lipgloss.NewStyle().
 					Padding(0, 1).
 					Foreground(polish.Colors.Yellow500).
-					Render(m.filetree.GetSelectedItem().Details)
+					Render(m.filetree.GetSelectedItem().Details) +
+				lipgloss.NewStyle().
+					Padding(0, 1).
+					Foreground(polish.Colors.Pink).
+					Render(m.filetree.GetSelectedItem().
+						FileInfo.
+						ModTime().Format("2006-01-02"))
 
 		if m.filetree.StatusMessage != "" {
 			statusMessage = m.filetree.StatusMessage
