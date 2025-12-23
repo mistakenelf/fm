@@ -4,6 +4,7 @@ package filesystem
 
 import (
 	"archive/zip"
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -590,4 +591,17 @@ func ConvertBytesToSizeString(size int64) string {
 	}
 
 	return ""
+}
+
+func IsBinary(path string) (bool, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+
+	buffer := make([]byte, 512)
+	n, _ := f.Read(buffer)
+
+	return bytes.Contains(buffer[:n], []byte{0}), nil
 }

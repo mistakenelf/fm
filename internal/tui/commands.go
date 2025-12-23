@@ -5,6 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/mistakenelf/fm/filesystem"
 	"github.com/mistakenelf/fm/polish"
 )
 
@@ -33,6 +34,14 @@ func (m *model) openFileCmd() tea.Cmd {
 	if !selectedFile.IsDirectory {
 		m.resetViewports()
 
+		isBinary, err := filesystem.IsBinary(selectedFile.Path)
+		if err != nil {
+			return m.newStatusMessageCmd(lipgloss.NewStyle().
+				Foreground(polish.Colors.Red600).
+				Bold(true).
+				Render("Selected file type is not supported"))
+		}
+
 		switch {
 		case selectedFile.Extension == ".csv":
 			m.state = showCsvState
@@ -55,6 +64,12 @@ func (m *model) openFileCmd() tea.Cmd {
 				Foreground(polish.Colors.Red600).
 				Bold(true).
 				Render("Selected file type is not supported"))
+		case isBinary:
+			return m.newStatusMessageCmd(
+				lipgloss.NewStyle().
+					Foreground(polish.Colors.Red600).
+					Bold(true).
+					Render("Selected file is not currently supported"))
 		default:
 			m.state = showCodeState
 
