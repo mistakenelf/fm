@@ -30,7 +30,7 @@ func (m *model) openFileCmd() tea.Cmd {
 			m.state = showCsvState
 
 			return m.csv.SetFileNameCmd(selectedFile.Path)
-		case selectedFile.Extension == ".png" || selectedFile.Extension == ".jpg" || selectedFile.Extension == ".jpeg":
+		case selectedFile.Extension == ".png" || selectedFile.Extension == ".jpg" || selectedFile.Extension == ".jpeg" || selectedFile.Extension == ".gif":
 			m.state = showImageState
 
 			return m.image.SetFileNameCmd(selectedFile.Path)

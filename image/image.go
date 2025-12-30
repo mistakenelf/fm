@@ -3,8 +3,10 @@
 package image
 
 import (
+	"fmt"
 	"image"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -78,8 +80,39 @@ func (m *Model) NewStatusMessageCmd(s string) tea.Cmd {
 	}
 }
 
+// convertWithChafa uses the chafa command-line tool to convert an image to a string.
+func convertWithChafa(width int, filename string) (string, error) {
+	cmd := exec.Command(
+		"chafa",
+		"-s", fmt.Sprintf("%dx", width),
+		"--format", "symbols",
+		filepath.Clean(filename),
+	)
+
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	return string(output), nil
+}
+
+// isGif checks if the file has a .gif extension.
+func isGif(filename string) bool {
+	ext := strings.ToLower(filepath.Ext(filename))
+	return ext == ".gif"
+}
+
 func convertImageToStringCmd(width int, filename string) tea.Cmd {
 	return func() tea.Msg {
+		if isGif(filename) {
+			imageString, err := convertWithChafa(width, filename)
+			if err != nil {
+				return errorMsg(err.Error())
+			}
+			return convertImageToStringMsg(imageString)
+		}
+
 		imageContent, err := os.Open(filepath.Clean(filename))
 		if err != nil {
 			return errorMsg(err.Error())
