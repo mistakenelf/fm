@@ -73,11 +73,16 @@ func (m *model) updateStatusBar() {
 			statusMessage = m.textinput.View()
 		}
 
+		logoColumn := fmt.Sprintf("%s", m.filetree.GetSelectedItem().FileSize)
+		if m.state == showDualPaneState {
+			logoColumn = "[DUAL] " + logoColumn
+		}
+
 		m.statusbar.SetContent(
 			m.filetree.GetSelectedItem().Name,
 			statusMessage,
 			fmt.Sprintf("%d/%d", m.filetree.Cursor+1, m.filetree.GetTotalItems()),
-			fmt.Sprintf("%s", m.filetree.GetSelectedItem().FileSize),
+			logoColumn,
 		)
 	} else {
 		statusMessage := "Directory is empty"
@@ -86,11 +91,16 @@ func (m *model) updateStatusBar() {
 			statusMessage = m.textinput.View()
 		}
 
+		logoColumn := "FM"
+		if m.state == showDualPaneState {
+			logoColumn = "[DUAL] FM"
+		}
+
 		m.statusbar.SetContent(
 			"N/A",
 			statusMessage,
 			fmt.Sprintf("%d/%d", 0, 0),
-			"FM",
+			logoColumn,
 		)
 	}
 }
