@@ -67,6 +67,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, cmd)
 
 			m.textinput.Reset()
+		case key.Matches(msg, m.keyMap.ToggleDualPane):
+			if m.filetree.State == filetree.IdleState && !m.showTextInput {
+				if m.state == showDualPaneState {
+					m.state = idleState
+					m.activePane = 0
+					m.filetree.SetDisabled(false)
+					m.secondaryFiletree.SetDisabled(true)
+					m.disableAllViewports()
+				} else {
+					m.state = showDualPaneState
+					m.disableAllViewports()
+					m.secondaryFiletree.SetDisabled(false)
+					cmds = append(cmds, m.secondaryFiletree.GetDirectoryListingCmd(m.secondaryFiletree.CurrentDirectory))
+				}
+			}
 		case key.Matches(msg, m.keyMap.MoveDirectoryItem):
 			if m.activePane == 0 && m.filetree.State == filetree.IdleState {
 				m.activePane = (m.activePane + 1) % 2
@@ -124,7 +139,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				if m.activePane == 0 {
 					m.filetree.SetDisabled(false)
-					m.secondaryFiletree.SetDisabled(true)
+					m.secondaryFiletree.SetDisabled(m.state != showDualPaneState && m.state != showMoveState)
 					m.disableAllViewports()
 				} else {
 					m.filetree.SetDisabled(true)
@@ -146,6 +161,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.disableAllViewports()
 						m.markdown.SetViewportDisabled(false)
 					case showMoveState:
+						m.secondaryFiletree.SetDisabled(false)
+						m.disableAllViewports()
+					case showDualPaneState:
 						m.secondaryFiletree.SetDisabled(false)
 						m.disableAllViewports()
 					}

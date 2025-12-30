@@ -34,6 +34,7 @@ type KeyMap struct {
 	GotoBottom          key.Binding
 	MoveDirectoryItem   key.Binding
 	RenameDirectoryItem key.Binding
+	ToggleDualPane      key.Binding
 }
 
 func DefaultKeyMap() KeyMap {
@@ -69,5 +70,6 @@ func DefaultKeyMap() KeyMap {
 		CreateFile:          key.NewBinding(key.WithKeys("N"), key.WithHelp("N", "Create new file")),
 		CreateDirectory:     key.NewBinding(key.WithKeys("M"), key.WithHelp("M", "Create new directory")),
 		RenameDirectoryItem: key.NewBinding(key.WithKeys("R"), key.WithHelp("R", "Rename directory items")),
+		ToggleDualPane:      key.NewBinding(key.WithKeys("w"), key.WithHelp("w", "Toggle dual pane mode")),
 	}
 }

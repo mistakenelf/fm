@@ -28,6 +28,7 @@ const (
 	showHelpState
 	showMoveState
 	showCsvState
+	showDualPaneState
 )
 
 type Config struct {
@@ -119,6 +120,7 @@ func New(cfg Config) model {
 			{Key: defaultKeyMap.ForceQuit.Help().Key, Description: defaultKeyMap.ForceQuit.Help().Desc},
 			{Key: defaultKeyMap.Quit.Help().Key, Description: defaultKeyMap.Quit.Help().Desc},
 			{Key: defaultKeyMap.TogglePane.Help().Key, Description: defaultKeyMap.TogglePane.Help().Desc},
+			{Key: defaultKeyMap.ToggleDualPane.Help().Key, Description: defaultKeyMap.ToggleDualPane.Help().Desc},
 			{Key: defaultKeyMap.OpenFile.Help().Key, Description: defaultKeyMap.OpenFile.Help().Desc},
 			{Key: defaultKeyMap.ResetState.Help().Key, Description: defaultKeyMap.ResetState.Help().Desc},
 			{Key: defaultKeyMap.ShowTextInput.Help().Key, Description: defaultKeyMap.ShowTextInput.Help().Desc},
