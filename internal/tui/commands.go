@@ -9,23 +9,6 @@ import (
 	"github.com/mistakenelf/fm/polish"
 )
 
-var forbiddenExtensions = []string{
-	".FCStd",
-	".gif",
-	".zip",
-	".rar",
-	".webm",
-	".sqlite",
-	".sqlite-shm",
-	".sqlite-wal",
-	".DS_Store",
-	".db",
-	".data",
-	".plist",
-	".webp",
-	".img",
-}
-
 type statusMessageTimeoutMsg struct{}
 
 func (m *model) openFileCmd() tea.Cmd {
@@ -59,17 +42,12 @@ func (m *model) openFileCmd() tea.Cmd {
 			m.state = showPdfState
 
 			return m.pdf.SetFileNameCmd(selectedFile.Path)
-		case contains(forbiddenExtensions, selectedFile.Extension):
-			return m.newStatusMessageCmd(lipgloss.NewStyle().
-				Foreground(polish.Colors.Red600).
-				Bold(true).
-				Render("Selected file type is not supported"))
 		case isBinary:
 			return m.newStatusMessageCmd(
 				lipgloss.NewStyle().
 					Foreground(polish.Colors.Red600).
 					Bold(true).
-					Render("Selected file is not currently supported"))
+					Render("Selected file cannot be opened"))
 		default:
 			m.state = showCodeState
 
